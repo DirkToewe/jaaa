@@ -101,6 +101,13 @@ public final class Hex16
       .collect( joining(", ","[","]") );
   }
 
+  /** Sorts this Hex16 in ascending order and then clears it. The swap operations
+   *  that are applied during sorting process are also applied to the given swap
+   *  method.
+   *
+   *  @param swap The swap method that is called for every swap operation that occurs
+   *              during sorting.
+   */
   public void sortAndClear( IntBiConsumer swap )
   {
     for( int i=0; i < size; i++ )

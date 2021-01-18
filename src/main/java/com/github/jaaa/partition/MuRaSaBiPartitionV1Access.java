@@ -115,12 +115,14 @@ public interface MuRaSaBiPartitionV1Access extends BlockSwapAccess,
       {
         if( nPrev + nCurr < n ) {
           // MERGE PREVIOUS BLOCKS A-ELEMENTS INTO CURRENT BLOCK
+          // [ A | B ][ A | B ] -> [  A  ][ A | B ]
           rotate(off-n,    off,            -nPrev);
           rotate(off-nPrev,off+nPrev+nCurr,+nPrev);
           nCurr  +=  nPrev;
         }
         else {
           // FILL UP PREVIOUS BLOCK
+          // [ A | B ][ A | B ] -> [  B  ][ A | B ]
           int        nFill = n-nPrev;
           rotate(off-nFill, off+nCurr, -nFill);
           nCurr  -=  nFill;

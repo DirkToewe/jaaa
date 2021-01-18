@@ -4,7 +4,7 @@ import com.github.jaaa.RandomAccessor;
 
 import static java.lang.Math.min;
 
-public class CheckArgsMerge
+class CheckArgsMerge
 {
 // STATIC FIELDS
 

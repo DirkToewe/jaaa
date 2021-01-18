@@ -1,25 +1,27 @@
 package com.github.jaaa.sort.tiny;
 
-import com.github.jaaa.sort.StaticMethodsSorter;
+import com.github.jaaa.sort.NewSorterInplaceTestTemplate;
+import com.github.jaaa.sort.SorterInplace;
+import com.github.jaaa.sort.StaticMethodsSorterInplace;
 import net.jqwik.api.Group;
 
 import static com.github.jaaa.sort.tiny.NetSortV1.NET_V1_SORTER;
 
-public class NetSortV1Test extends TinySorterTestTemplate
+
+public class NetSortV1Test implements NewSorterInplaceTestTemplate
 {
-  NetSortV1Test() {
-    super(new StaticMethodsSorter(NetSortV1.class) {
-      @Override public boolean isStable    () { return NET_V1_SORTER.isStable    (); }
-      @Override public boolean isInplace   () { return NET_V1_SORTER.isInplace   (); }
-      @Override public boolean isThreadSafe() { return NET_V1_SORTER.isThreadSafe(); }
-    });
-  }
+  private final SorterInplace sorter = new StaticMethodsSorterInplace(NetSortV1.class) {
+    @Override public boolean isStable    () { return NET_V1_SORTER.isStable    (); }
+    @Override public boolean isThreadSafe() { return NET_V1_SORTER.isThreadSafe(); }
+  };
+
+  @Override public int maxArraySize() { return 8; }
+  @Override public SorterInplace sorter() { return sorter; }
 
   @Group
-  class SorterTest extends TinySorterTestTemplate
+  class SorterTest implements NewSorterInplaceTestTemplate
   {
-    SorterTest() {
-      super(NET_V1_SORTER);
-    }
+    @Override public int maxArraySize() { return 8; }
+    @Override public SorterInplace sorter() { return NET_V1_SORTER; }
   }
 }

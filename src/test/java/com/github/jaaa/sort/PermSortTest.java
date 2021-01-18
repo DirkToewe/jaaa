@@ -4,21 +4,18 @@ import net.jqwik.api.Group;
 
 import static com.github.jaaa.sort.PermSort.PERM_SORTER;
 
-public class PermSortTest extends SorterInplaceTestTemplate
+public class PermSortTest implements SorterInplaceTestTemplate
 {
-  PermSortTest() {
-    super(new StaticMethodsSorter(PermSort.class) {
-      @Override public boolean isStable    () { return PERM_SORTER.isStable    (); }
-      @Override public boolean isInplace   () { return PERM_SORTER.isInplace   (); }
-      @Override public boolean isThreadSafe() { return PERM_SORTER.isThreadSafe(); }
-    });
-  }
+  private final SorterInplace sorter = new StaticMethodsSorterInplace(PermSort.class) {
+    @Override public boolean isStable    () { return PERM_SORTER.isStable    (); }
+    @Override public boolean isThreadSafe() { return PERM_SORTER.isThreadSafe(); }
+  };
+
+  @Override public SorterInplace sorter() { return sorter; }
 
   @Group
-  class SorterInplaceTest extends SorterInplaceTestTemplate
+  class SorterInplaceTest implements SorterInplaceTestTemplate
   {
-    SorterInplaceTest() {
-      super(PERM_SORTER);
-    }
+    @Override public SorterInplace sorter() { return PERM_SORTER; }
   }
 }

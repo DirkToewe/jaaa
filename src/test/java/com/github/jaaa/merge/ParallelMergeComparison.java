@@ -12,8 +12,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.github.jaaa.merge.ParallelRecMergeV1.PARALLEL_REC_V1_MERGER;
-import static com.github.jaaa.merge.ParallelRecMergeV2.PARALLEL_REC_V2_MERGER;
+import static com.github.jaaa.merge.ParallelRebelMerge.PARALLEL_REBEL_MERGER;
+import static com.github.jaaa.merge.ParallelZenMerge.PARALLEL_ZEN_MERGER;
 import static com.github.jaaa.merge.ParallelSkipMerge.PARALLEL_SKIP_MERGER;
 import static com.github.jaaa.misc.Shuffle.shuffled;
 import static java.awt.Desktop.getDesktop;
@@ -93,8 +93,8 @@ public class ParallelMergeComparison
     var gen = new RandomMergeInputGenerator(rng);
 
     Map<String,MergeFn> mergers = Map.ofEntries(
-      entry("RecV1", PARALLEL_REC_V1_MERGER::merge),
-      entry("RecV2", PARALLEL_REC_V2_MERGER::merge),
+      entry("RecV1", PARALLEL_REBEL_MERGER::merge),
+      entry("RecV2", PARALLEL_ZEN_MERGER::merge),
       entry("Skip",    PARALLEL_SKIP_MERGER::merge)
     );
 

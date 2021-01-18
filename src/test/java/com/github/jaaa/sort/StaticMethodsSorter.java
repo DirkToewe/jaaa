@@ -11,15 +11,17 @@ import static java.lang.invoke.MethodType.methodType;
 /** A {@link SorterInplace} which relays all sort calls to the static sort methods of a class.
  *  Used to test static sort methods the same way as any other {@link SorterInplace}.
  */
-public abstract class StaticMethodsSorter implements SorterInplace
+public abstract class StaticMethodsSorter implements Sorter
 {
   private static final class ArraySortMethod<A,C>
   {
     private final MethodHandle methodA,
-                               methodAII,
-                               methodAC,
-                               methodAIIC;
-    public ArraySortMethod( Class<?> sortClass, Class<A> arrType, Class<C> comparatorType ) {
+            methodAII,
+            methodAC,
+            methodAIIC;
+
+    public ArraySortMethod( Class<?> sortClass, Class<A> arrType, Class<C> comparatorType )
+    {
       MethodHandles.Lookup lookup = MethodHandles.publicLookup();
       Class<?> cmpType = arrType == Object[].class ? Comparable[].class : arrType;
       try {
@@ -32,28 +34,36 @@ public abstract class StaticMethodsSorter implements SorterInplace
         throw new Error(err);
       }
     }
-    public void sort( A array ) {
+
+    public void sort( A array )
+    {
       try {
         methodA.invoke(array);
       }
       catch( RuntimeException|Error ex ) { throw ex; }
       catch( Throwable t ) { throw new Error(t); }
     }
-    public void sort( A array, int from, int until ) {
+
+    public void sort( A array, int from, int until )
+    {
       try {
         methodAII.invoke(array,from,until);
       }
       catch( RuntimeException|Error ex ) { throw ex; }
       catch( Throwable t ) { throw new Error(t); }
     }
-    public void sort( A array, C comparator ) {
+
+    public void sort( A array, C comparator )
+    {
       try {
         methodAC.invoke(array,comparator);
       }
       catch( RuntimeException|Error ex ) { throw ex; }
       catch( Throwable t ) { throw new Error(t); }
     }
-    public void sort( A array, int from, int until, C comparator ) {
+
+    public void sort( A array, int from, int until, C comparator )
+    {
       try {
         methodAIIC.invoke(array,from,until,comparator);
       }
@@ -70,9 +80,9 @@ public abstract class StaticMethodsSorter implements SorterInplace
   private final ArraySortMethod< float[],ComparatorFloat > arrayFloat;
   private final ArraySortMethod<double[],ComparatorDouble> arrayDouble;
   private final ArraySortMethod<Object[],Comparator      > arrayObject;
-  private final MethodHandle                               access;
+  private final MethodHandle                               accessor;
 
-  public StaticMethodsSorter(Class<?> sortClass )
+  public StaticMethodsSorter( Class<?> sortClass )
   {
     arrayByte   = new ArraySortMethod(sortClass,   byte[].class, ComparatorByte  .class);
     arrayShort  = new ArraySortMethod(sortClass,  short[].class, ComparatorShort .class);
@@ -85,16 +95,17 @@ public abstract class StaticMethodsSorter implements SorterInplace
 
     MethodHandles.Lookup lookup = MethodHandles.publicLookup();
     try {
-      access = lookup.findStatic( sortClass, "sort", methodType(void.class, int.class, int.class, CompareSwapAccess.class) );
+      accessor = lookup.findStatic( sortClass, "sort", methodType(void.class, Object.class, int.class, int.class, CompareRandomAccessor.class) );
     }
     catch( NoSuchMethodException | IllegalAccessException err ) {
       throw new Error(err);
     }
   }
 
-  @Override public void sort( int from, int until, CompareSwapAccess acc ) {
+  @Override public <T> void sort( T seq, int from, int until, CompareRandomAccessor<? super T> acc )
+  {
     try {
-      access.invoke(from,until,acc);
+      accessor.invoke(seq,from,until,acc);
     }
     catch( RuntimeException|Error ex ) { throw ex; }
     catch( Throwable t ) { throw new Error(t); }

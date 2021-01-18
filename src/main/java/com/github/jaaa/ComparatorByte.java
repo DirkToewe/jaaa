@@ -17,7 +17,7 @@ public interface ComparatorByte
     }
   }
 
-  public int compare( byte x, byte y );
-
   public default ComparatorByte reversed() { return new ReverseComparatorByte(this); }
+
+  public int compare( byte x, byte y );
 }

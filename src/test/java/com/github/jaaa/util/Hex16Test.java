@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
+import static net.jqwik.api.RandomDistribution.uniform;
 
 public class Hex16Test
 {
@@ -20,7 +21,7 @@ public class Hex16Test
   @Provide
   Arbitrary<ActionSequence<TestState>> actions()
   {
-    var append = Arbitraries.integers().between(0,15).map( i -> new Action<TestState>() {
+    var append = Arbitraries.integers().between(0,15).withDistribution( uniform() ).map( i -> new Action<TestState>() {
       @Override public boolean precondition( TestState state ) { return state.hex16.size() < 16; }
       @Override public TestState run( TestState state ) {
         state.hex16.append(i);
@@ -30,8 +31,8 @@ public class Hex16Test
       @Override public String toString() { return format("append(%d)",i); }
     });
 
-    var insert = Arbitraries.integers().between(0,15).flatMap( pos ->
-                 Arbitraries.integers().between(0,15).    map( hex -> new Action<TestState>()
+    var insert = Arbitraries.integers().between(0,15).withDistribution( uniform() ).flatMap( pos ->
+                 Arbitraries.integers().between(0,15).withDistribution( uniform() ).    map( hex -> new Action<TestState>()
     {
       @Override public boolean precondition( TestState state ) { return pos <= state.hex16.size() && state.hex16.size() < 16; }
       @Override public TestState run( TestState state ) {
@@ -51,7 +52,7 @@ public class Hex16Test
       @Override public String toString() { return "clear"; }
     });
 
-    var rotate = Arbitraries.integers().map( rot -> new Action<TestState>() {
+    var rotate = Arbitraries.integers().withDistribution( uniform() ).map( rot -> new Action<TestState>() {
       @Override public TestState run( TestState state ) {
         state.hex16.rotate(rot);
 
@@ -69,8 +70,8 @@ public class Hex16Test
       @Override public String toString() { return format("rotate(%d)",rot); }
     });
 
-    var swap = Arbitraries.integers().between(0,15).flatMap( i ->
-               Arbitraries.integers().between(0,15).    map( j -> new Action<TestState>()
+    var swap = Arbitraries.integers().between(0,15).withDistribution( uniform() ).flatMap( i ->
+               Arbitraries.integers().between(0,15).withDistribution( uniform() ).    map( j -> new Action<TestState>()
     {
       @Override public boolean precondition( TestState state ) {
         int        len = state.hex16.size();

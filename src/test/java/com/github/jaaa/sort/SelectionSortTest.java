@@ -4,21 +4,18 @@ import net.jqwik.api.Group;
 
 import static com.github.jaaa.sort.SelectionSort.SELECTION_SORTER;
 
-public class SelectionSortTest extends SorterInplaceTestTemplate
+public class SelectionSortTest implements SorterInplaceTestTemplate
 {
-  SelectionSortTest() {
-    super(new StaticMethodsSorter(SelectionSort.class) {
-      @Override public boolean isStable    () { return SELECTION_SORTER.isStable    (); }
-      @Override public boolean isInplace   () { return SELECTION_SORTER.isInplace   (); }
-      @Override public boolean isThreadSafe() { return SELECTION_SORTER.isThreadSafe(); }
-    });
-  }
+  private final SorterInplace sorter = new StaticMethodsSorterInplace(SelectionSort.class) {
+    @Override public boolean isStable    () { return SELECTION_SORTER.isStable    (); }
+    @Override public boolean isThreadSafe() { return SELECTION_SORTER.isThreadSafe(); }
+  };
+
+  @Override public SorterInplace sorter() { return sorter; }
 
   @Group
-  class SorterInplaceTest extends SorterInplaceTestTemplate
+  class SorterInplaceTest implements SorterInplaceTestTemplate
   {
-    SorterInplaceTest() {
-      super(SELECTION_SORTER);
-    }
+    @Override public SorterInplace sorter() { return SELECTION_SORTER; }
   }
 }

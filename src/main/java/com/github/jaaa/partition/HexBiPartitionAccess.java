@@ -14,7 +14,8 @@ import com.github.jaaa.util.Hex16;
 // list. The order in which the collected and rolled elements were
 // originally encountered in the list is tracked by a single in a list of
 // up to 16 4-bit integers. Said list allows to finally stabilize the
-// `n` B-elements in O(n) swaps.
+// `n` B-elements in O(n) swaps. A list of 16*4bits fits exactly into a
+// 64-bit long value which making it very efficient to operate on.
 //
 // Complexity
 // ----------

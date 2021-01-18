@@ -1,8 +1,8 @@
 package com.github.jaaa.sort.tiny;
 
-import com.github.jaaa.sort.InsertionSortV1;
-import com.github.jaaa.sort.InsertionSortV2;
-import com.github.jaaa.sort.InsertionSortV3;
+import com.github.jaaa.sort.InsertionSort;
+import com.github.jaaa.sort.InsertionAdaptiveSort;
+import com.github.jaaa.sort.InsertionExpSort;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.infra.Blackhole;
@@ -24,19 +24,19 @@ public class TinySortBenchmark32 extends TinySortBenchmarkTemplate
 
   @Benchmark
   public void insertionSortV1( Blackhole blackhole ) {
-    InsertionSortV1.sort(output);
+    InsertionSort.sort(output);
     blackhole.consume(output);
   }
 
   @Benchmark
   public void insertionSortV2( Blackhole blackhole ) {
-    InsertionSortV2.sort(output);
+    InsertionAdaptiveSort.sort(output);
     blackhole.consume(output);
   }
 
   @Benchmark
   public void insertionSortV3( Blackhole blackhole ) {
-    InsertionSortV3.sort(output);
+    InsertionExpSort.sort(output);
     blackhole.consume(output);
   }
 }

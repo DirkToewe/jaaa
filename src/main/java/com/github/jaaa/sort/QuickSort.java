@@ -1,37 +1,58 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
-import com.github.jaaa.Swap;
 import com.github.jaaa.util.RNG;
 
 import java.util.Comparator;
+import java.util.function.IntBinaryOperator;
+import java.util.function.Supplier;
 
 public class QuickSort
 {
-  private static class QuickSorter implements SorterInplace
+// STATIC FIELDS
+  public static SorterInplace QUICK_SORTER = (QuickSorter) () -> new RNG(1337)::nextInt; // <- FIXME: use a less shitty seed
+
+  private interface QuickSorter extends SorterInplace
   {
-    private final long seed;
+    @Override default boolean isStable() { return false; }
 
-    public QuickSorter( long _seed ) { seed =_seed; }
+    IntBinaryOperator newRNG();
 
-    @Override public boolean isStable () { return false; }
-    @Override public boolean isInplace() { return true;  }
-
-    @Override public void sort( int from, int until, CompareSwapAccess acc )
+    @Override default <T> void sort( T seq, int from, int until, CompareRandomAccessor<? super T> acc )
     {
       new QuickSortAccess() {
-        private final RNG rng = new RNG(seed);
-        @Override public int randInt( int from, int until ) { return rng.nextInt(from,until); }
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
+        @Override public int compare( int i, int j ) { return acc.compare(seq,i, seq,j); }
+        @Override public void   swap( int i, int j ) {        acc.   swap(seq,i, seq,j); }
+      }.quickSort(from,until);
+    }
+
+    @Override default void sort( int from, int until, CompareSwapAccess acc )
+    {
+      new QuickSortAccess() {
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
         @Override public int compare( int i, int j ) { return acc.compare(i,j); }
         @Override public void   swap( int i, int j ) {        acc.   swap(i,j); }
       }.quickSort(from,until);
     }
 
-    @Override public void sort(byte[] seq, int from, int until, ComparatorByte cmp )
+    @Override default void sort( byte[] seq                      ) { sort(seq, 0,seq.length); }
+    @Override default void sort( byte[] seq, int from, int until )
     {
       new QuickSortAccess() {
-        private final RNG rng = new RNG(seed);
-        @Override public int randInt( int from, int until ) { return rng.nextInt(from,until); }
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
+        @Override public int compare( int i, int j ) { return Byte.compare( seq[i], seq[j] ); }
+        @Override public void   swap( int i, int j ) {
+          Swap.swap(seq,i,j);
+        }
+      }.quickSort(from,until);
+    }
+
+    @Override default void sort( byte[] seq,                      ComparatorByte cmp ) { sort(seq, 0,seq.length, cmp); }
+    @Override default void sort( byte[] seq, int from, int until, ComparatorByte cmp )
+    {
+      new QuickSortAccess() {
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
         @Override public int compare( int i, int j ) { return cmp.compare( seq[i], seq[j] ); }
         @Override public void   swap( int i, int j ) {
           Swap.swap(seq,i,j);
@@ -39,79 +60,154 @@ public class QuickSort
       }.quickSort(from,until);
     }
 
-    @Override public void sort( short[] seq, int from, int until, ComparatorShort cmp )
+    @Override default void sort( short[] seq                      ) { sort(seq, 0,seq.length); }
+    @Override default void sort( short[] seq, int from, int until )
     {
       new QuickSortAccess() {
-        private final RNG rng = new RNG(seed);
-        @Override public int randInt( int from, int until ) { return rng.nextInt(from,until); }
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
+        @Override public int compare( int i, int j ) { return Short.compare( seq[i], seq[j] ); }
+        @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
+      }.quickSort(from,until);
+    }
+
+    @Override default void sort( short[] seq,                      ComparatorShort cmp ) { sort(seq, 0,seq.length, cmp); }
+    @Override default void sort( short[] seq, int from, int until, ComparatorShort cmp )
+    {
+      new QuickSortAccess() {
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
         @Override public int compare( int i, int j ) { return cmp.compare( seq[i], seq[j] ); }
         @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
       }.quickSort(from,until);
     }
 
-    @Override public void sort( int[] seq, int from, int until, ComparatorInt cmp )
+    @Override default void sort( int[] seq                      ) { sort(seq, 0,seq.length); }
+    @Override default void sort( int[] seq, int from, int until )
     {
       new QuickSortAccess() {
-        private final RNG rng = new RNG(seed);
-        @Override public int randInt( int from, int until ) { return rng.nextInt(from,until); }
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
+        @Override public int compare( int i, int j ) { return Integer.compare( seq[i], seq[j] ); }
+        @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
+      }.quickSort(from,until);
+    }
+
+    @Override default void sort( int[] seq,                      ComparatorInt cmp ) { sort(seq, 0,seq.length, cmp); }
+    @Override default void sort( int[] seq, int from, int until, ComparatorInt cmp )
+    {
+      new QuickSortAccess() {
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
         @Override public int compare( int i, int j ) { return cmp.compare( seq[i], seq[j] ); }
         @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
       }.quickSort(from,until);
     }
 
-    @Override public void sort( long[] seq, int from, int until, ComparatorLong cmp )
+    @Override default void sort( long[] seq                      ) { sort(seq, 0,seq.length); }
+    @Override default void sort( long[] seq, int from, int until )
     {
       new QuickSortAccess() {
-        private final RNG rng = new RNG(seed);
-        @Override public int randInt( int from, int until ) { return rng.nextInt(from,until); }
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
+        @Override public int compare( int i, int j ) { return Long.compare( seq[i], seq[j] ); }
+        @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
+      }.quickSort(from,until);
+    }
+
+    @Override default void sort( long[] seq,                      ComparatorLong cmp ) { sort(seq, 0,seq.length, cmp); }
+    @Override default void sort( long[] seq, int from, int until, ComparatorLong cmp )
+    {
+      new QuickSortAccess() {
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
         @Override public int compare( int i, int j ) { return cmp.compare( seq[i], seq[j] ); }
         @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
       }.quickSort(from,until);
     }
 
-    @Override public void sort( char[] seq, int from, int until, ComparatorChar cmp )
+    @Override default void sort( char[] seq                      ) { sort(seq, 0,seq.length); }
+    @Override default void sort( char[] seq, int from, int until )
     {
       new QuickSortAccess() {
-        private final RNG rng = new RNG(seed);
-        @Override public int randInt( int from, int until ) { return rng.nextInt(from,until); }
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
+        @Override public int compare( int i, int j ) { return Character.compare( seq[i], seq[j] ); }
+        @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
+      }.quickSort(from,until);
+    }
+
+    @Override default void sort( char[] seq,                      ComparatorChar cmp ) { sort(seq, 0,seq.length, cmp); }
+    @Override default void sort( char[] seq, int from, int until, ComparatorChar cmp )
+    {
+      new QuickSortAccess() {
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
         @Override public int compare( int i, int j ) { return cmp.compare( seq[i], seq[j] ); }
         @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
       }.quickSort(from,until);
     }
 
-    @Override public void sort( float[] seq, int from, int until, ComparatorFloat cmp )
+    @Override default void sort( float[] seq                      ) { sort(seq, 0,seq.length); }
+    @Override default void sort( float[] seq, int from, int until )
     {
       new QuickSortAccess() {
-        private final RNG rng = new RNG(seed);
-        @Override public int randInt( int from, int until ) { return rng.nextInt(from,until); }
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
+        @Override public int compare( int i, int j ) { return Float.compare( seq[i], seq[j] ); }
+        @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
+      }.quickSort(from,until);
+    }
+
+    @Override default void sort( float[] seq,                      ComparatorFloat cmp ) { sort(seq, 0,seq.length, cmp); }
+    @Override default void sort( float[] seq, int from, int until, ComparatorFloat cmp )
+    {
+      new QuickSortAccess() {
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
         @Override public int compare( int i, int j ) { return cmp.compare( seq[i], seq[j] ); }
         @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
       }.quickSort(from,until);
     }
 
-    @Override public void sort( double[] seq, int from, int until, ComparatorDouble cmp )
+    @Override default void sort( double[] seq                      ) { sort(seq, 0,seq.length); }
+    @Override default void sort( double[] seq, int from, int until )
     {
       new QuickSortAccess() {
-        private final RNG rng = new RNG(seed);
-        @Override public int randInt( int from, int until ) { return rng.nextInt(from,until); }
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
+        @Override public int compare( int i, int j ) { return Double.compare( seq[i], seq[j] ); }
+        @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
+      }.quickSort(from,until);
+    }
+
+    @Override default void sort( double[] seq,                      ComparatorDouble cmp ) { sort(seq, 0,seq.length, cmp); }
+    @Override default void sort( double[] seq, int from, int until, ComparatorDouble cmp )
+    {
+      new QuickSortAccess() {
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
         @Override public int compare( int i, int j ) { return cmp.compare( seq[i], seq[j] ); }
         @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
       }.quickSort(from,until);
     }
 
-    @Override public <T> void sort( T[] seq, int from, int until, Comparator<? super T> cmp )
+    @Override default <T extends Comparable<? super T>> void sort( T[] seq                      ) { sort(seq, 0,seq.length); }
+    @Override default <T extends Comparable<? super T>> void sort( T[] seq, int from, int until )
     {
       new QuickSortAccess() {
-        private final RNG rng = new RNG(seed);
-        @Override public int randInt( int from, int until ) { return rng.nextInt(from,until); }
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
+        @Override public int compare( int i, int j ) { return seq[i].compareTo(seq[j]); }
+        @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
+      }.quickSort(from,until);
+    }
+
+    @Override default <T> void sort( T[] seq,                      Comparator<? super T> cmp ) { sort(seq, 0,seq.length, cmp); }
+    @Override default <T> void sort( T[] seq, int from, int until, Comparator<? super T> cmp )
+    {
+      new QuickSortAccess() {
+        @Override public IntBinaryOperator newRNG() { return QuickSorter.this.newRNG(); }
         @Override public int compare( int i, int j ) { return cmp.compare( seq[i], seq[j] ); }
         @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
       }.quickSort(from,until);
     }
-  };
-  public static SorterInplace QUICK_SORTER = new QuickSorter(1337);
+  }
 
-  public static void sort(               int from, int until,       CompareSwapAccess acc ) { QUICK_SORTER.sort(from,until,acc); }
+// STATIC CONSTRUCTOR
+
+// STATIC METHODS
+  public static SorterInplace newQuickSorter( Supplier<IntBinaryOperator> rngFactory ) { return (QuickSorter) rngFactory::get; }
+
+  public static <T> void sort( T seq, int from, int until, CompareRandomAccessor<? super T> acc ) { QUICK_SORTER.sort(seq,from,until,acc); }
+  public static     void sort(        int from, int until, CompareSwapAccess                acc ) { QUICK_SORTER.sort(    from,until,acc); }
 
   public static void sort( byte[] seq                                              ) { QUICK_SORTER.sort(seq); }
   public static void sort( byte[] seq, int from, int until                         ) { QUICK_SORTER.sort(seq,from,until); }

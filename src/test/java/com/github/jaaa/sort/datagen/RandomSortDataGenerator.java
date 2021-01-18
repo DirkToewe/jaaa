@@ -13,10 +13,7 @@ public class RandomSortDataGenerator
   public RandomSortDataGenerator( Random _rng ) {
     rng = requireNonNull(_rng);
   }
-
-  public RandomSortDataGenerator() {
-    rng = new Random();
-  }
+  public RandomSortDataGenerator() { this( new Random() ); }
 
   private void nextUniform( int[] array, int from, int until, int step )
   {

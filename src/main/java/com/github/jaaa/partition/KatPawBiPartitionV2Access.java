@@ -4,11 +4,34 @@ import com.github.jaaa.PredicateSwapAccess;
 import com.github.jaaa.misc.BlockSwapAccess;
 import com.github.jaaa.misc.RotateAccess;
 import com.github.jaaa.util.Hex16;
+import com.github.jaaa.util.IntBiConsumer;
+
+import java.util.function.IntFunction;
 
 import static com.github.jaaa.util.IMath.log2Ceil;
 import static java.lang.Math.*;
 import static java.lang.Math.max;
 
+// OVERVIEW
+// --------
+//   m: Number of A-elements
+//   n: Number of B-elements
+//
+// The KatPaw bi-partitioning algorithm builds on top of the ideas of the two
+// MuRaSaBi algorithms. Since the second MuRaSaBi algorithm requires O( (m+n)*log(m+n) ),
+// the idea of KatPaw is to reduce the problem size by a factor of O(log(m+n)) by first
+// grouping A- and B-elements into blocks of size ~log(m+n), similar to how the MuRaSaBi
+// algorithms themselves to. In the original sketch of KatPaw, these blocks are formed
+// by recursively applying a variant of KatPaw. In this implementation, however, we
+// decided to apply two sweeps of Hex(Rec)BiPartition to build blocks of size 256 (=16*16),
+// which is significantly larger than log(m+n). The HexRecBiPartition is more concise, simpler
+// and faster.
+//
+// Once blocks of size log(n+m) are formed, we now have l = (m+n) / log(m+n) blocks to
+// bi-partition. If we no apply the second MuRaSaBi, it will take
+// O( l*log(l) ) = O( (m+n) / log(m+n) * ( log(m+n) - loglog(m+n) ) ) = O(m+n) comparisons,
+// making it linear.
+//
 // REFERENCES
 // ----------
 // .. [1] "STABLE MINIMUM SPACE PARTITIONING IN LINEAR TIME"
@@ -21,6 +44,19 @@ public interface KatPawBiPartitionV2Access extends BlockSwapAccess,
   {
     if( from > until ) throw new IllegalArgumentException();
 
+    // BLOCK SIZES
+    // -----------
+    //   n: number of blocks (blockNum)
+    //   b: length of a block (blockLen)
+    //   B: size of an element in the block (16*16).
+    // len: number of elements in the sequence that is to be partitioned
+    //
+    // We want to divide the B-chunked sequence into roughly √(len/B) blocks.
+    // But for every block, 2A+2B elements are required as buffer. This leads to
+    // the following equation for the block size:
+    //
+    // b*(b*B+4) <= len   =>   b = (√(B*len + 4) - 2) / B;
+    //
     final int B = 16*16,
             len = subtractExact(until,from),
        blockLen = (int) ( ( sqrt(1d*len*B + 4) - 2 ) / B ), // <- number B-sized chunks per block
@@ -47,6 +83,11 @@ public interface KatPawBiPartitionV2Access extends BlockSwapAccess,
           ORD = new Hex16();
     int   pos = from, nA = 0,
           POS = from, nB = 0;
+
+    IntFunction<IntBiConsumer>
+      swapper = off -> (i,j) ->      swap(off+i,    off+j),
+      SWAPPER = OFF -> (i,j) -> blockSwap(OFF+i*16, OFF+j*16, 16);
+
     for( int l=from; l < until; l++ )
       if( ! predicate(l) ) nA++;
       else {               nB++;
@@ -62,16 +103,7 @@ public interface KatPawBiPartitionV2Access extends BlockSwapAccess,
           }
 
           // unravel collected elements
-          for( int i=0; i < 16; i++ )
-            for( int j = ord.get(i); i != j; )
-            {    int k = ord.get(j);
-              ord.set(j,j);
-              swap(pos + i,
-                   pos + j);
-              j = k;
-            }
-
-          ord.clear();
+          ord.sortAndClear( swapper.apply(pos) );
 
           if( ORD.isFull() )
           {
@@ -85,23 +117,14 @@ public interface KatPawBiPartitionV2Access extends BlockSwapAccess,
             assert POS ==TARGET;
 
             // unravel collected blocks
-            for( int i=0; i < 16; i++ )
-              for( int j = ORD.get(i); i != j; )
-              {    int k = ORD.get(j);
-                ORD.set(j,j);
-                blockSwap(POS + 16*i,
-                        POS + 16*j, 16);
-                j = k;
-              }
-
-            ORD.clear();
+            ORD.sortAndClear( SWAPPER.apply(POS) );
           }
           else
           { // move up collected blocks
             int     SIZE = ORD.size()*16;
             if( 0 < SIZE ) {
               ORD.rotate( (pos-SIZE-POS) / 16 );
-              for( ; POS < pos-SIZE; POS+=16 ) blockSwap(POS,POS+SIZE, 16);
+              for( ; POS < pos-SIZE;POS+=16 ) blockSwap(POS,POS+SIZE, 16);
             }
           }
 
@@ -122,35 +145,17 @@ public interface KatPawBiPartitionV2Access extends BlockSwapAccess,
       }
 
     // move remaining collected elements into place
-    int                size = ord.size();
+    int                SIZE = ORD.size()*16,
+                       size = ord.size();
     ord.rotate(  until-size-pos);
     for( ; pos < until-size; pos++) swap(pos, pos+size);
 
-    // unravel remaining collected elements
-    for( int i=0; i < size; i++ )
-    for( int j = ord.get(i); i != j; )
-    {    int k = ord.get(j);
-                 ord.set(j,j);
-      swap(pos + i,
-           pos + j);
-      j = k;
-    }
-
-    // unravel remaining collected blocks
-    for( int i=0; i < ORD.size(); i++ )
-    for( int j = ORD.get(i); i != j; )
-    {    int k = ORD.get(j);
-                 ORD.set(j,j);
-      blockSwap(POS + 16*i,
-                POS + 16*j, 16);
-      j = k;
-    }
+    // unravel remaining collected elements and blocks
+    ord.sortAndClear( swapper.apply(pos) );
+    ORD.sortAndClear( SWAPPER.apply(POS) );
 
     // move remaining collected blocks into place
-    int                     SIZE = ORD.size()*16;
     rotate(POS,until-size, -SIZE);
-
-
 
     // BI-PARTITION REMAINING BLOCKS
     // =============================

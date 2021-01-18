@@ -5,7 +5,6 @@ import com.github.jaaa.sort.datagen.RandomSortDataGenerator;
 import java.util.Arrays;
 import java.util.Random;
 import static java.util.Arrays.stream;
-import static java.util.stream.IntStream.range;
 
 import static java.lang.System.nanoTime;
 
@@ -19,7 +18,7 @@ public class ParallelMergeSortComparison
 
   public static void main( String... args ) throws InterruptedException
   {
-                            int nSamples = 1_000;
+                            int nSamples = 1_000_000;
        int[] x     = new    int[nSamples];
     double[] y_jdk = new double[nSamples],
              y_jaaa= new double[nSamples];
@@ -27,8 +26,8 @@ public class ParallelMergeSortComparison
     double speedupCount = 0,
            speedupSum   = 0;
 
-    var gen = new RandomSortDataGenerator();
     var rng = new Random(1337);
+    var gen = new RandomSortDataGenerator(rng);
 
     for( int i=0; i < nSamples; i++ )
     {
@@ -39,8 +38,9 @@ public class ParallelMergeSortComparison
 //      Integer[] input = range(0,len).map( j -> len-j ).boxed().toArray(Integer[]::new);
 
       long t0;
-      var input_jdk  = input.clone(); System.gc(); Thread.sleep(10_000); t0 = nanoTime();      Arrays.parallelSort(input_jdk);  double dt_jdk = nanoTime() - t0;
-      var input_jaaa = input.clone(); System.gc(); Thread.sleep(10_000); t0 = nanoTime(); ParallelMergeSortV4.sort(input_jaaa); double dt_jaaa= nanoTime() - t0;
+      var input_jdk  = input.clone(); System.gc(); Thread.sleep(10_000); t0 = nanoTime();          Arrays.parallelSort(input_jdk ); double dt_jdk = nanoTime() - t0;
+//      var input_jaaa = input.clone(); System.gc(); Thread.sleep(10_000); t0 = nanoTime(); ParallelSkipMergeSortV5.sort(input_jaaa); double dt_jaaa= nanoTime() - t0;
+      var input_jaaa = input.clone(); System.gc(); Thread.sleep(10_000); t0 = nanoTime(); ParallelRecMergeSort.sort(input_jaaa); double dt_jaaa= nanoTime() - t0;
 
       speedupSum  += dt_jdk / dt_jaaa;
       speedupCount++;

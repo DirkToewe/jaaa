@@ -61,8 +61,24 @@ tasks.register<JavaExec>("compareMergeParallel") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
   main = "com.github.jaaa.merge.ParallelMergeComparison"
-  jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx48g")
+  jvmArgs = listOf(
+    "-ea",
+    "--illegal-access=warn",
+    "-XX:MaxInlineLevel=15",
+//    "-Xscmx50M",
+//    "-XX:+UseParallelGC",
+//    "-XX:+UseParallelOldGC",
+    "-Xmx48g"
+  )
 }
+
+tasks.register<JavaExec>("compareBiPartition") {
+  dependsOn(tasks.compileTestJava)
+  classpath = sourceSets.test.get().runtimeClasspath
+  main = "com.github.jaaa.partition.BiPartitionComparison"
+  jvmArgs = listOf("-ea", "-XX:MaxInlineLevel=15", "-Xmx48g")
+}
+
 
 dependencies {
   testImplementation("net.jqwik:jqwik:$v_jqwik")

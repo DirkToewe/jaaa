@@ -85,12 +85,12 @@ public class MergeComparison
       entry("ExpV2",          ExpMergeV2::merge),
       entry("ExpV3",          ExpMergeV3::merge),
       entry("ExpV4",          ExpMergeV4::merge),
-      entry("HwangLinV1",HwangLinMergeV1::merge),
-      entry("HwangLinV2",HwangLinMergeV2::merge),
-      entry("RecMergeV1",     RecMergeV1::merge),
-      entry("RecMergeV2",     RecMergeV2::merge),
-      entry("RecMergeV3",     RecMergeV3::merge),
-      entry("RecMergeV4",     RecMergeV4::merge),
+      entry("HwangLinV1", HwangLinMerge::merge),
+      entry("HwangLinV2", HwangLinMergeStatic::merge),
+      entry("RecMergeV1",     RecMerge::merge),
+      entry("RecMergeV2",     RexMerge::merge),
+      entry("RecMergeV3",     ZenMerge::merge),
+      entry("RecMergeV4",     RebelMerge::merge),
       entry("TapeMerge",       TapeMerge::merge),
       entry("TimMerge",         TimMerge::merge)
     );

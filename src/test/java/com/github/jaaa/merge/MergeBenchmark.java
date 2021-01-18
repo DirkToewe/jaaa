@@ -13,7 +13,7 @@ public class MergeBenchmark extends MergeBenchmarkTemplate
   @Override protected int lenB() { return lenB; }
 
 
-  private static final HwangLinMergeV1Accessor<Double[]> HWANG_LIN_COMPARABLE_DOUBLE = new HwangLinMergeV1Accessor<>() {
+  private static final HwangLinMergeAccessor<Double[]> HWANG_LIN_COMPARABLE_DOUBLE = new HwangLinMergeAccessor<>() {
     @Override public int        len( Double[] buf ) { return buf.length; }
     @Override public void copy     ( Double[] a, int i, Double[] b, int j ) { b[j] = a[i]; }
     @Override public void copyRange( Double[] a, int i, Double[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
@@ -103,7 +103,7 @@ public class MergeBenchmark extends MergeBenchmarkTemplate
   }
 
 
-  private static final RecMergeV1Accessor<Double[]> REC_COMPARABLE_DOUBLE = new RecMergeV1Accessor<>() {
+  private static final RecMergeAccessor<Double[]> REC_COMPARABLE_DOUBLE = new RecMergeAccessor<>() {
     @Override public int        len( Double[] buf ) { return buf.length; }
     @Override public void copy     ( Double[] a, int i, Double[] b, int j ) { b[j] = a[i]; }
     @Override public void copyRange( Double[] a, int i, Double[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
@@ -135,7 +135,7 @@ public class MergeBenchmark extends MergeBenchmarkTemplate
     assert testA.length == lenA;
     assert testB.length == lenB;
 
-    REC_COMPARABLE_DOUBLE.recMergeV1_L2R(testA,0,testA.length, testB,0,testB.length, testC,0);
+    REC_COMPARABLE_DOUBLE.recMergeL2R(testA,0,testA.length, testB,0,testB.length, testC,0);
   }
 
   @Benchmark
@@ -144,7 +144,7 @@ public class MergeBenchmark extends MergeBenchmarkTemplate
     assert testA.length == lenA;
     assert testB.length == lenB;
 
-    REC_COMPARABLE_DOUBLE.recMergeV1_R2L(testA,0,testA.length, testB,0,testB.length, testC,0);
+    REC_COMPARABLE_DOUBLE.recMergeR2L(testA,0,testA.length, testB,0,testB.length, testC,0);
   }
 
 

@@ -55,9 +55,9 @@ public interface HexRecBiPartitionV2Access extends PredicateSwapAccess, BlockSwa
             // find place for collected blocks
             int target = off-s;
             if( first < 0 )
-              first  =  target-from;
+                first  =  target-from;
             else
-              target -= (target-from-first)%s;
+               target -= (target-from-first)%s;
 
             // roll collected blocks into place
             order.rotate((target - pos) / n);

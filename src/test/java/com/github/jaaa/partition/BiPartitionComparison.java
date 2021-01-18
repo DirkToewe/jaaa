@@ -2,16 +2,19 @@ package com.github.jaaa.partition;
 
 import com.github.jaaa.PredicateSwapAccess;
 import com.github.jaaa.Swap;
+import com.github.jaaa.misc.Revert;
 import com.github.jaaa.util.RNG;
 import net.jqwik.api.Tuple;
 import net.jqwik.api.Tuple.Tuple2;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
@@ -22,6 +25,7 @@ import static java.lang.System.nanoTime;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.range;
+import static com.github.jaaa.misc.Revert.revert;
 
 public class BiPartitionComparison
 {
@@ -70,27 +74,30 @@ public class BiPartitionComparison
   public static void main( String... args )
   {
     Map<String,BiPartitioner> algorithms = Map.of(
-//            "Sweep",   SweepBiPartition  ::biPartition,
-            "Railway", RailwayBiPartition  ::biPartition,
+//              "Sweep",   SweepBiPartition  ::biPartition,
+//            "Railway", RailwayBiPartition  ::biPartition,
+//         "MuRaSaBiV1",  MuRaSaBiPartitionV1::biPartition,
+//         "MuRaSaBiV2",  MuRaSaBiPartitionV2::biPartition,
                 "Rec",     RecBiPartition  ::biPartition,
-         "MuRaSaBiV1",  MuRaSaBiPartitionV1::biPartition,
-         "MuRaSaBiV2",  MuRaSaBiPartitionV2::biPartition,
            "HexRecV1",  HexRecBiPartitionV1::biPartition,
            "HexRecV2",  HexRecBiPartitionV2::biPartition,
            "KatPawV1",  KatPawBiPartitionV1::biPartition,
            "KatPawV2",  KatPawBiPartitionV2::biPartition,
-      "PermPartition", (from,until,access) -> PermPartitionStable.partition(from, until, new PartitionAccess() {
-        @Override public int  key(int i) { return access.predicate(i) ? 1 : 0; }
-        @Override public int nKeys() { return 2; }
-        @Override public void swap(int i, int j) { access.swap(i,j); }
-      })
+           "KatPawV3",  KatPawBiPartitionV3::biPartition,
+           "KatPawV4",  KatPawBiPartitionV4::biPartition,
+           "KatPawV5",  KatPawBiPartitionV5::biPartition
+//      "PermPartition", (from,until,access) -> PermPartitionStable.partition(from, until, new PartitionAccess() {
+//        @Override public int  key(int i) { return access.predicate(i) ? 1 : 0; }
+//        @Override public int nKeys() { return 2; }
+//        @Override public void swap(int i, int j) { access.swap(i,j); }
+//      })
     );
 
     boolean ea = false;
     assert  ea = true;
        if( !ea ) throw new ExceptionInInitializerError("Assertions must be enabled.");
 
-    RNG rng = new RNG(1337);
+    var rng = new Random();
     IntFunction<boolean[]> randBits = len -> {
       boolean[] result = new boolean[len];
       for( int i=0; i < len; ) {
@@ -101,7 +108,9 @@ public class BiPartitionComparison
       return result;
     };
 
-    int[] lens = IntStream.iterate(1, l -> l < 100_000_000, l -> max( l+1, (int) (l*1.05) ) ).toArray();
+//    int[] lens = IntStream.iterate(1, l -> l < 10_000_000, l -> max( l+1, (int) (l*1.05) ) ).toArray();
+    int[] lens = rng.ints(1_000, 0, 100_000_000).sorted().toArray();
+    revert(lens);
     Map<String,double[]>
       times = algorithms.entrySet().stream().collect( toMap(Entry::getKey, e -> new double[lens.length]) ),
       reads = algorithms.entrySet().stream().collect( toMap(Entry::getKey, e -> new double[lens.length]) ),
@@ -150,11 +159,17 @@ public class BiPartitionComparison
 
       String layout = format("{ title: 'BiPartition Benchmark %1$s', xaxis: {title: 'Array Length'}, yaxis: {title: '%1$s'} }", dataType);
 
-      try
-      {
+      try {
         Path tmp = Files.createTempFile("plot_"+dataType+"_",".html");
         Files.writeString(  tmp, format(PLOT_TEMPLATE, layout, data) );
-        getDesktop().browse(tmp.toUri());
+        SwingUtilities.invokeLater( () -> {
+          try {
+            getDesktop().browse(tmp.toUri());
+          }
+          catch( IOException ioe ) {
+            throw new Error(ioe);
+          }
+        });
       }
       catch( IOException ioe ) {
         throw new Error(ioe);

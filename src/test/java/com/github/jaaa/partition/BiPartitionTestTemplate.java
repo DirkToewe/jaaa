@@ -1,7 +1,6 @@
 package com.github.jaaa.partition;
 
 import com.github.jaaa.*;
-import com.github.jaaa.Swap;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
@@ -24,8 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BiPartitionTestTemplate
 {
 // STATIC FIELDS
-  static final int N_TRIES = 100_000,
-                  MAX_SIZE = 8192;
+  static final int N_TRIES = 128*1024,
+                  MAX_SIZE =  16*1024;
 
 // STATIC CONSTRUCTOR
 
@@ -123,27 +122,6 @@ public class BiPartitionTestTemplate
     biPartitionAccess.invoke(0, input.length, new PredicateSwapAccess() {
       @Override public boolean predicate( int i ) { return input[i].get1(); }
       @Override public void swap( int i, int j ) { Swap.swap(input,i,j); }
-    });
-
-    assertThat(input).isEqualTo(reference);
-  }
-
-  @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
-  void biPartitionsStablyAccessWithOffsetObjectTuple(
-    @ForAll @Size(min=0, max=MAX_SIZE) boolean[] sample,
-    @ForAll @IntRange(
-      min = Integer.MIN_VALUE,
-      max = Integer.MAX_VALUE - MAX_SIZE
-    ) int offset
-  ) throws Throwable
-  {
-    Tuple2<Boolean,Integer>[] input = range(0,sample.length).mapToObj(i -> Tuple.of(sample[i],i) ).toArray(Tuple2[]::new),
-                reference  =  input.clone();
-    Arrays.sort(reference, comparing(Tuple2::get1));
-
-    biPartitionAccess.invoke(offset, offset+input.length, new PredicateSwapAccess() {
-      @Override public boolean predicate( int i ) { return input[i-offset].get1(); }
-      @Override public void swap( int i, int j ) { Swap.swap(input, i-offset, j-offset); }
     });
 
     assertThat(input).isEqualTo(reference);

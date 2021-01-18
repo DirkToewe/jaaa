@@ -4,6 +4,9 @@ import com.github.jaaa.PredicateSwapAccess;
 import com.github.jaaa.misc.BlockSwapAccess;
 import com.github.jaaa.misc.RotateAccess;
 import com.github.jaaa.util.Hex16;
+import com.github.jaaa.util.IntBiConsumer;
+
+import java.util.function.IntFunction;
 
 import static java.lang.Math.min;
 import static java.lang.Math.sqrt;
@@ -47,6 +50,10 @@ public interface KatPawBiPartitionV1Access extends BlockSwapAccess,
     int   pos = from,
           POS = from;
 
+    IntFunction<IntBiConsumer>
+      swapper = off -> (i,j) ->      swap(off+i,    off+j),
+      SWAPPER = OFF -> (i,j) -> blockSwap(OFF+i*16, OFF+j*16, 16);
+
     int nA = 0,
         nB = 0;
 
@@ -65,21 +72,12 @@ public interface KatPawBiPartitionV1Access extends BlockSwapAccess,
           }
 
           // unravel collected elements
-          for( int i=0; i < 16; i++ )
-          for( int j = ord.get(i); i != j; )
-          {    int k = ord.get(j);
-                       ord.set(j,j);
-            swap(pos + i,
-                 pos + j);
-            j = k;
-          }
-
-          ord.clear();
+          ord.sortAndClear( swapper.apply(pos) );
 
           if( ORD.isFull() )
           {
             // dump off collectd blocks at multiple of B
-            int          TARGET = from + (pos-B-from)/B*B;
+            int          TARGET = from + (pos-B-from)/B * B;
             ORD.rotate( (TARGET-POS) / 16 );
 
             // move collected blocks
@@ -88,16 +86,7 @@ public interface KatPawBiPartitionV1Access extends BlockSwapAccess,
             assert POS ==TARGET;
 
             // unravel collected blocks
-            for( int i=0; i < 16; i++ )
-            for( int j = ORD.get(i); i != j; )
-            {    int k = ORD.get(j);
-                         ORD.set(j,j);
-              blockSwap(POS + 16*i,
-                        POS + 16*j, 16);
-              j = k;
-            }
-
-            ORD.clear();
+            ORD.sortAndClear( SWAPPER.apply(POS) );
           }
           else
           { // move up collected blocks
@@ -125,32 +114,16 @@ public interface KatPawBiPartitionV1Access extends BlockSwapAccess,
       }
 
     // move remaining collected elements into place
-    int                size = ord.size();
-    ord.rotate(  until-size-pos);
-    for( ; pos < until-size; pos++) swap(pos, pos+size);
+    int               SIZE = ORD.size()*16,
+                      size = ord.size();
+    ord.rotate( until-size-pos);
+    for(; pos < until-size;pos++) swap(pos, pos+size);
 
-    // unravel remaining collected elements
-    for( int i=0; i < size; i++ )
-      for( int j = ord.get(i); i != j; )
-      {    int k = ord.get(j);
-                   ord.set(j,j);
-        swap(pos + i,
-             pos + j);
-        j = k;
-      }
-
-    // unravel remaining collected blocks
-    for( int i=0; i < ORD.size(); i++ )
-      for( int j = ORD.get(i); i != j; )
-      {    int k = ORD.get(j);
-                   ORD.set(j,j);
-        blockSwap(POS + 16*i,
-                  POS + 16*j, 16);
-        j = k;
-      }
+    // unravel remaining collected elements and blocks
+    ord.sortAndClear( swapper.apply(pos) );
+    ORD.sortAndClear( SWAPPER.apply(POS) );
 
     // move remaining collected blocks into place
-    int                     SIZE = ORD.size()*16;
     rotate(POS,until-size, -SIZE);
 
     // BI-PARTITION REMAINING BLOCKS
@@ -162,6 +135,7 @@ public interface KatPawBiPartitionV1Access extends BlockSwapAccess,
       @Override public boolean predicate( int i ) { return KatPawBiPartitionV1Access.this.predicate(FROM+B*i); }
     });
 
+    // B-elements of the mixed block belong all the way to the end
     rotate( from+nA, SIZE==B ? until-B : until, -(size+SIZE)%B );
   }
 }

@@ -15,8 +15,8 @@ import static java.lang.Math.*;
 //
 // REFERENCES
 // ----------
-// .. [1] "STABLE IN SITU SORTING AND MINIMUM DATA MOVEMENT"
-//         J. IAN MUNRO, VENKATESH RAMAN and JEFFREY S. SALOWE
+// .. [1] "Stable In Situ Sorting and Minimum Data Movement"
+//         J. Ian Munro, Venkatesh Raman and Jeffrey S. Salowe
 
 public interface MuRaSaBiPartitionV2Access extends BlockSwapAccess,
                                        ExtractBufBiPartitionAccess

@@ -6,7 +6,8 @@ public interface RotateAccess extends RevertAccess
 {
   public default void rotate( int from, int until, int off )
   {
-    if( from >  until ) throw new IllegalArgumentException();
+    if( from >  until )
+      throw new IllegalArgumentException();
     if( from == until ) return;
     int        len = subtractExact(until,from);
         off %= len;
