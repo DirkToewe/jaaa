@@ -4,7 +4,7 @@ import com.github.jaaa.CompareAccessor;
 
 public interface ExpL2RSearchAccessor<T> extends CompareAccessor<T>
 {
-  public default int expL2RSearch( T a, int from, int until, T b, int key )
+  default int expL2RSearch( T a, int from, int until, T b, int key )
   {
     if( from < 0     ) throw new IllegalArgumentException();
     if( from > until ) throw new IllegalArgumentException();
@@ -12,84 +12,53 @@ public interface ExpL2RSearchAccessor<T> extends CompareAccessor<T>
     // GALLOPING PHASE
     for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
     {
-      int                      k = from+step,
-          c = compare(b,key, a,k);
-      if( c == 0 )      return k;
-      if( c <  0 )   { until = k; break; }
-                        from = k+1;
+      int                      next = from+step,
+          c = compare(b,key, a,next);
+      if( c == 0 )      return next;
+      if( c <  0 )   { until = next; break; }
+                        from = next+1;
     }
 
-    --until;
-
     // BINARY SEARCH PHASE
-    while( from <= until ) {    int mid = from+until >>> 1,
+    while( from < until ) {     int mid = from+until >>> 1,
                c = compare(b,key, a,mid);
-           if( c < 0 ) until = -1 + mid;
-      else if( c > 0 )  from = +1 + mid;
+           if( c < 0 )      until = mid;
+      else if( c > 0 )       from = mid+1;
       else                   return mid;
     }
     return ~from;
   }
 
-  public default int expL2RSearchR( T a, int from, int until, T b, int key )
+  default int expL2RSearchL( T a, int from, int until, T b, int key ) { return expL2RSearch(a,from,until, b,key, false); }
+  default int expL2RSearchR( T a, int from, int until, T b, int key ) { return expL2RSearch(a,from,until, b,key, true ); }
+  default int expL2RSearch ( T a, int from, int until, T b, int key, boolean rightBias )
   {
     if( from < 0     ) throw new IllegalArgumentException();
     if( from > until ) throw new IllegalArgumentException();
 
+    int bias = rightBias ? 0 : 1;
     boolean found = false;
 
     // GALLOPING PHASE
     for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
     {
-      int                      k = from+step,
-          c = compare(b,key, a,k);
-      if( c < 0 )    { until = k; break; }
-      found |= 0==c;    from = k+1;
-
+      int                      next = from+step,
+          c = compare(b,key, a,next); found |= 0==c;
+      if( c < bias ) { until = next; break; }
+                        from = next+1;
     }
 
-    --until;
-
     // BINARY SEARCH PHASE
-    while( from <= until ){int mid = from+until >>> 1,
+    while( from < until ){ int mid = from+until >>> 1,
           c = compare(b,key, a,mid);
-      if( c < 0 ) until = -1 + mid;
-      else         from = +1 + mid;
+      if( c < bias )   until = mid;
+      else              from = mid+1;
       found |= 0==c;
     }
     return found ? from : ~from;
   }
 
-  public default int expL2RSearchL( T a, int from, int until, T b, int key )
-  {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
-
-    boolean found = false;
-
-    // GALLOPING PHASE
-    for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
-    {
-      int                      k = from+step,
-          c = compare(b,key, a,k); found |= 0==c;
-      if( c <= 0 )   { until = k; break; }
-                        from = k+1;
-    }
-
-    --until;
-
-    // BINARY SEARCH PHASE
-    while( from <= until ){int mid = from+until >>> 1,
-          c = compare(b,key, a,mid);
-      if( c <= 0 )until = -1 + mid;
-      else         from = +1 + mid;
-      found |= 0==c;
-    }
-    return found ? from : ~from;
-  }
-
-
-  public default int expL2RSearchGap( T a, int from, int until, T b, int key )
+  default int expL2RSearchGap( T a, int from, int until, T b, int key )
   {
     if( from < 0     ) throw new IllegalArgumentException();
     if( from > until ) throw new IllegalArgumentException();
@@ -97,71 +66,46 @@ public interface ExpL2RSearchAccessor<T> extends CompareAccessor<T>
     // GALLOPING PHASE
     for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
     {
-      int                      k = from+step,
-          c = compare(b,key, a,k);
-      if( c == 0 )      return k;
-      if( c <  0 )   { until = k; break; }
-                        from = k+1;
+      int                      next = from+step,
+          c = compare(b,key, a,next);
+      if( c == 0 )      return next;
+      if( c <  0 )   { until = next; break; }
+                        from = next+1;
     }
 
-    --until;
-
     // BINARY SEARCH PHASE
-    while( from <= until ) {    int mid = from+until >>> 1,
+    while( from < until ) {     int mid = from+until >>> 1,
                c = compare(b,key, a,mid);
-           if( c < 0 ) until = -1 + mid;
-      else if( c > 0 )  from = +1 + mid;
+           if( c < 0 )      until = mid;
+      else if( c > 0 )       from = mid+1;
       else                   return mid;
     }
     return from;
   }
 
-  public default int expL2RSearchGapR( T a, int from, int until, T b, int key )
+  default int expL2RSearchGapL( T a, int from, int until, T b, int key ) { return expL2RSearchGap(a,from,until, b,key, false); }
+  default int expL2RSearchGapR( T a, int from, int until, T b, int key ) { return expL2RSearchGap(a,from,until, b,key, true ); }
+  default int expL2RSearchGap ( T a, int from, int until, T b, int key, boolean rightBias )
   {
     if( from < 0     ) throw new IllegalArgumentException();
     if( from > until ) throw new IllegalArgumentException();
 
-    // GALLOPING PHASE
-    for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
-    {
-      int                      k = from+step,
-          c = compare(b,key, a,k);
-      if( c < 0 )    { until = k; break; }
-                        from = k+1;
-    }
-
-    --until;
-
-    // BINARY SEARCH PHASE
-    while( from <= until ){int mid = from+until >>> 1,
-          c = compare(b,key, a,mid);
-      if( c < 0 ) until = -1 + mid;
-      else         from = +1 + mid;
-    }
-    return from;
-  }
-
-  public default int expL2RSearchGapL( T a, int from, int until, T b, int key )
-  {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    int bias = rightBias ? 0 : 1;
 
     // GALLOPING PHASE
     for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
     {
-      int                      k = from+step,
-          c = compare(b,key, a,k);
-      if( c <= 0 )   { until = k; break; }
-                        from = k+1;
+      int                      next = from+step,
+          c = compare(b,key, a,next);
+      if( c < bias ) { until = next; break; }
+                        from = next+1;
     }
 
-    --until;
-
     // BINARY SEARCH PHASE
-    while( from <= until ){int mid = from+until >>> 1,
+    while( from < until ){ int mid = from+until >>> 1,
           c = compare(b,key, a,mid);
-      if( c <= 0 )until = -1 + mid;
-      else         from = +1 + mid;
+      if( c < bias )   until = mid;
+      else              from = mid+1;
     }
     return from;
   }

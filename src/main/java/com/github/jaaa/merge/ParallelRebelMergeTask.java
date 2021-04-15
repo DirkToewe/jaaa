@@ -6,12 +6,12 @@ import static java.util.Objects.requireNonNull;
 
 //  Implementation Details
 //  ----------------------
-//  ParallelRecMerge is a family of parallel merge algorithms based on
-//  the RecMerge family of algorithms. All algorithms use a fork-join
-//  parallelism. During each fork, the merging problem is split into
-//  two, more or less, equally large sub-problems.
+//  Parallel(Rec|Rebel|Zen)Merge is a family of parallel merge algorithms
+//  based on the RecMerge family of algorithms. All algorithms use a
+//  fork-join parallelism. During each fork, the merging problem is
+//  split into two, more or less, equally large sub-problems.
 //
-//  ParallelRecMergeV1, specifically, is a parallel version of RecMergeV4.
+//  ParallelRebelMerge, specifically, is a parallel version of RebelMerge.
 //  On each fork, the longer of the subsequences is split in half. The mid
 //  value of the split sequence is then searched in the shorter sequence,
 //  using either `searchGapL` or `searchGapR`. Thus the fina position of
@@ -72,12 +72,11 @@ public class ParallelRebelMergeTask<T> extends CountedCompleter<Void>
     final T a = this.a,
             b = this.b,
             c = this.c;
-    final int a0 = this.a0,
-              b0 = this.b0,
-              c0 = this.c0,
-     granularity = this.granularity;
-    int a1 = this.a1,
-        b1 = this.b1;
+    final int c0 = this.c0, granularity = this.granularity,
+              a0 = this.a0,
+              b0 = this.b0;
+          int a1 = this.a1,
+              b1 = this.b1;
 
     int aLen,
         bLen,
@@ -89,20 +88,24 @@ public class ParallelRebelMergeTask<T> extends CountedCompleter<Void>
       cLen = aLen + bLen;
       if( cLen <= granularity ) break;
 
-      int am,bm,cm;
+      int am,bm,cm, a2,b2;
       if( aLen > bLen )
       {
         am = a0 + (cm = aLen>>>1);
-        bm  = ctx.searchGapL(b,b0,b1, a,am);
+        bm  = ctx.rebelMerge_searchGap(b,b0,b1, a,am, false);
         cm += c0 + bm-b0;
-        ctx.copy(a,am++, c,cm++);
+        ctx.copy(a,am, c,cm);
+        a2 = am++;
+        b2 = bm;
       }
       else
       {
         bm  = b0 + (cm = bLen>>>1);
-        am  = ctx.searchGapR(a,a0,a1, b,bm);
+        am  = ctx.rebelMerge_searchGap(a,a0,a1, b,bm, true);
         cm += c0 + am-a0;
-        ctx.copy(b,bm++, c,cm++);
+        ctx.copy(b,bm, c,cm);
+        a2 = am;
+        b2 = bm++;
       }
 
       addToPendingCount(1);
@@ -110,14 +113,14 @@ public class ParallelRebelMergeTask<T> extends CountedCompleter<Void>
         granularity, this,
         a,am,a1,
         b,bm,b1,
-        c,cm, ctx
+        c,cm+1, ctx
       ).fork();
 
-      a1 = am;
-      b1 = bm;
+      a1 = a2;
+      b1 = b2;
     }
 
-    ctx.mergePart(
+    ctx.rebelMerge_mergePart(
       a,a0,aLen,
       b,b0,bLen,
       c,c0,cLen

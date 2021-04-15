@@ -16,6 +16,9 @@ public class ExpL2RSearchAccessTest extends SearchAccessTestTemplate
     @Override public int compare( int i, int j ) { return access.compare(i,j); }
   }
 
+  @Override protected int search    ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).expL2RSearch    (from,until, key); }
+  @Override protected int searchR   ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).expL2RSearchR   (from,until, key); }
+  @Override protected int searchL   ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).expL2RSearchL   (from,until, key); }
   @Override protected int searchGap ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).expL2RSearchGap (from,until, key); }
   @Override protected int searchGapR( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).expL2RSearchGapR(from,until, key); }
   @Override protected int searchGapL( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).expL2RSearchGapL(from,until, key); }

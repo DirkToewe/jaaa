@@ -11,11 +11,11 @@ public interface PermSortAccess extends CompareSwapAccess
 {
   public default void permSort( int from, int until )
   {
-    if( from > until )
-      throw new IllegalArgumentException();
+    if( from < 0     ) throw new IllegalArgumentException();
+    if( from > until ) throw new IllegalArgumentException();
 
     // see `insitu_permsort` [1, Fig. 1b]
-    outer_loop:for( int k=from; k < until; k++ )
+    outer_loop:for( int k=from; k < until-1; k++ )
       for(;;)
       {
         // find correct position of element i by counting elements less than it

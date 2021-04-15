@@ -24,9 +24,9 @@ public interface HwangLinMergePartAccessor<T> extends CompareRandomAccessor<T>
   )
   {
     checkArgs_mergePartL2R(
-      this, a, a0, aLen,
-            b, b0, bLen,
-            c, c0, cLen
+      a, a0, aLen,
+      b, b0, bLen,
+      c, c0, cLen
     );
 
     for( int cmp=1;; )
@@ -87,9 +87,9 @@ public interface HwangLinMergePartAccessor<T> extends CompareRandomAccessor<T>
   )
   {
     checkArgs_mergePartR2L(
-      this, a, a0, aLen,
-            b, b0, bLen,
-            c, c0, cLen
+      a, a0, aLen,
+      b, b0, bLen,
+      c, c0, cLen
     );
 
     a0 += aLen;

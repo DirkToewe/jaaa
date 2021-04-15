@@ -20,7 +20,7 @@ import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeR2L;
 
 public interface TapeMergeAccessor<T> extends CompareRandomAccessor<T>
 {
-  public default void tapeMerge(
+  default void tapeMerge(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
@@ -32,15 +32,15 @@ public interface TapeMergeAccessor<T> extends CompareRandomAccessor<T>
       tapeMergeL2R(a,a0,aLen, b,b0,bLen, c,c0);
   }
 
-  public default void tapeMergeL2R(
+  default void tapeMergeL2R(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
   ) {
     checkArgs_mergeL2R(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     aLen += a0;
@@ -50,19 +50,19 @@ public interface TapeMergeAccessor<T> extends CompareRandomAccessor<T>
       if( compare(a,a0, b,b0) <= 0 ) copy(a,a0++, c,c0++);
       else                           copy(b,b0++, c,c0++);
     }
-    while( a0 < aLen ) copy(a,a0++, c,c0++);
-    while( b0 < bLen ) copy(b,b0++, c,c0++);
+    if( a0 < aLen ) copyRange(a,a0, c,c0, aLen-a0);
+    else            copyRange(b,b0, c,c0, bLen-b0);
   }
 
-  public default void tapeMergeR2L(
+  default void tapeMergeR2L(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
   ) {
     checkArgs_mergeR2L(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     c0 += aLen+bLen;
@@ -72,7 +72,8 @@ public interface TapeMergeAccessor<T> extends CompareRandomAccessor<T>
     while( aLen > a0 && bLen > b0 )
       if( compare(a,aLen-1, b,bLen-1) > 0 ) copy(a,--aLen, c,--c0);
       else                                  copy(b,--bLen, c,--c0);
-    while( aLen > a0 ) copy(a,--aLen, c,--c0);
-    while( bLen > b0 ) copy(b,--bLen, c,--c0);
+
+    if( 0 < (aLen-=a0) ) { copyRange(a,a0, c,c0-aLen, aLen); }
+    else {   bLen-=b0;     copyRange(b,b0, c,c0-bLen, bLen); }
   }
 }

@@ -1,5 +1,7 @@
 package com.github.jaaa;
 
+import java.nio.*;
+
 /** Contains utility methods for swapping pairs of elements in arrays.
  *
  *  @author Dirk Toewe
@@ -71,6 +73,57 @@ public class Swap
 
 
 
+  public static void swap( ByteBuffer buf, int i, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = buf.get(i);
+    buf.put(i,buf.get(j));
+    buf.put(j,tmp);
+  }
+
+  public static void swap( ShortBuffer buf, int i, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = buf.get(i);
+    buf.put(i,buf.get(j));
+    buf.put(j,tmp);
+  }
+
+  public static void swap( IntBuffer buf, int i, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = buf.get(i);
+    buf.put(i,buf.get(j));
+    buf.put(j,tmp);
+  }
+
+  public static void swap( LongBuffer buf, int i, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = buf.get(i);
+    buf.put(i,buf.get(j));
+    buf.put(j,tmp);
+  }
+
+  public static void swap( CharBuffer buf, int i, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = buf.get(i);
+    buf.put(i,buf.get(j));
+    buf.put(j,tmp);
+  }
+
+  public static void swap( FloatBuffer buf, int i, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = buf.get(i);
+    buf.put(i,buf.get(j));
+    buf.put(j,tmp);
+  }
+
+  public static void swap( DoubleBuffer buf, int i, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = buf.get(i);
+    buf.put(i,buf.get(j));
+    buf.put(j,tmp);
+  }
+
+
+
   public static <T> void swap( T[] a, int i, T[] b, int j ) throws IndexOutOfBoundsException, NullPointerException
   {
     T tmp = a[i];
@@ -132,5 +185,56 @@ public class Swap
     double tmp = a[i];
                  a[i] = b[j];
                         b[j] = tmp;
+  }
+
+
+
+  public static void swap( ByteBuffer a, int i, ByteBuffer b, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = a.get(i);
+    a.put(i,  b.get(j));
+    b.put(j,tmp);
+  }
+
+  public static void swap( ShortBuffer a, int i, ShortBuffer b, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = a.get(i);
+    a.put(i,  b.get(j));
+    b.put(j,tmp);
+  }
+
+  public static void swap( IntBuffer a, int i, IntBuffer b, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = a.get(i);
+    a.put(i,  b.get(j));
+    b.put(j,tmp);
+  }
+
+  public static void swap( LongBuffer a, int i, LongBuffer b, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = a.get(i);
+    a.put(i,  b.get(j));
+    b.put(j,tmp);
+  }
+
+  public static void swap( CharBuffer a, int i, CharBuffer b, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = a.get(i);
+    a.put(i,  b.get(j));
+    b.put(j,tmp);
+  }
+
+  public static void swap( FloatBuffer a, int i, FloatBuffer b, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = a.get(i);
+    a.put(i,  b.get(j));
+    b.put(j,tmp);
+  }
+
+  public static void swap( DoubleBuffer a, int i, DoubleBuffer b, int j ) throws IndexOutOfBoundsException, NullPointerException
+  {
+    var tmp = a.get(i);
+    a.put(i,  b.get(j));
+    b.put(j,tmp);
   }
 }

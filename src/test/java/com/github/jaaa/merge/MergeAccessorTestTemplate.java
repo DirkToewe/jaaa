@@ -1,33 +1,32 @@
 package com.github.jaaa.merge;
 
+import com.github.jaaa.*;
+import com.github.jaaa.misc.Boxing;
 import com.github.jaaa.misc.Revert;
-import com.github.jaaa.Swap;
-import com.github.jaaa.WithInsertIndex;
-import com.github.jaaa.WithRange;
-import com.github.jaaa.CompareRandomAccessor;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
+import net.jqwik.api.PropertyDefaults;
 import net.jqwik.api.Tuple;
 import net.jqwik.api.Tuple.Tuple2;
-import net.jqwik.api.constraints.Size;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
+import static com.github.jaaa.misc.Boxing.boxed;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
 import static java.util.stream.IntStream.range;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public abstract class MergeAccessorTestTemplate
+
+@PropertyDefaults( tries = 100_000 )
+public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
 {
 // STATIC FIELDS
-  private static final int N_TRIES = 100_000,
-                          MAX_SIZE = 8192;
-
   abstract protected boolean isStable();
   abstract protected boolean mergesInplaceL2R();
   abstract protected boolean mergesInplaceR2L();
@@ -53,8 +52,7 @@ public abstract class MergeAccessorTestTemplate
   abstract protected <T> MergeAccessor<T> createAccessor( CompareRandomAccessor<T> srtAcc );
 //  abstract protected long comparisonLimit( int len, int i );
 
-  @Property( tries = N_TRIES )
-  void mergeArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] aRef, @ForAll @Size(min=0, max=MAX_SIZE) byte[] bRef, @ForAll boolean reversed )
+  @Property void mergeArraysByte( @ForAll("arraysByte") byte[] aRef, @ForAll("arraysByte") byte[] bRef, @ForAll boolean reversed )
   {
     byte[] cRef = new byte[aRef.length + bRef.length];
     arraycopy(aRef,0, cRef,0,           aRef.length);
@@ -68,7 +66,7 @@ public abstract class MergeAccessorTestTemplate
            cTest = new byte[aTest.length+bTest.length];
 
     var acc = createAccessor(new CompareRandomAccessor<byte[]>() {
-      @Override public int len( byte[] buf ) { return buf.length; }
+      @Override public byte[] malloc( int len ) { return new byte[len]; }
       @Override public void copy( byte[] a, int i, byte[] b, int j ) { b[j] = a[i]; }
       @Override public void swap( byte[] a, int i, byte[] b, int j ) { Swap.swap(a,i, b,j); }
       @Override public int compare( byte[] a, int i, byte[] b, int j ) {
@@ -84,8 +82,7 @@ public abstract class MergeAccessorTestTemplate
     assertThat(cTest).isEqualTo(cRef);
   }
 
-  @Property( tries = N_TRIES )
-  void mergeArraysInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] aRef, @ForAll @Size(min=0, max=MAX_SIZE) int[] bRef, @ForAll boolean reversed )
+  @Property void mergeArraysInt( @ForAll("arraysInt") int[] aRef, @ForAll("arraysInt") int[] bRef, @ForAll boolean reversed )
   {
     int[] cRef = new int[aRef.length + bRef.length];
     arraycopy(aRef,0, cRef,0,           aRef.length);
@@ -99,7 +96,7 @@ public abstract class MergeAccessorTestTemplate
           cTest = new int[aTest.length+bTest.length];
 
     var acc = createAccessor(new CompareRandomAccessor<int[]>() {
-      @Override public int len( int[] buf ) { return buf.length; }
+      @Override public int[] malloc( int len ) { return new int[len]; }
       @Override public void copy( int[] a, int i, int[] b, int j ) { b[j] = a[i]; }
       @Override public void swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
       @Override public int compare( int[] a, int i, int[] b, int j ) {
@@ -118,15 +115,14 @@ public abstract class MergeAccessorTestTemplate
 
 
 
-  @Property( tries = N_TRIES )
-  void mergeArraysWithRangeByte(
-    @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> a,
-    @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> b,
+  @Property void mergeArraysWithRangeByte(
+    @ForAll("arraysWithRangeByte") WithRange<byte[]> a,
+    @ForAll("arraysWithRangeByte") WithRange<byte[]> b,
     @ForAll boolean reversed
   )
   {
-    byte[] aRef = a.getData(),
-           bRef = b.getData();
+    byte[] aRef = a.getData().clone(),
+           bRef = b.getData().clone();
     int aOff = a.getFrom(),
         bOff = b.getFrom(),
         aLen = a.getUntil() - aOff,
@@ -143,7 +139,7 @@ public abstract class MergeAccessorTestTemplate
            cTest = new byte[aLen + bLen];
 
     var acc = createAccessor(new CompareRandomAccessor<byte[]>() {
-      @Override public int len( byte[] buf ) { return buf.length; }
+      @Override public byte[] malloc( int len ) { return new byte[len]; }
       @Override public void copy( byte[] a, int i, byte[] b, int j ) { b[j] = a[i]; }
       @Override public void swap( byte[] a, int i, byte[] b, int j ) { Swap.swap(a,i, b,j); }
       @Override public int compare( byte[] a, int i, byte[] b, int j ) {
@@ -160,15 +156,14 @@ public abstract class MergeAccessorTestTemplate
     assertThat(cTest).isEqualTo(cRef);
   }
 
-  @Property( tries = N_TRIES )
-  void mergeArraysWithRangeInt(
-    @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> a,
-    @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> b,
+  @Property void mergeArraysWithRangeInt(
+    @ForAll("arraysWithRangeInt") WithRange<int[]> a,
+    @ForAll("arraysWithRangeInt") WithRange<int[]> b,
     @ForAll boolean reversed
   )
   {
-    int[] aRef = a.getData(),
-          bRef = b.getData();
+    int[] aRef = a.getData().clone(),
+          bRef = b.getData().clone();
     int   aOff = a.getFrom(),
           bOff = b.getFrom(),
           aLen = a.getUntil() - aOff,
@@ -185,7 +180,7 @@ public abstract class MergeAccessorTestTemplate
           cTest = new int[aLen + bLen];
 
     var acc = createAccessor(new CompareRandomAccessor<int[]>() {
-      @Override public int len( int[] buf ) { return buf.length; }
+      @Override public int[] malloc( int len ) { return new int[len]; }
       @Override public void copy( int[] a, int i, int[] b, int j ) { b[j] = a[i]; }
       @Override public void swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
       @Override public int compare( int[] a, int i, int[] b, int j ) {
@@ -204,59 +199,37 @@ public abstract class MergeAccessorTestTemplate
 
 
 
-  @Property( tries = N_TRIES )
-  void mergesStablyArraysTupleByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] aRefRaw, @ForAll @Size(min=0, max=MAX_SIZE) byte[] bRefRaw, @ForAll boolean reversed )
+  @Property                                 void mergesStablyArraysTupleBoolean( @ForAll("arraysBoolean") boolean[] aRef, @ForAll("arraysBoolean") boolean[] bRef, @ForAll boolean reversed ) { mergesStablyArraysTuple(boxed(aRef), boxed(bRef), reversed); }
+  @Property                                 void mergesStablyArraysTupleByte   ( @ForAll("arraysByte"   )    byte[] aRef, @ForAll("arraysByte"   )    byte[] bRef, @ForAll boolean reversed ) { mergesStablyArraysTuple(boxed(aRef), boxed(bRef), reversed); }
+  @Property                                 void mergesStablyArraysTupleShort  ( @ForAll("arraysShort"  )   short[] aRef, @ForAll("arraysShort"  )   short[] bRef, @ForAll boolean reversed ) { mergesStablyArraysTuple(boxed(aRef), boxed(bRef), reversed); }
+  @Property                                 void mergesStablyArraysTupleInt    ( @ForAll("arraysInt"    )     int[] aRef, @ForAll("arraysInt"    )     int[] bRef, @ForAll boolean reversed ) { mergesStablyArraysTuple(boxed(aRef), boxed(bRef), reversed); }
+  @Property                                 void mergesStablyArraysTupleLong   ( @ForAll("arraysLong"   )    long[] aRef, @ForAll("arraysLong"   )    long[] bRef, @ForAll boolean reversed ) { mergesStablyArraysTuple(boxed(aRef), boxed(bRef), reversed); }
+  @Property                                 void mergesStablyArraysTupleChar   ( @ForAll("arraysChar"   )    char[] aRef, @ForAll("arraysChar"   )    char[] bRef, @ForAll boolean reversed ) { mergesStablyArraysTuple(boxed(aRef), boxed(bRef), reversed); }
+  @Property                                 void mergesStablyArraysTupleFloat  ( @ForAll("arraysFloat"  )   float[] aRef, @ForAll("arraysFloat"  )   float[] bRef, @ForAll boolean reversed ) { mergesStablyArraysTuple(boxed(aRef), boxed(bRef), reversed); }
+  @Property                                 void mergesStablyArraysTupleDouble ( @ForAll("arraysDouble" )  double[] aRef, @ForAll("arraysDouble" )  double[] bRef, @ForAll boolean reversed ) { mergesStablyArraysTuple(boxed(aRef), boxed(bRef), reversed); }
+  @Property                                 void mergesStablyArraysTupleString ( @ForAll("arraysString" )  String[] aRef, @ForAll("arraysString" )  String[] bRef, @ForAll boolean reversed ) { mergesStablyArraysTuple(      aRef ,       bRef , reversed); }
+  private <T extends Comparable<? super T>> void mergesStablyArraysTuple( T[] aRefRaw, T[] bRefRaw, @ForAll boolean reversed )
   {
-    Comparator<Tuple2<Byte,Integer>> __cmp = comparing(Tuple2::get1);
-    if( ! isStable()) __cmp = __cmp.thenComparing(Tuple2::get2);
-    if(   reversed  ) __cmp = __cmp.reversed();
-    var cmp = __cmp;
-
-    Tuple2<Byte,Integer>[]
-      aRef  = range(0,aRefRaw.length).mapToObj( i -> Tuple.of(aRefRaw[i],i) ).sorted(cmp).toArray(Tuple2[]::new),
-      bRef  = range(0,bRefRaw.length).mapToObj( i -> Tuple.of(bRefRaw[i],i) ).sorted(cmp).toArray(Tuple2[]::new),
-      cRef  =                     Stream.concat( stream(aRef), stream(bRef) ).sorted(cmp).toArray(Tuple2[]::new),
-      aTest = aRef.clone(),
-      bTest = bRef.clone(),
-      cTest = new Tuple2[aTest.length+bTest.length];
-
-    var acc = createAccessor(new CompareRandomAccessor<Tuple2<Byte,Integer>[]>() {
-      @Override public int     len( Tuple2<Byte,Integer>[] buf ) { return buf.length; }
-      @Override public void   copy( Tuple2<Byte,Integer>[] a, int i, Tuple2<Byte,Integer>[] b, int j ) { b[j] = a[i]; }
-      @Override public void   swap( Tuple2<Byte,Integer>[] a, int i, Tuple2<Byte,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
-      @Override public int compare( Tuple2<Byte,Integer>[] a, int i, Tuple2<Byte,Integer>[] b, int j ) { return cmp.compare(a[i],b[j]); }
-    });
-
-    acc.merge(aTest,0,aTest.length, bTest,0,bTest.length, cTest,0);
-
-    assertThat(aTest).isEqualTo(aRef);
-    assertThat(bTest).isEqualTo(bRef);
-    assertThat(cTest).isEqualTo(cRef);
-  }
-
-  @Property( tries = N_TRIES )
-  void mergesStablyArraysTupleInteger( @ForAll @Size(min=0, max=MAX_SIZE) int[] aRefRaw, @ForAll @Size(min=0, max=MAX_SIZE) int[] bRefRaw, @ForAll boolean reversed )
-  {
-    Comparator<Tuple2<Integer,Integer>>  cmp; {
-    Comparator<Tuple2<Integer,Integer>> _cmp = comparing(Tuple2::get1);
+    Comparator<Tuple2<T,Integer>>  cmp; {
+    Comparator<Tuple2<T,Integer>> _cmp = comparing(Tuple2::get1);
       if( ! isStable()) _cmp = _cmp.thenComparing(Tuple2::get2);
       if(   reversed  ) _cmp = _cmp.reversed();
       cmp = _cmp;
     }
 
-    Tuple2<Integer,Integer>[]
-      aRef  = range(0,aRefRaw.length).mapToObj( i -> Tuple.of(aRefRaw[i],i) ).sorted(cmp).toArray(Tuple2[]::new),
-      bRef  = range(0,bRefRaw.length).mapToObj( i -> Tuple.of(bRefRaw[i],i) ).sorted(cmp).toArray(Tuple2[]::new),
-      cRef  =                     Stream.concat( stream(aRef), stream(bRef) ).sorted(cmp).toArray(Tuple2[]::new),
-      aTest = aRef.clone(),
-      bTest = bRef.clone(),
-      cTest = new Tuple2[aTest.length + bTest.length];
+    Tuple2<T,Integer>[]
+            aRef  = range(0,aRefRaw.length).mapToObj( i -> Tuple.of(aRefRaw[i],i) ).sorted(cmp).toArray(Tuple2[]::new),
+            bRef  = range(0,bRefRaw.length).mapToObj( i -> Tuple.of(bRefRaw[i],i) ).sorted(cmp).toArray(Tuple2[]::new),
+            cRef  =                     Stream.concat( stream(aRef), stream(bRef) ).sorted(cmp).toArray(Tuple2[]::new),
+            aTest = aRef.clone(),
+            bTest = bRef.clone(),
+            cTest = new Tuple2[aTest.length + bTest.length];
 
-    var acc = createAccessor(new CompareRandomAccessor<Tuple2<Integer,Integer>[]>() {
-      @Override public int     len( Tuple2<Integer,Integer>[] buf ) { return buf.length; }
-      @Override public void   copy( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j ) { b[j] = a[i]; }
-      @Override public void   swap( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
-      @Override public int compare( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j ) { return cmp.compare(a[i],b[j]); }
+    var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+      @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
+      @Override public void   copy( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { b[j] = a[i]; }
+      @Override public void   swap( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
+      @Override public int compare( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { return cmp.compare(a[i],b[j]); }
     });
 
     acc.merge(aTest,0,aTest.length, bTest,0,bTest.length, cTest,0);
@@ -268,14 +241,19 @@ public abstract class MergeAccessorTestTemplate
 
 
 
-  @Property( tries = N_TRIES )
-  void mergesStablyInplaceL2RArraysTupleInteger( @ForAll WithInsertIndex<@Size(min=0, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
+  @Property                                 void mergesStablyInplaceL2RArraysTupleBoolean( @ForAll("arraysWithInsertIndexBoolean") WithInsertIndex<boolean[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceL2RArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceL2RArraysTupleByte   ( @ForAll("arraysWithInsertIndexByte"   ) WithInsertIndex<   byte[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceL2RArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceL2RArraysTupleShort  ( @ForAll("arraysWithInsertIndexShort"  ) WithInsertIndex<  short[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceL2RArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceL2RArraysTupleInt    ( @ForAll("arraysWithInsertIndexInt"    ) WithInsertIndex<    int[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceL2RArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceL2RArraysTupleLong   ( @ForAll("arraysWithInsertIndexLong"   ) WithInsertIndex<   long[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceL2RArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceL2RArraysTupleChar   ( @ForAll("arraysWithInsertIndexChar"   ) WithInsertIndex<   char[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceL2RArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceL2RArraysTupleFloat  ( @ForAll("arraysWithInsertIndexFloat"  ) WithInsertIndex<  float[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceL2RArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceL2RArraysTupleDouble ( @ForAll("arraysWithInsertIndexDouble" ) WithInsertIndex< double[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceL2RArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceL2RArraysTupleString ( @ForAll("arraysWithInsertIndexString" ) WithInsertIndex< String[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceL2RArraysTuple(sample                   , reversed); }
+  private <T extends Comparable<? super T>> void mergesStablyInplaceL2RArraysTuple( @ForAll WithInsertIndex<T[]> sample, @ForAll boolean reversed )
   {
-//    if( ! mergesInplaceL2R() )
-//      return;
-
-    Comparator<Tuple2<Integer,Integer>>  cmp; {
-    Comparator<Tuple2<Integer,Integer>> _cmp = comparing(Tuple2::get1);
+    Comparator<Tuple2<T,Integer>>  cmp; {
+    Comparator<Tuple2<T,Integer>> _cmp = comparing(Tuple2::get1);
       if( ! isStable()) _cmp = _cmp.thenComparing(Tuple2::get2);
       if(   reversed  ) _cmp = _cmp.reversed();
       cmp = _cmp;
@@ -283,7 +261,7 @@ public abstract class MergeAccessorTestTemplate
 
     int split = sample.getIndex();
 
-    Tuple2<Integer,Integer>[]
+    Tuple2<T,Integer>[]
       cTest, cRef = range(0,sample.getData().length).mapToObj( i -> Tuple.of(sample.getData()[i],i) ).toArray(Tuple2[]::new),
       aTest, aRef = copyOfRange(cRef, 0,split);
     Arrays.sort(aRef,cmp);
@@ -294,18 +272,18 @@ public abstract class MergeAccessorTestTemplate
     Arrays.sort(cTest, split,cTest.length, cmp);
     Arrays.sort(cRef,cmp);
 
-    var acc = createAccessor(new CompareRandomAccessor<Tuple2<Integer,Integer>[]>() {
-      @Override public int     len( Tuple2<Integer,Integer>[] buf ) { return buf.length; }
-      @Override public void   copy( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j ) { b[j] = a[i]; }
-      @Override public void   swap( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
-      @Override public int compare( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j ) { return cmp.compare(a[i],b[j]); }
+    var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+      @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
+      @Override public void   copy( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { b[j] = a[i]; }
+      @Override public void   swap( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
+      @Override public int compare( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { return cmp.compare(a[i],b[j]); }
     });
 
     Runnable test = () -> {
       acc.merge(
-        aTest,    0,aTest.length,
-        cTest,split,cTest.length-split,
-        cTest,0
+              aTest,    0,aTest.length,
+              cTest,split,cTest.length-split,
+              cTest,0
       );
 
       assertThat(aTest).isEqualTo(aRef);
@@ -320,12 +298,20 @@ public abstract class MergeAccessorTestTemplate
 
 
 
-  @Property( tries = N_TRIES )
-  void mergesStablyInplaceR2LArraysTupleInteger( @ForAll WithInsertIndex<@Size(min=0, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
+  @Property                                 void mergesStablyInplaceR2LArraysTupleBoolean( @ForAll("arraysWithInsertIndexBoolean") WithInsertIndex<boolean[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceR2LArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceR2LArraysTupleByte   ( @ForAll("arraysWithInsertIndexByte"   ) WithInsertIndex<   byte[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceR2LArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceR2LArraysTupleShort  ( @ForAll("arraysWithInsertIndexShort"  ) WithInsertIndex<  short[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceR2LArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceR2LArraysTupleInt    ( @ForAll("arraysWithInsertIndexInt"    ) WithInsertIndex<    int[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceR2LArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceR2LArraysTupleLong   ( @ForAll("arraysWithInsertIndexLong"   ) WithInsertIndex<   long[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceR2LArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceR2LArraysTupleChar   ( @ForAll("arraysWithInsertIndexChar"   ) WithInsertIndex<   char[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceR2LArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceR2LArraysTupleFloat  ( @ForAll("arraysWithInsertIndexFloat"  ) WithInsertIndex<  float[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceR2LArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceR2LArraysTupleDouble ( @ForAll("arraysWithInsertIndexDouble" ) WithInsertIndex< double[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceR2LArraysTuple(sample.map(Boxing::boxed), reversed); }
+  @Property                                 void mergesStablyInplaceR2LArraysTupleString ( @ForAll("arraysWithInsertIndexString" ) WithInsertIndex< String[]> sample, @ForAll boolean reversed ) { mergesStablyInplaceR2LArraysTuple(sample                   , reversed); }
+  private <T extends Comparable<? super T>> void mergesStablyInplaceR2LArraysTuple( @ForAll WithInsertIndex<T[]> sample, @ForAll boolean reversed )
   {
 
-    Comparator<Tuple2<Integer,Integer>>  cmp; {
-    Comparator<Tuple2<Integer,Integer>> _cmp = comparing(Tuple2::get1);
+    Comparator<Tuple2<T,Integer>>  cmp; {
+    Comparator<Tuple2<T,Integer>> _cmp = comparing(Tuple2::get1);
       if( ! isStable()) _cmp = _cmp.thenComparing(Tuple2::get2);
       if(   reversed  ) _cmp = _cmp.reversed();
       cmp = _cmp;
@@ -333,7 +319,7 @@ public abstract class MergeAccessorTestTemplate
 
     int split = sample.getIndex();
 
-    Tuple2<Integer,Integer>[]
+    Tuple2<T,Integer>[]
       cTest, cRef = range(0,sample.getData().length).mapToObj( i -> Tuple.of(sample.getData()[i],i) ).toArray(Tuple2[]::new),
       aTest, aRef = copyOfRange(cRef, split,cRef.length);
     Arrays.sort(aRef,cmp);
@@ -344,11 +330,11 @@ public abstract class MergeAccessorTestTemplate
     Arrays.sort(cTest, 0,split, cmp);
     Arrays.sort(cRef,cmp);
 
-    var acc = createAccessor(new CompareRandomAccessor<Tuple2<Integer,Integer>[]>() {
-      @Override public int     len( Tuple2<Integer,Integer>[] buf ) { return buf.length; }
-      @Override public void   copy( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j ) { b[j] = a[i]; }
-      @Override public void   swap( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
-      @Override public int compare( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j ) { return cmp.compare(a[i],b[j]); }
+    var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+      @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
+      @Override public void   copy( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { b[j] = a[i]; }
+      @Override public void   swap( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
+      @Override public int compare( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { return cmp.compare(a[i],b[j]); }
     });
 
     Runnable test = () -> {

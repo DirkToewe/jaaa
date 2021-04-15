@@ -3,13 +3,25 @@ package com.github.jaaa;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
+import static java.util.Collections.unmodifiableCollection;
 
-public abstract class With<T>
+
+public abstract class With<T> implements Cloneable
 {
   private final T data;
 
-  public With(T _data ) {
-    data =_data;
+  public With( T _data ) {
+         if(_data instanceof  boolean[] ) data = (T) ( (boolean[]) _data ).clone();
+    else if(_data instanceof     byte[] ) data = (T) ( (   byte[]) _data ).clone();
+    else if(_data instanceof    short[] ) data = (T) ( (  short[]) _data ).clone();
+    else if(_data instanceof      int[] ) data = (T) ( (    int[]) _data ).clone();
+    else if(_data instanceof     long[] ) data = (T) ( (   long[]) _data ).clone();
+    else if(_data instanceof     char[] ) data = (T) ( (   char[]) _data ).clone();
+    else if(_data instanceof    float[] ) data = (T) ( (  float[]) _data ).clone();
+    else if(_data instanceof   double[] ) data = (T) ( ( double[]) _data ).clone();
+    else if(_data instanceof   Object[] ) data = (T) ( ( Object[]) _data ).clone();
+    else if(_data instanceof Collection ) data = (T) unmodifiableCollection( (Collection<?>) _data );
+    else                                  data = (T) ( (With<T>) _data ).clone();
 
     if( ! ( _data instanceof With
          || _data instanceof Collection
@@ -36,7 +48,9 @@ public abstract class With<T>
   public int contentLength() {
     for( Object c = data;; )
            if( c instanceof With) c = ((With) c).getData();
-      else if( c instanceof Collection   ) return ((Collection<?>) c).size();
-      else                                 return Array.getLength(c);
+      else if( c instanceof Collection ) return ((Collection<?>) c).size();
+      else                               return Array.getLength(c);
   }
+
+  @Override public abstract With<T> clone();
 }

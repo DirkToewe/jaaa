@@ -2,6 +2,7 @@ package com.github.jaaa.merge;
 
 import com.github.jaaa.Swap;
 import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.misc.Revert;
 import com.github.jaaa.util.EntryFn;
 
 import java.io.IOException;
@@ -67,7 +68,7 @@ public class MergeComparison
   {
     long nComps = 0,
          nWrite = 0;
-    @Override public int         len( double[] buf ) { return buf.length; }
+    @Override public double[] malloc(int len ) { return new double[len]; }
     @Override public int     compare( double[] a, int i, double[] b, int j ) { int c = Double.compare(a[i],b[j]); nComps+=1; return c; }
     @Override public void       swap( double[] a, int i, double[] b, int j ) {              Swap.swap(a,i, b,j);  nWrite+=2; }
     @Override public void  copy     ( double[] a, int i, double[] b, int j ) {                        b[j]=a[i];  nWrite+=1; }
@@ -80,19 +81,79 @@ public class MergeComparison
     var rng = new RandomMergeInputGenerator(1337);
 
     Map<String,MergeFn> mergers = Map.ofEntries(
-      entry("Binary",         BinaryMerge::merge),
-      entry("ExpV1",          ExpMergeV1::merge),
-      entry("ExpV2",          ExpMergeV2::merge),
-      entry("ExpV3",          ExpMergeV3::merge),
-      entry("ExpV4",          ExpMergeV4::merge),
-      entry("HwangLinV1", HwangLinMerge::merge),
-      entry("HwangLinV2", HwangLinMergeStatic::merge),
-      entry("RecMergeV1",     RecMerge::merge),
-      entry("RecMergeV2",     RexMerge::merge),
-      entry("RecMergeV3",     ZenMerge::merge),
-      entry("RecMergeV4",     RebelMerge::merge),
-      entry("TapeMerge",       TapeMerge::merge),
-      entry("TimMerge",         TimMerge::merge)
+      entry("Binary",            BinaryMerge::merge),
+      entry("ExpV1",              ExpMergeV1::merge),
+      entry("ExpV2",              ExpMergeV2::merge),
+      entry("ExpV3",              ExpMergeV3::merge),
+      entry("ExpV4",              ExpMergeV4::merge),
+      entry("ExpV5",              ExpMergeV5::merge),
+      entry("HwangLinV1",HwangLinMerge      ::merge),
+      entry("HwangLinV2",HwangLinStaticMerge::merge),
+      entry("RecMergeV1",           RecMerge::merge),
+      entry("RecMergeV2",           RexMerge::merge),
+      entry("RecMergeV3",           ZenMerge::merge),
+      entry("RecMergeV4",         RebelMerge::merge),
+      entry("TapeMerge",           TapeMerge::merge),
+      entry("TimMerge",             TimMerge::merge),
+      entry("TimMergeL2R", new MergeFn() {
+        @Override public <T> void merge(
+          T a, int i, int m,
+          T b, int j, int n,
+          T c, int k, CompareRandomAccessor<T> acc
+        )
+        {
+          new TimMergeAccessor<T>() {
+            @Override public T malloc( int len ) { return acc.malloc(len); }
+            @Override public void copy( T a, int i, T b, int j ) { acc.copy(a,i, b,j); }
+            @Override public void swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }
+            @Override public void copyRange( T a, int i, T b, int j, int len ) { acc.copyRange(a,i, b,j, len); }
+            @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
+          }.timMergeL2R(
+            a,i,m,
+            b,j,n,
+            c,k
+          );
+        }
+      }),
+      entry("TimMergeR2L", new MergeFn() {
+        @Override public <T> void merge(
+          T a, int i, int m,
+          T b, int j, int n,
+          T c, int k, CompareRandomAccessor<T> acc
+        )
+        {
+          Revert.revert(a, i,i+m, acc);
+          Revert.revert(b, j,j+n, acc);
+          new TimMergeAccessor<T>() {
+            @Override public T malloc( int len ) { return acc.malloc(len); }
+            @Override public void copy( T a, int i, T b, int j ) { acc.copy(a,i, b,j); }
+            @Override public void swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }
+            @Override public void copyRange( T a, int i, T b, int j, int len ) { acc.copyRange(a,i, b,j, len); }
+            @Override public int compare( T a, int i, T b, int j ) { return -acc.compare(a,i, b,j); }
+          }.timMergeR2L(
+            a,i,m,
+            b,j,n,
+            c,k
+          );
+          Revert.revert(a, i ,i+m,   acc);
+          Revert.revert(b, j, j+n,   acc);
+          Revert.revert(c, k, k+m+n, acc);
+        }
+      }),
+      entry("ExpAccV2", new MergeFn() {
+        @Override public <T> void merge(
+          T a, int i, int m,
+          T b, int j, int n,
+          T c, int k, CompareRandomAccessor<T> acc
+        ) {
+          acc.copyRange(a,i, c,k,   m);
+          acc.copyRange(b,j, c,k+m, n);
+          new ExpMergeV2Access() {
+            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
+            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
+          }.expMergeV2(k, k+m, k+m+n);
+        }
+      })
     );
 
     int N_SAMPLES =  10_000,

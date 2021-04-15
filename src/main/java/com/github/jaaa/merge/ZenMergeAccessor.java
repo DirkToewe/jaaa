@@ -10,7 +10,7 @@ import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeR2L;
 //  ZenMerge is a recursive merging algorithm, similar to RecMerge.
 //
 //  RecMerge is only guaranteed to split smaller of the two sequences
-//  in have during each step of recursion. The larger might remain
+//  in half during each step of recursion. The larger might remain
 //  entirely unsplit. As a result, one of the two recursive sub-problems
 //  may end up significantly larger than the other. When it comes to
 //  single-threaded implementations, this imbalance is not a problem.
@@ -52,9 +52,9 @@ public interface ZenMergeAccessor<T> extends CompareRandomAccessor<T>,
     T c, int c0
   ) {
     checkArgs_mergeL2R(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     new RecMergeFn(c0) {
@@ -78,9 +78,9 @@ public interface ZenMergeAccessor<T> extends CompareRandomAccessor<T>,
     T c, int c0
   ) {
     checkArgs_mergeR2L(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     c0 += aLen+bLen;

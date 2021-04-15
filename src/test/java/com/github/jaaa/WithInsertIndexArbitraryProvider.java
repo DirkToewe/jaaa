@@ -21,8 +21,8 @@ public class WithInsertIndexArbitraryProvider implements ArbitraryProvider
     TypeUsage content = targetType.getTypeArgument(0);
 
     return content.isArray()
-            || content.isOfType(Collection.class)
-            || content.isOfType( WithRange.class);
+        || content.isOfType(Collection.class)
+        || content.isOfType( WithRange.class);
   }
 
   @Override public Set<Arbitrary<?>> provideFor(TypeUsage targetType, ArbitraryProvider.SubtypeProvider subtypeProvider ) {
@@ -44,7 +44,7 @@ public class WithInsertIndexArbitraryProvider implements ArbitraryProvider
         })
       ).collect( toSet() );
 
-    if( contentType.isOfType(Collection.class) )
+    if( contentType.isOfType(WithRange.class) )
       return samples.map(
         x -> x.flatMap( range -> {
           int from = ((WithRange<?>) range).getFrom(),

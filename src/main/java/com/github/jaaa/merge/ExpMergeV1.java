@@ -20,7 +20,7 @@ public final class ExpMergeV1
     T c, int k, CompareRandomAccessor<T> acc
   ) {
     new ExpMergeV1Accessor<T>() {
-      @Override public int        len( T buf ) { return acc.len(buf); }
+      @Override public T malloc( int len ) { return acc.malloc(len); }
       @Override public void      copy( T a, int i, T b, int j ) { acc.copy(a,i, b,j); }
       @Override public void      swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }
       @Override public void copyRange( T a, int i, T b, int j, int len ) { acc.copyRange(a,i, b,j, len); }
@@ -34,7 +34,7 @@ public final class ExpMergeV1
     T[] c, int k, Comparator<? super T> cmp
   ) {
     new ExpMergeV1Accessor<T[]>() {
-      @Override public int        len( T[] buf ) { return buf.length; }
+      @Override public T[] malloc( int len ) { throw new UnsupportedOperationException(); }
       @Override public void      copy( T[] a, int i, T[] b, int j ) { }
       @Override public void      swap( T[] a, int i, T[] b, int j ) { Swap.swap(a,i, b,j); }
       @Override public void copyRange( T[] a, int i, T[] b, int j, int len ) { arraycopy(a,i, b,j, len); }

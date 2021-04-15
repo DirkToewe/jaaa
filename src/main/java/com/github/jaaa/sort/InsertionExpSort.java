@@ -2,6 +2,7 @@ package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
 
+import java.nio.IntBuffer;
 import java.util.Comparator;
 
 import static java.lang.System.arraycopy;
@@ -13,8 +14,8 @@ public final class InsertionExpSort
   {
     @Override public boolean isStable() { return true; }
 
-    @Override public <T> void sort( T seq, int from, int until, CompareRandomAccessor<? super T> acc ) { InsertionExpSort.sort(seq,from,until,acc); }
-    @Override public     void sort(        int from, int until, CompareSwapAccess                acc ) { InsertionExpSort.sort(    from,until,acc); }
+    @Override public <T> void sort( T seq, int from, int until, CompareRandomAccessor<T> acc ) { InsertionExpSort.sort(seq,from,until,acc); }
+    @Override public     void sort(        int from, int until, CompareSwapAccess        acc ) { InsertionExpSort.sort(    from,until,acc); }
 
     @Override public void sort(   byte[] seq                                            ) { InsertionExpSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(   byte[] seq, int from, int until                       ) { InsertionExpSort.sort(seq, from,until          ); }
@@ -50,6 +51,11 @@ public final class InsertionExpSort
     @Override public void sort( double[] seq, int from, int until                       ) { InsertionExpSort.sort(seq, from,until          ); }
     @Override public void sort( double[] seq,                      ComparatorDouble cmp ) { InsertionExpSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort( double[] seq, int from, int until, ComparatorDouble cmp ) { InsertionExpSort.sort(seq, from,until,      cmp); }
+
+    @Override public void sort( IntBuffer buf                                         ) { InsertionExpSort.sort(buf, buf.position(),buf.limit()     ); }
+    @Override public void sort( IntBuffer buf, int from, int until                    ) { InsertionExpSort.sort(buf,           from,until           ); }
+    @Override public void sort( IntBuffer buf,                      ComparatorInt cmp ) { InsertionExpSort.sort(buf, buf.position(),buf.limit(), cmp); }
+    @Override public void sort( IntBuffer buf, int from, int until, ComparatorInt cmp ) { InsertionExpSort.sort(buf,           from,until,       cmp); }
 
     @Override public <T extends Comparable<? super T>> void sort( T[] seq                                                 )  { InsertionExpSort.sort(seq,    0,seq.length     ); }
     @Override public <T extends Comparable<? super T>> void sort( T[] seq, int from, int until                            )  { InsertionExpSort.sort(seq, from,until          ); }
@@ -188,6 +194,22 @@ public final class InsertionExpSort
     }.insertionExpSort(from,until);
   }
 
+  public static void sort( IntBuffer buf, int from, int until )
+  {
+    new InsertionExpSortAccess() {
+      @Override public int compare( int i, int j ) { return Integer.compare( buf.get(i), buf.get(j) ); }
+      @Override public void   swap( int i, int j ) { Swap.swap(buf,i,j); }
+    }.insertionExpSort(from,until);
+  }
+
+  public static void sort( IntBuffer buf, int from, int until, ComparatorInt cmp )
+  {
+    new InsertionExpSortAccess() {
+      @Override public int compare( int i, int j ) { return cmp.compare( buf.get(i), buf.get(j) ); }
+      @Override public void   swap( int i, int j ) { Swap.swap(buf,i,j); }
+    }.insertionExpSort(from,until);
+  }
+
   public static <T extends Comparable<? super T>> void sort( T[] seq, int from, int until )
   {
     if(    0 > from      ) throw new IndexOutOfBoundsException();
@@ -279,6 +301,9 @@ public final class InsertionExpSort
 
   public static void sort( double[] seq                       ) { sort(seq,    0,seq.length     ); }
   public static void sort( double[] seq, ComparatorDouble cmp ) { sort(seq,    0,seq.length, cmp); }
+
+  public static void sort( IntBuffer buf                    ) { sort(buf, buf.position(),buf.limit()     ); }
+  public static void sort( IntBuffer buf, ComparatorInt cmp ) { sort(buf, buf.position(),buf.limit(), cmp); }
 
   public static <T extends Comparable<? super T>> void sort( T[] seq                            )  { sort(seq,    0,seq.length     ); }
   public static <T>                               void sort( T[] seq, Comparator<? super T> cmp )  { sort(seq,    0,seq.length, cmp); }

@@ -76,7 +76,9 @@ public interface ExpSearchAccessor<T> extends ExpR2LSearchAccessor<T>,
     else        return expL2RSearchGap(a,   1+start,until, b,key);
   }
 
-  public default int expSearchGapR( T a, int from, int until, int start, T b, int key )
+  default int expSearchGapL( T a, int from, int until, int start, T b, int key ) { return expSearchGap(a,from,until, start, b,key, false); }
+  default int expSearchGapR( T a, int from, int until, int start, T b, int key ) { return expSearchGap(a,from,until, start, b,key, true ); }
+  default int expSearchGap ( T a, int from, int until, int start, T b, int key, boolean rightBias )
   {
     if(  from <  0     ) throw new IllegalArgumentException();
     if(  from >  until ) throw new IllegalArgumentException();
@@ -88,23 +90,7 @@ public interface ExpSearchAccessor<T> extends ExpR2LSearchAccessor<T>,
           : start >= until ? -1
           : compare(b,key, a,start);
 
-    if( c < 0 ) return expR2LSearchGapR(a,from,start,       b,key);
-    else        return expL2RSearchGapR(a,   1+start,until, b,key);
-  }
-
-  public default int expSearchGapL( T a, int from, int until, int start, T b, int key )
-  {
-    if(  from <  0     ) throw new IllegalArgumentException();
-    if(  from >  until ) throw new IllegalArgumentException();
-    if( start <  from-1) throw new IllegalArgumentException();
-    if( start >  until ) throw new IllegalArgumentException();
-    if(  from == until ) return from;
-
-    int c = start <  from  ? +1
-          : start >= until ? -1
-          : compare(b,key, a,start);
-
-    if( c <= 0 ) return expR2LSearchGapL(a,from,start,       b,key);
-    else         return expL2RSearchGapL(a,   1+start,until, b,key);
+    if( c < (rightBias ? 0 : 1) ) return expR2LSearchGap(a,from,start,       b,key, rightBias);
+    else                          return expL2RSearchGap(a,   1+start,until, b,key, rightBias);
   }
 }

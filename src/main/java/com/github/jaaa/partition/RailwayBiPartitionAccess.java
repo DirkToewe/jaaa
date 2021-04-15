@@ -51,7 +51,7 @@ public interface RailwayBiPartitionAccess extends RotateAccess, BlockSwapAccess
 
         trainRot += i - (trainPos+trainLen);
 
-        // If we can "bunny hop" anymore, let's move the train wagon by wagon
+        // If we can't "bunny hop" anymore, let's move the train wagon by wagon
         wagon_by_wagon: {
           int wagonPos  = trainPos + trainLen,
               wagonStop = i;

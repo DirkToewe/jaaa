@@ -33,9 +33,9 @@ public interface ExpMergeV3Accessor<T> extends CompareRandomAccessor<T>
   )
   {
     checkArgs_mergeL2R(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     for( int cmp = 0;; )
@@ -59,9 +59,9 @@ public interface ExpMergeV3Accessor<T> extends CompareRandomAccessor<T>
       } hi = min(hi,bLen) - 1;
       // BINARY SEARCH PHASE
            ++lo;
-      while( lo <= hi ) {                  int mid = lo+hi >>> 1;
+      while( lo <= hi ) {                    int mid = lo+hi >>> 1;
         if( compare(a,a0, b,b0+mid) > cmp ) lo = mid + 1;
-        else                              hi = mid - 1;
+        else                                hi = mid - 1;
       }
 
       copyRange(b,b0, c,c0, lo);
@@ -82,9 +82,9 @@ public interface ExpMergeV3Accessor<T> extends CompareRandomAccessor<T>
   )
   {
     checkArgs_mergeR2L(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     a0 += aLen;

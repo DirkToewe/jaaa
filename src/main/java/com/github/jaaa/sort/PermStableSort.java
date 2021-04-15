@@ -4,6 +4,7 @@ import com.github.jaaa.*;
 import com.github.jaaa.CompareSwapAccess;
 import com.github.jaaa.Swap;
 
+import java.nio.IntBuffer;
 import java.util.Comparator;
 
 import static java.util.Comparator.naturalOrder;
@@ -15,8 +16,8 @@ public final class PermStableSort
   {
     @Override public boolean isStable() { return true; }
 
-    @Override public <T> void sort( T seq, int from, int until, CompareRandomAccessor<? super T> acc ) { PermStableSort.sort(seq,from,until,acc); }
-    @Override public     void sort(        int from, int until, CompareSwapAccess                acc ) { PermStableSort.sort(    from,until,acc); }
+    @Override public <T> void sort( T seq, int from, int until, CompareRandomAccessor<T> acc ) { PermStableSort.sort(seq,from,until,acc); }
+    @Override public     void sort(        int from, int until, CompareSwapAccess        acc ) { PermStableSort.sort(    from,until,acc); }
 
     @Override public void sort(   byte[] seq                                            ) { PermStableSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(   byte[] seq, int from, int until                       ) { PermStableSort.sort(seq, from,until          ); }
@@ -52,6 +53,11 @@ public final class PermStableSort
     @Override public void sort( double[] seq, int from, int until                       ) { PermStableSort.sort(seq, from,until,      Double::compare); }
     @Override public void sort( double[] seq,                      ComparatorDouble cmp ) { PermStableSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort( double[] seq, int from, int until, ComparatorDouble cmp ) { PermStableSort.sort(seq, from,until,      cmp); }
+
+    @Override public void sort( IntBuffer buf                                         ) { PermStableSort.sort(buf, buf.position(),buf.limit(), Double::compare); }
+    @Override public void sort( IntBuffer buf, int from, int until                    ) { PermStableSort.sort(buf,           from,until,       Double::compare); }
+    @Override public void sort( IntBuffer buf,                      ComparatorInt cmp ) { PermStableSort.sort(buf, buf.position(),buf.limit(), cmp); }
+    @Override public void sort( IntBuffer buf, int from, int until, ComparatorInt cmp ) { PermStableSort.sort(buf,           from,until,       cmp); }
 
     @Override public <T extends Comparable<? super T>> void sort( T[] seq                                                 )  { PermStableSort.sort(seq,    0,seq.length, naturalOrder()); }
     @Override public <T extends Comparable<? super T>> void sort( T[] seq, int from, int until                            )  { PermStableSort.sort(seq, from,until,      naturalOrder()); }
@@ -190,6 +196,22 @@ public final class PermStableSort
     }.permStableSort(from,until);
   }
 
+  public static void sort( IntBuffer buf, int from, int until )
+  {
+    new PermStableSortAccess() {
+      @Override public int compare( int i, int j ) { return Integer.compare( buf.get(i), buf.get(j) ); }
+      @Override public void   swap( int i, int j ) { Swap.swap(buf,i,j); }
+    }.permStableSort(from,until);
+  }
+
+  public static void sort( IntBuffer buf, int from, int until, ComparatorInt cmp )
+  {
+    new PermStableSortAccess() {
+      @Override public int compare( int i, int j ) { return cmp.compare( buf.get(i), buf.get(j) ); }
+      @Override public void   swap( int i, int j ) { Swap.swap(buf,i,j); }
+    }.permStableSort(from,until);
+  }
+
   public static <T extends Comparable<? super T>> void sort( T[] seq, int from, int until )
   {
     new PermStableSortAccess() {
@@ -226,6 +248,9 @@ public final class PermStableSort
 
   public static void sort( double[] seq                       ) { sort(seq, 0,seq.length     ); }
   public static void sort( double[] seq, ComparatorDouble cmp ) { sort(seq, 0,seq.length, cmp); }
+
+  public static void sort( IntBuffer buf                    ) { sort(buf, buf.position(),buf.limit()     ); }
+  public static void sort( IntBuffer buf, ComparatorInt cmp ) { sort(buf, buf.position(),buf.limit(), cmp); }
 
   public static <T extends Comparable<? super T>> void sort( T[] seq                            )  { sort(seq, 0,seq.length     ); }
   public static <T>                               void sort( T[] seq, Comparator<? super T> cmp )  { sort(seq, 0,seq.length, cmp); }

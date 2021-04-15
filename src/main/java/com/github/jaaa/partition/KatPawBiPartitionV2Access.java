@@ -1,10 +1,8 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateSwapAccess;
+import com.github.jaaa.SwapAccess;
 import com.github.jaaa.misc.BlockSwapAccess;
-import com.github.jaaa.misc.RotateAccess;
 import com.github.jaaa.util.Hex16;
-import com.github.jaaa.util.IntBiConsumer;
 
 import java.util.function.IntFunction;
 
@@ -38,7 +36,7 @@ import static java.lang.Math.max;
 //         JYRKI KATAJAINEN and TOMI PASANEN
 
 public interface KatPawBiPartitionV2Access extends BlockSwapAccess,
-                                       ExtractBufBiPartitionAccess
+        ExtractBiPartitionBufAccess
 {
   public default void katPawBiPartitionV2( int from, int until )
   {
@@ -69,8 +67,8 @@ public interface KatPawBiPartitionV2Access extends BlockSwapAccess,
         nL = nRest >>> 1,
         nR = nRest - nL;
       assert nRest >= 0;
-      if( extractBufB(from,until,nR) < nR ) return; until -= nR;
-      if( extractBufA(from,until,nL) < nL ) return;  from += nL;
+      if( extractBiPartitionBufB_R(from,until,nR) < nR ) return; until -= nR;
+      if( extractBiPartitionBufA_L(from,until,nL) < nL ) return;  from += nL;
     }
     if( from == until ) return;
 
@@ -84,7 +82,7 @@ public interface KatPawBiPartitionV2Access extends BlockSwapAccess,
     int   pos = from, nA = 0,
           POS = from, nB = 0;
 
-    IntFunction<IntBiConsumer>
+    IntFunction<SwapAccess>
       swapper = off -> (i,j) ->      swap(off+i,    off+j),
       SWAPPER = OFF -> (i,j) -> blockSwap(OFF+i*16, OFF+j*16, 16);
 

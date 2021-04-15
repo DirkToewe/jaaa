@@ -96,8 +96,8 @@ public class Hex16Test
     );
   }
 
-  @Property( tries = 10_000 )
-  void testHex16( @ForAll("actions") @Size(min=1, max=8192) ActionSequence<TestState> actions ) {
+  @Property( tries = 16*1024 )
+  void testHex16( @ForAll("actions") @Size(min=1, max=512) ActionSequence<TestState> actions ) {
     actions
       .withInvariant( state -> {
         var hex16 = state.hex16;

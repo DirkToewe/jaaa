@@ -15,9 +15,12 @@ public class BinarySearchAccessTest extends SearchAccessTestTemplate
     @Override public int compare( int i, int j ) { return access.compare(i,j); }
   }
 
+  @Override protected int search    ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearch    (from,until, key); }
+  @Override protected int searchL   ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearchL   (from,until, key); }
+  @Override protected int searchR   ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearchR   (from,until, key); }
   @Override protected int searchGap ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearchGap (from,until, key); }
-  @Override protected int searchGapR( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearchGapR(from,until, key); }
   @Override protected int searchGapL( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearchGapL(from,until, key); }
+  @Override protected int searchGapR( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearchGapR(from,until, key); }
 
   @Override protected long comparisonLimit( int from, int until, int i ) { return from==until ? 0 : 1 + log2Floor(until-from); }
 }

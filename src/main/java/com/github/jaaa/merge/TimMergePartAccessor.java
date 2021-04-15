@@ -7,6 +7,7 @@ import com.github.jaaa.search.ExpR2LSearchAccessor;
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergePartL2R;
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergePartR2L;
 import static java.lang.Math.min;
+import static com.github.jaaa.merge.TimMergeAccessor.MIN_GALLOP;
 
 
 public interface TimMergePartAccessor<T> extends CompareRandomAccessor<T>,
@@ -19,16 +20,15 @@ public interface TimMergePartAccessor<T> extends CompareRandomAccessor<T>,
     T c, int c0, int cLen
   ) {
     checkArgs_mergePartL2R(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0,cLen
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0,cLen
     );
 
     aLen = min(aLen,cLen);
     bLen = min(bLen,cLen);
 
-    int           MIN_GALLOP = 7,
-      minGallop = MIN_GALLOP;
+    int minGallop = MIN_GALLOP;
 
     // MERGE LOOP
     // ----------
@@ -58,7 +58,7 @@ public interface TimMergePartAccessor<T> extends CompareRandomAccessor<T>,
 
         // GALLOPING MERGE
         do {
-                   count1 = -a0 + expL2RSearchGapR(a,a0,a0+aLen, b,b0);
+                   count1 = expL2RSearchGap(a,a0,a0+aLen, b,b0, true) - a0;
           if( 0 != count1 ) { copyRange(a,a0, c,c0, count1);
              a0 += count1;
              c0 += count1;
@@ -69,7 +69,7 @@ public interface TimMergePartAccessor<T> extends CompareRandomAccessor<T>,
           if(--cLen <= 0 ) return; aLen = min(aLen,cLen);
           if(--bLen <= 0 ) break outer;
 
-                   count2 = -b0 + expL2RSearchGapL(b,b0,b0+bLen, a,a0);
+                   count2 = expL2RSearchGap(b,b0,b0+bLen, a,a0, false) - b0;
           if( 0 != count2 ) { copyRange(b,b0, c,c0, count2);
              b0 += count2;
              c0 += count2;
@@ -98,9 +98,9 @@ public interface TimMergePartAccessor<T> extends CompareRandomAccessor<T>,
     T c, int c0, int cLen
   ) {
     checkArgs_mergePartR2L(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0,cLen
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0,cLen
     );
 
     a0 += aLen;
@@ -110,8 +110,7 @@ public interface TimMergePartAccessor<T> extends CompareRandomAccessor<T>,
     aLen = min(aLen,cLen);
     bLen = min(bLen,cLen);
 
-    int           MIN_GALLOP = 7,
-      minGallop = MIN_GALLOP;
+    int minGallop = MIN_GALLOP;
 
     // MERGE LOOP
     // ----------
@@ -142,7 +141,7 @@ public interface TimMergePartAccessor<T> extends CompareRandomAccessor<T>,
 
         // GALLOPING MERGE
         do {
-                   count1 = a0 - expR2LSearchGapR(a,a0-aLen,a0, b,b0-1);
+                   count1 = a0 - expR2LSearchGap(a,a0-aLen,a0, b,b0-1, true);
           if( 0 != count1 ) {
              a0 -= count1;
              c0 -= count1; copyRange(a,a0, c,c0, count1);
@@ -153,7 +152,7 @@ public interface TimMergePartAccessor<T> extends CompareRandomAccessor<T>,
           if(--cLen <= 0 ) return; aLen = min(aLen,cLen);
           if(--bLen <= 0 ) break outer;
 
-                   count2 = b0 - expR2LSearchGapL(b,b0-bLen,b0, a,a0-1);
+                   count2 = b0 - expR2LSearchGap(b,b0-bLen,b0, a,a0-1, false);
           if( 0 != count2 ) {
              b0 -= count2;
              c0 -= count2; copyRange(b,b0, c,c0, count2);

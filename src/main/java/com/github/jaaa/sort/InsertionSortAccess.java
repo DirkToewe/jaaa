@@ -14,8 +14,8 @@ public interface InsertionSortAccess extends BinarySearchAccess, CompareSwapAcce
 {
   default void insertionSort( int from, int until )
   {
-    if( from > until )
-      throw new IllegalArgumentException();
+    if( from >  until ) throw new IllegalArgumentException();
+    if( from == until ) return;
 
     for( int i=from; ++i < until; )
       for( int j = binarySearchGapR(from,i,i), k = i; k > j; )

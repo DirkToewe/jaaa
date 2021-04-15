@@ -4,6 +4,7 @@ import com.github.jaaa.*;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.nio.IntBuffer;
 import java.util.Comparator;
 
 import static java.lang.invoke.MethodType.methodType;
@@ -15,10 +16,11 @@ public abstract class StaticMethodsSorter implements Sorter
 {
   private static final class ArraySortMethod<A,C>
   {
-    private final MethodHandle methodA,
-            methodAII,
-            methodAC,
-            methodAIIC;
+    private final MethodHandle
+      methodA,
+      methodAII,
+      methodAC,
+      methodAIIC;
 
     public ArraySortMethod( Class<?> sortClass, Class<A> arrType, Class<C> comparatorType )
     {
@@ -72,14 +74,15 @@ public abstract class StaticMethodsSorter implements Sorter
     }
   }
 
-  private final ArraySortMethod<  byte[],ComparatorByte  > arrayByte;
-  private final ArraySortMethod< short[],ComparatorShort > arrayShort;
-  private final ArraySortMethod<   int[],ComparatorInt   > arrayInt;
-  private final ArraySortMethod<  long[],ComparatorLong  > arrayLong;
-  private final ArraySortMethod<  char[],ComparatorChar  > arrayChar;
-  private final ArraySortMethod< float[],ComparatorFloat > arrayFloat;
-  private final ArraySortMethod<double[],ComparatorDouble> arrayDouble;
-  private final ArraySortMethod<Object[],Comparator      > arrayObject;
+  private final ArraySortMethod<   byte[],ComparatorByte  > arrayByte;
+  private final ArraySortMethod<  short[],ComparatorShort > arrayShort;
+  private final ArraySortMethod<    int[],ComparatorInt   > arrayInt;
+  private final ArraySortMethod<   long[],ComparatorLong  > arrayLong;
+  private final ArraySortMethod<   char[],ComparatorChar  > arrayChar;
+  private final ArraySortMethod<  float[],ComparatorFloat > arrayFloat;
+  private final ArraySortMethod< double[],ComparatorDouble> arrayDouble;
+  private final ArraySortMethod< Object[],Comparator      > arrayObject;
+  private final ArraySortMethod<IntBuffer,ComparatorInt   > bufInt;
   private final MethodHandle                               accessor;
 
   public StaticMethodsSorter( Class<?> sortClass )
@@ -92,6 +95,7 @@ public abstract class StaticMethodsSorter implements Sorter
     arrayFloat  = new ArraySortMethod(sortClass,  float[].class, ComparatorFloat .class);
     arrayDouble = new ArraySortMethod(sortClass, double[].class, ComparatorDouble.class);
     arrayObject = new ArraySortMethod(sortClass, Object[].class, Comparator      .class);
+    bufInt      = new ArraySortMethod(sortClass,IntBuffer.class, ComparatorInt   .class);
 
     MethodHandles.Lookup lookup = MethodHandles.publicLookup();
     try {
@@ -102,7 +106,7 @@ public abstract class StaticMethodsSorter implements Sorter
     }
   }
 
-  @Override public <T> void sort( T seq, int from, int until, CompareRandomAccessor<? super T> acc )
+  @Override public <T> void sort( T seq, int from, int until, CompareRandomAccessor<T> acc )
   {
     try {
       accessor.invoke(seq,from,until,acc);
@@ -145,6 +149,11 @@ public abstract class StaticMethodsSorter implements Sorter
   @Override public void sort( double[] seq, int from, int until                       ) { arrayDouble.sort(seq,from,until); }
   @Override public void sort( double[] seq,                      ComparatorDouble cmp ) { arrayDouble.sort(seq           ,cmp); }
   @Override public void sort( double[] seq, int from, int until, ComparatorDouble cmp ) { arrayDouble.sort(seq,from,until,cmp); }
+
+  @Override public void sort( IntBuffer buf                                         ) { bufInt.sort(buf); }
+  @Override public void sort( IntBuffer buf, int from, int until                    ) { bufInt.sort(buf,from,until); }
+  @Override public void sort( IntBuffer buf,                      ComparatorInt cmp ) { bufInt.sort(buf           ,cmp); }
+  @Override public void sort( IntBuffer buf, int from, int until, ComparatorInt cmp ) { bufInt.sort(buf,from,until,cmp); }
 
   @Override public <T extends Comparable<? super T>> void sort( T[] seq                                                 )  { arrayObject.sort(seq); }
   @Override public <T extends Comparable<? super T>> void sort( T[] seq, int from, int until                            )  { arrayObject.sort(seq,from,until); }

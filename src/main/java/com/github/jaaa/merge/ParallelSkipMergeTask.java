@@ -111,11 +111,11 @@ public class ParallelSkipMergeTask<T> extends CountedCompleter<Void>
     // ------------
 
     // skip over desired number of elements of the merged sequences
-    int l = ctx.mergeOffset(a,a0,aLen, b,b0,bLen, nSkip),
+    int l = ctx.skipMerge_mergeOffset(a,a0,aLen, b,b0,bLen, nSkip),
         r = nSkip-l;
 
     // merge part of the skipped, merged sequences
-    ctx.mergePart(
+    ctx.skipMerge_mergePart(
       a, a0+l, aLen-l,
       b, b0+r, bLen-r,
       c, c0+nSkip, nTake

@@ -16,9 +16,9 @@ public interface TapeMergePartAccessor<T> extends CompareRandomAccessor<T>
     T c, int c0, int cLen
   ) {
     checkArgs_mergePartL2R(
-      this, a, a0, aLen,
-            b, b0, bLen,
-            c, c0, cLen
+      a, a0, aLen,
+      b, b0, bLen,
+      c, c0, cLen
     );
     for( int i=0,j=0,k=0; k < cLen; k++ )
       if( j >= bLen || i < aLen && compare(a,a0+i, b,b0+j) <= 0 )
@@ -32,9 +32,9 @@ public interface TapeMergePartAccessor<T> extends CompareRandomAccessor<T>
     T c, int c0, int cLen
   ) {
     checkArgs_mergePartR2L(
-      this, a, a0, aLen,
-            b, b0, bLen,
-            c, c0, cLen
+      a, a0, aLen,
+      b, b0, bLen,
+      c, c0, cLen
     );
     for( int i=aLen-1,
              j=bLen-1,

@@ -1,8 +1,8 @@
 package com.github.jaaa.partition;
 
+import com.github.jaaa.SwapAccess;
 import com.github.jaaa.misc.BlockSwapAccess;
 import com.github.jaaa.util.Hex16;
-import com.github.jaaa.util.IntBiConsumer;
 
 import java.util.function.IntFunction;
 
@@ -35,7 +35,7 @@ import static java.lang.Math.*;
 //         JYRKI KATAJAINEN and TOMI PASANEN
 
 public interface KatPawBiPartitionV3Access extends BlockSwapAccess,
-                                       ExtractBufBiPartitionAccess
+        ExtractBiPartitionBufAccess
 {
   default void katPawBiPartitionV3( int from, int until )
   {
@@ -81,7 +81,7 @@ public interface KatPawBiPartitionV3Access extends BlockSwapAccess,
           p256= -1; // <- position of last B-sized chunk to be collected as left buffer
     final int n1 = nL % B; // <- remainder of elements to be used as left buffer,  i.e. elements that cannot be collected as B-sized chunks
 
-    IntFunction<IntBiConsumer>
+    IntFunction<SwapAccess>
       swapper = off -> (i,j) ->      swap(off+i,    off+j),
       SWAPPER = OFF -> (i,j) -> blockSwap(OFF+i*16, OFF+j*16, 16);
 

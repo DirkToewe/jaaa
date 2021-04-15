@@ -1,5 +1,6 @@
 package com.github.jaaa.misc;
 
+import com.github.jaaa.CopyAccessor;
 import com.github.jaaa.RandomAccessor;
 import com.github.jaaa.Swap;
 
@@ -16,7 +17,7 @@ public class ParallelCopy
 // STATIC CONSTRUCTOR
 
 // STATIC METHODS
-  public static <T> void copyRange( T src, int srcPos, T dst, int dstPos, int len, RandomAccessor<? super T> acc )
+  public static <T> void copyRange( T src, int srcPos, T dst, int dstPos, int len, CopyAccessor<? super T> acc )
   {
     int nPar = ForkJoinPool.getCommonPoolParallelism(),
           h  =              log2Ceil( max(1,len) ),
@@ -44,7 +45,7 @@ public class ParallelCopy
     }
     else
       copyRange(src,srcPos, dst,dstPos, length, new RandomAccessor<T[]>() {
-        @Override public int        len( T[] buf ) { return buf.length; }
+        @Override public T[] malloc( int len ) { throw new UnsupportedOperationException(); }
         @Override public void      swap( T[] a, int i, T[] b, int j ) { Swap.swap(a,i, b,j); }
         @Override public void copyRange( T[] a, int i, T[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
         @Override public void copy     ( T[] a, int i, T[] b, int j ) { b[j] = a[i]; }

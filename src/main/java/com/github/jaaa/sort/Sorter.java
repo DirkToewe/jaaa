@@ -2,6 +2,7 @@ package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
 
+import java.nio.IntBuffer;
 import java.util.Comparator;
 
 public interface Sorter
@@ -9,45 +10,50 @@ public interface Sorter
   boolean isStable();
   default boolean isThreadSafe() { return false; }
 
-  <T> void sort( T seq, int from, int until, CompareRandomAccessor<? super T> acc );
+  <T> void sort( T arr, int from, int until, CompareRandomAccessor<T> acc );
 
-  <T extends Comparable<? super T>> void sort( T[] seq                                                 );
-  <T extends Comparable<? super T>> void sort( T[] seq, int from, int until                            );
-  <T>                               void sort( T[] seq,                      Comparator<? super T> cmp );
-  <T>                               void sort( T[] seq, int from, int until, Comparator<? super T> cmp );
+  default <T extends Comparable<? super T>> void sort( T[] arr                                                 ) { sort(arr, 0,arr.length); }
+          <T extends Comparable<? super T>> void sort( T[] arr, int from, int until                            );
+  default <T>                               void sort( T[] arr,                      Comparator<? super T> cmp ) { sort(arr, 0,arr.length, cmp); }
+          <T>                               void sort( T[] arr, int from, int until, Comparator<? super T> cmp );
 
-  void sort( byte[] seq                                          );
-  void sort( byte[] seq, int from, int until                     );
-  void sort( byte[] seq,                      ComparatorByte cmp );
-  void sort( byte[] seq, int from, int until, ComparatorByte cmp );
+  default void sort( byte[] arr                                          ) { sort(arr, 0,arr.length); }
+          void sort( byte[] arr, int from, int until                     );
+  default void sort( byte[] arr,                      ComparatorByte cmp ) { sort(arr, 0,arr.length, cmp); }
+          void sort( byte[] arr, int from, int until, ComparatorByte cmp );
 
-  void sort( short[] seq                                           );
-  void sort( short[] seq, int from, int until                      );
-  void sort( short[] seq,                      ComparatorShort cmp );
-  void sort( short[] seq, int from, int until, ComparatorShort cmp );
+  default void sort( short[] arr                                           ) { sort(arr, 0,arr.length); }
+          void sort( short[] arr, int from, int until                      );
+  default void sort( short[] arr,                      ComparatorShort cmp ) { sort(arr, 0,arr.length, cmp); }
+          void sort( short[] arr, int from, int until, ComparatorShort cmp );
 
-  void sort( int[] seq                                         );
-  void sort( int[] seq, int from, int until                    );
-  void sort( int[] seq,                      ComparatorInt cmp );
-  void sort( int[] seq, int from, int until, ComparatorInt cmp );
+  default void sort( int[] arr                                         ) { sort(arr, 0,arr.length); }
+          void sort( int[] arr, int from, int until                    );
+  default void sort( int[] arr,                      ComparatorInt cmp ) { sort(arr, 0,arr.length, cmp); }
+          void sort( int[] arr, int from, int until, ComparatorInt cmp );
 
-  void sort( long[] seq                                          );
-  void sort( long[] seq, int from, int until                     );
-  void sort( long[] seq,                      ComparatorLong cmp );
-  void sort( long[] seq, int from, int until, ComparatorLong cmp );
+  default void sort( long[] arr                                          ) { sort(arr, 0,arr.length); }
+          void sort( long[] arr, int from, int until                     );
+  default void sort( long[] arr,                      ComparatorLong cmp ) { sort(arr, 0,arr.length, cmp); }
+          void sort( long[] arr, int from, int until, ComparatorLong cmp );
 
-  void sort( char[] seq                                          );
-  void sort( char[] seq, int from, int until                     );
-  void sort( char[] seq,                      ComparatorChar cmp );
-  void sort( char[] seq, int from, int until, ComparatorChar cmp );
+  default void sort( char[] arr                                          ) { sort(arr, 0,arr.length); }
+          void sort( char[] arr, int from, int until                     );
+  default void sort( char[] arr,                      ComparatorChar cmp ) { sort(arr, 0,arr.length, cmp); }
+          void sort( char[] arr, int from, int until, ComparatorChar cmp );
 
-  void sort( float[] seq                                           );
-  void sort( float[] seq, int from, int until                      );
-  void sort( float[] seq,                      ComparatorFloat cmp );
-  void sort( float[] seq, int from, int until, ComparatorFloat cmp );
+  default void sort( float[] arr                                           ) { sort(arr, 0,arr.length); }
+          void sort( float[] arr, int from, int until                      );
+  default void sort( float[] arr,                      ComparatorFloat cmp ) { sort(arr, 0,arr.length, cmp); }
+          void sort( float[] arr, int from, int until, ComparatorFloat cmp );
 
-  void sort( double[] seq                                            );
-  void sort( double[] seq, int from, int until                       );
-  void sort( double[] seq,                      ComparatorDouble cmp );
-  void sort( double[] seq, int from, int until, ComparatorDouble cmp );
+  default void sort( double[] arr                                            ) { sort(arr, 0,arr.length); }
+          void sort( double[] arr, int from, int until                       );
+  default void sort( double[] arr,                      ComparatorDouble cmp ) { sort(arr, 0,arr.length, cmp); }
+          void sort( double[] arr, int from, int until, ComparatorDouble cmp );
+
+  default void sort( IntBuffer buf                                         ) { sort(buf, buf.position(),buf.limit()); }
+          void sort( IntBuffer buf, int from, int until                    );
+  default void sort( IntBuffer buf,                      ComparatorInt cmp ) { sort(buf, buf.position(),buf.limit(), cmp); }
+          void sort( IntBuffer buf, int from, int until, ComparatorInt cmp );
 }

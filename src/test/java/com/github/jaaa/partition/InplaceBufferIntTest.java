@@ -11,9 +11,9 @@ import net.jqwik.api.stateful.ActionSequence;
 import java.util.Arrays;
 
 import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
-import static net.jqwik.api.RandomDistribution.uniform;
 import static java.util.stream.IntStream.range;
+import static net.jqwik.api.RandomDistribution.uniform;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class InplaceBufferIntTest
@@ -89,7 +89,7 @@ public class InplaceBufferIntTest
   void testInplaceBufferIntTest(
     @ForAll @IntRange(min=0, max= 31) int nBits,
     @ForAll @IntRange(min=0, max=512) int nInts,
-    @ForAll("actions") @Size(min=1, max=8192) ActionSequence<TestState> actions
+    @ForAll("actions") @Size(min=1, max=1024) ActionSequence<TestState> actions
   ) {
     actions.withInvariant( state -> {
 

@@ -1,16 +1,5 @@
 package com.github.jaaa.partition;
 
-import net.jqwik.api.ForAll;
-import net.jqwik.api.Property;
-import net.jqwik.api.constraints.IntRange;
-
-import java.util.function.IntUnaryOperator;
-
-import static com.github.jaaa.util.IMath.log2Ceil;
-import static com.github.jaaa.util.IMath.sqrtFloor;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class MuRaSaBiPartitionV2Test extends BiPartitionTestTemplate
 {
   MuRaSaBiPartitionV2Test() { super(MuRaSaBiPartitionV2.class); }

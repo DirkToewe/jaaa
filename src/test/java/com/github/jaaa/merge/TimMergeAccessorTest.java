@@ -5,6 +5,8 @@ import net.jqwik.api.Group;
 
 public class TimMergeAccessorTest extends MergeAccessorTestTemplate
 {
+  @Override public int maxArraySize() { return 32*1024; }
+
   @Override protected boolean isStable() { return true; }
   @Override protected boolean mergesInplaceL2R() { return true; }
   @Override protected boolean mergesInplaceR2L() { return true; }
@@ -15,8 +17,8 @@ public class TimMergeAccessorTest extends MergeAccessorTestTemplate
 
     public HLAccessor( CompareRandomAccessor<T> _acc ) { acc =_acc; }
 
+    @Override public T malloc( int len ) { return acc.malloc(len); }
     @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
-    @Override public int len( T buf ) { return acc.len(buf); }
     @Override public void copy( T a, int i, T b, int j ) { acc.copy(a,i, b,j); }
     @Override public void swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }
 
@@ -30,6 +32,8 @@ public class TimMergeAccessorTest extends MergeAccessorTestTemplate
   @Group
   class L2R extends MergeAccessorTestTemplate
   {
+    @Override public int maxArraySize() { return 32*1024; }
+
     @Override protected boolean isStable() { return true; }
     @Override protected boolean mergesInplaceL2R() { return true; }
     @Override protected boolean mergesInplaceR2L() { return false; }
@@ -40,8 +44,8 @@ public class TimMergeAccessorTest extends MergeAccessorTestTemplate
 
       public HLAccessor( CompareRandomAccessor<T> _acc ) { acc =_acc; }
 
+      @Override public T malloc(int len ) { return acc.malloc(len); }
       @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
-      @Override public int len( T buf ) { return acc.len(buf); }
       @Override public void copy( T a, int i, T b, int j ) { acc.copy(a,i, b,j); }
       @Override public void swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }
 
@@ -56,6 +60,8 @@ public class TimMergeAccessorTest extends MergeAccessorTestTemplate
   @Group
   class R2L extends MergeAccessorTestTemplate
   {
+    @Override public int maxArraySize() { return 32*1024; }
+
     @Override protected boolean isStable() { return true; }
     @Override protected boolean mergesInplaceL2R() { return false; }
     @Override protected boolean mergesInplaceR2L() { return true; }
@@ -66,8 +72,8 @@ public class TimMergeAccessorTest extends MergeAccessorTestTemplate
 
       public HLAccessor( CompareRandomAccessor<T> _acc ) { acc =_acc; }
 
+      @Override public T malloc( int len ) { return acc.malloc(len); }
       @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
-      @Override public int len( T buf ) { return acc.len(buf); }
       @Override public void copy( T a, int i, T b, int j ) { acc.copy(a,i, b,j); }
       @Override public void swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }
 

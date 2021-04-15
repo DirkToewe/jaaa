@@ -15,13 +15,13 @@ public interface ExpMergeOffsetAccessor<T> extends CompareAccessor<T>
     if( bLen  < 0 ) throw new IllegalArgumentException();
     if( nSkip < 0 ) throw new IllegalArgumentException();
     if( aLen < nSkip-bLen ) throw new IllegalArgumentException();
+    if( aLen == 0 ) return 0;
 
     int lo = max(nSkip-bLen, 0),
-        hi = min(nSkip,aLen),
-       len = max(1, aLen+bLen),
-     start = (int) ( lo + (1L*hi-lo)*nSkip / len );
+        hi = min(nSkip,aLen),          cLen = aLen+bLen,
+        l0 = (int) ( (long) nSkip*aLen/cLen );
 
-    return ExpSearch.searchGap( lo,hi,start, l -> { int r = nSkip - l;
+    return ExpSearch.searchGap( lo,hi, l0, l -> { int r = nSkip - l;
       return      compare(a,a0+l,   b,b0+r-1) <= 0 ? +1 :
         lo < l && compare(a,a0+l-1, b,b0+r  ) >  0 ? -1 : 0;
     });

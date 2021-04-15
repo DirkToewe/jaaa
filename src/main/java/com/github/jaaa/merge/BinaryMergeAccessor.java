@@ -34,9 +34,9 @@ public interface BinaryMergeAccessor<T> extends CompareRandomAccessor<T>
   )
   {
     checkArgs_mergeL2R(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     for( int cmp = 1;; )
@@ -75,9 +75,9 @@ public interface BinaryMergeAccessor<T> extends CompareRandomAccessor<T>
   )
   {
     checkArgs_mergeR2L(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     c0 += aLen+bLen;

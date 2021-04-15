@@ -3,6 +3,7 @@ package com.github.jaaa.search;
 import com.github.jaaa.ComparatorByte;
 import com.github.jaaa.ComparatorInt;
 
+import java.nio.IntBuffer;
 import java.util.Comparator;
 import java.util.function.IntUnaryOperator;
 
@@ -22,67 +23,67 @@ public class ExpL2RSearch
     @Override public int searchGapR( int from, int until, IntUnaryOperator compass ) { return ExpL2RSearch.searchGapR(from,until, compass); }
 
 
-    @Override public <T extends Comparable<? super T>> int search ( T[] seq,                      T key                            ) { return ExpL2RSearch.search (   0,seq.length, i -> key.compareTo(seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int search ( T[] seq, int from, int until, T key                            ) { return ExpL2RSearch.search (from,until,      i -> key.compareTo(seq[i]) ); }
-    @Override public <T>                               int search ( T[] seq,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.search (   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int search ( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.search (from,until,      i -> cmp.compare(key,seq[i]) ); }
+    @Override public <T extends Comparable<? super T>> int search ( T[] arr,                      T key                            ) { return ExpL2RSearch.search (   0,arr.length, i -> key.compareTo(arr[i]) ); }
+    @Override public <T extends Comparable<? super T>> int search ( T[] arr, int from, int until, T key                            ) { return ExpL2RSearch.search (from,until,      i -> key.compareTo(arr[i]) ); }
+    @Override public <T>                               int search ( T[] arr,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.search (   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+    @Override public <T>                               int search ( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.search (from,until,      i -> cmp.compare(key,arr[i]) ); }
 
-    @Override public <T extends Comparable<? super T>> int searchR( T[] seq,                      T key                            ) { return ExpL2RSearch.searchR(   0,seq.length, i -> key.compareTo(seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int searchR( T[] seq, int from, int until, T key                            ) { return ExpL2RSearch.searchR(from,until,      i -> key.compareTo(seq[i]) ); }
-    @Override public <T>                               int searchR( T[] seq,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchR(   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchR( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchR(from,until,      i -> cmp.compare(key,seq[i]) ); }
+    @Override public <T extends Comparable<? super T>> int searchR( T[] arr,                      T key                            ) { return ExpL2RSearch.searchR(   0,arr.length, i -> key.compareTo(arr[i]) ); }
+    @Override public <T extends Comparable<? super T>> int searchR( T[] arr, int from, int until, T key                            ) { return ExpL2RSearch.searchR(from,until,      i -> key.compareTo(arr[i]) ); }
+    @Override public <T>                               int searchR( T[] arr,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchR(   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+    @Override public <T>                               int searchR( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchR(from,until,      i -> cmp.compare(key,arr[i]) ); }
 
-    @Override public <T extends Comparable<? super T>> int searchL( T[] seq,                      T key                            ) { return ExpL2RSearch.searchL(   0,seq.length, i -> key.compareTo(seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int searchL( T[] seq, int from, int until, T key                            ) { return ExpL2RSearch.searchL(from,until,      i -> key.compareTo(seq[i]) ); }
-    @Override public <T>                               int searchL( T[] seq,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchL(   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchL( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchL(from,until,      i -> cmp.compare(key,seq[i]) ); }
-
-
-    @Override public <T extends Comparable<? super T>> int searchGap ( T[] seq,                      T key                            ) { return ExpL2RSearch.searchGap (   0,seq.length, i -> key.compareTo(seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int searchGap ( T[] seq, int from, int until, T key                            ) { return ExpL2RSearch.searchGap (from,until,      i -> key.compareTo(seq[i]) ); }
-    @Override public <T>                               int searchGap ( T[] seq,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGap (   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchGap ( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGap (from,until,      i -> cmp.compare(key,seq[i]) ); }
-
-    @Override public <T extends Comparable<? super T>> int searchGapR( T[] seq,                      T key                            ) { return ExpL2RSearch.searchGapR(   0,seq.length, i -> key.compareTo(seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int searchGapR( T[] seq, int from, int until, T key                            ) { return ExpL2RSearch.searchGapR(from,until,      i -> key.compareTo(seq[i]) ); }
-    @Override public <T>                               int searchGapR( T[] seq,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGapR(   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchGapR( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGapR(from,until,      i -> cmp.compare(key,seq[i]) ); }
-
-    @Override public <T extends Comparable<? super T>> int searchGapL( T[] seq,                      T key                            ) { return ExpL2RSearch.searchGapL(   0,seq.length, i -> key.compareTo(seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int searchGapL( T[] seq, int from, int until, T key                            ) { return ExpL2RSearch.searchGapL(from,until,      i -> key.compareTo(seq[i]) ); }
-    @Override public <T>                               int searchGapL( T[] seq,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGapL(   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchGapL( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGapL(from,until,      i -> cmp.compare(key,seq[i]) ); }
+    @Override public <T extends Comparable<? super T>> int searchL( T[] arr,                      T key                            ) { return ExpL2RSearch.searchL(   0,arr.length, i -> key.compareTo(arr[i]) ); }
+    @Override public <T extends Comparable<? super T>> int searchL( T[] arr, int from, int until, T key                            ) { return ExpL2RSearch.searchL(from,until,      i -> key.compareTo(arr[i]) ); }
+    @Override public <T>                               int searchL( T[] arr,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchL(   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+    @Override public <T>                               int searchL( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchL(from,until,      i -> cmp.compare(key,arr[i]) ); }
 
 
-    @Override public <T extends Comparable<? super T>> int search ( byte[] seq,                      byte key                     ) { return ExpL2RSearch.search (   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int search ( byte[] seq, int from, int until, byte key                     ) { return ExpL2RSearch.search (from,until,      i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T>                               int search ( byte[] seq,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.search (   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int search ( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.search (from,until,      i ->  cmp.compare(key,seq[i]) ); }
+    @Override public <T extends Comparable<? super T>> int searchGap ( T[] arr,                      T key                            ) { return ExpL2RSearch.searchGap (   0,arr.length, i -> key.compareTo(arr[i]) ); }
+    @Override public <T extends Comparable<? super T>> int searchGap ( T[] arr, int from, int until, T key                            ) { return ExpL2RSearch.searchGap (from,until,      i -> key.compareTo(arr[i]) ); }
+    @Override public <T>                               int searchGap ( T[] arr,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGap (   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+    @Override public <T>                               int searchGap ( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGap (from,until,      i -> cmp.compare(key,arr[i]) ); }
 
-    @Override public <T extends Comparable<? super T>> int searchR( byte[] seq,                      byte key                     ) { return ExpL2RSearch.searchR(   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int searchR( byte[] seq, int from, int until, byte key                     ) { return ExpL2RSearch.searchR(from,until,      i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchR( byte[] seq,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchR(   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchR( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchR(from,until,      i ->  cmp.compare(key,seq[i]) ); }
+    @Override public <T extends Comparable<? super T>> int searchGapR( T[] arr,                      T key                            ) { return ExpL2RSearch.searchGapR(   0,arr.length, i -> key.compareTo(arr[i]) ); }
+    @Override public <T extends Comparable<? super T>> int searchGapR( T[] arr, int from, int until, T key                            ) { return ExpL2RSearch.searchGapR(from,until,      i -> key.compareTo(arr[i]) ); }
+    @Override public <T>                               int searchGapR( T[] arr,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGapR(   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+    @Override public <T>                               int searchGapR( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGapR(from,until,      i -> cmp.compare(key,arr[i]) ); }
 
-    @Override public <T extends Comparable<? super T>> int searchL( byte[] seq,                      byte key                     ) { return ExpL2RSearch.searchL(   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int searchL( byte[] seq, int from, int until, byte key                     ) { return ExpL2RSearch.searchL(from,until,      i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchL( byte[] seq,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchL(   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchL( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchL(from,until,      i ->  cmp.compare(key,seq[i]) ); }
+    @Override public <T extends Comparable<? super T>> int searchGapL( T[] arr,                      T key                            ) { return ExpL2RSearch.searchGapL(   0,arr.length, i -> key.compareTo(arr[i]) ); }
+    @Override public <T extends Comparable<? super T>> int searchGapL( T[] arr, int from, int until, T key                            ) { return ExpL2RSearch.searchGapL(from,until,      i -> key.compareTo(arr[i]) ); }
+    @Override public <T>                               int searchGapL( T[] arr,                      T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGapL(   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+    @Override public <T>                               int searchGapL( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return ExpL2RSearch.searchGapL(from,until,      i -> cmp.compare(key,arr[i]) ); }
 
-    @Override public <T extends Comparable<? super T>> int searchGap ( byte[] seq,                      byte key                     ) { return ExpL2RSearch.searchGap (   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int searchGap ( byte[] seq, int from, int until, byte key                     ) { return ExpL2RSearch.searchGap (from,until,      i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchGap ( byte[] seq,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGap (   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchGap ( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGap (from,until,      i ->  cmp.compare(key,seq[i]) ); }
 
-    @Override public <T extends Comparable<? super T>> int searchGapR( byte[] seq,                      byte key                     ) { return ExpL2RSearch.searchGapR(   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int searchGapR( byte[] seq, int from, int until, byte key                     ) { return ExpL2RSearch.searchGapR(from,until,      i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchGapR( byte[] seq,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGapR(   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchGapR( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGapR(from,until,      i ->  cmp.compare(key,seq[i]) ); }
+    @Override public int search ( byte[] arr,                      byte key                     ) { return ExpL2RSearch.search (   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+    @Override public int search ( byte[] arr, int from, int until, byte key                     ) { return ExpL2RSearch.search (from,until,      i -> Byte.compare(key,arr[i]) ); }
+    @Override public int search ( byte[] arr,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.search (   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+    @Override public int search ( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.search (from,until,      i ->  cmp.compare(key,arr[i]) ); }
 
-    @Override public <T extends Comparable<? super T>> int searchGapL( byte[] seq,                      byte key                     ) { return ExpL2RSearch.searchGapL(   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T extends Comparable<? super T>> int searchGapL( byte[] seq, int from, int until, byte key                     ) { return ExpL2RSearch.searchGapL(from,until,      i -> Byte.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchGapL( byte[] seq,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGapL(   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-    @Override public <T>                               int searchGapL( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGapL(from,until,      i ->  cmp.compare(key,seq[i]) ); }
+    @Override public int searchR( byte[] arr,                      byte key                     ) { return ExpL2RSearch.searchR(   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+    @Override public int searchR( byte[] arr, int from, int until, byte key                     ) { return ExpL2RSearch.searchR(from,until,      i -> Byte.compare(key,arr[i]) ); }
+    @Override public int searchR( byte[] arr,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchR(   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+    @Override public int searchR( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchR(from,until,      i ->  cmp.compare(key,arr[i]) ); }
+
+    @Override public int searchL( byte[] arr,                      byte key                     ) { return ExpL2RSearch.searchL(   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+    @Override public int searchL( byte[] arr, int from, int until, byte key                     ) { return ExpL2RSearch.searchL(from,until,      i -> Byte.compare(key,arr[i]) ); }
+    @Override public int searchL( byte[] arr,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchL(   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+    @Override public int searchL( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchL(from,until,      i ->  cmp.compare(key,arr[i]) ); }
+
+    @Override public int searchGap ( byte[] arr,                      byte key                     ) { return ExpL2RSearch.searchGap (   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+    @Override public int searchGap ( byte[] arr, int from, int until, byte key                     ) { return ExpL2RSearch.searchGap (from,until,      i -> Byte.compare(key,arr[i]) ); }
+    @Override public int searchGap ( byte[] arr,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGap (   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+    @Override public int searchGap ( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGap (from,until,      i ->  cmp.compare(key,arr[i]) ); }
+
+    @Override public int searchGapR( byte[] arr,                      byte key                     ) { return ExpL2RSearch.searchGapR(   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+    @Override public int searchGapR( byte[] arr, int from, int until, byte key                     ) { return ExpL2RSearch.searchGapR(from,until,      i -> Byte.compare(key,arr[i]) ); }
+    @Override public int searchGapR( byte[] arr,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGapR(   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+    @Override public int searchGapR( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGapR(from,until,      i ->  cmp.compare(key,arr[i]) ); }
+
+    @Override public int searchGapL( byte[] arr,                      byte key                     ) { return ExpL2RSearch.searchGapL(   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+    @Override public int searchGapL( byte[] arr, int from, int until, byte key                     ) { return ExpL2RSearch.searchGapL(from,until,      i -> Byte.compare(key,arr[i]) ); }
+    @Override public int searchGapL( byte[] arr,                      byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGapL(   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+    @Override public int searchGapL( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return ExpL2RSearch.searchGapL(from,until,      i ->  cmp.compare(key,arr[i]) ); }
   };
 
 
@@ -253,96 +254,126 @@ public class ExpL2RSearch
   }
 
 
-  public static <T extends Comparable<? super T>> int search ( T[] seq,                      T key                            ) { return search (   0,seq.length, i -> key.compareTo(seq[i]) ); }
-  public static <T extends Comparable<? super T>> int search ( T[] seq, int from, int until, T key                            ) { return search (from,until,      i -> key.compareTo(seq[i]) ); }
-  public static <T>                               int search ( T[] seq,                      T key, Comparator<? super T> cmp ) { return search (   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-  public static <T>                               int search ( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return search (from,until,      i -> cmp.compare(key,seq[i]) ); }
+  public static <T extends Comparable<? super T>> int search ( T[] arr,                      T key                            ) { return search (   0,arr.length, i -> key.compareTo(arr[i]) ); }
+  public static <T extends Comparable<? super T>> int search ( T[] arr, int from, int until, T key                            ) { return search (from,until,      i -> key.compareTo(arr[i]) ); }
+  public static <T>                               int search ( T[] arr,                      T key, Comparator<? super T> cmp ) { return search (   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+  public static <T>                               int search ( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return search (from,until,      i -> cmp.compare(key,arr[i]) ); }
 
-  public static <T extends Comparable<? super T>> int searchR( T[] seq,                      T key                            ) { return searchR(   0,seq.length, i -> key.compareTo(seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchR( T[] seq, int from, int until, T key                            ) { return searchR(from,until,      i -> key.compareTo(seq[i]) ); }
-  public static <T>                               int searchR( T[] seq,                      T key, Comparator<? super T> cmp ) { return searchR(   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchR( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return searchR(from,until,      i -> cmp.compare(key,seq[i]) ); }
+  public static <T extends Comparable<? super T>> int searchR( T[] arr,                      T key                            ) { return searchR(   0,arr.length, i -> key.compareTo(arr[i]) ); }
+  public static <T extends Comparable<? super T>> int searchR( T[] arr, int from, int until, T key                            ) { return searchR(from,until,      i -> key.compareTo(arr[i]) ); }
+  public static <T>                               int searchR( T[] arr,                      T key, Comparator<? super T> cmp ) { return searchR(   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+  public static <T>                               int searchR( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return searchR(from,until,      i -> cmp.compare(key,arr[i]) ); }
 
-  public static <T extends Comparable<? super T>> int searchL( T[] seq,                      T key                            ) { return searchL(   0,seq.length, i -> key.compareTo(seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchL( T[] seq, int from, int until, T key                            ) { return searchL(from,until,      i -> key.compareTo(seq[i]) ); }
-  public static <T>                               int searchL( T[] seq,                      T key, Comparator<? super T> cmp ) { return searchL(   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchL( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return searchL(from,until,      i -> cmp.compare(key,seq[i]) ); }
-
-
-  public static <T extends Comparable<? super T>> int searchGap ( T[] seq,                      T key                            ) { return searchGap (   0,seq.length, i -> key.compareTo(seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchGap ( T[] seq, int from, int until, T key                            ) { return searchGap (from,until,      i -> key.compareTo(seq[i]) ); }
-  public static <T>                               int searchGap ( T[] seq,                      T key, Comparator<? super T> cmp ) { return searchGap (   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchGap ( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return searchGap (from,until,      i -> cmp.compare(key,seq[i]) ); }
-
-  public static <T extends Comparable<? super T>> int searchGapR( T[] seq,                      T key                            ) { return searchGapR(   0,seq.length, i -> key.compareTo(seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchGapR( T[] seq, int from, int until, T key                            ) { return searchGapR(from,until,      i -> key.compareTo(seq[i]) ); }
-  public static <T>                               int searchGapR( T[] seq,                      T key, Comparator<? super T> cmp ) { return searchGapR(   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchGapR( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return searchGapR(from,until,      i -> cmp.compare(key,seq[i]) ); }
-
-  public static <T extends Comparable<? super T>> int searchGapL( T[] seq,                      T key                            ) { return searchGapL(   0,seq.length, i -> key.compareTo(seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchGapL( T[] seq, int from, int until, T key                            ) { return searchGapL(from,until,      i -> key.compareTo(seq[i]) ); }
-  public static <T>                               int searchGapL( T[] seq,                      T key, Comparator<? super T> cmp ) { return searchGapL(   0,seq.length, i -> cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchGapL( T[] seq, int from, int until, T key, Comparator<? super T> cmp ) { return searchGapL(from,until,      i -> cmp.compare(key,seq[i]) ); }
+  public static <T extends Comparable<? super T>> int searchL( T[] arr,                      T key                            ) { return searchL(   0,arr.length, i -> key.compareTo(arr[i]) ); }
+  public static <T extends Comparable<? super T>> int searchL( T[] arr, int from, int until, T key                            ) { return searchL(from,until,      i -> key.compareTo(arr[i]) ); }
+  public static <T>                               int searchL( T[] arr,                      T key, Comparator<? super T> cmp ) { return searchL(   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+  public static <T>                               int searchL( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return searchL(from,until,      i -> cmp.compare(key,arr[i]) ); }
 
 
-  public static <T extends Comparable<? super T>> int search ( byte[] seq,                      byte key                     ) { return search (   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int search ( byte[] seq, int from, int until, byte key                     ) { return search (from,until,      i -> Byte.compare(key,seq[i]) ); }
-  public static <T>                               int search ( byte[] seq,                      byte key, ComparatorByte cmp ) { return search (   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-  public static <T>                               int search ( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return search (from,until,      i ->  cmp.compare(key,seq[i]) ); }
+  public static <T extends Comparable<? super T>> int searchGap ( T[] arr,                      T key                            ) { return searchGap (   0,arr.length, i -> key.compareTo(arr[i]) ); }
+  public static <T extends Comparable<? super T>> int searchGap ( T[] arr, int from, int until, T key                            ) { return searchGap (from,until,      i -> key.compareTo(arr[i]) ); }
+  public static <T>                               int searchGap ( T[] arr,                      T key, Comparator<? super T> cmp ) { return searchGap (   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+  public static <T>                               int searchGap ( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return searchGap (from,until,      i -> cmp.compare(key,arr[i]) ); }
 
-  public static <T extends Comparable<? super T>> int searchR( byte[] seq,                      byte key                     ) { return searchR(   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchR( byte[] seq, int from, int until, byte key                     ) { return searchR(from,until,      i -> Byte.compare(key,seq[i]) ); }
-  public static <T>                               int searchR( byte[] seq,                      byte key, ComparatorByte cmp ) { return searchR(   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchR( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return searchR(from,until,      i ->  cmp.compare(key,seq[i]) ); }
+  public static <T extends Comparable<? super T>> int searchGapR( T[] arr,                      T key                            ) { return searchGapR(   0,arr.length, i -> key.compareTo(arr[i]) ); }
+  public static <T extends Comparable<? super T>> int searchGapR( T[] arr, int from, int until, T key                            ) { return searchGapR(from,until,      i -> key.compareTo(arr[i]) ); }
+  public static <T>                               int searchGapR( T[] arr,                      T key, Comparator<? super T> cmp ) { return searchGapR(   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+  public static <T>                               int searchGapR( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return searchGapR(from,until,      i -> cmp.compare(key,arr[i]) ); }
 
-  public static <T extends Comparable<? super T>> int searchL( byte[] seq,                      byte key                     ) { return searchL(   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchL( byte[] seq, int from, int until, byte key                     ) { return searchL(from,until,      i -> Byte.compare(key,seq[i]) ); }
-  public static <T>                               int searchL( byte[] seq,                      byte key, ComparatorByte cmp ) { return searchL(   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchL( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return searchL(from,until,      i ->  cmp.compare(key,seq[i]) ); }
-
-  public static <T extends Comparable<? super T>> int searchGap ( byte[] seq,                      byte key                     ) { return searchGap (   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchGap ( byte[] seq, int from, int until, byte key                     ) { return searchGap (from,until,      i -> Byte.compare(key,seq[i]) ); }
-  public static <T>                               int searchGap ( byte[] seq,                      byte key, ComparatorByte cmp ) { return searchGap (   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchGap ( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return searchGap (from,until,      i ->  cmp.compare(key,seq[i]) ); }
-
-  public static <T extends Comparable<? super T>> int searchGapR( byte[] seq,                      byte key                     ) { return searchGapR(   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchGapR( byte[] seq, int from, int until, byte key                     ) { return searchGapR(from,until,      i -> Byte.compare(key,seq[i]) ); }
-  public static <T>                               int searchGapR( byte[] seq,                      byte key, ComparatorByte cmp ) { return searchGapR(   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchGapR( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return searchGapR(from,until,      i ->  cmp.compare(key,seq[i]) ); }
-
-  public static <T extends Comparable<? super T>> int searchGapL( byte[] seq,                      byte key                     ) { return searchGapL(   0,seq.length, i -> Byte.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchGapL( byte[] seq, int from, int until, byte key                     ) { return searchGapL(from,until,      i -> Byte.compare(key,seq[i]) ); }
-  public static <T>                               int searchGapL( byte[] seq,                      byte key, ComparatorByte cmp ) { return searchGapL(   0,seq.length, i ->  cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchGapL( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return searchGapL(from,until,      i ->  cmp.compare(key,seq[i]) ); }
+  public static <T extends Comparable<? super T>> int searchGapL( T[] arr,                      T key                            ) { return searchGapL(   0,arr.length, i -> key.compareTo(arr[i]) ); }
+  public static <T extends Comparable<? super T>> int searchGapL( T[] arr, int from, int until, T key                            ) { return searchGapL(from,until,      i -> key.compareTo(arr[i]) ); }
+  public static <T>                               int searchGapL( T[] arr,                      T key, Comparator<? super T> cmp ) { return searchGapL(   0,arr.length, i -> cmp.compare(key,arr[i]) ); }
+  public static <T>                               int searchGapL( T[] arr, int from, int until, T key, Comparator<? super T> cmp ) { return searchGapL(from,until,      i -> cmp.compare(key,arr[i]) ); }
 
 
-  public static <T extends Comparable<? super T>> int search ( int[] seq,                      int key                    ) { return search (   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int search ( int[] seq, int from, int until, int key                    ) { return search (from,until,      i -> Integer.compare(key,seq[i]) ); }
-  public static <T>                               int search ( int[] seq,                      int key, ComparatorInt cmp ) { return search (   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-  public static <T>                               int search ( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return search (from,until,      i ->     cmp.compare(key,seq[i]) ); }
+  public static int search ( byte[] arr,                      byte key                     ) { return search (   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+  public static int search ( byte[] arr, int from, int until, byte key                     ) { return search (from,until,      i -> Byte.compare(key,arr[i]) ); }
+  public static int search ( byte[] arr,                      byte key, ComparatorByte cmp ) { return search (   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+  public static int search ( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return search (from,until,      i ->  cmp.compare(key,arr[i]) ); }
 
-  public static <T extends Comparable<? super T>> int searchR( int[] seq,                      int key                    ) { return searchR(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchR( int[] seq, int from, int until, int key                    ) { return searchR(from,until,      i -> Integer.compare(key,seq[i]) ); }
-  public static <T>                               int searchR( int[] seq,                      int key, ComparatorInt cmp ) { return searchR(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchR( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return searchR(from,until,      i ->     cmp.compare(key,seq[i]) ); }
+  public static int searchR( byte[] arr,                      byte key                     ) { return searchR(   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+  public static int searchR( byte[] arr, int from, int until, byte key                     ) { return searchR(from,until,      i -> Byte.compare(key,arr[i]) ); }
+  public static int searchR( byte[] arr,                      byte key, ComparatorByte cmp ) { return searchR(   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+  public static int searchR( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return searchR(from,until,      i ->  cmp.compare(key,arr[i]) ); }
 
-  public static <T extends Comparable<? super T>> int searchL( int[] seq,                      int key                    ) { return searchL(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchL( int[] seq, int from, int until, int key                    ) { return searchL(from,until,      i -> Integer.compare(key,seq[i]) ); }
-  public static <T>                               int searchL( int[] seq,                      int key, ComparatorInt cmp ) { return searchL(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchL( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return searchL(from,until,      i ->     cmp.compare(key,seq[i]) ); }
+  public static int searchL( byte[] arr,                      byte key                     ) { return searchL(   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+  public static int searchL( byte[] arr, int from, int until, byte key                     ) { return searchL(from,until,      i -> Byte.compare(key,arr[i]) ); }
+  public static int searchL( byte[] arr,                      byte key, ComparatorByte cmp ) { return searchL(   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+  public static int searchL( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return searchL(from,until,      i ->  cmp.compare(key,arr[i]) ); }
 
-  public static <T extends Comparable<? super T>> int searchGap ( int[] seq,                      int key                    ) { return searchGap (   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchGap ( int[] seq, int from, int until, int key                    ) { return searchGap (from,until,      i -> Integer.compare(key,seq[i]) ); }
-  public static <T>                               int searchGap ( int[] seq,                      int key, ComparatorInt cmp ) { return searchGap (   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchGap ( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return searchGap (from,until,      i ->     cmp.compare(key,seq[i]) ); }
+  public static int searchGap ( byte[] arr,                      byte key                     ) { return searchGap (   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+  public static int searchGap ( byte[] arr, int from, int until, byte key                     ) { return searchGap (from,until,      i -> Byte.compare(key,arr[i]) ); }
+  public static int searchGap ( byte[] arr,                      byte key, ComparatorByte cmp ) { return searchGap (   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+  public static int searchGap ( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return searchGap (from,until,      i ->  cmp.compare(key,arr[i]) ); }
 
-  public static <T extends Comparable<? super T>> int searchGapR( int[] seq,                      int key                    ) { return searchGapR(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchGapR( int[] seq, int from, int until, int key                    ) { return searchGapR(from,until,      i -> Integer.compare(key,seq[i]) ); }
-  public static <T>                               int searchGapR( int[] seq,                      int key, ComparatorInt cmp ) { return searchGapR(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchGapR( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return searchGapR(from,until,      i ->     cmp.compare(key,seq[i]) ); }
+  public static int searchGapR( byte[] arr,                      byte key                     ) { return searchGapR(   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+  public static int searchGapR( byte[] arr, int from, int until, byte key                     ) { return searchGapR(from,until,      i -> Byte.compare(key,arr[i]) ); }
+  public static int searchGapR( byte[] arr,                      byte key, ComparatorByte cmp ) { return searchGapR(   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+  public static int searchGapR( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return searchGapR(from,until,      i ->  cmp.compare(key,arr[i]) ); }
 
-  public static <T extends Comparable<? super T>> int searchGapL( int[] seq,                      int key                    ) { return searchGapL(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-  public static <T extends Comparable<? super T>> int searchGapL( int[] seq, int from, int until, int key                    ) { return searchGapL(from,until,      i -> Integer.compare(key,seq[i]) ); }
-  public static <T>                               int searchGapL( int[] seq,                      int key, ComparatorInt cmp ) { return searchGapL(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-  public static <T>                               int searchGapL( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return searchGapL(from,until,      i ->     cmp.compare(key,seq[i]) ); }
+  public static int searchGapL( byte[] arr,                      byte key                     ) { return searchGapL(   0,arr.length, i -> Byte.compare(key,arr[i]) ); }
+  public static int searchGapL( byte[] arr, int from, int until, byte key                     ) { return searchGapL(from,until,      i -> Byte.compare(key,arr[i]) ); }
+  public static int searchGapL( byte[] arr,                      byte key, ComparatorByte cmp ) { return searchGapL(   0,arr.length, i ->  cmp.compare(key,arr[i]) ); }
+  public static int searchGapL( byte[] arr, int from, int until, byte key, ComparatorByte cmp ) { return searchGapL(from,until,      i ->  cmp.compare(key,arr[i]) ); }
+
+  public static int search ( int[] arr,                      int key                    ) { return search (   0,arr.length, i -> Integer.compare(key,arr[i]) ); }
+  public static int search ( int[] arr, int from, int until, int key                    ) { return search (from,until,      i -> Integer.compare(key,arr[i]) ); }
+  public static int search ( int[] arr,                      int key, ComparatorInt cmp ) { return search (   0,arr.length, i ->     cmp.compare(key,arr[i]) ); }
+  public static int search ( int[] arr, int from, int until, int key, ComparatorInt cmp ) { return search (from,until,      i ->     cmp.compare(key,arr[i]) ); }
+
+  public static int searchR( int[] arr,                      int key                    ) { return searchR(   0,arr.length, i -> Integer.compare(key,arr[i]) ); }
+  public static int searchR( int[] arr, int from, int until, int key                    ) { return searchR(from,until,      i -> Integer.compare(key,arr[i]) ); }
+  public static int searchR( int[] arr,                      int key, ComparatorInt cmp ) { return searchR(   0,arr.length, i ->     cmp.compare(key,arr[i]) ); }
+  public static int searchR( int[] arr, int from, int until, int key, ComparatorInt cmp ) { return searchR(from,until,      i ->     cmp.compare(key,arr[i]) ); }
+
+  public static int searchL( int[] arr,                      int key                    ) { return searchL(   0,arr.length, i -> Integer.compare(key,arr[i]) ); }
+  public static int searchL( int[] arr, int from, int until, int key                    ) { return searchL(from,until,      i -> Integer.compare(key,arr[i]) ); }
+  public static int searchL( int[] arr,                      int key, ComparatorInt cmp ) { return searchL(   0,arr.length, i ->     cmp.compare(key,arr[i]) ); }
+  public static int searchL( int[] arr, int from, int until, int key, ComparatorInt cmp ) { return searchL(from,until,      i ->     cmp.compare(key,arr[i]) ); }
+
+  public static int searchGap ( int[] arr,                      int key                    ) { return searchGap (   0,arr.length, i -> Integer.compare(key,arr[i]) ); }
+  public static int searchGap ( int[] arr, int from, int until, int key                    ) { return searchGap (from,until,      i -> Integer.compare(key,arr[i]) ); }
+  public static int searchGap ( int[] arr,                      int key, ComparatorInt cmp ) { return searchGap (   0,arr.length, i ->     cmp.compare(key,arr[i]) ); }
+  public static int searchGap ( int[] arr, int from, int until, int key, ComparatorInt cmp ) { return searchGap (from,until,      i ->     cmp.compare(key,arr[i]) ); }
+
+  public static int searchGapR( int[] arr,                      int key                    ) { return searchGapR(   0,arr.length, i -> Integer.compare(key,arr[i]) ); }
+  public static int searchGapR( int[] arr, int from, int until, int key                    ) { return searchGapR(from,until,      i -> Integer.compare(key,arr[i]) ); }
+  public static int searchGapR( int[] arr,                      int key, ComparatorInt cmp ) { return searchGapR(   0,arr.length, i ->     cmp.compare(key,arr[i]) ); }
+  public static int searchGapR( int[] arr, int from, int until, int key, ComparatorInt cmp ) { return searchGapR(from,until,      i ->     cmp.compare(key,arr[i]) ); }
+
+  public static int searchGapL( int[] arr,                      int key                    ) { return searchGapL(   0,arr.length, i -> Integer.compare(key,arr[i]) ); }
+  public static int searchGapL( int[] arr, int from, int until, int key                    ) { return searchGapL(from,until,      i -> Integer.compare(key,arr[i]) ); }
+  public static int searchGapL( int[] arr,                      int key, ComparatorInt cmp ) { return searchGapL(   0,arr.length, i ->     cmp.compare(key,arr[i]) ); }
+  public static int searchGapL( int[] arr, int from, int until, int key, ComparatorInt cmp ) { return searchGapL(from,until,      i ->     cmp.compare(key,arr[i]) ); }
+
+
+  public static int search ( IntBuffer buf,                      int key                    ) { return search ( buf.position(),buf.limit(), i -> Integer.compare(key,buf.get(i)) ); }
+  public static int search ( IntBuffer buf, int from, int until, int key                    ) { return search (           from,until,       i -> Integer.compare(key,buf.get(i)) ); }
+  public static int search ( IntBuffer buf,                      int key, ComparatorInt cmp ) { return search ( buf.position(),buf.limit(), i ->     cmp.compare(key,buf.get(i)) ); }
+  public static int search ( IntBuffer buf, int from, int until, int key, ComparatorInt cmp ) { return search (           from,until,       i ->     cmp.compare(key,buf.get(i)) ); }
+
+  public static int searchR( IntBuffer buf,                      int key                    ) { return searchR( buf.position(),buf.limit(), i -> Integer.compare(key,buf.get(i)) ); }
+  public static int searchR( IntBuffer buf, int from, int until, int key                    ) { return searchR(           from,until,       i -> Integer.compare(key,buf.get(i)) ); }
+  public static int searchR( IntBuffer buf,                      int key, ComparatorInt cmp ) { return searchR( buf.position(),buf.limit(), i ->     cmp.compare(key,buf.get(i)) ); }
+  public static int searchR( IntBuffer buf, int from, int until, int key, ComparatorInt cmp ) { return searchR(           from,until,       i ->     cmp.compare(key,buf.get(i)) ); }
+
+  public static int searchL( IntBuffer buf,                      int key                    ) { return searchL( buf.position(),buf.limit(), i -> Integer.compare(key,buf.get(i)) ); }
+  public static int searchL( IntBuffer buf, int from, int until, int key                    ) { return searchL(           from,until,       i -> Integer.compare(key,buf.get(i)) ); }
+  public static int searchL( IntBuffer buf,                      int key, ComparatorInt cmp ) { return searchL( buf.position(),buf.limit(), i ->     cmp.compare(key,buf.get(i)) ); }
+  public static int searchL( IntBuffer buf, int from, int until, int key, ComparatorInt cmp ) { return searchL(           from,until,       i ->     cmp.compare(key,buf.get(i)) ); }
+
+  public static int searchGap ( IntBuffer buf,                      int key                    ) { return searchGap (buf.position(),buf.limit(), i -> Integer.compare(key,buf.get(i)) ); }
+  public static int searchGap ( IntBuffer buf, int from, int until, int key                    ) { return searchGap (          from,until,       i -> Integer.compare(key,buf.get(i)) ); }
+  public static int searchGap ( IntBuffer buf,                      int key, ComparatorInt cmp ) { return searchGap (buf.position(),buf.limit(), i ->     cmp.compare(key,buf.get(i)) ); }
+  public static int searchGap ( IntBuffer buf, int from, int until, int key, ComparatorInt cmp ) { return searchGap (          from,until,       i ->     cmp.compare(key,buf.get(i)) ); }
+
+  public static int searchGapR( IntBuffer buf,                      int key                    ) { return searchGapR(buf.position(),buf.limit(), i -> Integer.compare(key,buf.get(i)) ); }
+  public static int searchGapR( IntBuffer buf, int from, int until, int key                    ) { return searchGapR(          from,until,       i -> Integer.compare(key,buf.get(i)) ); }
+  public static int searchGapR( IntBuffer buf,                      int key, ComparatorInt cmp ) { return searchGapR(buf.position(),buf.limit(), i ->     cmp.compare(key,buf.get(i)) ); }
+  public static int searchGapR( IntBuffer buf, int from, int until, int key, ComparatorInt cmp ) { return searchGapR(          from,until,       i ->     cmp.compare(key,buf.get(i)) ); }
+
+  public static int searchGapL( IntBuffer buf,                      int key                    ) { return searchGapL(buf.position(),buf.limit(), i -> Integer.compare(key,buf.get(i)) ); }
+  public static int searchGapL( IntBuffer buf, int from, int until, int key                    ) { return searchGapL(          from,until,       i -> Integer.compare(key,buf.get(i)) ); }
+  public static int searchGapL( IntBuffer buf,                      int key, ComparatorInt cmp ) { return searchGapL(buf.position(),buf.limit(), i ->     cmp.compare(key,buf.get(i)) ); }
+  public static int searchGapL( IntBuffer buf, int from, int until, int key, ComparatorInt cmp ) { return searchGapL(          from,until,       i ->     cmp.compare(key,buf.get(i)) ); }
 }

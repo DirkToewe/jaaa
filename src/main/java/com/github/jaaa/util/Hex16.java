@@ -1,7 +1,10 @@
 package com.github.jaaa.util;
 
+import com.github.jaaa.SwapAccess;
+
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
+
 
 public final class Hex16
 {
@@ -105,32 +108,32 @@ public final class Hex16
    *  that are applied during sorting process are also applied to the given swap
    *  method.
    *
-   *  @param swap The swap method that is called for every swap operation that occurs
-   *              during sorting.
+   *  @param acc The swap method that is called for every swap operation that occurs
+   *             during sorting.
    */
-  public void sortAndClear( IntBiConsumer swap )
+  public void sortAndClear( SwapAccess acc )
   {
     for( int i=0; i < size; i++ )
     for(
       int  j = get(i);
       i != j;
     )
-    { int k = get(j);
-              set(j,j);
-      swap.accept(i,j);
+    { int k=get(j);
+           set(j,j);
+      acc.swap(i,j);
       j = k;
     }
     bits = size = 0;
   }
 
-  public void unsortAndClear( IntBiConsumer swap )
+  public void unsortAndClear( SwapAccess acc )
   {
     for( int i=0; i < size-1; i++ )
     for( int j=i;; )
     {
-      int k = get(j);
-              set(j,j); if( k==i ) break;
-      swap.accept(j,k);
+      int k=get(j);
+           set(j,j); if( k==i ) break;
+      acc.swap(j,k);
       j=k;
     }
     bits = size = 0;

@@ -285,6 +285,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysComparatorInteger( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     ComparatorInt cmp = Integer::compare;
     Arrays.sort(array);
     if( reversed ) {
@@ -311,7 +313,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
             until = arrayWithRange.getUntil();
 
@@ -334,7 +336,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -359,7 +361,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -382,7 +384,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -407,7 +409,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -432,7 +434,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysWithRangeComparatorObjInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -459,7 +461,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
             until = arrayWithRange.getUntil();
 
@@ -488,7 +490,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysWithRangeComparatorInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -519,6 +521,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     byte[] input = array.clone();
 
@@ -538,6 +542,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     int[] input = array.clone();
 
@@ -559,6 +565,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysComparableByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     Byte[] input = array.clone();
 
@@ -578,6 +586,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysComparableInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     Integer[] input = array.clone();
 
@@ -599,6 +609,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysComparatorByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     ComparatorByte cmp = Byte::compare;
     Arrays.sort(array);
     if( reversed ) {
@@ -624,6 +636,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysComparatorInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     ComparatorInt cmp = Integer::compare;
     Arrays.sort(array);
     if( reversed ) {
@@ -651,6 +665,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysComparatorObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     Comparator<Byte>  cmp = naturalOrder();
     if( reversed )    cmp = cmp.reversed();
     Arrays.sort(array,cmp);
@@ -673,6 +689,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysComparatorObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     Comparator<Integer> cmp = naturalOrder();
     if( reversed )      cmp = cmp.reversed();
     Arrays.sort(array,  cmp);
@@ -697,9 +715,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+           until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -721,7 +739,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -747,7 +765,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -771,7 +789,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -797,9 +815,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+           until = arrayWithRange.getUntil();
 
     ComparatorByte cmp = Byte::compare;
     Arrays.sort(array, from,until);
@@ -826,7 +844,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysWithRangeComparatorInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -857,7 +875,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -883,7 +901,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysWithRangeComparatorObjInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -911,6 +929,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     byte[] input = array.clone();
 
@@ -930,6 +950,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     int[] input = array.clone();
 
@@ -951,6 +973,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysComparableByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     Byte[] input = array.clone();
 
@@ -970,6 +994,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysComparableInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     Integer[] input = array.clone();
 
@@ -991,6 +1017,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysComparatorByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     ComparatorByte cmp = Byte::compare;
     Arrays.sort(array);
     if( reversed ) {
@@ -1016,6 +1044,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysComparatorInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     ComparatorInt cmp = Integer::compare;
     Arrays.sort(array);
     if( reversed ) {
@@ -1043,6 +1073,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysComparatorObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     Comparator<Byte>  cmp = naturalOrder();
     if( reversed )    cmp = cmp.reversed();
     Arrays.sort(array,cmp);
@@ -1065,6 +1097,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysComparatorObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     Comparator<Integer> cmp = naturalOrder();
     if( reversed )      cmp = cmp.reversed();
     Arrays.sort(array,  cmp);
@@ -1089,7 +1123,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -1113,7 +1147,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -1139,7 +1173,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -1163,7 +1197,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -1189,7 +1223,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -1218,7 +1252,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysWithRangeComparatorInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -1249,7 +1283,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -1275,7 +1309,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysWithRangeComparatorObjInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -1303,6 +1337,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchSatisfiesComparisonLimitByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Byte>() {
       @Override public int compare( Byte x, Byte y ) {
         ++nComps;
@@ -1320,6 +1356,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchSatisfiesComparisonLimitInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Integer>() {
       @Override public int compare( Integer x, Integer y ) {
         ++nComps;
@@ -1339,6 +1377,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRSatisfiesComparisonLimitByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Byte>() {
       @Override public int compare( Byte x, Byte y ) {
         ++nComps;
@@ -1356,6 +1396,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRSatisfiesComparisonLimitInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Integer>() {
       @Override public int compare( Integer x, Integer y ) {
         ++nComps;
@@ -1375,6 +1417,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLSatisfiesComparisonLimitByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Byte>() {
       @Override public int compare( Byte x, Byte y ) {
         ++nComps;
@@ -1392,6 +1436,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLSatisfiesComparisonLimitInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Integer>() {
       @Override public int compare( Integer x, Integer y ) {
         ++nComps;
@@ -1411,6 +1457,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Byte>() {
       @Override public int compare( Byte x, Byte y ) {
       ++nComps;
@@ -1428,6 +1476,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Integer>() {
       @Override public int compare( Integer x, Integer y ) {
       ++nComps;
@@ -1447,6 +1497,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Byte>() {
       @Override public int compare( Byte x, Byte y ) {
       ++nComps;
@@ -1464,6 +1516,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Integer>() {
       @Override public int compare( Integer x, Integer y ) {
       ++nComps;
@@ -1483,6 +1537,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Byte>() {
       @Override public int compare( Byte x, Byte y ) {
       ++nComps;
@@ -1500,6 +1556,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
   {
+    array = array.clone();
+
     var cmp = new CountingComparator<Integer>() {
       @Override public int compare( Integer x, Integer y ) {
       ++nComps;
@@ -1595,6 +1653,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     byte[] input = array.clone();
 
@@ -1609,6 +1669,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysInteger( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     int[] input = array.clone();
 
@@ -1625,6 +1687,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysComparableByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     Byte[] input = array.clone();
 
@@ -1639,6 +1703,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysComparableInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     Integer[] input = array.clone();
 
@@ -1655,6 +1721,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysComparatorByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     ComparatorByte cmp = Byte::compare;
     Arrays.sort(array);
     if( reversed ) {
@@ -1675,6 +1743,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysComparatorInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     ComparatorInt cmp = Integer::compare;
     Arrays.sort(array);
     if( reversed ) {
@@ -1697,6 +1767,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysComparatorObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     Comparator<Byte>  cmp = naturalOrder();
     if( reversed )    cmp = cmp.reversed();
     Arrays.sort(array,cmp);
@@ -1714,6 +1786,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysComparatorObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     Comparator<Integer> cmp = naturalOrder();
     if( reversed )      cmp = cmp.reversed();
     Arrays.sort(array,  cmp);
@@ -1733,7 +1807,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -1752,7 +1826,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -1773,7 +1847,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -1792,7 +1866,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -1813,7 +1887,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
             until = arrayWithRange.getUntil();
 
@@ -1837,7 +1911,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysWithRangeComparatorInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -1863,7 +1937,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -1884,7 +1958,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysWithRangeComparatorObjInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -1907,6 +1981,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     byte[] input = array.clone();
 
@@ -1921,6 +1997,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     int[] input = array.clone();
 
@@ -1937,6 +2015,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysComparableByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     Byte[] input = array.clone();
 
@@ -1951,6 +2031,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysComparableInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     Integer[] input = array.clone();
 
@@ -1967,6 +2049,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysComparatorByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     ComparatorByte cmp = Byte::compare;
     Arrays.sort(array);
     if( reversed ) {
@@ -1987,6 +2071,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysComparatorInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     ComparatorInt cmp = Integer::compare;
     Arrays.sort(array);
     if( reversed ) {
@@ -2009,6 +2095,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysComparatorObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     Comparator<Byte>  cmp = naturalOrder();
     if( reversed )    cmp = cmp.reversed();
     Arrays.sort(array,cmp);
@@ -2026,6 +2114,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysComparatorObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     Comparator<Integer> cmp = naturalOrder();
     if( reversed )      cmp = cmp.reversed();
     Arrays.sort(array,  cmp);
@@ -2045,9 +2135,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+           until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -2064,7 +2154,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -2085,9 +2175,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+           until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -2104,7 +2194,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -2125,9 +2215,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+           until = arrayWithRange.getUntil();
 
     ComparatorByte cmp = Byte::compare;
     Arrays.sort(array, from,until);
@@ -2149,7 +2239,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysWithRangeComparatorInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -2175,7 +2265,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
             until = arrayWithRange.getUntil();
 
@@ -2196,7 +2286,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysWithRangeComparatorObjInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -2219,6 +2309,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     byte[] input = array.clone();
 
@@ -2233,6 +2325,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     int[] input = array.clone();
 
@@ -2249,6 +2343,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysComparableByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     Byte[] input = array.clone();
 
@@ -2263,6 +2359,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysComparableInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
     Integer[] input = array.clone();
 
@@ -2279,6 +2377,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysComparatorByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     ComparatorByte cmp = Byte::compare;
     Arrays.sort(array);
     if( reversed ) {
@@ -2299,6 +2399,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysComparatorInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     ComparatorInt cmp = Integer::compare;
     Arrays.sort(array);
     if( reversed ) {
@@ -2321,6 +2423,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysComparatorObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     Comparator<Byte>  cmp = naturalOrder();
     if( reversed )    cmp = cmp.reversed();
     Arrays.sort(array,cmp);
@@ -2338,6 +2442,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysComparatorObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key, @ForAll boolean reversed )
   {
+    array = array.clone();
+
     Comparator<Integer> cmp = naturalOrder();
     if( reversed )      cmp = cmp.reversed();
     Arrays.sort(array,  cmp);
@@ -2357,7 +2463,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -2376,7 +2482,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -2397,7 +2503,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -2416,7 +2522,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -2437,7 +2543,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -2460,7 +2566,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysWithRangeComparatorInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -2485,9 +2591,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
   {
-    Byte[] array = arrayWithRange.getData();
+    Byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+           until = arrayWithRange.getUntil();
 
     Comparator<Byte>  cmp = naturalOrder();
     if( reversed )    cmp = cmp.reversed();
@@ -2505,7 +2611,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysWithRangeComparatorObjInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
   {
-    Integer[] array = arrayWithRange.getData();
+    Integer[] array = arrayWithRange.getData().clone();
     int        from = arrayWithRange.getFrom(),
               until = arrayWithRange.getUntil();
 
@@ -2527,6 +2633,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapSatisfiesComparisonLimitByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Byte>() {
@@ -2546,6 +2654,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapSatisfiesComparisonLimitInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Integer>() {
@@ -2567,6 +2677,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Byte>() {
@@ -2586,6 +2698,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Integer>() {
@@ -2607,6 +2721,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Byte>() {
@@ -2626,6 +2742,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Integer>() {
@@ -2647,6 +2765,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Byte>() {
@@ -2666,6 +2786,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Integer>() {
@@ -2687,6 +2809,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Byte>() {
@@ -2706,6 +2830,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Integer>() {
@@ -2727,6 +2853,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Byte>() {
@@ -2746,6 +2874,8 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
   {
+    array = array.clone();
+
     Arrays.sort(array);
 
     var cmp = new CountingComparator<Integer>() {
@@ -2767,7 +2897,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
            until = arrayWithRange.getUntil();
 
@@ -2790,7 +2920,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
           until = arrayWithRange.getUntil();
 
@@ -2815,9 +2945,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+           until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -2838,9 +2968,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+          until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -2863,9 +2993,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+           until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -2886,9 +3016,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+          until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -2911,9 +3041,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+           until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -2934,9 +3064,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+          until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -2959,9 +3089,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+           until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -2982,9 +3112,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+          until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -3007,9 +3137,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
   {
-    byte[] array = arrayWithRange.getData();
+    byte[] array = arrayWithRange.getData().clone();
     int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+           until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 
@@ -3030,9 +3160,9 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
   {
-    int[] array = arrayWithRange.getData();
+    int[] array = arrayWithRange.getData().clone();
     int    from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+          until = arrayWithRange.getUntil();
 
     Arrays.sort(array, from,until);
 

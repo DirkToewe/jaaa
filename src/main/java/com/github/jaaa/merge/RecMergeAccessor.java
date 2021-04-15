@@ -52,9 +52,9 @@ public interface RecMergeAccessor<T> extends CompareRandomAccessor<T>,
     T c, int c0
   ) {
     checkArgs_mergeL2R(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     new RecMergeFn(c0) {
@@ -89,9 +89,9 @@ public interface RecMergeAccessor<T> extends CompareRandomAccessor<T>,
     T c, int c0
   ) {
     checkArgs_mergeR2L(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     new RecMergeFn(c0+aLen+bLen) {

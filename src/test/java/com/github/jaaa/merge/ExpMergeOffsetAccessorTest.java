@@ -5,6 +5,8 @@ import static java.util.Objects.requireNonNull;
 
 public class ExpMergeOffsetAccessorTest extends MergeOffsetAccessorTestTemplate
 {
+  @Override public int maxArraySize() { return 32*1024; }
+
   private static class MrgSkpAcc<T> implements MergeOffsetAccessor<T>, ExpMergeOffsetAccessor<T>
   {
     private final CompareAccessor<T> acc;

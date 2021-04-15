@@ -6,6 +6,7 @@ import com.github.jaaa.search.ExpR2LSearchAccessor;
 
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeL2R;
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeR2L;
+import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 
@@ -31,10 +32,14 @@ import static java.lang.Math.min;
 //
 
 public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
-                                     ExpR2LSearchAccessor<T>,
-                                     ExpL2RSearchAccessor<T>
+//                                           GallopL2RSearchAccessor<T>,
+//                                           GallopR2LSearchAccessor<T>
+                                              ExpR2LSearchAccessor<T>,
+                                              ExpL2RSearchAccessor<T>
 {
-  public default void timMerge(
+  int MIN_GALLOP = 7;
+
+  default void timMerge(
     T a, int i, int m,
     T b, int j, int n,
     T c, int k
@@ -46,19 +51,42 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
       timMergeL2R(a,i,m, b,j,n, c,k);
   }
 
-  public default void timMergeL2R(
+  default void timMergeL2R(
+    T a, int a0, int aLen,
+    T b, int b0, int bLen,
+    T c, int c0
+  ) {
+    _timMergeL2R(
+      MIN_GALLOP,a,a0,aLen,
+                 b,b0,bLen,
+                 c,c0
+    );
+  }
+
+  default void timMergeR2L(
+    T a, int a0, int aLen,
+    T b, int b0, int bLen,
+    T c, int c0
+  ) {
+    _timMergeR2L(
+      MIN_GALLOP,a,a0,aLen,
+                 b,b0,bLen,
+                 c,c0
+    );
+  }
+
+  default int _timMergeL2R(
+    int minGallop,
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
   ) {
     checkArgs_mergeL2R(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
-
-    int           MIN_GALLOP = 7,
-      minGallop = MIN_GALLOP;
+    assert 1 <= minGallop;
 
     // MERGE LOOP
     // ----------
@@ -86,7 +114,8 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
 
         // GALLOPING MERGE
         do {
-                   count1 = -a0 + expL2RSearchGapR(a,a0,a0+aLen, b,b0);
+                   count1 = expL2RSearchGap(a,a0,a0+aLen, b,b0, true) - a0;
+//                   count1 = gallopL2RSearchGap(a,a0,a0+aLen, b,b0, true) - a0;
           if( 0 != count1 ) { copyRange(a,a0, c,c0, count1);
              a0 += count1;
              c0 += count1;
@@ -96,7 +125,8 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
           copy(b,b0++, c,c0++);
           if(--bLen <= 0 ) break outer;
 
-                   count2 = -b0 + expL2RSearchGapL(b,b0,b0+bLen, a,a0);
+                   count2 = expL2RSearchGap(b,b0,b0+bLen, a,a0, false) - b0;
+//                   count2 = gallopL2RSearchGap(b,b0,b0+bLen, a,a0, false) - b0;
           if( 0 != count2 ) { copyRange(b,b0, c,c0, count2);
              b0 += count2;
              c0 += count2;
@@ -106,37 +136,37 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
           copy(a,a0++, c,c0++);
           if(--aLen <= 0 ) break outer;
 
-          minGallop--;
+          --minGallop;
         } while( count1 >= MIN_GALLOP | count2 >= MIN_GALLOP );
 
         if(minGallop < 0)
            minGallop = 0;
            minGallop+= 2;  // Penalize for leaving gallop mode
-
       }
 
     assert ! (aLen != 0 && bLen != 0);
          if( aLen!=0 ) copyRange(a,a0, c,c0, aLen);
     else if( bLen!=0 ) copyRange(b,b0, c,c0, bLen);
+
+    return max(1,minGallop);
   }
 
-  public default void timMergeR2L(
+  default int _timMergeR2L(
+    int minGallop,
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
   ) {
     checkArgs_mergeR2L(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
+    assert 1 <= minGallop;
 
     a0 += aLen;
     b0 +=      bLen;
     c0 += aLen+bLen;
-
-    int           MIN_GALLOP = 7,
-      minGallop = MIN_GALLOP;
 
     // MERGE LOOP
     // ----------
@@ -149,13 +179,13 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
         // TAPE MERGE
         do {
           --c0;
-          if( compare(a,--a0, b,--b0) > 0 ) {
-            copy(a,a0, c,c0); b0++;
+          if( compare(a,a0-1, b,b0-1) > 0 ) {
+            copy(a,--a0, c,c0);
             count2++;
             count1 = 0;
             if(--aLen <= 0 ) break outer;
           } else {
-            copy(b,b0, c,c0); a0++;
+            copy(b,--b0, c,c0);
             count1++;
             count2 = 0;
             if(--bLen <= 0 ) break outer;
@@ -165,17 +195,8 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
 
         // GALLOPING MERGE
         do {
-                   count1 = a0 - expR2LSearchGapR(a,a0-aLen,a0, b,b0-1);
-          if( 0 != count1 ) {
-             a0 -= count1;
-             c0 -= count1; copyRange(a,a0, c,c0, count1);
-           aLen -= count1;
-           if( aLen <= 0 ) break outer;
-          }
-          copy(b,--b0, c,--c0);
-          if(--bLen <= 0 ) break outer;
-
-                   count2 = b0 - expR2LSearchGapL(b,b0-bLen,b0, a,a0-1);
+                   count2 = b0 - expR2LSearchGap(b,b0-bLen,b0, a,a0-1, false);
+//                   count2 = b0 - gallopR2LSearchGap(b,b0-bLen,b0, a,a0-1, false);
           if( 0 != count2 ) {
              b0 -= count2;
              c0 -= count2; copyRange(b,b0, c,c0, count2);
@@ -185,17 +206,29 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
           copy(a,--a0, c,--c0);
           if(--aLen <= 0 ) break outer;
 
-          minGallop--;
+                   count1 = a0 - expR2LSearchGap(a,a0-aLen,a0, b,b0-1, true);
+//                   count1 = a0 - gallopR2LSearchGap(a,a0-aLen,a0, b,b0-1, true);
+          if( 0 != count1 ) {
+             a0 -= count1;
+             c0 -= count1; copyRange(a,a0, c,c0, count1);
+           aLen -= count1;
+           if( aLen <= 0 ) break outer;
+          }
+          copy(b,--b0, c,--c0);
+          if(--bLen <= 0 ) break outer;
+
+          --minGallop;
         } while( count1 >= MIN_GALLOP | count2 >= MIN_GALLOP );
 
         if(minGallop < 0)
            minGallop = 0;
            minGallop+= 2;  // Penalize for leaving gallop mode
-
       }
 
     assert ! (aLen != 0 && bLen != 0);
          if( aLen!=0 ) copyRange(a,a0-aLen, c,c0-aLen, aLen);
     else if( bLen!=0 ) copyRange(b,b0-bLen, c,c0-bLen, bLen);
+
+    return max(1,minGallop);
   }
 }

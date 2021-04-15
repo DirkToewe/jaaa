@@ -24,7 +24,7 @@ import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeR2L;
 
 public interface HwangLinMergeAccessor<T> extends CompareRandomAccessor<T>
 {
-  default void hwangLinMergeV1(
+  default void hwangLinMerge(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
@@ -32,22 +32,22 @@ public interface HwangLinMergeAccessor<T> extends CompareRandomAccessor<T>
   {
     if(  a==c && c0 < a0+aLen && a0 <= c0
       || b==c && c0 < b0+bLen && b0 <= c0 )
-      hwangLinMergeV1_R2L(a,a0,aLen, b,b0,bLen, c,c0); // <- depending on overlap, merge from right to left
+      hwangLinMergeR2L(a,a0,aLen, b,b0,bLen, c,c0); // <- depending on overlap, merge from right to left
     else
-      hwangLinMergeV1_L2R(a,a0,aLen, b,b0,bLen, c,c0);
+      hwangLinMergeL2R(a,a0,aLen, b,b0,bLen, c,c0);
   }
 
 
-  default void hwangLinMergeV1_L2R(
+  default void hwangLinMergeL2R(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
   )
   {
     checkArgs_mergeL2R(
-      this, a, a0, aLen,
-            b, b0, bLen,
-            c, c0
+      a, a0, aLen,
+      b, b0, bLen,
+      c, c0
     );
 
     for( int cmp=1;; )
@@ -95,16 +95,16 @@ public interface HwangLinMergeAccessor<T> extends CompareRandomAccessor<T>
   }
 
 
-  default void hwangLinMergeV1_R2L(
+  default void hwangLinMergeR2L(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
   )
   {
     checkArgs_mergeR2L(
-      this, a, a0, aLen,
-            b, b0, bLen,
-            c, c0
+      a, a0, aLen,
+      b, b0, bLen,
+      c, c0
     );
 
     c0 += aLen+bLen;

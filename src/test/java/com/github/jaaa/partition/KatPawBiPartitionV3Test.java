@@ -1,18 +1,10 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateSwapAccess;
-import com.github.jaaa.Swap;
-import net.jqwik.api.Example;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
-import net.jqwik.api.ShrinkingMode;
 import net.jqwik.api.constraints.IntRange;
-import net.jqwik.api.constraints.Size;
-
-import java.util.Arrays;
 
 import static java.lang.Math.sqrt;
-import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class KatPawBiPartitionV3Test extends BiPartitionTestTemplate

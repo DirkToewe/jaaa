@@ -1,5 +1,7 @@
 package com.github.jaaa;
 
+import java.util.function.Function;
+
 import static java.lang.String.format;
 
 public class WithRange<T> extends With<T>
@@ -23,5 +25,13 @@ public class WithRange<T> extends With<T>
 
   @Override public String toString() {
     return format( "WithRange{ from: %d, until: %d, data: %s }", from, until, dataString() );
+  }
+
+  @Override public WithRange<T> clone() {
+    return new WithRange<>(from,until, getData());
+  }
+
+  public <U> WithRange<U> map( Function<? super T,? extends U> mapFn ) {
+    return new WithRange<>( from, until, mapFn.apply(getData()) );
   }
 }

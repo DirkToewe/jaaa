@@ -31,9 +31,9 @@ public interface ExpMergeV4Accessor<T> extends CompareRandomAccessor<T>
   )
   {
     checkArgs_mergeL2R(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     for( int cmp=1; bLen > 0; )
@@ -45,20 +45,21 @@ public interface ExpMergeV4Accessor<T> extends CompareRandomAccessor<T>
       int o=aLen; aLen=bLen; bLen=o;
 
       int lo = 0,
-          hi = bLen-1;
+          hi = bLen;
       // GALLOPING PHASE
-      for( int step=0; step <= hi-lo; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
+      for( int step=0; step < hi-lo; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
       {
         int                    next = lo+step;
         if( compare(a,a0, b,b0+next) < cmp ) {
-                     hi = -1 + next; break;
-        }            lo = +1 + next;
+                          hi = next; break;
+        }                 lo = next+1;
       }
 
       // BINARY SEARCH PHASE
-      while( lo <= hi ){ int mid = lo+hi >>> 1;
-        if( compare(a,a0, b,b0+mid) < cmp ) hi = -1 + mid;
-        else                              lo = +1 + mid;
+      while( lo < hi ) {   int mid = lo+hi >>> 1;
+        if( compare(a,a0, b,b0+mid) < cmp )
+                          hi = mid;
+        else              lo = mid+1;
       }
 
       copyRange(b,b0, c,c0, lo);
@@ -80,9 +81,9 @@ public interface ExpMergeV4Accessor<T> extends CompareRandomAccessor<T>
   {
 
     checkArgs_mergeR2L(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
     c0 += aLen+bLen;
@@ -97,19 +98,20 @@ public interface ExpMergeV4Accessor<T> extends CompareRandomAccessor<T>
       --aLen;
 
       int lo = 0,
-          hi = bLen-1;
+          hi = bLen;
       // galloping phase
-      for( int step=0; step <= hi-lo; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
+      for( int step=1; step < hi-lo; step<<=1 )  // <- make step have all bits set such that binary search is optimally efficient
       {
-        int                    next = hi-step;
+        int                         next = hi-step;
         if( compare(a,a0+aLen, b,b0+next) > cmp ) {
-                     lo = +1 + next; break;
-        }            hi = -1 + next;
+                               lo = next+1; break;
+        }                      hi = next;
       }
       // binary search phase
-      while( lo <= hi ) {  int mid = lo+hi >>> 1;
-        if( compare(a,a0+aLen, b,b0+mid) > cmp ) lo = +1 + mid;
-        else                                hi = -1 + mid;
+      while( lo < hi ) {        int mid = lo+hi >>> 1;
+        if( compare(a,a0+aLen, b,b0+mid) > cmp )
+                               lo = mid+1;
+        else                   hi = mid;
       }
 
       bLen -= lo = bLen-lo;

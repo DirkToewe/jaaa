@@ -52,7 +52,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData();
+    byte[] array = sample.getData().clone();
     int      key = sample.getIndex();
 
     Arrays.sort(array);
@@ -74,7 +74,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -97,7 +97,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData().getData();
+    byte[] array = sample.getData().getData().clone();
     int      key = sample.getData().getIndex(),
             from = sample.getFrom(),
            until = sample.getUntil();
@@ -131,7 +131,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData().getData();
+    int[] array = sample.getData().getData().clone();
     int     key = sample.getData().getIndex(),
            from = sample.getFrom(),
           until = sample.getUntil();
@@ -166,6 +166,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void search2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     byte[] keyArray = keyArrWithIndex.getData();
     int    key      = keyArrWithIndex.getIndex();
 
@@ -199,6 +201,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void search2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     int[] keyArr = keyArrWithIndex.getData();
     int   key    = keyArrWithIndex.getIndex();
 
@@ -233,7 +237,7 @@ public abstract class SearchAccessorTestTemplate
   void search2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData();
+        searchArr = searchArrWithRange.getData().clone();
     int       key =    keyArrWithIndex.getIndex(),
              from = searchArrWithRange.getFrom(),
             until = searchArrWithRange.getUntil();
@@ -269,7 +273,7 @@ public abstract class SearchAccessorTestTemplate
   void search2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData();
+       searchArr = searchArrWithRange.getData().clone();
     int      key =    keyArrWithIndex.getIndex(),
             from = searchArrWithRange.getFrom(),
            until = searchArrWithRange.getUntil();
@@ -307,7 +311,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData();
+    byte[] array = sample.getData().clone();
     int      key = sample.getIndex();
 
     Arrays.sort(array);
@@ -329,7 +333,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -352,7 +356,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData().getData();
+    byte[] array = sample.getData().getData().clone();
     int      key = sample.getData().getIndex(),
             from = sample.getFrom(),
            until = sample.getUntil();
@@ -386,7 +390,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchLArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData().getData();
+    int[] array = sample.getData().getData().clone();
     int     key = sample.getData().getIndex(),
            from = sample.getFrom(),
           until = sample.getUntil();
@@ -421,6 +425,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchL2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     byte[] keyArray = keyArrWithIndex.getData();
     int    key      = keyArrWithIndex.getIndex();
 
@@ -453,6 +459,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchL2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     int[] keyArray = keyArrWithIndex.getData();
     int   key      = keyArrWithIndex.getIndex();
 
@@ -487,7 +495,7 @@ public abstract class SearchAccessorTestTemplate
   void searchL2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData();
+        searchArr = searchArrWithRange.getData().clone();
     int       key =    keyArrWithIndex.getIndex(),
              from = searchArrWithRange.getFrom(),
             until = searchArrWithRange.getUntil();
@@ -522,7 +530,7 @@ public abstract class SearchAccessorTestTemplate
   void searchL2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData();
+       searchArr = searchArrWithRange.getData().clone();
     int      key =    keyArrWithIndex.getIndex(),
             from = searchArrWithRange.getFrom(),
            until = searchArrWithRange.getUntil();
@@ -560,7 +568,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData();
+    byte[] array = sample.getData().clone();
     int      key = sample.getIndex();
 
     Arrays.sort(array);
@@ -582,7 +590,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -605,7 +613,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData().getData();
+    byte[] array = sample.getData().getData().clone();
     int      key = sample.getData().getIndex(),
             from = sample.getFrom(),
            until = sample.getUntil();
@@ -639,7 +647,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchRArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData().getData();
+    int[] array = sample.getData().getData().clone();
     int     key = sample.getData().getIndex(),
            from = sample.getFrom(),
           until = sample.getUntil();
@@ -674,6 +682,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchR2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     byte[] keyArray = keyArrWithIndex.getData();
     int    key      = keyArrWithIndex.getIndex();
 
@@ -706,6 +716,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchR2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     int[] keyArray = keyArrWithIndex.getData();
     int   key      = keyArrWithIndex.getIndex();
 
@@ -740,7 +752,7 @@ public abstract class SearchAccessorTestTemplate
   void searchR2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData();
+        searchArr = searchArrWithRange.getData().clone();
     int       key =    keyArrWithIndex.getIndex(),
              from = searchArrWithRange.getFrom(),
             until = searchArrWithRange.getUntil();
@@ -775,7 +787,7 @@ public abstract class SearchAccessorTestTemplate
   void searchR2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData();
+       searchArr = searchArrWithRange.getData().clone();
     int      key =    keyArrWithIndex.getIndex(),
             from = searchArrWithRange.getFrom(),
            until = searchArrWithRange.getUntil();
@@ -813,7 +825,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData();
+    byte[] array = sample.getData().clone();
     int      key = sample.getIndex();
 
     Arrays.sort(array);
@@ -835,7 +847,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -858,7 +870,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData().getData();
+    byte[] array = sample.getData().getData().clone();
     int      key = sample.getData().getIndex(),
             from = sample.getFrom(),
            until = sample.getUntil();
@@ -882,7 +894,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData().getData();
+    int[] array = sample.getData().getData().clone();
     int     key = sample.getData().getIndex(),
            from = sample.getFrom(),
           until = sample.getUntil();
@@ -907,6 +919,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGap2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     byte[] keyArray = keyArrWithIndex.getData();
     int    key      = keyArrWithIndex.getIndex();
 
@@ -929,6 +943,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGap2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     int[] keyArray = keyArrWithIndex.getData();
     int   key      = keyArrWithIndex.getIndex();
 
@@ -953,7 +969,7 @@ public abstract class SearchAccessorTestTemplate
   void searchGap2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData();
+        searchArr = searchArrWithRange.getData().clone();
     int       key =    keyArrWithIndex.getIndex(),
              from = searchArrWithRange.getFrom(),
             until = searchArrWithRange.getUntil();
@@ -978,7 +994,7 @@ public abstract class SearchAccessorTestTemplate
   void searchGap2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData();
+       searchArr = searchArrWithRange.getData().clone();
     int      key =    keyArrWithIndex.getIndex(),
             from = searchArrWithRange.getFrom(),
            until = searchArrWithRange.getUntil();
@@ -1006,7 +1022,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData();
+    byte[] array = sample.getData().clone();
     int      key = sample.getIndex();
 
     Arrays.sort(array);
@@ -1028,7 +1044,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -1051,7 +1067,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData().getData();
+    byte[] array = sample.getData().getData().clone();
     int      key = sample.getData().getIndex(),
             from = sample.getFrom(),
            until = sample.getUntil();
@@ -1075,7 +1091,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData().getData();
+    int[] array = sample.getData().getData().clone();
     int     key = sample.getData().getIndex(),
            from = sample.getFrom(),
           until = sample.getUntil();
@@ -1100,6 +1116,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapL2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     byte[] keyArray = keyArrWithIndex.getData();
     int    key      = keyArrWithIndex.getIndex();
 
@@ -1122,6 +1140,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapL2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     int[] keyArray = keyArrWithIndex.getData();
     int   key      = keyArrWithIndex.getIndex();
 
@@ -1146,7 +1166,7 @@ public abstract class SearchAccessorTestTemplate
   void searchGapL2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData();
+        searchArr = searchArrWithRange.getData().clone();
     int       key =    keyArrWithIndex.getIndex(),
              from = searchArrWithRange.getFrom(),
             until = searchArrWithRange.getUntil();
@@ -1171,7 +1191,7 @@ public abstract class SearchAccessorTestTemplate
   void searchGapL2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData();
+       searchArr = searchArrWithRange.getData().clone();
     int      key =    keyArrWithIndex.getIndex(),
             from = searchArrWithRange.getFrom(),
            until = searchArrWithRange.getUntil();
@@ -1199,7 +1219,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData();
+    byte[] array = sample.getData().clone();
     int      key = sample.getIndex();
 
     Arrays.sort(array);
@@ -1221,7 +1241,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -1244,7 +1264,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
   {
-    byte[] array = sample.getData().getData();
+    byte[] array = sample.getData().getData().clone();
     int      key = sample.getData().getIndex(),
             from = sample.getFrom(),
            until = sample.getUntil();
@@ -1268,7 +1288,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData().getData();
+    int[] array = sample.getData().getData().clone();
     int     key = sample.getData().getIndex(),
            from = sample.getFrom(),
           until = sample.getUntil();
@@ -1293,6 +1313,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapR2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     byte[] keyArray = keyArrWithIndex.getData();
     int    key      = keyArrWithIndex.getIndex();
 
@@ -1315,6 +1337,8 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapR2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
+    searchArr = searchArr.clone();
+
     int[] keyArray = keyArrWithIndex.getData();
     int   key      = keyArrWithIndex.getIndex();
 
@@ -1339,7 +1363,7 @@ public abstract class SearchAccessorTestTemplate
   void searchGapR2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData();
+        searchArr = searchArrWithRange.getData().clone();
     int       key =    keyArrWithIndex.getIndex(),
              from = searchArrWithRange.getFrom(),
             until = searchArrWithRange.getUntil();
@@ -1364,7 +1388,7 @@ public abstract class SearchAccessorTestTemplate
   void searchGapR2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
   {
     int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData();
+       searchArr = searchArrWithRange.getData().clone();
     int      key =    keyArrWithIndex.getIndex(),
             from = searchArrWithRange.getFrom(),
            until = searchArrWithRange.getUntil();
@@ -1392,7 +1416,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -1443,7 +1467,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchRComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -1466,10 +1490,10 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchRComparisonLimitArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData().getData();
+    int[] array = sample.getData().getData().clone();
     int     key = sample.getData().getIndex(),
-            from = sample.getFrom(),
-            until = sample.getUntil();
+           from = sample.getFrom(),
+          until = sample.getUntil();
 
     Arrays.sort(array, from,until);
     if(reversed) Revert.revert(array, from,until);
@@ -1494,7 +1518,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchLComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -1517,10 +1541,10 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchLComparisonLimitArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData().getData();
+    int[] array = sample.getData().getData().clone();
     int     key = sample.getData().getIndex(),
-            from = sample.getFrom(),
-            until = sample.getUntil();
+           from = sample.getFrom(),
+          until = sample.getUntil();
 
     Arrays.sort(array, from,until);
     if(reversed) Revert.revert(array, from,until);
@@ -1546,7 +1570,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -1569,7 +1593,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapComparisonLimitArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData().getData();
+    int[] array = sample.getData().getData().clone();
     int     key = sample.getData().getIndex(),
            from = sample.getFrom(),
           until = sample.getUntil();
@@ -1597,7 +1621,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -1620,10 +1644,10 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRComparisonLimitArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData().getData();
+    int[] array = sample.getData().getData().clone();
     int     key = sample.getData().getIndex(),
-            from = sample.getFrom(),
-            until = sample.getUntil();
+           from = sample.getFrom(),
+          until = sample.getUntil();
 
     Arrays.sort(array, from,until);
     if(reversed) Revert.revert(array, from,until);
@@ -1648,7 +1672,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData();
+    int[] array = sample.getData().clone();
     int     key = sample.getIndex();
 
     Arrays.sort(array);
@@ -1671,7 +1695,7 @@ public abstract class SearchAccessorTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLComparisonLimitArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
   {
-    int[] array = sample.getData().getData();
+    int[] array = sample.getData().getData().clone();
     int     key = sample.getData().getIndex(),
            from = sample.getFrom(),
           until = sample.getUntil();

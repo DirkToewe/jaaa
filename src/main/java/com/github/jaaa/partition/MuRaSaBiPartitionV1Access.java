@@ -1,7 +1,6 @@
 package com.github.jaaa.partition;
 
 import com.github.jaaa.misc.BlockSwapAccess;
-import com.github.jaaa.misc.RotateAccess;
 
 import static java.lang.Math.min;
 import static java.lang.Math.subtractExact;
@@ -19,7 +18,7 @@ import static com.github.jaaa.util.IMath.sqrtFloor;
 //         J. IAN MUNRO, VENKATESH RAMAN and JEFFREY S. SALOWE
 
 public interface MuRaSaBiPartitionV1Access extends BlockSwapAccess,
-                                       ExtractBufBiPartitionAccess
+        ExtractBiPartitionBufAccess
 {
   private static int blockSizes( int len )
   {
@@ -56,8 +55,8 @@ public interface MuRaSaBiPartitionV1Access extends BlockSwapAccess,
               nR = (len - n*n) - nL;
 
     // buffer extraction
-    if( extractBufB(from,until,nR) < nR ) return; until -= nR;
-    if( extractBufA(from,until,nL) < nL ) return;
+    if( extractBiPartitionBufB_R(from,until,nR) < nR ) return; until -= nR;
+    if( extractBiPartitionBufA_L(from,until,nL) < nL ) return;
 
     if( from+nL == until ) return;
 

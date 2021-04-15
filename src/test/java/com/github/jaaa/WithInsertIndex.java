@@ -1,5 +1,7 @@
 package com.github.jaaa;
 
+import java.util.function.Function;
+
 import static java.lang.String.format;
 
 public class WithInsertIndex<T> extends With<T>
@@ -18,5 +20,13 @@ public class WithInsertIndex<T> extends With<T>
 
   @Override public String toString() {
     return format( "WithInsertIndex{ index: %d, data: %s }", index, dataString() );
+  }
+
+  @Override public WithInsertIndex<T> clone() {
+    return new WithInsertIndex<>(index, getData());
+  }
+
+  public <U> WithInsertIndex<U> map( Function<? super T,? extends U> mapFn ) {
+    return new WithInsertIndex<>( index, mapFn.apply(getData()) );
   }
 }

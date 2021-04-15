@@ -1,8 +1,10 @@
 package com.github.jaaa.partition;
 
+import com.github.jaaa.PredicateSwapAccess;
+import com.github.jaaa.SwapAccess;
 import com.github.jaaa.misc.BlockSwapAccess;
+import com.github.jaaa.misc.RotateAccess;
 import com.github.jaaa.util.Byte256;
-import com.github.jaaa.util.IntBiConsumer;
 import com.github.jaaa.util.IntTriOp;
 
 import java.util.function.IntFunction;
@@ -35,8 +37,7 @@ import static java.lang.Math.*;
 // .. [1] "STABLE MINIMUM SPACE PARTITIONING IN LINEAR TIME"
 //         JYRKI KATAJAINEN and TOMI PASANEN
 
-public interface KatPawBiPartitionV5Access extends BlockSwapAccess,
-        ExtractBufBiPartitionAccess
+public interface KatPawBiPartitionV5Access extends PredicateSwapAccess, BlockSwapAccess, RotateAccess
 {
   default void katPawBiPartitionV5( int from, int until )
   {
@@ -79,7 +80,7 @@ public interface KatPawBiPartitionV5Access extends BlockSwapAccess,
                 p256= -1; // <- position of last B-sized chunk to be collected as left buffer
     final int n1 = nL % B; // <- remainder of elements to be used as left buffer,  i.e. elements that cannot be collected as B-sized chunks
 
-    IntFunction<IntBiConsumer> swapper = off -> (i,j) -> swap(off+i, off+j);
+    IntFunction<SwapAccess> swapper = off -> (i, j) -> swap(off+i, off+j);
 
     for( int l=from; l < until; l++ )
     {

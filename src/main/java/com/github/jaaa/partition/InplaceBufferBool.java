@@ -2,6 +2,7 @@ package com.github.jaaa.partition;
 
 import com.github.jaaa.PredicateSwapAccess;
 
+
 final class InplaceBufferBool
 {
 // STATIC FIELDS

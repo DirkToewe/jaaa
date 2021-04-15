@@ -1,18 +1,19 @@
 package com.github.jaaa.misc;
 
-import com.github.jaaa.RandomAccessor;
+import com.github.jaaa.CopyAccessor;
 
 import java.util.concurrent.CountedCompleter;
 
 import static java.util.Objects.requireNonNull;
 
+
 public class ParallelCopyTask<T> extends CountedCompleter<T>
 {
   private final int a0,b0,height,length;
   private final  T  a, b;
-  private final RandomAccessor<? super T> acc;
+  private final CopyAccessor<? super T> acc;
 
-  public ParallelCopyTask( int _height, CountedCompleter<?> parent, T _a, int _a0, T _b, int _b0, int _length, RandomAccessor<? super T> _acc )
+  public ParallelCopyTask( int _height, CountedCompleter<?> parent, T _a, int _a0, T _b, int _b0, int _length, CopyAccessor<? super T> _acc )
   {
     super(parent);
     if(_height < 0 ) throw new IllegalArgumentException();

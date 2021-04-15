@@ -17,16 +17,16 @@ public class RandomSortDataGenerator
 
   private void nextUniform( int[] array, int from, int until, int step )
   {
-    int mag = rng.nextInt(array.length*2),
-        off = rng.nextInt(array.length*2) - array.length;
+    int mag = rng.nextInt(array.length*2+1) + 1,
+        off = rng.nextInt(array.length*2+1) - array.length;
     for( int i=from; i < until; i+= step )
       array[i] = rng.nextInt(mag) + off;
   }
 
   private void nextGaussian( int[] array, int from, int until, int step )
   {
-    int mag = rng.nextInt(array.length*2),
-            off = rng.nextInt(array.length*2) - array.length;
+    int mag = rng.nextInt(array.length*2+1),
+        off = rng.nextInt(array.length*2+1) - array.length;
     for( int i=from; i < until; i+= step )
       array[i] = (int) (rng.nextGaussian()*mag + off);
   }
@@ -34,7 +34,7 @@ public class RandomSortDataGenerator
   private void nextAscending( int[] array, int from, int until, int step )
   {
     int slope = rng.nextInt(4) + 2,
-          off = rng.nextInt(array.length*3) - array.length*2;
+          off = rng.nextInt(array.length*3+1) - array.length*2;
 
     if( from < until )
       array[from] = off;
@@ -46,7 +46,7 @@ public class RandomSortDataGenerator
   private void nextDescending( int[] array, int from, int until, int step )
   {
     int slope = rng.nextInt(4) + 2,
-          off = rng.nextInt(array.length*3) - array.length;
+          off = rng.nextInt(array.length*3+1) - array.length;
 
     if( from < until )
       array[from] = off;
@@ -59,7 +59,7 @@ public class RandomSortDataGenerator
   {
     int len = (until-from) / step;
 
-    if( 3 < len && rng.nextDouble() < 0.5 )
+    if( 3 < len && rng.nextDouble() < 2/3d )
     {
       if( rng.nextDouble() < 0.5 ) {
         // INTERLEAVE
@@ -126,5 +126,10 @@ public class RandomSortDataGenerator
     int[] result = new int[len];
     nextMixed(result, 0,result.length, 1);
     return result;
+  }
+
+  public void nextMixed( int[] array )
+  {
+    nextMixed(array, 0,array.length, 1);
   }
 }

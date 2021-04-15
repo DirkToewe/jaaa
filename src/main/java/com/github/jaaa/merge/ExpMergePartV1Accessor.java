@@ -16,9 +16,9 @@ public interface ExpMergePartV1Accessor<T> extends CompareRandomAccessor<T>
   )
   {
     checkArgs_mergePartL2R(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0,cLen
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0,cLen
     );
 
     for( int cmp = 1;; )
@@ -61,7 +61,7 @@ public interface ExpMergePartV1Accessor<T> extends CompareRandomAccessor<T>
       c0 += lo; copy(a,a0++, c,c0++);
     }
 
-    copyRange(b,b0, c,c0, bLen);
+    copyRange(b,b0, c,c0, cLen);
   }
 
 
@@ -72,9 +72,9 @@ public interface ExpMergePartV1Accessor<T> extends CompareRandomAccessor<T>
   )
   {
     checkArgs_mergePartR2L(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0,cLen
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0,cLen
     );
 
     a0 += aLen;
@@ -121,6 +121,6 @@ public interface ExpMergePartV1Accessor<T> extends CompareRandomAccessor<T>
       copy(a,a0, c,c0+cLen);
     }
 
-    copyRange(b,b0, c,c0-bLen, bLen);
+    copyRange(b,b0-cLen, c,c0, cLen);
   }
 }

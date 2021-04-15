@@ -1,7 +1,6 @@
 package com.github.jaaa.partition;
 
 import com.github.jaaa.misc.BlockSwapAccess;
-import com.github.jaaa.misc.RotateAccess;
 
 import static com.github.jaaa.util.IMath.log2Ceil;
 import static com.github.jaaa.util.IMath.sqrtFloor;
@@ -19,7 +18,7 @@ import static java.lang.Math.*;
 //         J. Ian Munro, Venkatesh Raman and Jeffrey S. Salowe
 
 public interface MuRaSaBiPartitionV2Access extends BlockSwapAccess,
-                                       ExtractBufBiPartitionAccess
+        ExtractBiPartitionBufAccess
 {
   private static int blockSizes( int len )
   {
@@ -58,8 +57,8 @@ public interface MuRaSaBiPartitionV2Access extends BlockSwapAccess,
               nR = (len - n*n) - nL;
 
     // buffer extraction
-    if( extractBufB(from,until,nR) < nR ) return; until -= nR;
-    if( extractBufA(from,until,nL) < nL ) return;
+    if( extractBiPartitionBufB_R(from,until,nR) < nR ) return; until -= nR;
+    if( extractBiPartitionBufA_L(from,until,nL) < nL ) return;
 
     // starting of positions of the left and right sides of the two bit buffers.
     int finL = from,  lg2L = finL + n,

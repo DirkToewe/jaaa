@@ -60,7 +60,7 @@ public class ParallelMergeComparison
     if( ! ea ) throw new AssertionError("Assertions not enabled.");
   }
 
-  private static interface MergeFn
+  private interface MergeFn
   {
     public <T> void merge(
       T a, int i, int m,
@@ -69,17 +69,17 @@ public class ParallelMergeComparison
     );
   }
 
-  private static interface CompRandAccessor<T> extends CompareRandomAccessor<T[]>
+  private interface CompRandAccessor<T> extends CompareRandomAccessor<T[]>
   {
-    @Override public default int         len( T[] buf ) { return buf.length; }
-    @Override public default void       swap( T[] a, int i, T[] b, int j ) { Swap.swap(a,i, b,j); }
-    @Override public default void  copy     ( T[] a, int i, T[] b, int j ) { b[j]=a[i]; }
-    @Override public default void  copyRange( T[] a, int i, T[] b, int j, int len ){ arraycopy(a,i, b,j, len); }
+    @Override default T[] malloc( int len ) { throw new UnsupportedOperationException(); }
+    @Override default void       swap( T[] a, int i, T[] b, int j ) { Swap.swap(a,i, b,j); }
+    @Override default void  copy     ( T[] a, int i, T[] b, int j ) { b[j]=a[i]; }
+    @Override default void  copyRange( T[] a, int i, T[] b, int j, int len ){ arraycopy(a,i, b,j, len); }
   }
 
   private static final class CompRandccessorDouble implements CompareRandomAccessor<double[]>
   {
-    @Override public int         len( double[] buf ) { return buf.length; }
+    @Override public double[] malloc(int len ) { return new double[len]; }
     @Override public int     compare( double[] a, int i, double[] b, int j ) { int c = Double.compare(a[i],b[j]); /*nComps+=1;  */ return c; }
     @Override public void       swap( double[] a, int i, double[] b, int j ) {              Swap.swap(a,i, b,j);  /*nWrite+=2;  */ }
     @Override public void  copy     ( double[] a, int i, double[] b, int j ) {                        b[j]=a[i];  /*nWrite+=1;  */ }
@@ -94,8 +94,8 @@ public class ParallelMergeComparison
 
     Map<String,MergeFn> mergers = Map.ofEntries(
       entry("RecV1", PARALLEL_REBEL_MERGER::merge),
-      entry("RecV2", PARALLEL_ZEN_MERGER::merge),
-      entry("Skip",    PARALLEL_SKIP_MERGER::merge)
+      entry("RecV2", PARALLEL_ZEN_MERGER  ::merge),
+      entry("Skip",  PARALLEL_SKIP_MERGER ::merge)
     );
 
     int N_SAMPLES = 1_000,

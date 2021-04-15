@@ -2,9 +2,12 @@ package com.github.jaaa.merge;
 
 import com.github.jaaa.CompareRandomAccessor;
 import net.jqwik.api.Group;
+import net.jqwik.api.Tuple;
 
 public class RexMergeAccessorTest extends MergeAccessorTestTemplate
 {
+  @Override public int maxArraySize() { return 32*1024; }
+
   @Override protected boolean isStable() { return true; }
   @Override protected boolean mergesInplaceL2R() { return true; }
   @Override protected boolean mergesInplaceR2L() { return true; }
@@ -16,7 +19,7 @@ public class RexMergeAccessorTest extends MergeAccessorTestTemplate
 
     public HLAccessor( CompareRandomAccessor<T> _acc ) { acc =_acc; }
 
-    @Override public int     len( T buf ) { return acc.len(buf); }
+    @Override public T malloc(int len ) { return acc.malloc(len); }
     @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
     @Override public void   copy( T a, int i, T b, int j ) { acc.copy(a,i, b,j); }
     @Override public void   swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }
@@ -30,6 +33,8 @@ public class RexMergeAccessorTest extends MergeAccessorTestTemplate
   @Group
   class L2R extends MergeAccessorTestTemplate
   {
+    @Override public int maxArraySize() { return 32*1024; }
+
     @Override protected boolean isStable() { return true; }
     @Override protected boolean mergesInplaceL2R() { return true; }
     @Override protected boolean mergesInplaceR2L() { return false; }
@@ -41,7 +46,7 @@ public class RexMergeAccessorTest extends MergeAccessorTestTemplate
 
       public HLAccessor( CompareRandomAccessor<T> _acc ) { acc =_acc; }
 
-      @Override public int     len( T buf ) { return acc.len(buf); }
+      @Override public T malloc(int len ) { return acc.malloc(len); }
       @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
       @Override public void   copy( T a, int i, T b, int j ) { acc.copy(a,i, b,j); }
       @Override public void   swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }
@@ -56,6 +61,8 @@ public class RexMergeAccessorTest extends MergeAccessorTestTemplate
   @Group
   class R2L extends MergeAccessorTestTemplate
   {
+    @Override public int maxArraySize() { return 32*1024; }
+
     @Override protected boolean isStable() { return true; }
     @Override protected boolean mergesInplaceL2R() { return false; }
     @Override protected boolean mergesInplaceR2L() { return true; }
@@ -67,7 +74,7 @@ public class RexMergeAccessorTest extends MergeAccessorTestTemplate
 
       public HLAccessor( CompareRandomAccessor<T> _acc ) { acc =_acc; }
 
-      @Override public int     len( T buf ) { return acc.len(buf); }
+      @Override public T malloc(int len ) { return acc.malloc(len); }
       @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
       @Override public void   copy( T a, int i, T b, int j ) { acc.copy(a,i, b,j); }
       @Override public void   swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }

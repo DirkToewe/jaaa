@@ -25,9 +25,9 @@ public interface RecMergePartAccessor<T> extends CompareRandomAccessor<T>,
     T c, int c0, int cLen
   ) {
     checkArgs_mergePartL2R(
-      this, a, a0, aLen,
-            b, b0, bLen,
-            c, c0, cLen
+      a, a0, aLen,
+      b, b0, bLen,
+      c, c0, cLen
     );
 
     new RecMergePartFn(c0,cLen) {
@@ -70,9 +70,9 @@ public interface RecMergePartAccessor<T> extends CompareRandomAccessor<T>,
     T c, int c0, int cLen
   ) {
     checkArgs_mergePartR2L(
-      this, a, a0, aLen,
-            b, b0, bLen,
-            c, c0, cLen
+      a, a0, aLen,
+      b, b0, bLen,
+      c, c0, cLen
     );
 
     new RecMergePartFn(c0+cLen, cLen) {

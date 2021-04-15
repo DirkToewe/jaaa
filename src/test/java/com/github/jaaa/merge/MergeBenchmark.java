@@ -14,7 +14,7 @@ public class MergeBenchmark extends MergeBenchmarkTemplate
 
 
   private static final HwangLinMergeAccessor<Double[]> HWANG_LIN_COMPARABLE_DOUBLE = new HwangLinMergeAccessor<>() {
-    @Override public int        len( Double[] buf ) { return buf.length; }
+    @Override public Double[] malloc( int len ) { return new Double[len]; }
     @Override public void copy     ( Double[] a, int i, Double[] b, int j ) { b[j] = a[i]; }
     @Override public void copyRange( Double[] a, int i, Double[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
     @Override public void      swap( Double[] a, int i, Double[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -45,7 +45,7 @@ public class MergeBenchmark extends MergeBenchmarkTemplate
     assert testA.length == lenA;
     assert testB.length == lenB;
 
-    HWANG_LIN_COMPARABLE_DOUBLE.hwangLinMergeV1_L2R(testA,0,testA.length, testB,0,testB.length, testC,0);
+    HWANG_LIN_COMPARABLE_DOUBLE.hwangLinMergeL2R(testA,0,testA.length, testB,0,testB.length, testC,0);
   }
 
   @Benchmark
@@ -54,12 +54,12 @@ public class MergeBenchmark extends MergeBenchmarkTemplate
     assert testA.length == lenA;
     assert testB.length == lenB;
 
-    HWANG_LIN_COMPARABLE_DOUBLE.hwangLinMergeV1_R2L(testA,0,testA.length, testB,0,testB.length, testC,0);
+    HWANG_LIN_COMPARABLE_DOUBLE.hwangLinMergeR2L(testA,0,testA.length, testB,0,testB.length, testC,0);
   }
 
 
   private static final TapeMergeAccessor<Double[]> TAPE_COMPARABLE_DOUBLE = new TapeMergeAccessor<>() {
-    @Override public int        len( Double[] buf ) { return buf.length; }
+    @Override public Double[] malloc( int len ) { return new Double[len]; }
     @Override public void copy     ( Double[] a, int i, Double[] b, int j ) { b[j] = a[i]; }
     @Override public void copyRange( Double[] a, int i, Double[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
     @Override public void      swap( Double[] a, int i, Double[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -104,7 +104,7 @@ public class MergeBenchmark extends MergeBenchmarkTemplate
 
 
   private static final RecMergeAccessor<Double[]> REC_COMPARABLE_DOUBLE = new RecMergeAccessor<>() {
-    @Override public int        len( Double[] buf ) { return buf.length; }
+    @Override public Double[] malloc( int len ) { return new Double[len]; }
     @Override public void copy     ( Double[] a, int i, Double[] b, int j ) { b[j] = a[i]; }
     @Override public void copyRange( Double[] a, int i, Double[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
     @Override public void      swap( Double[] a, int i, Double[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -149,7 +149,7 @@ public class MergeBenchmark extends MergeBenchmarkTemplate
 
 
   private static final ExpMergeV1Accessor<Double[]> EXP_V1_COMPARABLE_DOUBLE = new ExpMergeV1Accessor<>() {
-    @Override public int        len( Double[] buf ) { return buf.length; }
+    @Override public Double[] malloc( int len ) { return new Double[len]; }
     @Override public void copy     ( Double[] a, int i, Double[] b, int j ) { b[j] = a[i]; }
     @Override public void copyRange( Double[] a, int i, Double[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
     @Override public void      swap( Double[] a, int i, Double[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -194,7 +194,7 @@ public class MergeBenchmark extends MergeBenchmarkTemplate
 
 
   private static final ExpMergeV2Accessor<Double[]> EXP_V2_COMPARABLE_DOUBLE = new ExpMergeV2Accessor<>() {
-    @Override public int        len( Double[] buf ) { return buf.length; }
+    @Override public Double[] malloc( int len ) { return new Double[len]; }
     @Override public void copy     ( Double[] a, int i, Double[] b, int j ) { b[j] = a[i]; }
     @Override public void copyRange( Double[] a, int i, Double[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
     @Override public void      swap( Double[] a, int i, Double[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -239,7 +239,7 @@ public class MergeBenchmark extends MergeBenchmarkTemplate
 
 
   private static final BinaryMergeAccessor<Double[]> BINARY_COMPARABLE_DOUBLE = new BinaryMergeAccessor<>() {
-    @Override public int        len( Double[] buf ) { return buf.length; }
+    @Override public Double[] malloc( int len ) { return new Double[len]; }
     @Override public void copy     ( Double[] a, int i, Double[] b, int j ) { b[j] = a[i]; }
     @Override public void copyRange( Double[] a, int i, Double[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
     @Override public void      swap( Double[] a, int i, Double[] b, int j ) { Swap.swap(a,i, b,j); }

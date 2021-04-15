@@ -1,10 +1,10 @@
 package com.github.jaaa.partition;
 
 import com.github.jaaa.PredicateSwapAccess;
+import com.github.jaaa.SwapAccess;
 import com.github.jaaa.misc.BlockSwapAccess;
 import com.github.jaaa.misc.RotateAccess;
 import com.github.jaaa.util.Hex16;
-import com.github.jaaa.util.IntBiConsumer;
 import com.github.jaaa.util.IntBiFunction;
 
 import static java.lang.Math.subtractExact;
@@ -36,7 +36,7 @@ public interface HexRecBiPartitionV2Access extends PredicateSwapAccess, BlockSwa
     if( from == until ) return;
 
     int len = subtractExact(until,from);
-    IntBiFunction<IntBiConsumer> swapFn = (pos,n) -> (i,j) -> blockSwap(pos+n*i, pos+n*j, n);
+    IntBiFunction<SwapAccess> swapFn = (pos, n) -> (i, j) -> blockSwap(pos+n*i, pos+n*j, n);
     Hex16 order = new Hex16(); // stores up to 16 4-bit indices that keep track of permutations
 
     outer_loop:for( int n=1;; n*=16 )

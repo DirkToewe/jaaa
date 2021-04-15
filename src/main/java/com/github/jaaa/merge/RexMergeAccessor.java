@@ -26,10 +26,10 @@ import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeR2L;
 public interface RexMergeAccessor<T> extends CompareRandomAccessor<T>,
                                                  ExpSearchAccessor<T>
 {
-  abstract class RecMergeFn
+  abstract class RexMergeFn
   {
     public int k;
-    public RecMergeFn( int _k ) { k =_k; }
+    public RexMergeFn(int _k ) { k =_k; }
     public abstract void merge( int a0, int a1, int b0, int b1 );
   }
 
@@ -51,12 +51,12 @@ public interface RexMergeAccessor<T> extends CompareRandomAccessor<T>,
     T c, int c0
   ) {
     checkArgs_mergeL2R(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
-    new RecMergeFn(c0) {
+    new RexMergeFn(c0) {
       @Override public final void merge( int a0, int a1, int b0, int b1 )
       {
         int aLen = a1-a0, am = a0 + (aLen>>>1),
@@ -84,12 +84,12 @@ public interface RexMergeAccessor<T> extends CompareRandomAccessor<T>,
     T c, int c0
   ) {
     checkArgs_mergeR2L(
-      this,a,a0,aLen,
-           b,b0,bLen,
-           c,c0
+      a,a0,aLen,
+      b,b0,bLen,
+      c,c0
     );
 
-    new RecMergeFn(c0+aLen+bLen) {
+    new RexMergeFn(c0+aLen+bLen) {
       @Override public final void merge( int a0, int a1, int b0, int b1 )
       {
         int aLen = a1-a0, am = a0 + (aLen>>>1),

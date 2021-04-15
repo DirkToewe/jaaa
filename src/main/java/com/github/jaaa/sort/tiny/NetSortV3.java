@@ -5,6 +5,7 @@ import com.github.jaaa.CompareSwapAccess;
 import com.github.jaaa.Swap;
 import com.github.jaaa.sort.SorterInplace;
 
+import java.nio.IntBuffer;
 import java.util.Comparator;
 
 import static java.util.Comparator.naturalOrder;
@@ -16,46 +17,51 @@ public final class NetSortV3
   {
     @Override public boolean isStable() { return true; }
 
-    @Override public <T> void sort( T seq, int from, int until, CompareRandomAccessor<? super T> acc ) { NetSortV3.sort(seq,from,until,acc); }
-    @Override public     void sort(        int from, int until, CompareSwapAccess                acc ) { NetSortV3.sort(    from,until,acc); }
+    @Override public <T> void sort( T seq, int from, int until, CompareRandomAccessor<T> acc ) { NetSortV3.sort(seq,from,until,acc); }
+    @Override public     void sort(        int from, int until, CompareSwapAccess        acc ) { NetSortV3.sort(    from,until,acc); }
 
-    @Override public void sort(   byte[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
-    @Override public void sort(   byte[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
-    @Override public void sort(   byte[] seq,                      ComparatorByte   cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
-    @Override public void sort(   byte[] seq, int from, int until, ComparatorByte   cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
+    @Override public void sort(      byte[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
+    @Override public void sort(      byte[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
+    @Override public void sort(      byte[] seq,                      ComparatorByte   cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(      byte[] seq, int from, int until, ComparatorByte   cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
 
-    @Override public void sort(  short[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length, Short::compare); }
-    @Override public void sort(  short[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until,      Short::compare); }
-    @Override public void sort(  short[] seq,                      ComparatorShort  cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
-    @Override public void sort(  short[] seq, int from, int until, ComparatorShort  cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
+    @Override public void sort(     short[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
+    @Override public void sort(     short[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
+    @Override public void sort(     short[] seq,                      ComparatorShort  cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(     short[] seq, int from, int until, ComparatorShort  cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
 
-    @Override public void sort(    int[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length, Integer::compare); }
-    @Override public void sort(    int[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until,      Integer::compare); }
-    @Override public void sort(    int[] seq,                      ComparatorInt    cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
-    @Override public void sort(    int[] seq, int from, int until, ComparatorInt    cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
+    @Override public void sort(       int[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
+    @Override public void sort(       int[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
+    @Override public void sort(       int[] seq,                      ComparatorInt    cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(       int[] seq, int from, int until, ComparatorInt    cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
 
-    @Override public void sort(   long[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length, Long::compare); }
-    @Override public void sort(   long[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until,      Long::compare); }
-    @Override public void sort(   long[] seq,                      ComparatorLong   cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
-    @Override public void sort(   long[] seq, int from, int until, ComparatorLong   cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
+    @Override public void sort(      long[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
+    @Override public void sort(      long[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
+    @Override public void sort(      long[] seq,                      ComparatorLong   cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(      long[] seq, int from, int until, ComparatorLong   cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
 
-    @Override public void sort(   char[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length, Character::compare); }
-    @Override public void sort(   char[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until,      Character::compare); }
-    @Override public void sort(   char[] seq,                      ComparatorChar   cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
-    @Override public void sort(   char[] seq, int from, int until, ComparatorChar   cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
+    @Override public void sort(      char[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
+    @Override public void sort(      char[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
+    @Override public void sort(      char[] seq,                      ComparatorChar   cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(      char[] seq, int from, int until, ComparatorChar   cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
 
-    @Override public void sort(  float[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length, Float::compare); }
-    @Override public void sort(  float[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until,      Float::compare); }
-    @Override public void sort(  float[] seq,                      ComparatorFloat  cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
-    @Override public void sort(  float[] seq, int from, int until, ComparatorFloat  cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
+    @Override public void sort(     float[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
+    @Override public void sort(     float[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
+    @Override public void sort(     float[] seq,                      ComparatorFloat  cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(     float[] seq, int from, int until, ComparatorFloat  cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
 
-    @Override public void sort( double[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length, Double::compare); }
-    @Override public void sort( double[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until,      Double::compare); }
-    @Override public void sort( double[] seq,                      ComparatorDouble cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
-    @Override public void sort( double[] seq, int from, int until, ComparatorDouble cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
+    @Override public void sort(    double[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
+    @Override public void sort(    double[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
+    @Override public void sort(    double[] seq,                      ComparatorDouble cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(    double[] seq, int from, int until, ComparatorDouble cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
 
-    @Override public <T extends Comparable<? super T>> void sort( T[] seq                                                 )  { NetSortV3.sort(seq,    0,seq.length, naturalOrder()); }
-    @Override public <T extends Comparable<? super T>> void sort( T[] seq, int from, int until                            )  { NetSortV3.sort(seq, from,until,      naturalOrder()); }
+    @Override public void sort(   IntBuffer buf                                            ) { NetSortV3.sort(buf, buf.position(),buf.limit()     ); }
+    @Override public void sort(   IntBuffer buf, int from, int until                       ) { NetSortV3.sort(buf,           from,until           ); }
+    @Override public void sort(   IntBuffer buf,                      ComparatorInt    cmp ) { NetSortV3.sort(buf, buf.position(),buf.limit(), cmp); }
+    @Override public void sort(   IntBuffer buf, int from, int until, ComparatorInt    cmp ) { NetSortV3.sort(buf,           from,until,       cmp); }
+
+    @Override public <T extends Comparable<? super T>> void sort( T[] seq                                                 )  { NetSortV3.sort(seq,    0,seq.length     ); }
+    @Override public <T extends Comparable<? super T>> void sort( T[] seq, int from, int until                            )  { NetSortV3.sort(seq, from,until          ); }
     @Override public <T>                               void sort( T[] seq,                      Comparator<? super T> cmp )  { NetSortV3.sort(seq,    0,seq.length, cmp); }
     @Override public <T>                               void sort( T[] seq, int from, int until, Comparator<? super T> cmp )  { NetSortV3.sort(seq, from,until,      cmp); }
   };
@@ -191,6 +197,22 @@ public final class NetSortV3
     }.netSortV3(from,until);
   }
 
+  public static void sort( IntBuffer buf, int from, int until )
+  {
+    new NetSortV3Access() {
+      @Override public int compare( int i, int j ) { return Integer.compare( buf.get(i), buf.get(j) ); }
+      @Override public void   swap( int i, int j ) { Swap.swap(buf,i,j); }
+    }.netSortV3(from,until);
+  }
+
+  public static void sort( IntBuffer buf, int from, int until, ComparatorInt cmp )
+  {
+    new NetSortV3Access() {
+      @Override public int compare( int i, int j ) { return cmp.compare( buf.get(i), buf.get(j) ); }
+      @Override public void   swap( int i, int j ) { Swap.swap(buf,i,j); }
+    }.netSortV3(from,until);
+  }
+
   public static <T extends Comparable<? super T>> void sort( T[] seq, int from, int until )
   {
     new NetSortV3Access() {
@@ -227,6 +249,9 @@ public final class NetSortV3
 
   public static void sort( double[] seq                       ) { sort(seq, 0,seq.length     ); }
   public static void sort( double[] seq, ComparatorDouble cmp ) { sort(seq, 0,seq.length, cmp); }
+
+  public static void sort(   IntBuffer buf                       ) { sort(buf, buf.position(),buf.limit()     ); }
+  public static void sort(   IntBuffer buf, ComparatorInt    cmp ) { sort(buf, buf.position(),buf.limit(), cmp); }
 
   public static <T extends Comparable<? super T>> void sort( T[] seq                            )  { sort(seq, 0,seq.length     ); }
   public static <T>                               void sort( T[] seq, Comparator<? super T> cmp )  { sort(seq, 0,seq.length, cmp); }

@@ -95,9 +95,10 @@ public class BiPartitionTestTemplate
 
 // METHODS
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
-  void biPartitionsAccessBoolean( @ForAll @Size(min=0, max=MAX_SIZE) boolean[] input ) throws Throwable
+  void biPartitionsAccessBoolean( @ForAll @Size(min=0, max=MAX_SIZE) boolean[] sample ) throws Throwable
   {
-    boolean[] reference = input.clone(); {
+    var input = sample.clone();
+    var reference = input.clone(); {
       Boolean[]   ref = range(0,input.length).mapToObj( i -> input[i] ).toArray(Boolean[]::new);
       Arrays.sort(ref);
       for( int i=ref.length; i-- > 0; )
@@ -140,8 +141,9 @@ public class BiPartitionTestTemplate
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
-  void biPartitionsArrayByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] input, @ForAll @IntRange(min=0, max=Byte.SIZE-1) int bit ) throws Throwable
+  void biPartitionsArrayByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] sample, @ForAll @IntRange(min=0, max=Byte.SIZE-1) int bit ) throws Throwable
   {
+    var input = sample.clone();
     PredicateByte pred = x -> (x >>> bit) == 1;
 
     Byte[]       reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Byte[]::new);
@@ -153,8 +155,9 @@ public class BiPartitionTestTemplate
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
-  void biPartitionsArrayShort( @ForAll @Size(min=0, max=MAX_SIZE) short[] input, @ForAll @IntRange(min=0, max=Short.SIZE-1) int bit ) throws Throwable
+  void biPartitionsArrayShort( @ForAll @Size(min=0, max=MAX_SIZE) short[] sample, @ForAll @IntRange(min=0, max=Short.SIZE-1) int bit ) throws Throwable
   {
+    var input = sample.clone();
     PredicateShort pred = x -> (x >>> bit) == 1;
 
     Short[]      reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Short[]::new);
@@ -166,8 +169,9 @@ public class BiPartitionTestTemplate
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
-  void biPartitionsArrayInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] input, @ForAll @IntRange(min=0, max=Integer.SIZE-1) int bit ) throws Throwable
+  void biPartitionsArrayInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] sample, @ForAll @IntRange(min=0, max=Integer.SIZE-1) int bit ) throws Throwable
   {
+    var input = sample.clone();
     PredicateInt pred = x -> (x >>> bit) == 1;
 
     Integer[]    reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Integer[]::new);
@@ -179,8 +183,9 @@ public class BiPartitionTestTemplate
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
-  void biPartitionsArrayLong( @ForAll @Size(min=0, max=MAX_SIZE) long[] input, @ForAll @IntRange(min=0, max=Long.SIZE-1) int bit ) throws Throwable
+  void biPartitionsArrayLong( @ForAll @Size(min=0, max=MAX_SIZE) long[] sample, @ForAll @IntRange(min=0, max=Long.SIZE-1) int bit ) throws Throwable
   {
+    var input = sample.clone();
     PredicateLong pred = x -> (x >>> bit) == 1;
 
     Long[]       reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Long[]::new);
@@ -192,8 +197,9 @@ public class BiPartitionTestTemplate
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
-  void biPartitionsArrayChar( @ForAll @Size(min=0, max=MAX_SIZE) char[] input, @ForAll @IntRange(min=0, max=Character.SIZE-1) int bit ) throws Throwable
+  void biPartitionsArrayChar( @ForAll @Size(min=0, max=MAX_SIZE) char[] sample, @ForAll @IntRange(min=0, max=Character.SIZE-1) int bit ) throws Throwable
   {
+    var input = sample.clone();
     PredicateChar pred = x -> (x >>> bit) == 1;
 
     Character[]  reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Character[]::new);
@@ -205,8 +211,9 @@ public class BiPartitionTestTemplate
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
-  void biPartitionsArrayFloat( @ForAll @Size(min=0, max=MAX_SIZE) float[] input, @ForAll float split ) throws Throwable
+  void biPartitionsArrayFloat( @ForAll @Size(min=0, max=MAX_SIZE) float[] sample, @ForAll float split ) throws Throwable
   {
+    var input = sample.clone();
     PredicateFloat pred = x -> x <= split;
 
     Float[]      reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Float[]::new);
@@ -218,8 +225,9 @@ public class BiPartitionTestTemplate
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
-  void biPartitionsArrayDouble( @ForAll @Size(min=0, max=MAX_SIZE) double[] input, @ForAll double split ) throws Throwable
+  void biPartitionsArrayDouble( @ForAll @Size(min=0, max=MAX_SIZE) double[] sample, @ForAll double split ) throws Throwable
   {
+    var input = sample.clone();
     PredicateDouble pred = x -> x <= split;
 
     Double[]     reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Double[]::new);
@@ -252,7 +260,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> sampleWithRange, @ForAll @IntRange(min=0, max=Byte.SIZE-1) int bit ) throws Throwable
   {
-    byte[] input = sampleWithRange.getData();
+    byte[] input = sampleWithRange.getData().clone();
     int from = sampleWithRange.getFrom(),
        until = sampleWithRange.getUntil();
 
@@ -269,7 +277,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsWithRangeShort( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) short[]> sampleWithRange, @ForAll @IntRange(min=0, max=Short.SIZE-1) int bit ) throws Throwable
   {
-    short[] input = sampleWithRange.getData();
+    short[] input = sampleWithRange.getData().clone();
     int from = sampleWithRange.getFrom(),
        until = sampleWithRange.getUntil();
 
@@ -286,7 +294,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> sampleWithRange, @ForAll @IntRange(min=0, max=Integer.SIZE-1) int bit ) throws Throwable
   {
-    int[] input = sampleWithRange.getData();
+    int[] input = sampleWithRange.getData().clone();
     int from = sampleWithRange.getFrom(),
        until = sampleWithRange.getUntil();
 
@@ -303,7 +311,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsWithRangeLong( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) long[]> sampleWithRange, @ForAll @IntRange(min=0, max=Long.SIZE-1) int bit ) throws Throwable
   {
-    long[] input = sampleWithRange.getData();
+    long[] input = sampleWithRange.getData().clone();
     int from = sampleWithRange.getFrom(),
        until = sampleWithRange.getUntil();
 
@@ -320,7 +328,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsWithRangeChar( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) char[]> sampleWithRange, @ForAll @IntRange(min=0, max=Character.SIZE-1) int bit ) throws Throwable
   {
-    char[] input = sampleWithRange.getData();
+    char[] input = sampleWithRange.getData().clone();
     int from = sampleWithRange.getFrom(),
        until = sampleWithRange.getUntil();
 
@@ -337,7 +345,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsWithRangeFloat( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) float[]> sampleWithRange, @ForAll float split ) throws Throwable
   {
-    float[] input = sampleWithRange.getData();
+    float[] input = sampleWithRange.getData().clone();
     int from = sampleWithRange.getFrom(),
        until = sampleWithRange.getUntil();
 
@@ -354,7 +362,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsWithRangeDouble( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) double[]> sampleWithRange, @ForAll double split ) throws Throwable
   {
-    double[] input = sampleWithRange.getData();
+    double[] input = sampleWithRange.getData().clone();
     int from = sampleWithRange.getFrom(),
        until = sampleWithRange.getUntil();
 

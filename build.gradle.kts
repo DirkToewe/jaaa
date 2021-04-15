@@ -1,3 +1,9 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.lang.Math.min
+import java.util.stream.IntStream
+import kotlin.text.Regex
+
 plugins {
   java
 }
@@ -6,20 +12,39 @@ group = "org.example"
 version = "1.0-SNAPSHOT"
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 java {
   sourceCompatibility = org.gradle.api.JavaVersion.VERSION_11
 }
 
-val v_junit = "5.7.0"
-val v_jqwik = "1.3.10"
+val v_junit = "5.7.1"
+val v_jqwik = "1.5.1"
 val v_assertj = "3.12.2"
-val v_jmh = "1.26"
+val v_jmh = "1.29"
 
 tasks.compileTestJava {
   options.compilerArgs.addAll( listOf("-parameters") )
+}
+
+var memTotal   = Integer.MAX_VALUE
+val memPerFork = 5
+
+if( System.getProperty("os.name").toLowerCase() == "linux" )
+{
+  val pattern = "(?ui)\\s*MemAvailable\\s*:\\s*(?<kiloBytes>\\d+)\\s*kB\\s*".toRegex().toPattern()
+  val memKiloBytes = Files.lines( Paths.get("/proc/meminfo") ).flatMapToInt{
+    line ->
+      val m = pattern.matcher(line)
+      if( m.matches() )
+        IntStream.of( m.group("kiloBytes").toInt() )
+      else
+        IntStream.empty()
+  }.findFirst()
+
+  if( memKiloBytes.isPresent() )
+    memTotal = memKiloBytes.asInt / (1024*1024)
 }
 
 tasks.test {
@@ -31,12 +56,14 @@ tasks.test {
     )
   }
   enableAssertions = true
-  maxHeapSize = "2g"
-  maxParallelForks = Runtime.getRuntime().availableProcessors()
+  maxHeapSize = "${memPerFork}g"
+  maxParallelForks = min(memTotal/memPerFork, Runtime.getRuntime().availableProcessors())
   jvmArgs = listOf(
     "-ea",
     "--illegal-access=permit",
     "-XX:MaxInlineLevel=15"
+//    "-Xdisablejavadump",
+//    "-Xdump:none"
   )
   include("**/*Properties.class")
   include("**/*Test.class")
@@ -47,7 +74,7 @@ tasks.register<JavaExec>("benchParallelMergeSort") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
   main = "com.github.jaaa.sort.ParallelMergeSortComparison"
-  jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx48g")
+  jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx12g")
 }
 
 tasks.register<JavaExec>("compareMerge") {
@@ -55,6 +82,13 @@ tasks.register<JavaExec>("compareMerge") {
   classpath = sourceSets.test.get().runtimeClasspath
   main = "com.github.jaaa.merge.MergeComparison"
   jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15")
+}
+
+tasks.register<JavaExec>("compareSort") {
+  dependsOn(tasks.compileTestJava)
+  classpath = sourceSets.test.get().runtimeClasspath
+  main = "com.github.jaaa.sort.BenchmarkSort"
+  jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx12g")
 }
 
 tasks.register<JavaExec>("compareMergeParallel") {
@@ -89,5 +123,7 @@ dependencies {
   testImplementation("org.jsoup:jsoup:1.13.1")
   testImplementation("org.jparsec:jparsec:3.1")
   testImplementation("org.json:json:20201115")
+//  testImplementation("org.junit.jupiter:junit-jupiter-api:$v_junit")
+//  testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$v_junit")
   testAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:$v_jmh")
 }

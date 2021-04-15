@@ -19,4 +19,8 @@ public class WithIndex<T> extends With<T>
   @Override public String toString() {
     return format( "WithIndex{ index: %d, data: %s }", index, dataString() );
   }
+
+  @Override public WithIndex<T> clone() {
+    return new WithIndex<>(index, getData());
+  }
 }

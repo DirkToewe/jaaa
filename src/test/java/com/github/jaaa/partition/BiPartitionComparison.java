@@ -2,8 +2,6 @@ package com.github.jaaa.partition;
 
 import com.github.jaaa.PredicateSwapAccess;
 import com.github.jaaa.Swap;
-import com.github.jaaa.misc.Revert;
-import com.github.jaaa.util.RNG;
 import net.jqwik.api.Tuple;
 import net.jqwik.api.Tuple.Tuple2;
 
@@ -16,16 +14,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.function.IntFunction;
-import java.util.stream.IntStream;
 
+import static com.github.jaaa.misc.Revert.revert;
 import static java.awt.Desktop.getDesktop;
-import static java.lang.Math.max;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.range;
-import static com.github.jaaa.misc.Revert.revert;
 
 public class BiPartitionComparison
 {

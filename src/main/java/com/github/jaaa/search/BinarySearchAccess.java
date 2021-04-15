@@ -4,44 +4,66 @@ import com.github.jaaa.CompareAccess;
 
 public interface BinarySearchAccess extends CompareAccess
 {
-  public default int binarySearchGap(int from, int until, int key )
+  default int binarySearch( int from, int until, int key )
   {
-    if( from > until )
-      throw new IllegalArgumentException();
-    --until;
-    while( from <= until ){ int mid = from + (until-from >>> 1),
+    if( from < 0     ) throw new IllegalArgumentException();
+    if( from > until ) throw new IllegalArgumentException();
+
+    while( from < until ) { int mid = from+until >>> 1,
                c = compare(key, mid);
-           if( c < 0 )  until = mid-1;
+           if( c < 0 )  until = mid;
+      else if( c > 0 )   from = mid+1;
+      else               return mid;
+    }
+    return ~from;
+  }
+
+  default int binarySearchL( int from, int until, int key ) { return binarySearch(from,until, key, false); }
+  default int binarySearchR( int from, int until, int key ) { return binarySearch(from,until, key, true ); }
+  default int binarySearch ( int from, int until, int key, boolean rightBias )
+  {
+    if( from < 0     ) throw new IllegalArgumentException();
+    if( from > until ) throw new IllegalArgumentException();
+
+    int bias = rightBias ? -1 : 0;
+    boolean found = false;
+
+    while(from < until){ int mid = from+until >>> 1,
+          c  =  compare(key, mid);
+      if( c > bias )  from = mid+1;
+      else           until = mid;
+      found |= 0==c;
+    }
+    return found ? from : ~from;
+  }
+
+  default int binarySearchGap( int from, int until, int key )
+  {
+    if( from < 0     ) throw new IllegalArgumentException();
+    if( from > until ) throw new IllegalArgumentException();
+
+    while( from < until ) { int mid = from+until >>> 1,
+               c = compare(key, mid);
+           if( c < 0 )  until = mid;
       else if( c > 0 )   from = mid+1;
       else               return mid;
     }
     return from;
   }
 
-  public default int binarySearchGapR(int from, int until, int key )
+  default int binarySearchGapL( int from, int until, int key ) { return binarySearchGap(from,until, key, false); }
+  default int binarySearchGapR( int from, int until, int key ) { return binarySearchGap(from,until, key, true ); }
+  default int binarySearchGap ( int from, int until, int key, boolean rightBias )
   {
-    if( from > until )
-      throw new IllegalArgumentException();
-    --until;
-    while( from <= until )
-    { int                mid = from + (until-from >>> 1),
-         c = compare(key,mid);
-      if(c < 0)  until = mid-1;
-      else        from = mid+1;
-    }
-    return from;
-  }
+    if( from < 0     ) throw new IllegalArgumentException();
+    if( from > until ) throw new IllegalArgumentException();
 
-  public default int binarySearchGapL(int from, int until, int key )
-  {
-    if( from > until )
-      throw new IllegalArgumentException();
-    --until;
-    while( from <= until )
-    { int                mid = from + (until-from >>> 1),
-         c = compare(key,mid);
-      if(c > 0)   from = mid+1;
-      else       until = mid-1;
+    int bias = rightBias ? -1 : 0;
+
+    while( from < until ){int mid = from+until >>> 1,
+          c   =   compare(key,mid);
+      if( c > bias )   from = mid+1;
+      else            until = mid;
     }
     return from;
   }
