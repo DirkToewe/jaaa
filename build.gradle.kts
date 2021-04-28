@@ -13,6 +13,7 @@ version = "1.0-SNAPSHOT"
 
 repositories {
   mavenCentral()
+  maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
 java {
@@ -20,7 +21,7 @@ java {
 }
 
 val v_junit = "5.7.1"
-val v_jqwik = "1.5.1"
+val v_jqwik = "1.5.2-SNAPSHOT"
 val v_assertj = "3.12.2"
 val v_jmh = "1.29"
 
@@ -31,7 +32,7 @@ tasks.compileTestJava {
 var memTotal   = Integer.MAX_VALUE
 val memPerFork = 5
 
-if( System.getProperty("os.name").toLowerCase() == "linux" )
+if( System.getProperty("os.name").decapitalize() == "linux" )
 {
   val pattern = "(?ui)\\s*MemAvailable\\s*:\\s*(?<kiloBytes>\\d+)\\s*kB\\s*".toRegex().toPattern()
   val memKiloBytes = Files.lines( Paths.get("/proc/meminfo") ).flatMapToInt{

@@ -37,31 +37,6 @@ public class HwangLinMergePartAccessorTest extends MergePartAccessorTestTemplate
     }
   }
 
-  @Group public class MergeFullyL2R extends MergeAccessorTestTemplate
-  {
-    @Override public int maxArraySize      () { return HwangLinMergePartAccessorTest.this.maxArraySize(); }
-    @Override public int maxArraySizeString() { return HwangLinMergePartAccessorTest.this.maxArraySizeString(); }
-    @Override protected boolean    isStable() { return HwangLinMergePartAccessorTest.this.isStable(); }
-    @Override protected boolean mergesInplaceL2R() { return true; }
-    @Override protected boolean mergesInplaceR2L() { return false; }
-    @Override protected <T> MergeAccessor<T> createAccessor( CompareRandomAccessor<T> srtAcc ) {
-      var acc = HwangLinMergePartAccessorTest.this.createAccessor(srtAcc);
-      return (a,a0,aLen, b,b0,bLen, c,c0) -> acc.mergePartL2R(a,a0,aLen, b,b0,bLen, c,c0,aLen+bLen);
-    }
-  }
-  @Group class MergeFullyR2L extends MergeAccessorTestTemplate
-  {
-    @Override public int maxArraySize      () { return HwangLinMergePartAccessorTest.this.maxArraySize(); }
-    @Override public int maxArraySizeString() { return HwangLinMergePartAccessorTest.this.maxArraySizeString(); }
-    @Override protected boolean    isStable() { return HwangLinMergePartAccessorTest.this.isStable(); }
-    @Override protected boolean mergesInplaceL2R() { return false; }
-    @Override protected boolean mergesInplaceR2L() { return true; }
-    @Override protected <T> MergeAccessor<T> createAccessor( CompareRandomAccessor<T> srtAcc ) {
-      var acc = HwangLinMergePartAccessorTest.this.createAccessor(srtAcc);
-      return (a,a0,aLen, b,b0,bLen, c,c0) -> acc.mergePartR2L(a,a0,aLen, b,b0,bLen, c,c0,aLen+bLen);
-    }
-  }
-
   @Override protected boolean isStable() { return true; }
 
   @Override protected <T> MergePartAccessor<T> createAccessor( CompareRandomAccessor<T> randAcc ) {
