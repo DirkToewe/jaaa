@@ -9,7 +9,7 @@ public class WithIndex<T> extends With<T>
   public WithIndex( int _index, T _data )
   {
     super(_data);
-    index =_index;
+        index =_index;
     if( index < 0               ) throw new IllegalArgumentException();
     if( index >= contentLength()) throw new IllegalArgumentException();
   }
