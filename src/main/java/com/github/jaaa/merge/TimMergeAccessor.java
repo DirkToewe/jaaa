@@ -114,8 +114,7 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
 
         // GALLOPING MERGE
         do {
-                   count1 = expL2RSearchGap(a,a0,a0+aLen, b,b0, true) - a0;
-//                   count1 = gallopL2RSearchGap(a,a0,a0+aLen, b,b0, true) - a0;
+                   count1 = expL2RSearchGap(a,a0,a0+aLen, b,b0, /*rightBias=*/true) - a0;
           if( 0 != count1 ) { copyRange(a,a0, c,c0, count1);
              a0 += count1;
              c0 += count1;
@@ -125,8 +124,7 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
           copy(b,b0++, c,c0++);
           if(--bLen <= 0 ) break outer;
 
-                   count2 = expL2RSearchGap(b,b0,b0+bLen, a,a0, false) - b0;
-//                   count2 = gallopL2RSearchGap(b,b0,b0+bLen, a,a0, false) - b0;
+                   count2 = expL2RSearchGap(b,b0,b0+bLen, a,a0, /*rightBias=*/false) - b0;
           if( 0 != count2 ) { copyRange(b,b0, c,c0, count2);
              b0 += count2;
              c0 += count2;
@@ -195,8 +193,7 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
 
         // GALLOPING MERGE
         do {
-                   count2 = b0 - expR2LSearchGap(b,b0-bLen,b0, a,a0-1, false);
-//                   count2 = b0 - gallopR2LSearchGap(b,b0-bLen,b0, a,a0-1, false);
+                   count2 = b0 - expR2LSearchGap(b,b0-bLen,b0, a,a0-1, /*rightBias=*/false);
           if( 0 != count2 ) {
              b0 -= count2;
              c0 -= count2; copyRange(b,b0, c,c0, count2);
@@ -206,8 +203,7 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
           copy(a,--a0, c,--c0);
           if(--aLen <= 0 ) break outer;
 
-                   count1 = a0 - expR2LSearchGap(a,a0-aLen,a0, b,b0-1, true);
-//                   count1 = a0 - gallopR2LSearchGap(a,a0-aLen,a0, b,b0-1, true);
+                   count1 = a0 - expR2LSearchGap(a,a0-aLen,a0, b,b0-1, /*rightBias=*/true);
           if( 0 != count1 ) {
              a0 -= count1;
              c0 -= count1; copyRange(a,a0, c,c0, count1);

@@ -1,9 +1,6 @@
 package com.github.jaaa.sort;
 
-import net.jqwik.api.ForAll;
-import net.jqwik.api.Group;
-import net.jqwik.api.Property;
-import net.jqwik.api.PropertyDefaults;
+import net.jqwik.api.*;
 import net.jqwik.api.constraints.IntRange;
 import net.jqwik.api.constraints.Positive;
 
@@ -12,20 +9,18 @@ import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 import static com.github.jaaa.sort.TimSort.TIM_SORTER;
+import static java.lang.Integer.numberOfLeadingZeros;
 import static java.lang.Math.addExact;
 import static java.lang.Math.min;
 import static java.util.Spliterator.*;
-import static java.util.Spliterator.ORDERED;
 import static java.util.stream.StreamSupport.intStream;
 import static org.assertj.core.api.Assertions.assertThat;
-import static java.lang.Integer.numberOfLeadingZeros;
 
 
 public class TimSortTest
 {
-  @Property( tries = 1_000_000 )
-//  @Property( tries = Integer.MAX_VALUE )
-  void timSort_minRunLength( @ForAll @Positive int n ) {
+  @Example void timSort_minRunLength()
+  {
     new Object() {
       private static final int MIN_MERGE = 32;
 
@@ -64,8 +59,11 @@ public class TimSortTest
       }
 
       {
-        assertThat( minRunLenJaaaV1(n) ).isEqualTo( minRunLenJDK(n) );
-        assertThat( minRunLenJaaaV2(n) ).isEqualTo( minRunLenJDK(n) );
+        for( int n=0; n >= 0; n++ ) {                        int runLen = minRunLenJDK(n);
+          assertThat(             minRunLenJaaaV1(n) ).isEqualTo(runLen);
+          assertThat(             minRunLenJaaaV2(n) ).isEqualTo(runLen);
+          assertThat( TimSort.optimalRunLength(16,n) ).isEqualTo(runLen);
+        }
       }
     };
   }

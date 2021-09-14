@@ -45,15 +45,7 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
   private static int minRunLen( int n )
   {
     assert 1 == Integer.bitCount(MIN_RUN_LEN);
-    assert 0 <= n;
-    int     s = 0;
-    if( n>>> 16 >= MIN_RUN_LEN ) s += 16;
-    if( n>>>s+8 >= MIN_RUN_LEN ) s +=  8;
-    if( n>>>s+4 >= MIN_RUN_LEN ) s +=  4;
-    if( n>>>s+2 >= MIN_RUN_LEN ) s +=  2;
-    if( n>>>s+1 >= MIN_RUN_LEN ) s +=  1;
-    int    l = n>>>s;
-    return l<<s != n ? l+1 : l;
+    return TimSort.optimalRunLength(MIN_RUN_LEN,n);
   }
 
   default int timSort_prepareNextRun( T arr, int from, int until, int minRunLen )
@@ -70,9 +62,8 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
     if( ! ascending )
       revert(arr, from,start);
 
-        until = min(from+minRunLen, until);
-    if( until <= start) return start;
-    for(;;)
+                  until = min(from+minRunLen, until);
+    for(; start < until; start++)
     {
       int lo = from,
           hi = start;
@@ -84,10 +75,8 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
 
       for( int i=start; i > lo; )
         swap(arr,i, arr,--i);
-
-      if( until <= ++start )
-        return until;
     }
+    return start;
   }
 
   default void timSort( T arr, int arrFrom, int arrUntil, T _buf, int _bufFrom, int _bufUntil )

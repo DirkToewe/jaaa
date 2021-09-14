@@ -6,6 +6,7 @@ import java.lang.reflect.Array;
 import java.nio.IntBuffer;
 import java.util.Comparator;
 
+import static java.lang.Math.min;
 import static java.lang.System.arraycopy;
 
 
@@ -68,7 +69,7 @@ public final class TimSort
   private static abstract class AccArrObj<T> implements TimSortAccessorArrObj<T>
   {
     private final Class<?> elemType;
-    AccArrObj( Class<?> elemType ) { this.elemType = elemType; }
+    AccArrObj( Class<?> _elemType ) { elemType = _elemType; }
     @Override public T[] malloc( int len ) { return (T[]) Array.newInstance(elemType, len); }
   }
   private interface AccArrByte   extends TimSortAccessor<   byte[]>, RandomAccessorArrByte  {}
@@ -83,6 +84,20 @@ public final class TimSort
 // STATIC CONSTRUCTOR
 
 // STATIC METHODS
+  public static int optimalRunLength( int minRunLen, int len )
+  {
+    if( minRunLen <= 0 ) throw new IllegalArgumentException();
+    if(       len <  0 ) throw new IllegalArgumentException();
+    int                             s = 0;
+    if(   len>>> 16 >= minRunLen )  s =16;
+    if(   len>>>s+8 >= minRunLen )  s+= 8;
+    if(   len>>>s+4 >= minRunLen )  s+= 4;
+    if(   len>>>s+2 >= minRunLen )  s+= 2;
+    if(   len>>>s+1 >= minRunLen )  s+= 1;
+    int l=len>>>s;
+    return l<<s != len ? l+1 : l;
+  }
+
   public static <T> void sort( T seq, int from, int until, CompareRandomAccessor<T> acc )
   {
     new TimSortAccessor<T>() {
@@ -116,6 +131,35 @@ public final class TimSort
     if( arr.length < until ) throw new IndexOutOfBoundsException();
     new AccArrObj<T>( arr.getClass().getComponentType() ) {
       @Override public int compare( T[] a, int i, T[] b, int j ) { return a[i].compareTo(b[j]); }
+      @Override public int timSort_prepareNextRun( T[] arr, int from, int until, int minRunLen )
+      {
+        int start = from+1;
+        if( start >= until ) return start;
+
+        boolean ascending = compare(arr,start++, arr,from) >= 0;
+
+        while( start < until && arr[start].compareTo(arr[start-1]) >= 0 == ascending )
+             ++start;
+
+        if( ! ascending )
+          revert(arr, from,start);
+
+                      until = min(from+minRunLen, until);
+        for(; start < until; start++)
+        {
+          var piv = arr[start];
+          int lo = from,
+              hi = start;
+          while( lo < hi ) {  int mid = lo+hi >>> 1;
+            if( piv.compareTo(arr[mid]) < 0 )
+                             hi = mid;
+            else             lo = mid+1;
+          }
+          arraycopy(arr,lo, arr,lo+1, start-lo);
+          arr[lo] = piv;
+        }
+        return start;
+      }
     }.timSort(arr,from,until, null,0,0);
   }
 
@@ -124,6 +168,35 @@ public final class TimSort
     if( arr.length < until ) throw new IndexOutOfBoundsException();
     new AccArrObj<T>( arr.getClass().getComponentType() ) {
       @Override public int compare( T[] a, int i, T[] b, int j ) { return cmp.compare(a[i], b[j]); }
+      @Override public int timSort_prepareNextRun( T[] arr, int from, int until, int minRunLen )
+      {
+        int start = from+1;
+        if( start >= until ) return start;
+
+        boolean ascending = compare(arr,start++, arr,from) >= 0;
+
+        while( start < until && cmp.compare(arr[start], arr[start-1]) >= 0 == ascending )
+             ++start;
+
+        if( ! ascending )
+          revert(arr, from,start);
+
+                      until = min(from+minRunLen, until);
+        for(; start < until; start++)
+        {
+          var piv = arr[start];
+          int lo = from,
+              hi = start;
+          while( lo < hi ) {     int mid = lo+hi >>> 1;
+            if( cmp.compare(piv, arr[mid]) < 0 )
+                                hi = mid;
+            else                lo = mid+1;
+          }
+          arraycopy(arr,lo, arr,lo+1, start-lo);
+          arr[lo] = piv;
+        }
+        return start;
+      }
     }.timSort(arr,from,until, null,0,0);
   }
 
