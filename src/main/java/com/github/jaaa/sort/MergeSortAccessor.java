@@ -7,32 +7,19 @@ import static java.lang.Integer.numberOfTrailingZeros;
 
 
 public interface MergeSortAccessor<T> extends CompareRandomAccessor<T>,
-        InsertionSortAccessor<T>,
+                                              InsertionSortAccessor<T>,
                                                   TapeMergeAccessor<T>
 {
-  default int mergeSort_runLen( int n )
+  default  int mergeSort_runLen( int n ) { return TimSort.optimalRunLength(16,n); }
+  default void mergeSort_sortRun ( T a, int from, int until )
   {
-    assert 0 <= n;
-    int            MIN_RUN_LEN=16,s = 0;
-    if( n>>> 16 >= MIN_RUN_LEN )  s =16;
-    if( n>>>s+8 >= MIN_RUN_LEN )  s+= 8;
-    if( n>>>s+4 >= MIN_RUN_LEN )  s+= 4;
-    if( n>>>s+2 >= MIN_RUN_LEN )  s+= 2;
-    if( n>>>s+1 >= MIN_RUN_LEN )  s+= 1;
-    int    l = n>>>s;
-    return l<<s != n ? l+1 : l;
+    insertionSort(a,from,until);
   }
-
   default void mergeSort_mergeR2L( T ac, int a0, int aLen,
                                    T b,  int b0, int bLen,
                                          int c0 )
   {
     tapeMergeR2L(ac,a0,aLen, b,b0,bLen, ac,c0);
-  }
-
-  default void mergeSort_sortRun( T a, int from, int until )
-  {
-    insertionSort(a,from,until);
   }
 
   default void mergeSort( T arr, int arr0, int arr1, T buf, int buf0, int buf1 )

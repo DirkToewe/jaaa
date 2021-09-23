@@ -11,7 +11,7 @@ import static java.lang.System.arraycopy;
 
 public final class MergeSort
 {
-  // STATIC FIELDS
+// STATIC FIELDS
   public static Sorter MERGE_SORTER = new Sorter()
   {
     @Override public boolean isThreadSafe() { return true; }
@@ -69,6 +69,7 @@ public final class MergeSort
   {
     private final Class<?> elemType;
     AccArrObj( Class<?> elemType ) { this.elemType = elemType; }
+    @SuppressWarnings("unchecked")
     @Override public T[] malloc( int len ) { return (T[]) Array.newInstance(elemType, len); }
   }
   private interface AccArrByte   extends MergeSortAccessor<   byte[]>, RandomAccessorArrByte  {}
@@ -82,7 +83,7 @@ public final class MergeSort
 
 // STATIC CONSTRUCTOR
 
-  // STATIC METHODS
+// STATIC METHODS
   public static <T> void sort( T seq, int from, int until, CompareRandomAccessor<T> acc )
   {
     new MergeSortAccessor<T>() {
@@ -147,7 +148,7 @@ public final class MergeSort
   public static <T extends Comparable<? super T>> void sort( T[] seq                            )  { sort(seq, 0,seq.length     ); }
   public static <T>                               void sort( T[] seq, Comparator<? super T> cmp )  { sort(seq, 0,seq.length, cmp); }
 
-  // FIELDS
+// FIELDS
 // CONSTRUCTORS
   private MergeSort() { throw new UnsupportedOperationException("Static class cannot be instantiated."); }
 
