@@ -4,23 +4,23 @@ import com.github.jaaa.CompareAccess;
 
 import static com.github.jaaa.util.IMath.log2Floor;
 
-public class BinarySearchAccessTest extends SearchAccessTestTemplate
+
+public class BinarySearchAccessTest implements SearchAccessTestTemplate
 {
-  private static final class SearchAccessWrapper implements BinarySearchAccess
+  interface SrchAcc extends SearchAccess, BinarySearchAccess
   {
-    private final CompareAccess access;
-
-    private SearchAccessWrapper( CompareAccess _access ) { access =_access; }
-
-    @Override public int compare( int i, int j ) { return access.compare(i,j); }
+    @Override default int search    ( int from, int until, int key ) { return binarySearch    (from,until, key); }
+    @Override default int searchL   ( int from, int until, int key ) { return binarySearchL   (from,until, key); }
+    @Override default int searchR   ( int from, int until, int key ) { return binarySearchR   (from,until, key); }
+    @Override default int searchGap ( int from, int until, int key ) { return binarySearchGap (from,until, key); }
+    @Override default int searchGapL( int from, int until, int key ) { return binarySearchGapL(from,until, key); }
+    @Override default int searchGapR( int from, int until, int key ) { return binarySearchGapR(from,until, key); }
   }
 
-  @Override protected int search    ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearch    (from,until, key); }
-  @Override protected int searchL   ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearchL   (from,until, key); }
-  @Override protected int searchR   ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearchR   (from,until, key); }
-  @Override protected int searchGap ( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearchGap (from,until, key); }
-  @Override protected int searchGapL( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearchGapL(from,until, key); }
-  @Override protected int searchGapR( int from, int until, CompareAccess access, int key ) { return new SearchAccessWrapper(access).binarySearchGapR(from,until, key); }
+  @Override public SrchAcc createAccess( CompareAccess acc ) { return acc::compare; }
 
-  @Override protected long comparisonLimit( int from, int until, int i ) { return from==until ? 0 : 1 + log2Floor(until-from); }
+  @Override public long comparisonLimit( int from, int until, int i )
+  {
+    return from==until ? 0 : 1 + log2Floor(until-from);
+  }
 }

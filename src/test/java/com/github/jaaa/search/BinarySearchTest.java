@@ -5,6 +5,7 @@ import net.jqwik.api.Group;
 import static com.github.jaaa.search.BinarySearch.BINARY_SEARCHER;
 import static com.github.jaaa.util.IMath.log2Floor;
 
+
 public class BinarySearchTest extends SearcherTestTemplate
 {
   BinarySearchTest() {

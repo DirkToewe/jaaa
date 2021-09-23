@@ -6,7 +6,6 @@ import com.github.jaaa.ComparatorInt;
 import java.util.Comparator;
 import java.util.function.IntUnaryOperator;
 
-import static java.util.Comparator.naturalOrder;
 
 public class BinarySearch
 {
@@ -121,11 +120,11 @@ public class BinarySearch
   {
     if( from < 0     ) throw new IllegalArgumentException();
     if( from > until ) throw new IllegalArgumentException();
-    --until;
-    while( from <= until ) {      int mid = from+until >>> 1,
+
+    while( from < until ) {       int mid = from+until >>> 1,
                c = compass.applyAsInt(mid);
-           if( c < 0 )   until = -1 + mid;
-      else if( c > 0 )    from = +1 + mid;
+           if( c < 0 )        until = mid;
+      else if( c > 0 )         from = mid+1;
       else                     return mid;
     }
     return ~from;
@@ -135,12 +134,12 @@ public class BinarySearch
   {
     if( from < 0     ) throw new IllegalArgumentException();
     if( from > until ) throw new IllegalArgumentException();
-    --until;
+
     boolean found = false;
-    while( from <= until ) { int mid = from+until >>> 1,
+    while( from < until ) {  int mid = from+until >>> 1,
           c = compass.applyAsInt(mid);
-      if( c < 0 )   until = -1 + mid;
-      else           from = +1 + mid;
+      if( c < 0 )        until = mid;
+      else                from = mid+1;
       found |= 0==c;
     }
     return found ? from : ~from;
@@ -150,12 +149,12 @@ public class BinarySearch
   {
     if( from < 0     ) throw new IllegalArgumentException();
     if( from > until ) throw new IllegalArgumentException();
-    --until;
+
     boolean found = false;
-    while( from <= until ) { int mid = from+until >>> 1,
+    while( from < until ) {  int mid = from+until >>> 1,
           c = compass.applyAsInt(mid);
-      if( c <= 0 )  until = -1 + mid;
-      else           from = +1 + mid;
+      if( c <= 0 )       until = mid;
+      else                from = mid+1;
       found |= 0==c;
     }
     return found ? from : ~from;
@@ -165,11 +164,11 @@ public class BinarySearch
   public static int searchGap ( int from, int until, IntUnaryOperator compass )
   {
     if( from > until ) throw new IllegalArgumentException();
-    --until;
-    while( from <= until ) {      int mid = from + (until-from >>> 1),
+
+    while( from < until ) {       int mid = from + (until-from >>> 1),
                c = compass.applyAsInt(mid);
-           if( c < 0 )   until = -1 + mid;
-      else if( c > 0 )    from = +1 + mid;
+           if( c < 0 )        until = mid;
+      else if( c > 0 )         from = mid+1;
       else                     return mid;
     }
     return from;
@@ -178,11 +177,11 @@ public class BinarySearch
   public static int searchGapR( int from, int until, IntUnaryOperator compass )
   {
     if( from > until ) throw new IllegalArgumentException();
-    --until;
-    while( from <= until ) { int mid = from + (until-from >>> 1),
+
+    while( from < until ) {  int mid = from + (until-from >>> 1),
           c = compass.applyAsInt(mid);
-      if( c < 0 )   until = -1 + mid;
-      else           from = +1 + mid;
+      if( c < 0 )   until =      mid;
+      else           from =      mid+1;
     }
     return from;
   }
@@ -190,11 +189,11 @@ public class BinarySearch
   public static int searchGapL( int from, int until, IntUnaryOperator compass )
   {
     if( from > until ) throw new IllegalArgumentException();
-    --until;
-    while( from <= until ) { int mid = from + (until-from >>> 1),
+
+    while( from < until ) {  int mid = from + (until-from >>> 1),
           c = compass.applyAsInt(mid);
-      if( c <= 0 )  until = -1 + mid;
-      else           from = +1 + mid;
+      if( c <= 0 )       until = mid;
+      else                from = mid+1;
     }
     return from;
   }
