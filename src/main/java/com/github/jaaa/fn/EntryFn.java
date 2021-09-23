@@ -1,4 +1,4 @@
-package com.github.jaaa.util;
+package com.github.jaaa.fn;
 
 import static java.util.Map.Entry;
 import java.util.function.Function;

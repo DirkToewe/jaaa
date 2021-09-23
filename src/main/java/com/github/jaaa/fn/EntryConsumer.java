@@ -1,4 +1,4 @@
-package com.github.jaaa.util;
+package com.github.jaaa.fn;
 
 import java.util.function.Consumer;
 
@@ -18,7 +18,7 @@ public interface EntryConsumer<K,V> extends Consumer<Entry<K,V>>
 // CONSTRUCTORS
 
 // METHODS
-  public void accept( K key, V value );
+  void accept( K key, V value );
 
   @Override default void accept( Entry<K,V> entry ) {
     accept(
