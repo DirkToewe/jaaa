@@ -4,18 +4,16 @@ import net.jqwik.api.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Set;
-import static java.util.stream.Collectors.toSet;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountedCompleter;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import static java.util.Arrays.stream;
 
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TypesTest
@@ -39,7 +37,7 @@ public class TypesTest
     for(;;)
     {
       Set<Class<?>> moreTypes = types.stream().flatMap(
-        clazz -> Stream.<Class<?>>iterate(clazz, cl -> cl != null, Class::getSuperclass)
+        clazz -> Stream.<Class<?>>iterate(clazz, Objects::nonNull, Class::getSuperclass)
       ).flatMap(
         clazz -> Stream.of( Stream.of(clazz), stream( clazz.getInterfaces() ), stream( clazz.getClasses() ) ).flatMap(x->x)
       ).collect( toSet() );
@@ -56,7 +54,7 @@ public class TypesTest
   }
 
   @Property( tries = N_TRIES )
-  void revertsArraysByte1(
+  void test_superClass(
     @ForAll("handPickedClasses") Class<?> classA,
     @ForAll("handPickedClasses") Class<?> classB
   )

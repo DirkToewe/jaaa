@@ -1,8 +1,5 @@
 package com.github.jaaa.util;
 
-import static java.util.Objects.requireNonNull;
-
-
 public class Types
 {
 // STATIC FIELDS
@@ -10,6 +7,7 @@ public class Types
 // STATIC CONSTRUCTOR
 
 // STATIC METHODS
+  @SuppressWarnings("unchecked")
   public static <T> Class<? super T> superClass( Class<? extends T> classA, Class<? extends T> classB )
   {
     for( Class<?> cl = classA; null != cl; cl = cl.getSuperclass() )
