@@ -9,6 +9,7 @@ import java.util.function.IntUnaryOperator;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
 
+
 public class ExpR2LSearch
 {
   public static final Searcher EXP_R2L_SEARCHER = new Searcher()
@@ -122,8 +123,8 @@ public class ExpR2LSearch
     for( int step=0; step <= until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
     {
       int                        k = until-step,
-          c = compass.applyAsInt(k); found |= 0==c;
-      if( c >= 0 ) { from = +1 + k; break; }
+          c = compass.applyAsInt(k);
+      if( c >= 0 ) { from = +1 + k; found = 0==c; break; }
                     until = -1 + k;
     }
 

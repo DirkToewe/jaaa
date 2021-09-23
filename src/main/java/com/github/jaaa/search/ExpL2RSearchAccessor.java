@@ -10,7 +10,7 @@ public interface ExpL2RSearchAccessor<T> extends CompareAccessor<T>
     if( from > until ) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
-    for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
+    for( int step=0; step < until-from; step = 1 | step<<1 ) // <- make step have all bits set such that binary search is optimally efficient
     {
       int                      next = from+step,
           c = compare(b,key, a,next);
@@ -40,7 +40,7 @@ public interface ExpL2RSearchAccessor<T> extends CompareAccessor<T>
     boolean found = false;
 
     // GALLOPING PHASE
-    for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
+    for( int step=0; step < until-from; step = 1 | step<<1 ) // <- make step have all bits set such that binary search is optimally efficient
     {
       int                      next = from+step,
           c = compare(b,key, a,next); found |= 0==c;
@@ -64,7 +64,7 @@ public interface ExpL2RSearchAccessor<T> extends CompareAccessor<T>
     if( from > until ) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
-    for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
+    for( int step=0; step < until-from; step = 1 | step<<1 ) // <- make step have all bits set such that binary search is optimally efficient
     {
       int                      next = from+step,
           c = compare(b,key, a,next);
@@ -93,7 +93,7 @@ public interface ExpL2RSearchAccessor<T> extends CompareAccessor<T>
     int bias = rightBias ? 0 : 1;
 
     // GALLOPING PHASE
-    for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
+    for( int step=0; step < until-from; step = 1 | step<<1 ) // <- make step have all bits set such that binary search is optimally efficient
     {
       int                      next = from+step,
           c = compare(b,key, a,next);

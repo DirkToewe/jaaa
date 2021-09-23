@@ -7,8 +7,15 @@ import java.nio.IntBuffer;
 import java.util.Comparator;
 import java.util.function.IntUnaryOperator;
 
-import static java.lang.Integer.MIN_VALUE;
 
+/** Implementation of the left-to-right Exponential Search a.k.a. Galloping Search algorithm.
+  * Exponential search is a specialized extension of the Binary Search algorithm. In the worst case,
+  * left-to-right Exponential Search requires roughly twice as many comparisons as Binary Search.
+  * If however the searched element is close to the left end (i.e. the beginning) of the searched range,
+  * left-to-right Exponential Search is significantly faster than Binary Search. More specifically:
+  * if the searched element is <code>n</code> elements away from the beginning, it takes
+  * <code>O(log(n))</code> comparisons to find it.
+  */
 public class ExpL2RSearch
 {
   public static final Searcher EXP_L2R_SEARCHER = new Searcher()
@@ -157,8 +164,7 @@ public class ExpL2RSearch
     {
       int                      k = from+step,
         c = compass.applyAsInt(k);
-      found |= 0==c;
-      if( c <= 0 ) { until = k; break; }
+      if( c <= 0 ) { until = k; found = 0==c; break; }
                       from = k+1;
     }
 
@@ -178,10 +184,11 @@ public class ExpL2RSearch
 
   public static int searchGap( int from, int until, IntUnaryOperator compass )
   {
+    if( from < 0     ) throw new IllegalArgumentException();
     if( from > until ) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
-    for( int step=0; MIN_VALUE+step < until-from+MIN_VALUE; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
+    for( int step=0; step < until-from; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
     {
       int                        k = from+step,
           c = compass.applyAsInt(k);
@@ -190,13 +197,11 @@ public class ExpL2RSearch
                       from = k+1;
     }
 
-    --until;
-
     // BINARY SEARCH PHASE
-    while( from <= until ) {      int mid = from + (until-from >>> 1),
+    while( from < until ) {       int mid = from+until >>> 1,
                c = compass.applyAsInt(mid);
-           if( c < 0 )   until = -1 + mid;
-      else if( c > 0 )    from = +1 + mid;
+           if( c < 0 )        until = mid;
+      else if( c > 0 )         from = mid+1;
       else                     return mid;
     }
 
@@ -205,10 +210,11 @@ public class ExpL2RSearch
 
   public static int searchGapR( int from, int until, IntUnaryOperator compass )
   {
+    if( from < 0     ) throw new IllegalArgumentException();
     if( from > until ) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
-    for( int step=0; MIN_VALUE+step < until-from+MIN_VALUE; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
+    for( int step=0; step < until-from; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
     {
       int                        k = from+step,
           c = compass.applyAsInt(k);
@@ -216,13 +222,11 @@ public class ExpL2RSearch
                      from = k+1;
     }
 
-    --until;
-
     // BINARY SEARCH PHASE
-    while( from <= until ) { int mid = from + (until-from >>> 1),
+    while( from < until ) {  int mid = from+until >>> 1,
           c = compass.applyAsInt(mid);
-      if( c < 0 )   until = -1 + mid;
-      else           from = +1 + mid;
+      if( c < 0 )        until = mid;
+      else                from = mid+1;
     }
 
     return from;
@@ -230,10 +234,11 @@ public class ExpL2RSearch
 
   public static int searchGapL( int from, int until, IntUnaryOperator compass )
   {
+    if( from < 0     ) throw new IllegalArgumentException();
     if( from > until ) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
-    for( int step=0; MIN_VALUE+step < until-from+MIN_VALUE; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
+    for( int step=0; step < until-from; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
     {
       int                        k = from+step,
           c = compass.applyAsInt(k);
@@ -241,13 +246,11 @@ public class ExpL2RSearch
                       from = k+1;
     }
 
-    --until;
-
     // BINARY SEARCH PHASE
-    while( from <= until ) { int mid = from + (until-from >>> 1),
+    while( from < until ) {  int mid = from+until >>> 1,
           c = compass.applyAsInt(mid);
-      if( c <= 0 )  until = -1 + mid;
-      else           from = +1 + mid;
+      if( c <= 0 )       until = mid;
+      else                from = mid+1;
     }
 
     return from;
@@ -376,4 +379,8 @@ public class ExpL2RSearch
   public static int searchGapL( IntBuffer buf, int from, int until, int key                    ) { return searchGapL(          from,until,       i -> Integer.compare(key,buf.get(i)) ); }
   public static int searchGapL( IntBuffer buf,                      int key, ComparatorInt cmp ) { return searchGapL(buf.position(),buf.limit(), i ->     cmp.compare(key,buf.get(i)) ); }
   public static int searchGapL( IntBuffer buf, int from, int until, int key, ComparatorInt cmp ) { return searchGapL(          from,until,       i ->     cmp.compare(key,buf.get(i)) ); }
+
+  private ExpL2RSearch() {
+    throw new UnsupportedOperationException("Static class cannot be instantiated.");
+  }
 }

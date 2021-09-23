@@ -6,11 +6,12 @@ public interface ExpL2RSearchAccess extends CompareAccess
 {
   default int expL2RSearch( int from, int until, int key )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( key < 0    ) throw new IllegalArgumentException();
+    if(from < 0    ) throw new IllegalArgumentException();
+    if(from > until) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
-    for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
+    for( int step=0; step < until-from; step = 1 | step<<1 ) // <- make step have all bits set such that binary search is optimally efficient
     {
       int                  next = from+step,
           c = compare(key, next);
@@ -33,14 +34,15 @@ public interface ExpL2RSearchAccess extends CompareAccess
   default int expL2RSearchR( int from, int until, int key ) { return expL2RSearch(from,until, key, true ); }
   default int expL2RSearch ( int from, int until, int key, boolean rightBias )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( key < 0    ) throw new IllegalArgumentException();
+    if(from < 0    ) throw new IllegalArgumentException();
+    if(from > until) throw new IllegalArgumentException();
 
     int bias = rightBias ? 0 : 1;
     boolean found = false;
 
     // GALLOPING PHASE
-    for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
+    for( int step=0; step < until-from; step = 1 | step<<1 ) // <- make step have all bits set such that binary search is optimally efficient
     {
       int                  next = from+step,
           c = compare(key, next); found |= 0==c;
@@ -60,11 +62,12 @@ public interface ExpL2RSearchAccess extends CompareAccess
 
   default int expL2RSearchGap( int from, int until, int key )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( key < 0    ) throw new IllegalArgumentException();
+    if(from < 0    ) throw new IllegalArgumentException();
+    if(from > until) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
-    for( int step=0; step < until-from; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
+    for( int step=0; step < until-from; step = 1 | step<<1 )  // <- make step have all bits set such that binary search is optimally efficient
     {
       int                  k = from+step,
           c = compare(key, k);
@@ -88,13 +91,13 @@ public interface ExpL2RSearchAccess extends CompareAccess
   default int expL2RSearchGapR( int from, int until, int key ) { return expL2RSearchGap(from,until, key, true ); }
   default int expL2RSearchGap ( int from, int until, int key, boolean rightBias )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if(from < 0    ) throw new IllegalArgumentException();
+    if(from > until) throw new IllegalArgumentException();
 
     int bias = rightBias ? 0 : 1;
 
     // GALLOPING PHASE
-    for( int step=0; step < until-from; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
+    for( int step=0; step < until-from; step = 1 | step<<1 )  // <- make step have all bits set such that binary search is optimally efficient
     {
       int                      k = from+step,
           c   =   compare(key, k);

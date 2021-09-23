@@ -3,11 +3,12 @@ package com.github.jaaa.search;
 import java.util.Comparator;
 import java.util.function.IntUnaryOperator;
 
+
 public class ExpSearch
 {
-  public static interface ExpSearcher extends Searcher
+  public interface ExpSearcher extends Searcher
   {
-    public int startIndex( int from, int until );
+    int startIndex( int from, int until );
 
     @Override default int search ( int from, int until, IntUnaryOperator compass ) { return ExpSearch.search (from,until, startIndex(from,until), compass); }
     @Override default int searchL( int from, int until, IntUnaryOperator compass ) { return ExpSearch.searchL(from,until, startIndex(from,until), compass); }

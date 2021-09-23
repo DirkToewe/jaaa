@@ -6,8 +6,9 @@ public interface ExpR2LSearchAccess extends CompareAccess
 {
   default int expR2LSearch( int from, int until, int key )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( key < 0    ) throw new IllegalArgumentException();
+    if(from < 0    ) throw new IllegalArgumentException();
+    if(from > until) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
     for( int step=1; step < until-from; step<<=1 ) // <- make step have all bits set such that binary search is optimally efficient
@@ -33,8 +34,9 @@ public interface ExpR2LSearchAccess extends CompareAccess
   default int expR2LSearchR( int from, int until, int key ) { return expR2LSearch(from,until, key, true ); }
   default int expR2LSearch ( int from, int until, int key, boolean rightBias )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( key < 0    ) throw new IllegalArgumentException();
+    if(from < 0    ) throw new IllegalArgumentException();
+    if(from > until) throw new IllegalArgumentException();
 
     int bias = rightBias ? -1 : 0;
     boolean found = false;
@@ -60,8 +62,9 @@ public interface ExpR2LSearchAccess extends CompareAccess
 
   default int expR2LSearchGap( int from, int until, int key )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( key < 0    ) throw new IllegalArgumentException();
+    if(from < 0    ) throw new IllegalArgumentException();
+    if(from > until) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
     for( int step=1; step < until-from; step<<=1 ) // <- make step have all bits set such that binary search is optimally efficient
@@ -87,8 +90,8 @@ public interface ExpR2LSearchAccess extends CompareAccess
   default int expR2LSearchGapR( int from, int until, int key ) { return expR2LSearchGap(from,until, key, true ); }
   default int expR2LSearchGap ( int from, int until, int key, boolean rightBias )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if(from < 0    ) throw new IllegalArgumentException();
+    if(from > until) throw new IllegalArgumentException();
 
     int bias = rightBias ? -1 : 0;
 

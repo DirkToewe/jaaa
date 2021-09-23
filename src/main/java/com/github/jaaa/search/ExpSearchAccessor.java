@@ -3,7 +3,7 @@ package com.github.jaaa.search;
 public interface ExpSearchAccessor<T> extends ExpR2LSearchAccessor<T>,
                                               ExpL2RSearchAccessor<T>
 {
-  public default int expSearch( T a, int from, int until, int start, T b, int key )
+  default int expSearch( T a, int from, int until, int start, T b, int key )
   {
     if(  from <  0     ) throw new IllegalArgumentException();
     if(  from >  until ) throw new IllegalArgumentException();
@@ -21,7 +21,7 @@ public interface ExpSearchAccessor<T> extends ExpR2LSearchAccessor<T>,
     else        return expL2RSearch(a,   1+start,until, b,key);
   }
 
-  public default int expSearchR( T a, int from, int until, int start, T b, int key )
+  default int expSearchR( T a, int from, int until, int start, T b, int key )
   {
     if(  from <  0     ) throw new IllegalArgumentException();
     if(  from >  until ) throw new IllegalArgumentException();
@@ -39,7 +39,7 @@ public interface ExpSearchAccessor<T> extends ExpR2LSearchAccessor<T>,
     return c==0 && ~(start+1)==i ? ~i : i;
   }
 
-  public default int expSearchL( T a, int from, int until, int start, T b, int key )
+  default int expSearchL( T a, int from, int until, int start, T b, int key )
   {
     if(  from <  0     ) throw new IllegalArgumentException();
     if(  from >  until ) throw new IllegalArgumentException();
@@ -58,7 +58,7 @@ public interface ExpSearchAccessor<T> extends ExpR2LSearchAccessor<T>,
   }
 
 
-  public default int expSearchGap( T a, int from, int until, int start, T b, int key )
+  default int expSearchGap( T a, int from, int until, int start, T b, int key )
   {
     if(  from <  0     ) throw new IllegalArgumentException();
     if(  from >  until ) throw new IllegalArgumentException();
