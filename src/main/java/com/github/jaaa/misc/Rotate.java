@@ -10,6 +10,7 @@ public class Rotate
 
   // STATIC METHODS
   public static <T> void rotate(      T[] arr, int dist ) { rotate(arr, 0,arr.length, dist); }
+  public static     void rotate(boolean[] arr, int dist ) { rotate(arr, 0,arr.length, dist); }
   public static     void rotate(   byte[] arr, int dist ) { rotate(arr, 0,arr.length, dist); }
   public static     void rotate(  short[] arr, int dist ) { rotate(arr, 0,arr.length, dist); }
   public static     void rotate(    int[] arr, int dist ) { rotate(arr, 0,arr.length, dist); }
@@ -19,6 +20,7 @@ public class Rotate
   public static     void rotate( double[] arr, int dist ) { rotate(arr, 0,arr.length, dist); }
 
   public static <T> void rotate(      T[] arr, int from, int until, int dist ) { ( (RotateAccess) (i, j) -> swap(arr,i,j) ).rotate(from,until,dist); }
+  public static     void rotate(boolean[] arr, int from, int until, int dist ) { ( (RotateAccess) (i, j) -> swap(arr,i,j) ).rotate(from,until,dist); }
   public static     void rotate(   byte[] arr, int from, int until, int dist ) { ( (RotateAccess) (i, j) -> swap(arr,i,j) ).rotate(from,until,dist); }
   public static     void rotate(  short[] arr, int from, int until, int dist ) { ( (RotateAccess) (i, j) -> swap(arr,i,j) ).rotate(from,until,dist); }
   public static     void rotate(    int[] arr, int from, int until, int dist ) { ( (RotateAccess) (i, j) -> swap(arr,i,j) ).rotate(from,until,dist); }

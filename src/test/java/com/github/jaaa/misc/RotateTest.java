@@ -1,15 +1,99 @@
 package com.github.jaaa.misc;
 
+import com.github.jaaa.WithRange;
 import net.jqwik.api.*;
 import net.jqwik.api.constraints.IntRange;
 
 import static com.github.jaaa.misc.Rotate.rotate;
 import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.stream.IntStream.range;
+import static com.github.jaaa.misc.Boxing.unboxed;
 
+
+@PropertyDefaults( shrinking = ShrinkingMode.OFF )
 public class RotateTest
 {
   private static final int N_TRIES = 100_000;
+
+
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysBoolean1( @ForAll boolean[] input, @ForAll @IntRange( min = -Integer.MAX_VALUE ) int dist )
+  {
+    var reference = input.clone();
+    rotate(input,+dist);
+    rotate(input,-dist);
+    assertThat(input).isEqualTo(reference);
+  }
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysBoolean2( @ForAll boolean[] input, @ForAll int dist1, @ForAll int dist2 )
+  {
+    Assume.that(
+      dist1 < 0 ? (dist2 > Integer.MIN_VALUE - dist1)
+                : (dist2 < Integer.MAX_VALUE - dist1)
+    );
+    var reference = input.clone();
+    rotate(input, dist1);
+    rotate(input, dist2);
+    rotate(reference, dist1+dist2);
+    assertThat(input).isEqualTo(reference);
+  }
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysBoolean3( @ForAll boolean[] input, @ForAll int dist )
+  {
+    if(  0 != input.length ) {
+      dist /= input.length;
+      dist *= input.length;
+    }
+    var reference = input.clone();
+    rotate(input, dist);
+    assertThat(input).isEqualTo(reference);
+  }
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysBoolean4( @ForAll boolean[] input, @ForAll int dist )
+  {
+    Assume.that( dist >= input.length - Integer.MAX_VALUE );
+
+    var reference = range(0,input.length).mapToObj( i -> {
+      i -= dist;
+      i %= input.length;
+      if( i < 0 ) i += input.length;
+      return           input[i];
+    }).toArray(Boolean[]::new);
+
+    rotate(input, dist);
+
+    assertThat(input).isEqualTo( unboxed(reference) );
+  }
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysBoolean5( @ForAll WithRange<boolean[]> sample, @ForAll int dist )
+  {
+    int  from = sample.getFrom(),
+        until = sample.getUntil(),
+          len = until-from;
+    var input = sample.getData();
+
+    var reference = range(0,input.length).mapToObj( i -> {
+      if( from <= i && i < until ) {
+            i -= from;
+            i = (i - dist % len) % len;
+        if( i < 0 )
+            i += len;
+            i += from;
+      }
+      return input[i];
+    }).toArray(Boolean[]::new);
+
+    rotate(input, from,until, dist);
+
+    assertThat(input).isEqualTo( unboxed(reference) );
+  }
+
+
 
   @Property( tries = N_TRIES )
   void rotatesArraysByte1( @ForAll byte[] input, @ForAll @IntRange( min = -Integer.MAX_VALUE ) int dist )
@@ -60,7 +144,31 @@ public class RotateTest
 
     rotate(input, dist);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
+  }
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysByte5( @ForAll WithRange<byte[]> sample, @ForAll int dist )
+  {
+    int  from = sample.getFrom(),
+        until = sample.getUntil(),
+          len = until-from;
+    var input = sample.getData();
+
+    var reference = range(0,input.length).mapToObj( i -> {
+      if( from <= i && i < until ) {
+            i -= from;
+            i = (i - dist % len) % len;
+        if( i < 0 )
+            i += len;
+            i += from;
+      }
+      return input[i];
+    }).toArray(Byte[]::new);
+
+    rotate(input, from,until, dist);
+
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
 
@@ -114,7 +222,31 @@ public class RotateTest
 
     rotate(input, dist);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
+  }
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysShort5( @ForAll WithRange<short[]> sample, @ForAll int dist )
+  {
+    int  from = sample.getFrom(),
+        until = sample.getUntil(),
+          len = until-from;
+    var input = sample.getData();
+
+    var reference = range(0,input.length).mapToObj( i -> {
+      if( from <= i && i < until ) {
+            i -= from;
+            i = (i - dist % len) % len;
+        if( i < 0 )
+            i += len;
+            i += from;
+      }
+      return input[i];
+    }).toArray(Short[]::new);
+
+    rotate(input, from,until, dist);
+
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
 
@@ -167,6 +299,30 @@ public class RotateTest
     }).toArray();
 
     rotate(input, dist);
+
+    assertThat(input).isEqualTo(reference);
+  }
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysInt5( @ForAll WithRange<int[]> sample, @ForAll int dist )
+  {
+    int  from = sample.getFrom(),
+        until = sample.getUntil(),
+          len = until-from;
+    var input = sample.getData();
+
+    var reference = range(0,input.length).map( i -> {
+      if( from <= i && i < until ) {
+            i -= from;
+            i = (i - dist % len) % len;
+        if( i < 0 )
+            i += len;
+            i += from;
+      }
+      return input[i];
+    }).toArray();
+
+    rotate(input, from,until, dist);
 
     assertThat(input).isEqualTo(reference);
   }
@@ -225,6 +381,30 @@ public class RotateTest
     assertThat(input).isEqualTo(reference);
   }
 
+  @Property( tries = N_TRIES )
+  void rotatesArraysLong5( @ForAll WithRange<long[]> sample, @ForAll int dist )
+  {
+    int  from = sample.getFrom(),
+        until = sample.getUntil(),
+          len = until-from;
+    var input = sample.getData();
+
+    var reference = range(0,input.length).mapToLong( i -> {
+      if( from <= i && i < until ) {
+            i -= from;
+            i = (i - dist % len) % len;
+        if( i < 0 )
+            i += len;
+            i += from;
+      }
+      return input[i];
+    }).toArray();
+
+    rotate(input, from,until, dist);
+
+    assertThat(input).isEqualTo(reference);
+  }
+
 
 
   @Property( tries = N_TRIES )
@@ -276,7 +456,31 @@ public class RotateTest
 
     rotate(input, dist);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
+  }
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysChar5( @ForAll WithRange<char[]> sample, @ForAll int dist )
+  {
+    int  from = sample.getFrom(),
+        until = sample.getUntil(),
+          len = until-from;
+    var input = sample.getData();
+
+    var reference = range(0,input.length).mapToObj( i -> {
+      if( from <= i && i < until ) {
+            i -= from;
+            i = (i - dist % len) % len;
+        if( i < 0 )
+            i += len;
+            i += from;
+      }
+      return input[i];
+    }).toArray(Character[]::new);
+
+    rotate(input, from,until, dist);
+
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
 
@@ -330,7 +534,31 @@ public class RotateTest
 
     rotate(input, dist);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
+  }
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysFloat5( @ForAll WithRange<float[]> sample, @ForAll int dist )
+  {
+    int  from = sample.getFrom(),
+        until = sample.getUntil(),
+          len = until-from;
+    var input = sample.getData();
+
+    Float[] reference = range(0,input.length).mapToObj( i -> {
+      if( from <= i && i < until ) {
+            i -= from;
+            i = (i - dist % len) % len;
+        if( i < 0 )
+            i += len;
+            i += from;
+      }
+      return input[i];
+    }).toArray(Float[]::new);
+
+    rotate(input, from,until, dist);
+
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
 
@@ -373,13 +601,12 @@ public class RotateTest
   @Property( tries = N_TRIES )
   void rotatesArraysDouble4( @ForAll double[] input, @ForAll int dist )
   {
-    Assume.that( dist >= input.length - Integer.MAX_VALUE );
-
-    double[] reference = range(0,input.length).mapToDouble( i -> {
-                  i -= dist;
-                  i %= input.length;
-      if( i < 0 ) i += input.length;
-      return           input[i];
+    int len = input.length;
+    double[] reference = range(0,len).mapToDouble( i -> {
+          i = (i - dist % len) % len;
+      if( i < 0 )
+          i += len;
+      return input[i];
     }).toArray();
 
     rotate(input, dist);
@@ -387,56 +614,103 @@ public class RotateTest
     assertThat(input).isEqualTo(reference);
   }
 
-
-
-  @Property( tries = 10_000 )
-  void rotatesArraysObject1( @ForAll String[] input, @ForAll @IntRange( min = -Integer.MAX_VALUE ) int dist )
+  @Property( tries = N_TRIES )
+  void rotatesArraysDouble5( @ForAll WithRange<double[]> sample, @ForAll int dist )
   {
-    String[] reference = input.clone();
+    int  from = sample.getFrom(),
+        until = sample.getUntil(),
+          len = until-from;
+    var input = sample.getData();
+
+    double[] reference = range(0,input.length).mapToDouble( i -> {
+      if( from <= i && i < until ) {
+            i -= from;
+            i = (i - dist % len) % len;
+        if( i < 0 )
+            i += len;
+            i += from;
+      }
+      return input[i];
+    }).toArray();
+
+    rotate(input, from,until, dist);
+
+    assertThat(input).isEqualTo(reference);
+  }
+
+
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysObject1( @ForAll Integer[] input, @ForAll @IntRange( min = -Integer.MAX_VALUE ) int dist )
+  {
+    var reference = input.clone();
     rotate(input,+dist);
     rotate(input,-dist);
     assertThat(input).isEqualTo(reference);
   }
 
-  @Property( tries = 10_000 )
-  void rotatesArraysObject2( @ForAll String[] input, @ForAll int dist1, @ForAll int dist2 )
+  @Property( tries = N_TRIES )
+  void rotatesArraysObject2( @ForAll Integer[] input, @ForAll int dist1, @ForAll int dist2 )
   {
     Assume.that(
       dist1 < 0 ? (dist2 > Integer.MIN_VALUE - dist1)
                 : (dist2 < Integer.MAX_VALUE - dist1)
     );
-    String[] reference = input.clone();
+    var reference = input.clone();
     rotate(input, dist1);
     rotate(input, dist2);
     rotate(reference, dist1+dist2);
     assertThat(input).isEqualTo(reference);
   }
 
-  @Property( tries = 10_000 )
-  void rotatesArraysObject3( @ForAll String[] input, @ForAll int dist )
+  @Property( tries = N_TRIES )
+  void rotatesArraysObject3( @ForAll Integer[] input, @ForAll int dist )
   {
     if(  0 != input.length ) {
       dist /= input.length;
       dist *= input.length;
     }
-    String[] reference = input.clone();
+    var reference = input.clone();
     rotate(input, dist);
     assertThat(input).isEqualTo(reference);
   }
 
-  @Property( tries = 10_000 )
-  void rotatesArraysObject4( @ForAll String[] input, @ForAll int dist )
+  @Property( tries = N_TRIES )
+  void rotatesArraysObject4( @ForAll Integer[] input, @ForAll int dist )
   {
-    Assume.that( dist >= input.length - Integer.MAX_VALUE );
-
-    String[] reference = range(0,input.length).mapToObj( i -> {
-                  i -= dist;
-                  i %= input.length;
-      if( i < 0 ) i += input.length;
-      return           input[i];
-    }).toArray(String[]::new);
+    int len = input.length;
+    var reference = range(0,len).mapToObj( i -> {
+          i = (i - dist % len) % len;
+      if( i < 0 )
+          i += len;
+      return input[i];
+    }).toArray(Integer[]::new);
 
     rotate(input, dist);
+
+    assertThat(input).isEqualTo(reference);
+  }
+
+  @Property( tries = N_TRIES )
+  void rotatesArraysObject5( @ForAll WithRange<Integer[]> sample, @ForAll int dist )
+  {
+    int  from = sample.getFrom(),
+        until = sample.getUntil(),
+          len = until-from;
+    var input = sample.getData();
+
+    Integer[] reference = range(0,input.length).mapToObj( i -> {
+      if( from <= i && i < until ) {
+            i -= from;
+            i = (i - dist % len) % len;
+        if( i < 0 )
+            i += len;
+            i += from;
+      }
+      return input[i];
+    }).toArray(Integer[]::new);
+
+    rotate(input, from,until, dist);
 
     assertThat(input).isEqualTo(reference);
   }

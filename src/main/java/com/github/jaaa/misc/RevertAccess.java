@@ -4,11 +4,11 @@ import com.github.jaaa.SwapAccess;
 
 public interface RevertAccess extends SwapAccess
 {
-  public default void revert( int from, int until )
+  default void revert( int from, int until )
   {
-    if( from > until )
-      throw new IllegalArgumentException();
-    for(;--until>from; ++from)
+    if( from < 0     ) throw new IllegalArgumentException();
+    if( from > until ) throw new IllegalArgumentException();
+    for(;from < --until; ++from)
       swap(from,until);
   }
 }
