@@ -1,26 +1,34 @@
 package com.github.jaaa;
 
+import java.util.function.Function;
+
 import static java.lang.String.format;
 
-public class WithIndex<T> extends With<T>
-{
-  private final int index;
 
-  public WithIndex( int _index, T _data )
+public record WithIndex<T>( int index, T data ) implements With<T>
+{
+  public WithIndex
   {
-    super(_data);
-        index =_index;
-    if( index < 0               ) throw new IllegalArgumentException();
-    if( index >= contentLength()) throw new IllegalArgumentException();
+    if( index < 0                        ) throw new IllegalArgumentException();
+    if( index >= With.contentLength(data)) throw new IllegalArgumentException();
+    data = With.clone(data);
   }
 
+  @Override
+  public  T  getData () { return data; }
   public int getIndex() { return index; }
 
   @Override public String toString() {
-    return format( "WithIndex{ index: %d, data: %s }", index, dataString() );
+    return format( "WithIndex{ index: %d, data: %s }", index, With.toString(data) );
   }
 
   @Override public WithIndex<T> clone() {
-    return new WithIndex<>(index, getData());
+    return new WithIndex<>( index, With.clone(data) );
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  @Override
+  public <R> With<R> map(Function<? super T, ? extends R> mapper) {
+    return new WithIndex(index, mapper.apply(data));
   }
 }

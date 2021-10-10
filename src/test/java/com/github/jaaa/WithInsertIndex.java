@@ -4,28 +4,27 @@ import java.util.function.Function;
 
 import static java.lang.String.format;
 
-public class WithInsertIndex<T> extends With<T>
+public record WithInsertIndex<T>( int index, T data ) implements With<T>
 {
-  private final int index;
-
-  public WithInsertIndex( int _index, T _data )
-  {
-    super(_data);
-        index =_index;
-    if( index < 0              ) throw new IllegalArgumentException();
-    if( index > contentLength()) throw new IllegalArgumentException();
+  public WithInsertIndex {
+    if( index < 0                       ) throw new IllegalArgumentException();
+    if( index > With.contentLength(data)) throw new IllegalArgumentException();
+    data = With.clone(data);
   }
 
+  @Override
+  public  T  getData () { return data; }
   public int getIndex() { return index; }
 
   @Override public String toString() {
-    return format( "WithInsertIndex{ index: %d, data: %s }", index, dataString() );
+    return format( "WithInsertIndex{ index: %d, data: %s }", index, With.toString(data) );
   }
 
   @Override public WithInsertIndex<T> clone() {
-    return new WithInsertIndex<>(index, getData());
+    return new WithInsertIndex<>(index, With.clone(data));
   }
 
+  @Override
   public <U> WithInsertIndex<U> map( Function<? super T,? extends U> mapFn ) {
     return new WithInsertIndex<>( index, mapFn.apply(getData()) );
   }
