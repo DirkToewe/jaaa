@@ -7,9 +7,11 @@ import net.jqwik.api.arbitraries.ArrayArbitrary;
 
 import java.lang.reflect.Array;
 
+import static com.github.jaaa.Swap.swap;
+import static com.github.jaaa.util.Combinatorics.factorial;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import static net.jqwik.api.Arbitraries.bytes;
+import static net.jqwik.api.Arbitraries.*;
 import static net.jqwik.api.RandomDistribution.uniform;
 
 
@@ -34,11 +36,16 @@ public interface ArrayProviderTemplate
   }
 
   static <T> Arbitrary<WithInsertIndex<T>> withInsertIndex( Arbitrary<T> arbitrary ) {
-    return arbitrary.flatMap( arr ->
-      Arbitraries.integers().between(0, Array.getLength(arr)).withDistribution( uniform() ).map(
+    return arbitrary.flatMap( arr -> {
+      if( arr instanceof WithRange wr )
+        return Arbitraries.integers().between(wr.getFrom(), wr.getUntil()).withDistribution( uniform() ).map(
+          i -> new WithInsertIndex<>(i,arr)
+        );
+
+      return Arbitraries.integers().between(0, Array.getLength(arr)).withDistribution( uniform() ).map(
         i -> new WithInsertIndex<>(i,arr)
-      )
-    );
+      );
+    });
   }
 
   static <T> Arbitrary<WithIndex<T>> withIndex( Arbitrary<T> arbitrary ) {
@@ -56,28 +63,33 @@ public interface ArrayProviderTemplate
     return bytes().tuple2().flatMap( xy -> {
       byte to = (byte) max(xy.get1(), xy.get2()),
          from = (byte) min(xy.get1(), xy.get2());
-      return bytes().between(from,to).array(byte[].class).ofMinSize( maxArraySize() );
+      return bytes().between(from,to).array(byte[].class).ofMaxSize( maxArraySize() );
     });
   }
 
-  @Provide default ArrayArbitrary<  Boolean, boolean[]> arraysBoolean() { return Arbitraries.of(false,true).array(boolean[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<     Byte,    byte[]> arraysByte   () { return Arbitraries.       bytes().array(   byte[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<    Short,   short[]> arraysShort  () { return Arbitraries.      shorts().array(  short[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<  Integer,     int[]> arraysInt    () { return Arbitraries.    integers().array(    int[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<     Long,    long[]> arraysLong   () { return Arbitraries.       longs().array(   long[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<Character,    char[]> arraysChar   () { return Arbitraries.       chars().array(   char[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<    Float,   float[]> arraysFloat  () { return Arbitraries.      floats().array(  float[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<   Double,  double[]> arraysDouble () { return Arbitraries.     doubles().array( double[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<   String,  String[]> arraysString () { return Arbitraries.     strings().array( String[].class).ofMaxSize( maxArraySizeString() ); }
+  @Provide default Arbitrary<byte[]> arraysByte_smallPermutations() {
+    return integers().between(0,8).flatMap(
+      n ->    longs().between(0,factorial(n)-1).map( off -> {
+        var next = new byte[n];
+        for( int i=0; i < n; ) {
+          next[i] = (byte) i;
+          swap(next,i++, (int) (off % i));
+          off /= i;
+        }
+        return next;
+      })
+    );
+  }
 
-  @Provide default ArrayArbitrary<  Boolean,   Boolean[]> arraysObjBoolean() { return Arbitraries.of(false,true).array(  Boolean[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<     Byte,      Byte[]> arraysObjByte   () { return Arbitraries.       bytes().array(     Byte[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<    Short,     Short[]> arraysObjShort  () { return Arbitraries.      shorts().array(    Short[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<  Integer,   Integer[]> arraysObjInt    () { return Arbitraries.    integers().array(  Integer[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<     Long,      Long[]> arraysObjLong   () { return Arbitraries.       longs().array(     Long[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<Character, Character[]> arraysObjChar   () { return Arbitraries.       chars().array(Character[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<    Float,     Float[]> arraysObjFloat  () { return Arbitraries.      floats().array(    Float[].class).ofMaxSize( maxArraySize()       ); }
-  @Provide default ArrayArbitrary<   Double,    Double[]> arraysObjDouble () { return Arbitraries.     doubles().array(   Double[].class).ofMaxSize( maxArraySize()       ); }
+  @Provide default ArrayArbitrary<  Boolean, boolean[]> arraysBoolean() { return Arbitraries.of(false,true).array(boolean[].class).ofMaxSize( maxArraySize()       ).withSizeDistribution(uniform()); }
+  @Provide default ArrayArbitrary<     Byte,    byte[]> arraysByte   () { return Arbitraries.       bytes().array(   byte[].class).ofMaxSize( maxArraySize()       ).withSizeDistribution(uniform()); }
+  @Provide default ArrayArbitrary<    Short,   short[]> arraysShort  () { return Arbitraries.      shorts().array(  short[].class).ofMaxSize( maxArraySize()       ).withSizeDistribution(uniform()); }
+  @Provide default ArrayArbitrary<  Integer,     int[]> arraysInt    () { return Arbitraries.    integers().array(    int[].class).ofMaxSize( maxArraySize()       ).withSizeDistribution(uniform()); }
+  @Provide default ArrayArbitrary<     Long,    long[]> arraysLong   () { return Arbitraries.       longs().array(   long[].class).ofMaxSize( maxArraySize()       ).withSizeDistribution(uniform()); }
+  @Provide default ArrayArbitrary<Character,    char[]> arraysChar   () { return Arbitraries.       chars().array(   char[].class).ofMaxSize( maxArraySize()       ).withSizeDistribution(uniform()); }
+  @Provide default ArrayArbitrary<    Float,   float[]> arraysFloat  () { return Arbitraries.      floats().array(  float[].class).ofMaxSize( maxArraySize()       ).withSizeDistribution(uniform()); }
+  @Provide default ArrayArbitrary<   Double,  double[]> arraysDouble () { return Arbitraries.     doubles().array( double[].class).ofMaxSize( maxArraySize()       ).withSizeDistribution(uniform()); }
+  @Provide default ArrayArbitrary<   String,  String[]> arraysString () { return Arbitraries.     strings().array( String[].class).ofMaxSize( maxArraySizeString() ).withSizeDistribution(uniform()); }
 
   @Provide default Arbitrary< WithRange<boolean[]> > arraysWithRangeBoolean() { return withRange( arraysBoolean() ); }
   @Provide default Arbitrary< WithRange<   byte[]> > arraysWithRangeByte   () { return withRange( arraysByte   () ); }
@@ -109,22 +121,23 @@ public interface ArrayProviderTemplate
   @Provide default Arbitrary< WithIndex< double[]> > arraysWithIndexDouble () { return withIndex( arraysDouble ().ofMinSize(1) ); }
   @Provide default Arbitrary< WithIndex< String[]> > arraysWithIndexString () { return withIndex( arraysString ().ofMinSize(1) ); }
 
-  @Provide default Arbitrary< WithIndex<  Boolean[]> > arraysWithIndexObjBoolean() { return withIndex( arraysObjBoolean().ofMinSize(1) ); }
-  @Provide default Arbitrary< WithIndex<     Byte[]> > arraysWithIndexObjByte   () { return withIndex( arraysObjByte   ().ofMinSize(1) ); }
-  @Provide default Arbitrary< WithIndex<    Short[]> > arraysWithIndexObjShort  () { return withIndex( arraysObjShort  ().ofMinSize(1) ); }
-  @Provide default Arbitrary< WithIndex<  Integer[]> > arraysWithIndexObjInt    () { return withIndex( arraysObjInt    ().ofMinSize(1) ); }
-  @Provide default Arbitrary< WithIndex<     Long[]> > arraysWithIndexObjLong   () { return withIndex( arraysObjLong   ().ofMinSize(1) ); }
-  @Provide default Arbitrary< WithIndex<Character[]> > arraysWithIndexObjChar   () { return withIndex( arraysObjChar   ().ofMinSize(1) ); }
-  @Provide default Arbitrary< WithIndex<    Float[]> > arraysWithIndexObjFloat  () { return withIndex( arraysObjFloat  ().ofMinSize(1) ); }
-  @Provide default Arbitrary< WithIndex<   Double[]> > arraysWithIndexObjDouble () { return withIndex( arraysObjDouble ().ofMinSize(1) ); }
+  @Provide default Arbitrary< WithRange< WithIndex< String[]>>> arraysWithIndexWithRangeString () { return withRange( withIndex( arraysString ().ofMinSize(1) ) ); }
+  @Provide default Arbitrary< WithRange< WithIndex<boolean[]>>> arraysWithIndexWithRangeBoolean() { return withRange( withIndex( arraysBoolean().ofMinSize(1) ) ); }
+  @Provide default Arbitrary< WithRange< WithIndex<   byte[]>>> arraysWithIndexWithRangeByte   () { return withRange( withIndex( arraysByte   ().ofMinSize(1) ) ); }
+  @Provide default Arbitrary< WithRange< WithIndex<  short[]>>> arraysWithIndexWithRangeShort  () { return withRange( withIndex( arraysShort  ().ofMinSize(1) ) ); }
+  @Provide default Arbitrary< WithRange< WithIndex<    int[]>>> arraysWithIndexWithRangeInt    () { return withRange( withIndex( arraysInt    ().ofMinSize(1) ) ); }
+  @Provide default Arbitrary< WithRange< WithIndex<   long[]>>> arraysWithIndexWithRangeLong   () { return withRange( withIndex( arraysLong   ().ofMinSize(1) ) ); }
+  @Provide default Arbitrary< WithRange< WithIndex<   char[]>>> arraysWithIndexWithRangeChar   () { return withRange( withIndex( arraysChar   ().ofMinSize(1) ) ); }
+  @Provide default Arbitrary< WithRange< WithIndex<  float[]>>> arraysWithIndexWithRangeFloat  () { return withRange( withIndex( arraysFloat  ().ofMinSize(1) ) ); }
+  @Provide default Arbitrary< WithRange< WithIndex< double[]>>> arraysWithIndexWithRangeDouble () { return withRange( withIndex( arraysDouble ().ofMinSize(1) ) ); }
 
-  @Provide default Arbitrary< WithRange< WithIndex<   String[]>>> arraysWithIndexWithRangeString    () { return withRange( withIndex( arraysString    ().ofMinSize(1) ) ); }
-  @Provide default Arbitrary< WithRange< WithIndex<  Boolean[]>>> arraysWithIndexWithRangeObjBoolean() { return withRange( withIndex( arraysObjBoolean().ofMinSize(1) ) ); }
-  @Provide default Arbitrary< WithRange< WithIndex<     Byte[]>>> arraysWithIndexWithRangeObjByte   () { return withRange( withIndex( arraysObjByte   ().ofMinSize(1) ) ); }
-  @Provide default Arbitrary< WithRange< WithIndex<    Short[]>>> arraysWithIndexWithRangeObjShort  () { return withRange( withIndex( arraysObjShort  ().ofMinSize(1) ) ); }
-  @Provide default Arbitrary< WithRange< WithIndex<  Integer[]>>> arraysWithIndexWithRangeObjInt    () { return withRange( withIndex( arraysObjInt    ().ofMinSize(1) ) ); }
-  @Provide default Arbitrary< WithRange< WithIndex<     Long[]>>> arraysWithIndexWithRangeObjLong   () { return withRange( withIndex( arraysObjLong   ().ofMinSize(1) ) ); }
-  @Provide default Arbitrary< WithRange< WithIndex<Character[]>>> arraysWithIndexWithRangeObjChar   () { return withRange( withIndex( arraysObjChar   ().ofMinSize(1) ) ); }
-  @Provide default Arbitrary< WithRange< WithIndex<    Float[]>>> arraysWithIndexWithRangeObjFloat  () { return withRange( withIndex( arraysObjFloat  ().ofMinSize(1) ) ); }
-  @Provide default Arbitrary< WithRange< WithIndex<   Double[]>>> arraysWithIndexWithRangeObjDouble () { return withRange( withIndex( arraysObjDouble ().ofMinSize(1) ) ); }
+  @Provide default Arbitrary< WithInsertIndex< WithRange< String[]>>> arraysWithRangeWithInsertIndexString () { return withInsertIndex( withRange( arraysString () ) ); }
+  @Provide default Arbitrary< WithInsertIndex< WithRange<boolean[]>>> arraysWithRangeWithInsertIndexBoolean() { return withInsertIndex( withRange( arraysBoolean() ) ); }
+  @Provide default Arbitrary< WithInsertIndex< WithRange<   byte[]>>> arraysWithRangeWithInsertIndexByte   () { return withInsertIndex( withRange( arraysByte   () ) ); }
+  @Provide default Arbitrary< WithInsertIndex< WithRange<  short[]>>> arraysWithRangeWithInsertIndexShort  () { return withInsertIndex( withRange( arraysShort  () ) ); }
+  @Provide default Arbitrary< WithInsertIndex< WithRange<    int[]>>> arraysWithRangeWithInsertIndexInt    () { return withInsertIndex( withRange( arraysInt    () ) ); }
+  @Provide default Arbitrary< WithInsertIndex< WithRange<   long[]>>> arraysWithRangeWithInsertIndexLong   () { return withInsertIndex( withRange( arraysLong   () ) ); }
+  @Provide default Arbitrary< WithInsertIndex< WithRange<   char[]>>> arraysWithRangeWithInsertIndexChar   () { return withInsertIndex( withRange( arraysChar   () ) ); }
+  @Provide default Arbitrary< WithInsertIndex< WithRange<  float[]>>> arraysWithRangeWithInsertIndexFloat  () { return withInsertIndex( withRange( arraysFloat  () ) ); }
+  @Provide default Arbitrary< WithInsertIndex< WithRange< double[]>>> arraysWithRangeWithInsertIndexDouble () { return withInsertIndex( withRange( arraysDouble () ) ); }
 }
