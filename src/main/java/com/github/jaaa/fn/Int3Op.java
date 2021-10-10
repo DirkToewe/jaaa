@@ -1,6 +1,6 @@
 package com.github.jaaa.fn;
 
-public interface Int2Op
+public interface Int3Op
 {
   int applyAsInt( int x, int y, int z );
 }

@@ -16,13 +16,13 @@ import static net.jqwik.api.RandomDistribution.uniform;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class InplaceBufferIntTest
+public class InPlacePartitionBufferIntTest
 {
   final class TestState
   {
   // FIELDS
     public final int nBits, nInts;
-    public final InplaceBufferInt tst;
+    public final InPlacePartitionBufferInt tst;
     public final int[] ref;
 
   // CONSTRUCTORS
@@ -36,7 +36,7 @@ public class InplaceBufferIntTest
       };
       nBits =_nBits;
       nInts =_nInts;
-      tst = new InplaceBufferInt(acc, 0, _nBits*_nInts, _nBits,_nInts);
+      tst = new InPlacePartitionBufferInt(acc, 0, _nBits*_nInts, _nBits,_nInts);
       ref  = new int[_nInts];
     }
 

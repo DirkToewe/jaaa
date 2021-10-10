@@ -3,7 +3,7 @@ package com.github.jaaa.merge;
 import com.github.jaaa.*;
 import com.github.jaaa.misc.Revert;
 import com.github.jaaa.sort.TimSort;
-import com.github.jaaa.util.IntBiFunction;
+import com.github.jaaa.fn.Int2Fn;
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.Tuple2;
 import net.jqwik.api.Tuple.Tuple3;
@@ -41,12 +41,11 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
   Merger merger();
 
 
-
   @Provide private <T> Arbitrary<Tuple3<
     WithRange<T>,
     WithRange<T>,
     WithInsertIndex<T>
-  >> mergeSamplesWithRange( IntBiFunction<Arbitrary<T>> arraysWithSizeBetween )
+  >> mergeSamplesWithRange( Int2Fn<Arbitrary<T>> arraysWithSizeBetween )
   {
     return
     withRange( arraysWithSizeBetween.apply(0,maxArraySize()) ).flatMap( a ->
@@ -771,6 +770,7 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
       cmp = reversed ? _cmp.reversed() : _cmp;
     }
 
+    @SuppressWarnings("unchecked")
     Tuple2<Byte,Integer>[]
       aRef = range(0,aRaw.length).mapToObj( i -> Tuple.of(aRaw[i],              i) ).toArray(Tuple2[]::new),
       bRef = range(0,bRaw.length).mapToObj( i -> Tuple.of(bRaw[i],aRaw.length + i) ).toArray(Tuple2[]::new),
@@ -782,6 +782,7 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     Arrays.sort(cRef,cmp);
 
     var acc = new CompareRandomAccessor<Tuple2<Byte,Integer>[]>(){
+      @SuppressWarnings("unchecked")
       @Override public Tuple2<Byte,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public void copyRange( Tuple2<Byte,Integer>[] a, int i, Tuple2<Byte,Integer>[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
       @Override public void copy     ( Tuple2<Byte,Integer>[] a, int i, Tuple2<Byte,Integer>[] b, int j ) { b[j] = a[i]; }
@@ -807,6 +808,7 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
       cmp = reversed ? _cmp.reversed() : _cmp;
     }
 
+    @SuppressWarnings("unchecked")
     Tuple2<Integer,Integer>[]
       aRef = range(0,aRaw.length).mapToObj( i -> Tuple.of(aRaw[i],              i) ).toArray(Tuple2[]::new),
       bRef = range(0,bRaw.length).mapToObj( i -> Tuple.of(bRaw[i],aRaw.length + i) ).toArray(Tuple2[]::new),
@@ -818,6 +820,7 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     Arrays.sort(cRef,cmp);
 
     var acc = new CompareRandomAccessor<Tuple2<Integer,Integer>[]>(){
+      @SuppressWarnings("unchecked")
       @Override public Tuple2<Integer,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public void copyRange( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
       @Override public void copy     ( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j ) { b[j] = a[i]; }

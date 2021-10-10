@@ -10,7 +10,7 @@ import static java.lang.System.arraycopy;
 public final class InsertionExpSort
 {
 // STATIC FIELDS
-  public static SorterInplace INSERTION_EXP_SORTER = new SorterInplace()
+  public static SorterInPlace INSERTION_EXP_SORTER = new SorterInPlace()
   {
     @Override public boolean isStable() { return true; }
 

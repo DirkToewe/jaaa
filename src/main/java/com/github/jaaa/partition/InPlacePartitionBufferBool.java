@@ -3,7 +3,7 @@ package com.github.jaaa.partition;
 import com.github.jaaa.PredicateSwapAccess;
 
 
-final class InplaceBufferBool
+final class InPlacePartitionBufferBool
 {
 // STATIC FIELDS
 
@@ -17,7 +17,7 @@ final class InplaceBufferBool
   private boolean tru = true;
 
 // CONSTRUCTORS
-  public InplaceBufferBool( PredicateSwapAccess _acc, int _a, int _b, int _size )
+  public InPlacePartitionBufferBool(PredicateSwapAccess _acc, int _a, int _b, int _size )
   {
     assert      _size >= 0;
     assert _a         >= 0;
@@ -57,7 +57,7 @@ final class InplaceBufferBool
   }
 
   public boolean isTruthInverted() {
-    return tru == false;
+    return !tru;
   }
 
   public void flipTruth() {

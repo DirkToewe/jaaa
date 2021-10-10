@@ -10,7 +10,7 @@ import static java.lang.System.arraycopy;
 public final class InsertionAdaptiveSort
 {
 // STATIC FIELDS
-  public static SorterInplace INSERTION_ADAPTIVE_SORTER = new SorterInplace()
+  public static SorterInPlace INSERTION_ADAPTIVE_SORTER = new SorterInPlace()
   {
     @Override public boolean isStable() { return true; }
 
@@ -225,10 +225,10 @@ public final class InsertionAdaptiveSort
          mid = lo+hi >>> 1 )
       {
         int c = piv.compareTo(seq[mid]);
-        if( c < 0 )     hi = -1 + mid;
-        else            lo = +1 + mid;
+        if( c < 0 )          hi = mid;
+        else                 lo = mid+1;
 
-        if( lo > hi ) break;
+        if( lo >= hi ) break;
       }
 
       arraycopy(seq,lo, seq,lo+1, i-lo);
@@ -251,10 +251,10 @@ public final class InsertionAdaptiveSort
          mid = lo+hi >>> 1 )
       {
         int c = cmp.compare(piv, seq[mid]);
-        if( c < 0 )        hi = -1 + mid;
-        else               lo = +1 + mid;
+        if( c < 0 )             hi = mid;
+        else                    lo = mid+1;
 
-        if( lo > hi ) break;
+        if( lo >= hi ) break;
       }
 
       arraycopy(seq,lo, seq,lo+1, i-lo);

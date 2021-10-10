@@ -9,7 +9,7 @@ import java.util.Comparator;
 public final class SelectionSort
 {
   // STATIC FIELDS
-  public static SorterInplace SELECTION_SORTER = new SorterInplace()
+  public static SorterInPlace SELECTION_SORTER = new SorterInPlace()
   {
     @Override public boolean isStable() { return false; }
 

@@ -21,30 +21,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Group
 public class InsertionAdaptiveSortTest
 {
-  private final SorterInplace sorter = new StaticMethodsSorterInplace(InsertionAdaptiveSort.class) {
+  private final SorterInPlace sorter = new StaticMethodsSorterInPlace(InsertionAdaptiveSort.class) {
     @Override public boolean isStable    () { return INSERTION_ADAPTIVE_SORTER.isStable    (); }
     @Override public boolean isThreadSafe() { return INSERTION_ADAPTIVE_SORTER.isThreadSafe(); }
   };
 
   @Group class SortTestSmall implements TestTemplate {
     @Override public int maxArraySize() { return 100; }
-    @Override public SorterInplace sorter() { return sorter; }
+    @Override public SorterInPlace sorter() { return sorter; }
   }
   @Group class SortTestMedium implements TestTemplate {
     @Override public int maxArraySize() { return 10_000; }
-    @Override public SorterInplace sorter() { return sorter; }
+    @Override public SorterInPlace sorter() { return sorter; }
   }
 
   @Group class SorterTestSmall implements TestTemplate {
     @Override public int maxArraySize() { return 100; }
-    @Override public SorterInplace sorter() { return INSERTION_ADAPTIVE_SORTER; }
+    @Override public SorterInPlace sorter() { return INSERTION_ADAPTIVE_SORTER; }
   }
   @Group class SorterTestMedium implements TestTemplate {
     @Override public int maxArraySize() { return 10_000; }
-    @Override public SorterInplace sorter() { return INSERTION_ADAPTIVE_SORTER; }
+    @Override public SorterInPlace sorter() { return INSERTION_ADAPTIVE_SORTER; }
   }
 
-  interface TestTemplate extends SorterInplaceTestTemplate
+  interface TestTemplate extends SorterInPlaceTestTemplate
   {
     @Override default long nCompMax( int len ) { return len<=1 ? 0 : len-1 + range(1,len-1).mapToLong( n -> log2Ceil(n+1) ).sum(); }
     @Override default long nCompMin( int len ) { return len<=1 ? 0 : len-1; }
@@ -67,6 +67,7 @@ public class InsertionAdaptiveSortTest
 
       Comparator<Tuple2<Integer,Integer>> cmp = comparing(Tuple2::get1);
 
+      @SuppressWarnings("unchecked")
       Tuple2<Integer,Integer>[] reference = range(0,array.length).mapToObj(i -> Tuple.of(array[i],i) ).toArray(Tuple2[]::new);
       Arrays.sort(reference, from,until, cmp);
       var input = reference.clone();
@@ -76,7 +77,7 @@ public class InsertionAdaptiveSortTest
                     nComps = 0L;
         @Override public int compare( int i, int j ) { nComps++; return cmp.compare(input[i], input[j]); }
         @Override public void   swap( int i, int j ) { nSwaps++; Swap.swap(input,i,j); }
-      };
+      }
 
       var acc = new CountAcc() {};
 

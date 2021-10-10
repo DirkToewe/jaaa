@@ -12,7 +12,7 @@ import static java.util.Comparator.naturalOrder;
 public final class PermSort
 {
   // STATIC FIELDS
-  public static SorterInplace PERM_SORTER = new SorterInplace()
+  public static SorterInPlace PERM_SORTER = new SorterInPlace()
   {
     @Override public boolean isStable() { return false; }
 

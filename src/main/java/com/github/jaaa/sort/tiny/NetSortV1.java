@@ -3,17 +3,15 @@ package com.github.jaaa.sort.tiny;
 import com.github.jaaa.*;
 import com.github.jaaa.CompareSwapAccess;
 import com.github.jaaa.Swap;
-import com.github.jaaa.sort.SorterInplace;
+import com.github.jaaa.sort.SorterInPlace;
 
 import java.nio.IntBuffer;
 import java.util.Comparator;
 
-import static java.util.Comparator.naturalOrder;
-
 public final class NetSortV1
 {
   // STATIC FIELDS
-  public static SorterInplace NET_V1_SORTER = new SorterInplace()
+  public static SorterInPlace NET_V1_SORTER = new SorterInPlace()
   {
     @Override public boolean isStable() { return true; }
 

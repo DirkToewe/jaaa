@@ -3,7 +3,7 @@ package com.github.jaaa.partition;
 import com.github.jaaa.PredicateSwapAccess;
 
 
-final class InplaceBufferInt
+final class InPlacePartitionBufferInt
 {
 // STATIC FIELDS
 
@@ -16,7 +16,7 @@ final class InplaceBufferInt
   private final int a,b, nBits, nInts;
 
 // CONSTRUCTORS
-  public InplaceBufferInt( PredicateSwapAccess _acc, int _a, int _b, int _nBits, int _nInts )
+  public InPlacePartitionBufferInt(PredicateSwapAccess _acc, int _a, int _b, int _nBits, int _nInts )
   {
     assert _a >= 0;
     assert _b >= 0;

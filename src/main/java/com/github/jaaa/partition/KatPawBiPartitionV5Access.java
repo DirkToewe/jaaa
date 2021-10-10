@@ -5,7 +5,7 @@ import com.github.jaaa.SwapAccess;
 import com.github.jaaa.misc.BlockSwapAccess;
 import com.github.jaaa.misc.RotateAccess;
 import com.github.jaaa.util.Byte256;
-import com.github.jaaa.util.IntTriOp;
+import com.github.jaaa.fn.Int3Op;
 
 import java.util.function.IntFunction;
 
@@ -219,10 +219,10 @@ public interface KatPawBiPartitionV5Access extends PredicateSwapAccess, BlockSwa
     int lg2 =  blockNum<2 ? 1 : log2Ceil(blockNum),
       nInts = (blockNum-1) / lg2;
 
-    var finishedEntries = new InplaceBufferBool(this, from-blockNum,           until,blockNum);
-    var         offsets = new InplaceBufferInt (this, from-blockNum-nInts*lg2, until+blockNum, lg2, nInts);
+    var finishedEntries = new InPlacePartitionBufferBool(this, from-blockNum,           until,blockNum);
+    var         offsets = new InPlacePartitionBufferInt(this, from-blockNum-nInts*lg2, until+blockNum, lg2, nInts);
 
-    IntTriOp permPartitionStableBlocks = (off,nBlocks,blockSize) ->
+    Int3Op permPartitionStableBlocks = (off, nBlocks, blockSize) ->
     {
       // INIT OFFSETS
       int mid=0; // number of A-elements in current block

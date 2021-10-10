@@ -9,26 +9,26 @@ import static com.github.jaaa.sort.SelectionSort.SELECTION_SORTER;
 public class SelectionSortTest
 {
 
-  private final SorterInplace sorter = new StaticMethodsSorterInplace(SelectionSort.class) {
+  private final SorterInPlace sorter = new StaticMethodsSorterInPlace(SelectionSort.class) {
     @Override public boolean isStable    () { return SELECTION_SORTER.isStable    (); }
     @Override public boolean isThreadSafe() { return SELECTION_SORTER.isThreadSafe(); }
   };
 
-  @Group class SortTestSmall implements SorterInplaceTestTemplate {
+  @Group class SortTestSmall implements SorterInPlaceTestTemplate {
     @Override public int maxArraySize() { return 100; }
-    @Override public SorterInplace sorter() { return sorter; }
+    @Override public SorterInPlace sorter() { return sorter; }
   }
-  @Group class SortTestMedium implements SorterInplaceTestTemplate {
+  @Group class SortTestMedium implements SorterInPlaceTestTemplate {
     @Override public int maxArraySize() { return 10_000; }
-    @Override public SorterInplace sorter() { return sorter; }
+    @Override public SorterInPlace sorter() { return sorter; }
   }
 
-  @Group class SorterTestSmall implements SorterInplaceTestTemplate {
+  @Group class SorterTestSmall implements SorterInPlaceTestTemplate {
     @Override public int maxArraySize() { return 100; }
-    @Override public SorterInplace sorter() { return SELECTION_SORTER; }
+    @Override public SorterInPlace sorter() { return SELECTION_SORTER; }
   }
-  @Group class SorterTestMedium implements SorterInplaceTestTemplate {
+  @Group class SorterTestMedium implements SorterInPlaceTestTemplate {
     @Override public int maxArraySize() { return 10_000; }
-    @Override public SorterInplace sorter() { return SELECTION_SORTER; }
+    @Override public SorterInPlace sorter() { return SELECTION_SORTER; }
   }
 }
