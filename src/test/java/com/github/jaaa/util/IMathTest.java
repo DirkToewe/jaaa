@@ -40,7 +40,7 @@ public class IMathTest
     assertThat( Integer.compareUnsigned(1<<l+1, n) ).isGreaterThan(0);
   }
 
-  @Property void log2FloorIntTestNeg( @ForAll @IntRange(max=0) int n )
+  @Property void log2FloorIntTestNeg( @ForAll @IntRange(min=Integer.MIN_VALUE, max=0) int n )
   {
     assertThatCode( () -> log2Floor(n) ).isInstanceOf(ArithmeticException.class);
   }
@@ -52,7 +52,7 @@ public class IMathTest
     assertThat( Long.compareUnsigned(1L<<l+1, n) ).isGreaterThan(0);
   }
 
-  @Property void log2FloorLongTestNeg( @ForAll @LongRange(max=0) long n )
+  @Property void log2FloorLongTestNeg( @ForAll @LongRange(min=Long.MIN_VALUE, max=0) long n )
   {
     assertThatCode( () -> log2Floor(n) ).isInstanceOf(ArithmeticException.class);
   }
@@ -67,7 +67,7 @@ public class IMathTest
     );
   }
 
-  @Property void log2CeilIntTestNeg( @ForAll @IntRange(max=0) int n )
+  @Property void log2CeilIntTestNeg( @ForAll @IntRange(min=Integer.MIN_VALUE, max=0) int n )
   {
     assertThatCode( () -> log2Ceil(n) ).isInstanceOf(ArithmeticException.class);
   }
@@ -82,17 +82,17 @@ public class IMathTest
     );
   }
 
-  @Property void log2CeilLongTestNeg( @ForAll @LongRange(max=0) long n )
+  @Property void log2CeilLongTestNeg( @ForAll @LongRange(min=Long.MIN_VALUE, max=0) long n )
   {
     assertThatCode( () -> log2Ceil(n) ).isInstanceOf(ArithmeticException.class);
   }
 
   @Property void signIntTestNeg( @ForAll @Negative int n ) { assertThat( sign(n) ).isEqualTo(-1); }
-  @Example                     void signIntTestNul()                          { assertThat( sign(0) ).isEqualTo( 0); }
+  @Example  void signIntTestNul()                          { assertThat( sign(0) ).isEqualTo( 0); }
   @Property void signIntTestPos( @ForAll @Positive int n ) { assertThat( sign(n) ).isEqualTo(+1); }
 
   @Property void signLongTestNeg( @ForAll @Negative long n ) { assertThat( sign(n) ).isEqualTo(-1); }
-  @Example                     void signLongTestNul()                           { assertThat( sign(0) ).isEqualTo( 0); }
+  @Example  void signLongTestNul()                           { assertThat( sign(0) ).isEqualTo( 0); }
   @Property void signLongTestPos( @ForAll @Positive long n ) { assertThat( sign(n) ).isEqualTo(+1); }
 
   @Property void sqrtCeilIntTestPos( @ForAll @IntRange(min=0) int n )

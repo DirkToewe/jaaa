@@ -159,26 +159,23 @@ public class IMathBenchmark_gcd_int
 //    }
 //  }
 
-  private static int gcd4( int x, int y )
-  {
-    int sx = x>>31; x = (x^sx) - sx; // <- x = abs(x)
-    int sy = y>>31; y = (y^sy) - sy; // <- y = abs(y)
-
-    for( int shift=0;;) {
-      int l = numberOfTrailingZeros(x); x >>>= l;
-      int r = numberOfTrailingZeros(y); y >>>= r;
-      shift += min(l,r);
-
-      if( x==0 || x==y || y==0 )
-        return (x|y) << shift;
-
-      // x,y = min(x,y), |x-y|/2
-      int xy =  x-y>>1, z = xy>>31;
-          xy = (xy^z) - z;
-      y^= (x^y) & z;
-      x = xy;
-    }
-  }
+//  private static int gcd4( int x, int y )
+//  {
+//    x = abs(x);
+//    y = abs(y);
+//    for( int shift=0;;) {
+//      int l = Integer.numberOfTrailingZeros(x); x >>>= l;
+//      int r = Integer.numberOfTrailingZeros(y); y >>>= r;
+//      shift += min(l,r);
+//
+//      if( x==0 || x==y || y==0 )
+//        return (x|y) << shift;
+//
+//      int z = abs(x-y) >>> 1;
+//      x = min(x,y);
+//      y = z;
+//    }
+//  }
 
 //  private static int gcd4( int x, int y )
 //  {
@@ -203,6 +200,30 @@ public class IMathBenchmark_gcd_int
 //      x = xy;
 //    }
 //  }
+
+
+
+  private static int gcd4( int x, int y )
+  {
+    x = abs(x);
+    y = abs(y);
+    for(;;) {
+      int l = Integer.numberOfTrailingZeros(x);
+      int r = Integer.numberOfTrailingZeros(y);
+      int lr = l-r,
+         slr = lr>>31;
+      x >>>=  lr & ~slr;
+      y >>>= -lr &  slr;
+
+      if( x==0 || x==y || y==0 )
+        return x|y;
+
+      // x,y = min(x,y), |x-y|/2
+      int z = abs(x-y) >>> 1;
+      x = min(x,y);
+      y = z;
+    }
+  }
 
 // FIELDS
   private final Random rng = new Random();
