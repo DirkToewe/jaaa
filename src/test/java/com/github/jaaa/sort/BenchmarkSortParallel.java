@@ -1,6 +1,6 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.util.EntryFn;
+import com.github.jaaa.fn.EntryFn;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.infra.BenchmarkParams;
@@ -16,36 +16,38 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static com.github.jaaa.misc.Revert.revert;
 import static java.awt.Desktop.getDesktop;
+import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static com.github.jaaa.misc.Revert.revert;
+
 
 public class BenchmarkSortParallel extends BenchmarkSortTemplate
 {
-  private static String PLOT_TEMPLATE
-    =        "<!DOCTYPE html>"
-    + "\n" + "<html lang=\"en\">"
-    + "\n" + "  <head>"
-    + "\n" + "    <meta charset=\"utf-8\">"
-    + "\n" + "    <script src=\"https://cdn.plot.ly/plotly-latest.js\"></script>"
-    + "\n" + "  </head>"
-    + "\n" + "  <body>"
-    + "\n" + "    <script>"
-    + "\n" + "      'use strict';"
-    + "\n" + ""
-    + "\n" + "      const plot = document.createElement('div');"
-    + "\n" + "      plot.style = 'width: 100%%; height: 95vh;';"
-    + "\n" + "      document.body.appendChild(plot);"
-    + "\n" + ""
-    + "\n" + "      const layout = %1$s;"
-    + "\n" + "      document.title = layout.title;"
-    + "\n" + ""
-    + "\n" + "      Plotly.plot(plot, {layout, data: %2$s});"
-    + "\n" + "    </script>"
-    + "\n" + "  </body>"
-    + "\n" + "</html>"
-    + "\n";
+  private static String PLOT_TEMPLATE = """
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <script src="https://cdn.plot.ly/plotly-latest.js"></script>
+      </head>
+      <body>
+        <script>
+          'use strict';
+
+          const plot = document.createElement('div');
+          plot.style = 'width: 100%%; height: 95vh;';
+          document.body.appendChild(plot);
+
+          const layout = %1$s;
+          document.title = layout.title;
+
+          Plotly.plot(plot, {layout, data: %2$s});
+        </script>
+      </body>
+    </html>
+  """;
 
   public static void main( String... args ) throws RunnerException, IOException
   {
@@ -77,7 +79,7 @@ public class BenchmarkSortParallel extends BenchmarkSortTemplate
       if( ! result.getParams().getParamsKeys().equals( Set.of("len") ) )
         throw new AssertionError();
 
-      int len = Integer.valueOf( params.getParam("len") );
+      int len = parseInt( params.getParam("len") );
       resultMap
         .computeIfAbsent(method, x -> new TreeMap<>())
         .put( len, avgTime.getScore() );
@@ -92,7 +94,13 @@ public class BenchmarkSortParallel extends BenchmarkSortTemplate
       ) )
     ).collect( joining(",", "[", "]") );
 
-    String layout = format("{ title: 'Parallel Sort Benchmark', xaxis: {title: 'Array Length'}, yaxis: {title: 'Time [msec.]'} }");
+    String layout = """
+      {
+        title: 'Parallel Sort Benchmark',
+        xaxis: {title: 'Array Length'},
+        yaxis: {title: 'Time [msec.]'}
+      }
+    """;
 
     Path tmp = Files.createTempFile("plot_", ".html");
     Files.writeString(  tmp, format(PLOT_TEMPLATE, layout, data) );

@@ -1,6 +1,6 @@
 package com.github.jaaa.sort.tiny;
 
-import com.github.jaaa.util.EntryFn;
+import com.github.jaaa.fn.EntryFn;
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.results.AverageTimeResult;
 import org.openjdk.jmh.results.RunResult;
@@ -14,34 +14,38 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static java.awt.Desktop.getDesktop;
+import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
-public class TinySortBenchmarkMain
+
+// -ea -Xmx16g -XX:MaxInlineLevel=15
+public class BenchmarkTinySortMain
 {
-  private static String PLOT_TEMPLATE
-    =        "<!DOCTYPE html>"
-    + "\n" + "<html lang=\"en\">"
-    + "\n" + "  <head>"
-    + "\n" + "    <meta charset=\"utf-8\">"
-    + "\n" + "    <script src=\"https://cdn.plot.ly/plotly-latest.js\"></script>"
-    + "\n" + "  </head>"
-    + "\n" + "  <body>"
-    + "\n" + "    <script>"
-    + "\n" + "      'use strict';"
-    + "\n" + "\n"
-    + "\n" + "      const plot = document.createElement('div');"
-    + "\n" + "      plot.style = 'width: 100%%; height: 95vh;';"
-    + "\n" + "      document.body.appendChild(plot);"
-    + "\n" + "\n"
-    + "\n" + "      const layout = %1$s;"
-    + "\n" + "      document.title = layout.title;"
-    + "\n" + "\n"
-    + "\n" + "      Plotly.plot(plot, {layout, data: %2$s});"
-    + "\n" + "    </script>"
-    + "\n" + "  </body>"
-    + "\n" + "</html>"
-    + "\n";
+  private static String PLOT_TEMPLATE = """
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <script src="https://cdn.plot.ly/plotly-latest.js"></script>
+      </head>
+      <body>
+        <script>
+          'use strict';
+
+          const plot = document.createElement('div');
+          plot.style = 'width: 100%%; height: 95vh;';
+          document.body.appendChild(plot);
+
+          const layout = %1$s;
+          document.title = layout.title;
+
+          Plotly.plot(plot, {layout, data: %2$s});
+        </script>
+      </body>
+    </html>
+    
+  """;
 
   public static void main( String... args ) throws RunnerException, IOException
   {
@@ -56,7 +60,13 @@ public class TinySortBenchmarkMain
       ) )
     ).collect( joining(",", "[", "]") );
 
-    String layout = format("{ title: 'Tiny Sort Benchmark', xaxis: {title: 'Array Length'}, yaxis: {title: 'Time [nsec.]'} }");
+    String layout = """
+      {
+        title: 'Tiny Sort Benchmark',
+        xaxis: {title: 'Array Length'},
+        yaxis: {title: 'Time [nsec.]'}
+      }
+    """;
 
     Path tmp = Files.createTempFile("plot_", ".html");
     Files.writeString(  tmp, format(PLOT_TEMPLATE, layout, data) );
@@ -66,9 +76,9 @@ public class TinySortBenchmarkMain
   private static SortedMap<String, SortedMap<Integer,Double>> runBenchmarks() throws RunnerException
   {
     var opt = new OptionsBuilder()
-      .include( TinySortBenchmark8 .class.getCanonicalName() )
-      .include( TinySortBenchmark16.class.getCanonicalName() )
-      .include( TinySortBenchmark32.class.getCanonicalName() )
+//      .include( BenchmarkTinySort8 .class.getCanonicalName() )
+//      .include( BenchmarkTinySort16.class.getCanonicalName() )
+      .include( BenchmarkTinySort32.class.getCanonicalName() )
       .build();
 
     Collection<RunResult> results = new Runner(opt).run();
@@ -89,7 +99,7 @@ public class TinySortBenchmarkMain
       if( ! result.getParams().getParamsKeys().equals( Set.of("len") ) )
         throw new AssertionError();
 
-      int len = Integer.valueOf( params.getParam("len") );
+      int len = parseInt( params.getParam("len") );
       resultMap
         .computeIfAbsent(method, x -> new TreeMap<>())
         .put( len, avgTime.getScore() );

@@ -9,9 +9,10 @@ import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.Arrays;
 
-public class TinySortBenchmark32 extends TinySortBenchmarkTemplate
+
+public class BenchmarkTinySort32 extends BenchmarkTinySortTemplate
 {
-  @Param({"31", "30", "29", "28", "27", "26", "25", "24", "23", "22", "21", "20", "19", "18", "17", "16", "15", "14", "13", "12", "11", "10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0"})
+  @Param({/*"31", "30", "29", "28", "27", "26", "25", "24", "23", "22", "21", "20", "19", "18", "17",*/ "16", "15", "14", "13", "12", "11", "10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0"})
   private int len;
 
   @Override protected int len() { return len; }
@@ -22,11 +23,11 @@ public class TinySortBenchmark32 extends TinySortBenchmarkTemplate
     blackhole.consume(output);
   }
 
-  @Benchmark
-  public void insertionSortV1( Blackhole blackhole ) {
-    InsertionSort.sort(output);
-    blackhole.consume(output);
-  }
+//  @Benchmark
+//  public void insertionSortV1( Blackhole blackhole ) {
+//    InsertionSort.sort(output);
+//    blackhole.consume(output);
+//  }
 
   @Benchmark
   public void insertionSortV2( Blackhole blackhole ) {
@@ -34,9 +35,9 @@ public class TinySortBenchmark32 extends TinySortBenchmarkTemplate
     blackhole.consume(output);
   }
 
-  @Benchmark
-  public void insertionSortV3( Blackhole blackhole ) {
-    InsertionExpSort.sort(output);
-    blackhole.consume(output);
-  }
+//  @Benchmark
+//  public void insertionSortV3( Blackhole blackhole ) {
+//    InsertionExpSort.sort(output);
+//    blackhole.consume(output);
+//  }
 }

@@ -4,7 +4,7 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.infra.Blackhole;
 
-public class TinySortBenchmark8 extends TinySortBenchmarkTemplate
+public class BenchmarkTinySort8 extends BenchmarkTinySortTemplate
 {
   @Param({"8", "7", "6", "5", "4", "3", "2", "1", "0"})
   private int len;

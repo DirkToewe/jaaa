@@ -1,12 +1,15 @@
 package com.github.jaaa.sort.tiny;
 
 import org.openjdk.jmh.annotations.*;
-import org.openjdk.jmh.infra.Blackhole;
 
 import java.util.Arrays;
+import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.TimeUnit;
 
+import static com.github.jaaa.misc.Shuffle.shuffle;
 import static java.lang.System.arraycopy;
+
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -16,9 +19,9 @@ import static java.lang.System.arraycopy;
 @Fork( value=5, jvmArgsAppend={"-ea", "-XX:MaxInlineLevel=15"} )
 
 @State(Scope.Benchmark)
-public abstract class TinySortBenchmarkTemplate
+public abstract class BenchmarkTinySortTemplate
 {
-  ;{
+  {
     boolean ea = false;
     assert  ea = true;
        if( !ea ) throw new IllegalStateException();
@@ -26,9 +29,11 @@ public abstract class TinySortBenchmarkTemplate
 
   protected abstract int len();
 
-  private Integer[]  input = null,
-                 reference = null;
-          Integer[] output = null;
+  private   Integer[]  input = null,
+                   reference = null;
+  protected Integer[] output = null;
+
+  private final SplittableRandom rng = new SplittableRandom(1337);
 
   @Setup(Level.Invocation)
   public void setup() {
@@ -43,9 +48,11 @@ public abstract class TinySortBenchmarkTemplate
     assert len ==    output.length;
     assert len == reference.length;
 
-    for( int i=0; i  < len; i++ )
-      if( ++input[i] < len ) break;
-      else  input[i] = 0;
+    input[0] = 0;
+    for( int i=1; i < len; i++ )
+      input[i] = input[i-1] + rng.nextInt(2);
+
+    shuffle(input, rng::nextInt);
 
     arraycopy(input,0,    output,0, len);
     arraycopy(input,0, reference,0, len);
