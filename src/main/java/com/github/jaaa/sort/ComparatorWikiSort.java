@@ -141,6 +141,11 @@ public class ComparatorWikiSort<T> {
     else cache = cache1;
   }
 
+  public ComparatorWikiSort( T[] _cache ) {
+    cache_size = _cache==null ? 0 : _cache.length;
+    cache = _cache;
+  }
+
   public static <T> void sort(T[] array, Comparator<? super T> comp) {
     new ComparatorWikiSort<T>().Sort(array, comp);
   }
@@ -148,7 +153,7 @@ public class ComparatorWikiSort<T> {
   // toolbox functions used by the sorter
 
   // find the index of the first value within the range that is equal to array[index]
-  int BinaryFirst(T array[], T value, Range range, Comparator<? super T> comp) {
+  static <T> int BinaryFirst(T array[], T value, Range range, Comparator<? super T> comp) {
     int start = range.start, end = range.end - 1;
     while (start < end) {
       int mid = start + (end - start)/2;
@@ -162,7 +167,7 @@ public class ComparatorWikiSort<T> {
   }
 
   // find the index of the last value within the range that is equal to array[index], plus 1
-  int BinaryLast(T array[], T value, Range range, Comparator<? super T> comp) {
+  static <T> int BinaryLast(T array[], T value, Range range, Comparator<? super T> comp) {
     int start = range.start, end = range.end - 1;
     while (start < end) {
       int mid = start + (end - start)/2;
@@ -177,7 +182,7 @@ public class ComparatorWikiSort<T> {
 
   // combine a linear search with a binary search to reduce the number of comparisons in situations
   // where have some idea as to how many unique values there are and where the next value might be
-  int FindFirstForward(T array[], T value, Range range, Comparator<? super T> comp, int unique) {
+  static <T> int FindFirstForward(T array[], T value, Range range, Comparator<? super T> comp, int unique) {
     if (range.length() == 0) return range.start;
     int index, skip = Math.max(range.length()/unique, 1);
 
@@ -188,7 +193,7 @@ public class ComparatorWikiSort<T> {
     return BinaryFirst(array, value, new Range(index - skip, index), comp);
   }
 
-  int FindLastForward(T array[], T value, Range range, Comparator<? super T> comp, int unique) {
+  static <T> int FindLastForward(T array[], T value, Range range, Comparator<? super T> comp, int unique) {
     if (range.length() == 0) return range.start;
     int index, skip = Math.max(range.length()/unique, 1);
 
@@ -199,7 +204,7 @@ public class ComparatorWikiSort<T> {
     return BinaryLast(array, value, new Range(index - skip, index), comp);
   }
 
-  int FindFirstBackward(T array[], T value, Range range, Comparator<? super T> comp, int unique) {
+  static <T> int FindFirstBackward(T array[], T value, Range range, Comparator<? super T> comp, int unique) {
     if (range.length() == 0) return range.start;
     int index, skip = Math.max(range.length()/unique, 1);
 
@@ -210,7 +215,7 @@ public class ComparatorWikiSort<T> {
     return BinaryFirst(array, value, new Range(index, index + skip), comp);
   }
 
-  int FindLastBackward(T array[], T value, Range range, Comparator<? super T> comp, int unique) {
+  static <T> int FindLastBackward(T array[], T value, Range range, Comparator<? super T> comp, int unique) {
     if (range.length() == 0) return range.start;
     int index, skip = Math.max(range.length()/unique, 1);
 
@@ -222,7 +227,7 @@ public class ComparatorWikiSort<T> {
   }
 
   // n^2 sorting algorithm used to sort tiny chunks of the full array
-  void InsertionSort(T array[], Range range, Comparator<? super T> comp) {
+  static <T> void InsertionSort(T array[], Range range, Comparator<? super T> comp) {
     for (int j, i = range.start + 1; i < range.end; i++) {
       T temp = array[i];
       for (j = i; j > range.start && comp.compare(temp, array[j - 1]) < 0; j--)
@@ -232,7 +237,7 @@ public class ComparatorWikiSort<T> {
   }
 
   // reverse a range of values within the array
-  void Reverse(T array[], Range range) {
+  static <T> void Reverse(T array[], Range range) {
     for (int index = range.length()/2 - 1; index >= 0; index--) {
       T swap = array[range.start + index];
       array[range.start + index] = array[range.end - index - 1];
@@ -241,7 +246,7 @@ public class ComparatorWikiSort<T> {
   }
 
   // swap a series of values in the array
-  void BlockSwap(T array[], int start1, int start2, int block_size) {
+  static <T> void BlockSwap(T array[], int start1, int start2, int block_size) {
     for (int index = 0; index < block_size; index++) {
       T swap = array[start1 + index];
       array[start1 + index] = array[start2 + index];
@@ -251,7 +256,7 @@ public class ComparatorWikiSort<T> {
 
   // rotate the values in an array ([0 1 2 3] becomes [1 2 3 0] if we rotate by 1)
   // this assumes that 0 <= amount <= range.length()
-  void Rotate(T array[], int amount, Range range, boolean use_cache) {
+  void Rotate( T array[], int amount, Range range, boolean use_cache) {
     if (range.length() == 0) return;
 
     int split;
@@ -292,7 +297,7 @@ public class ComparatorWikiSort<T> {
   }
 
   // merge two ranges from one array and save the results into a different array
-  void MergeInto(T from[], Range A, Range B, Comparator<? super T> comp, T[] into, int at_index) {
+  static <T> void MergeInto(T from[], Range A, Range B, Comparator<? super T> comp, T[] into, int at_index) {
     int A_index = A.start;
     int B_index = B.start;
     int insert_index = at_index;
@@ -352,7 +357,7 @@ public class ComparatorWikiSort<T> {
   }
 
   // merge operation using an internal buffer
-  void MergeInternal(T array[], Range A, Range B, Comparator<? super T> comp, Range buffer) {
+  static <T> void MergeInternal(T array[], Range A, Range B, Comparator<? super T> comp, Range buffer) {
     // whenever we find a value to add to the final array, swap it with the value that's already in that spot
     // when this algorithm is finished, 'buffer' will contain its original contents, but in a different order
     int A_count = 0, B_count = 0, insert = 0;
