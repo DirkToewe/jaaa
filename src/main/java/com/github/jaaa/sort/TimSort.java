@@ -70,6 +70,7 @@ public final class TimSort
   {
     private final Class<?> elemType;
     AccArrObj( Class<?> _elemType ) { elemType = _elemType; }
+    @SuppressWarnings("unchecked")
     @Override public T[] malloc( int len ) { return (T[]) Array.newInstance(elemType, len); }
   }
   private interface AccArrByte   extends TimSortAccessor<   byte[]>, RandomAccessorArrByte  {}
@@ -84,7 +85,7 @@ public final class TimSort
 // STATIC CONSTRUCTOR
 
 // STATIC METHODS
-  public static int optimalRunLength( int minRunLen, int len )
+  static int optimalRunLength( int minRunLen, int len )
   {
     if( minRunLen <= 0 ) throw new IllegalArgumentException();
     if(       len <  0 ) throw new IllegalArgumentException();

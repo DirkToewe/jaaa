@@ -79,17 +79,15 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
     return start;
   }
 
-  default void timSort( T arr, int arrFrom, int arrUntil, T _buf, int _bufFrom, int _bufUntil )
+  default void timSort( T arr, int arr0, int arr1, T _buf, int _buf0, int _buf1 )
   {
-    if( arrFrom < 0         ) throw new IllegalArgumentException();
-    if( arrFrom > arrUntil  ) throw new IllegalArgumentException();
-    if(_bufFrom < 0         ) throw new IllegalArgumentException();
-    if(_bufFrom > _bufUntil ) throw new IllegalArgumentException();
+    if(   arr0 < 0 ||  arr0 >  arr1
+      || _buf0 < 0 || _buf0 > _buf1 ) throw new IllegalArgumentException();
 
-    int length = arrUntil - arrFrom;
+    int length = arr1 - arr0;
     if( length <   2 ) return;
     if( length <= MIN_RUN_LEN*2 ) {
-      timSort_prepareNextRun(arr,arrFrom,arrUntil,MIN_RUN_LEN*2);
+      timSort_prepareNextRun(arr,arr0,arr1,MIN_RUN_LEN*2);
       return;
     }
 
@@ -100,8 +98,8 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
 
     // FIELDS
       private  T  buf    = _buf;
-      private int buf0   = _bufFrom,
-                  bufLen = _bufUntil - _bufFrom,
+      private int buf0   = _buf0,
+                  bufLen = _buf1 - _buf0,
                 stackTop = 0,
                minGallop = MIN_GALLOP;
       private final int minRunLen = minRunLen(length);
@@ -111,9 +109,9 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
       {
         ensureCapacity(1); // <- required by selectionSort
 
-        stack[0] = arrFrom;
-        for( int i=arrFrom; i < arrUntil; ) {
-          stack[++stackTop] = i = timSort_prepareNextRun(arr, i,arrUntil, minRunLen);
+        stack[0] = arr0;
+        for( int i=arr0; i < arr1; ) {
+          stack[++stackTop] = i = timSort_prepareNextRun(arr, i,arr1, minRunLen);
           mergeCollapse();
         }
 
@@ -191,7 +189,7 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
       {
         loop: for(; stackTop > 1; stackTop--) {
           int pos = stackTop;
-          block: {          int l2 = runLen(pos-0),
+          block: {          int l2 = runLen(pos  ),
                                 l1 = runLen(pos-1);
             if( 2 < pos ) { int l0 = runLen(pos-2);
               if(                     l0 <= l1+l2 ||
@@ -206,7 +204,7 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
           merge(
             stack[pos-2],
             stack[pos-1],
-            stack[pos-0]
+            stack[pos  ]
           );stack[pos-1] = stack[pos  ];
             stack[pos  ] = stack[pos+1]; // <- never out of bounds (stack is 1 entry larger)
         }
@@ -219,12 +217,12 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
       {
         for( ;  1 < stackTop; stackTop--) {
           int pos = stackTop;
-          if( pos > 2 && runLen(pos-2) < runLen(pos-0) )
+          if( pos > 2 && runLen(pos-2) < runLen(pos) )
             --pos;
           merge(
             stack[pos-2],
             stack[pos-1],
-            stack[pos-0]
+            stack[pos  ]
           );stack[pos-1] = stack[pos  ];
             stack[pos  ] = stack[pos+1]; // <- never out of bounds (stack is 1 entry larger)
         }
