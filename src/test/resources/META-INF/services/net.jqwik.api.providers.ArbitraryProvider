@@ -1,3 +1,4 @@
+com.github.jaaa.ComparatorArbitraryProvider
 com.github.jaaa.WithRangeArbitraryProvider
 com.github.jaaa.WithIndexArbitraryProvider
 com.github.jaaa.WithInsertIndexArbitraryProvider
