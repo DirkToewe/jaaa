@@ -19,9 +19,10 @@ public interface BlockRotationMergeAccess extends CompareSwapAccess, RotateAcces
 
   default void blockRotationMerge( int from, int mid, int until )
   {
-    if(  0  > from ) throw new IllegalArgumentException();
-    if( mid < from ) throw new IllegalArgumentException(); if( mid == until) return;
-    if( mid > until) throw new IllegalArgumentException(); if( mid == from ) return;
+    if( 0 > from || from > mid || mid > until )
+      throw new IllegalArgumentException();
+    if( from == mid || mid == until )
+      return;
     int lenL =   mid - from,
         lenR = until - mid;
     if( lenL < lenR ) blockRotationMergeL2R( from,mid,until, sqrtFloor(lenL) );
@@ -30,9 +31,10 @@ public interface BlockRotationMergeAccess extends CompareSwapAccess, RotateAcces
 
   default void blockRotationMergeL2R( int from, int mid, int until, int blockSize )
   {
-    if(  0  > from ) throw new IllegalArgumentException();
-    if( mid < from ) throw new IllegalArgumentException(); if( mid == until) return;
-    if( mid > until) throw new IllegalArgumentException(); if( mid == from ) return;
+    if( 0 > from || from > mid || mid > until )
+      throw new IllegalArgumentException();
+    if( from == mid || mid == until )
+      return;
 
     if( blockSize <= 0 ) throw new IllegalArgumentException();
 
@@ -54,9 +56,10 @@ public interface BlockRotationMergeAccess extends CompareSwapAccess, RotateAcces
 
   default void blockRotationMergeR2L( int from, int mid, int until, int blockSize )
   {
-    if(  0  > from ) throw new IllegalArgumentException();
-    if( mid < from ) throw new IllegalArgumentException(); if( mid == until) return;
-    if( mid > until) throw new IllegalArgumentException(); if( mid == from ) return;
+    if( 0 > from || from > mid || mid > until )
+      throw new IllegalArgumentException();
+    if( from == mid || mid == until )
+      return;
 
     if( blockSize <= 0 ) throw new IllegalArgumentException();
 
