@@ -10,7 +10,7 @@ public record WithRange<T>( int from, int until, T data ) implements With<T>
     if( from < 0                       ) throw new IllegalArgumentException();
     if( from > until                   ) throw new IllegalArgumentException();
     if(until > With.contentLength(data)) throw new IllegalArgumentException();
-    data = With.clone(data);
+    With.checkData(data);
   }
 
   @Override

@@ -27,6 +27,20 @@ public interface With<T>
     if( data instanceof  Object[] dat ) return Arrays.deepToString(dat);
     return data.toString();
   }
+  static void checkData( Object data ) {
+    if(!( data instanceof boolean[]
+       || data instanceof    byte[]
+       || data instanceof   short[]
+       || data instanceof     int[]
+       || data instanceof    long[]
+       || data instanceof    char[]
+       || data instanceof   float[]
+       || data instanceof  double[]
+       || data instanceof  Object[]
+       || data instanceof     With
+     ))
+      throw new IllegalArgumentException();
+  }
   @SuppressWarnings("unchecked")
   static <T> T clone( T data ) {
     if( data instanceof boolean[] dat ) return (T)  dat.clone();

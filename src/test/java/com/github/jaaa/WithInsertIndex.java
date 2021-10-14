@@ -9,7 +9,7 @@ public record WithInsertIndex<T>( int index, T data ) implements With<T>
   public WithInsertIndex {
     if( index < 0                       ) throw new IllegalArgumentException();
     if( index > With.contentLength(data)) throw new IllegalArgumentException();
-    data = With.clone(data);
+    With.checkData(data);
   }
 
   @Override

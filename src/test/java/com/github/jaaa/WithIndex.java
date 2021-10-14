@@ -11,7 +11,7 @@ public record WithIndex<T>( int index, T data ) implements With<T>
   {
     if( index < 0                        ) throw new IllegalArgumentException();
     if( index >= With.contentLength(data)) throw new IllegalArgumentException();
-    data = With.clone(data);
+    With.checkData(data);
   }
 
   @Override
@@ -28,7 +28,7 @@ public record WithIndex<T>( int index, T data ) implements With<T>
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   @Override
-  public <R> With<R> map(Function<? super T, ? extends R> mapper) {
+  public <R> WithIndex<R> map(Function<? super T, ? extends R> mapper) {
     return new WithIndex(index, mapper.apply(data));
   }
 }
