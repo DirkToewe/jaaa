@@ -52,10 +52,7 @@ public interface PracticalInplaceMergeAccess extends BlockSwapAccess,
 
     // HANDLE LEFT ODD-END
     // merge the odd-end of the left sublist and the first block of the right sublist using the buffer
-    for( int  i=from,
-              j=mid,
-           buff=mid-t1; i < from+t1; )
-      swap(buff++, j >= mid+s || compare(i,j) <= 0 ? i++ : j++);
+    practicalInplaceMerge_bufferedMerge(mid-t1, from,from+t1, mid,mid+s);
     blockSwap(from,mid-t1, t1);
 
     // move buffer to front
@@ -68,6 +65,7 @@ public interface PracticalInplaceMergeAccess extends BlockSwapAccess,
     outer_loop: for( int end = buf + 2*s;; )
     {
       int m=end;
+      // skip over blocks that are already in order
       inner_loop: for(;;) {
         if(    m >= until-s2   ) break outer_loop;
         if( compare(m,m-1) < 0 ) break inner_loop;
@@ -75,23 +73,36 @@ public interface PracticalInplaceMergeAccess extends BlockSwapAccess,
       }
       end = min(m+s,until-s2);
 
-      for( int i=buf+s,
-           j=m; i < m; )
-        swap(buf++, j >= end || compare(i,j) <= 0 ? i++ : j++);
+      // tape merge
+      buf = practicalInplaceMerge_bufferedMerge(buf,buf+s,m, m,end);
     }
 
-    if( s2 > 0 && compare(until-s2-1,until-s2) > 0 )
-      for( int i = buf+s,
-               j = until-s2;
-               i < until-s2; )
-        swap(buf++, j >= until || compare(i,j) <= 0 ? i++ : j++);
+    if( s2 > 0 && compare(until-s2-1,until-s2) > 0 ) {
+      int m = until-s2;
+      buf = practicalInplaceMerge_bufferedMerge(buf,buf+s, m,m, until);
+    }
 
-    // move buffer back and sort it
+    // move/roll buffer back and sort it
     for( ; buf+s < until; buf++ )
       swap(buf+s,buf);
     insertionSort(until-s, until);
   }
 
+  default int practicalInplaceMerge_bufferedMerge( int buf, int l, int L, int r, int R )
+  {
+    // tape merge
+    while( l < L )
+      swap(buf++, r >= R || compare(l,r) <= 0 ? l++ : r++);
+    return buf;
+  }
+
+  /** Sorts blocks with their last element each as key.
+   *  Uses selection sort which only requires O(n) swaps.
+   *
+   *  @param from  First index of the first block.
+   *  @param until The end of the last block.
+   *  @param s     Block size.
+   */
   private void blockSort( int from, int until, int s )
   {
     assert from <= until;
@@ -99,6 +110,7 @@ public interface PracticalInplaceMergeAccess extends BlockSwapAccess,
 
     for( int i=from; i < until; i+=s )
     {
+      // find min. block
       int j=i+s-1;
       for( int k=j; (k+=s) < until; )
       {
@@ -107,6 +119,7 @@ public interface PracticalInplaceMergeAccess extends BlockSwapAccess,
           j=k;
       }
       j -= s-1;
+      // move min. block to front
       blockSwap(i,j,s);
     }
   }
