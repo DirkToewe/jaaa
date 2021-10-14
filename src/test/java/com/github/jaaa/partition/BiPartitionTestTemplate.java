@@ -20,6 +20,10 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static com.github.jaaa.misc.Boxing.boxed;
+import static com.github.jaaa.misc.Boxing.unboxed;
+
+
 public class BiPartitionTestTemplate
 {
 // STATIC FIELDS
@@ -116,6 +120,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsStablyAccessTuple( @ForAll @Size(min=0, max=MAX_SIZE) boolean[] sample ) throws Throwable
   {
+    @SuppressWarnings("unchecked")
     Tuple2<Boolean,Integer>[] input = range(0,sample.length).mapToObj(i -> Tuple.of(sample[i],i) ).toArray(Tuple2[]::new),
                 reference  =  input.clone();
     Arrays.sort(reference, comparing(Tuple2::get1));
@@ -131,6 +136,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsArrayTuple( @ForAll @Size(min=0, max=MAX_SIZE) Boolean[] sample ) throws Throwable
   {
+    @SuppressWarnings("unchecked")
     Tuple2<Boolean,Integer>[] input = range(0,sample.length).mapToObj(i -> Tuple.of(sample[i],i) ).toArray(Tuple2[]::new),
                 reference  =  input.clone();
     Arrays.sort(reference, comparing(Tuple2::get1));
@@ -151,7 +157,7 @@ public class BiPartitionTestTemplate
 
     biPartitionArraysByte.invoke(input, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -165,7 +171,7 @@ public class BiPartitionTestTemplate
 
     biPartitionArraysShort.invoke(input, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -174,12 +180,12 @@ public class BiPartitionTestTemplate
     var input = sample.clone();
     PredicateInt pred = x -> (x >>> bit) == 1;
 
-    Integer[]    reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Integer[]::new);
+    Integer[]    reference = boxed(input);
     Arrays.sort( reference, (x,y) -> Boolean.compare( pred.test(x), pred.test(y) ) );
 
     biPartitionArraysInt.invoke(input, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -188,12 +194,12 @@ public class BiPartitionTestTemplate
     var input = sample.clone();
     PredicateLong pred = x -> (x >>> bit) == 1;
 
-    Long[]       reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Long[]::new);
+    Long[]       reference = boxed(input);
     Arrays.sort( reference, (x,y) -> Boolean.compare( pred.test(x), pred.test(y) ) );
 
     biPartitionArraysLong.invoke(input, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -207,7 +213,7 @@ public class BiPartitionTestTemplate
 
     biPartitionArraysChar.invoke(input, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -221,7 +227,7 @@ public class BiPartitionTestTemplate
 
     biPartitionArraysFloat.invoke(input, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -230,12 +236,12 @@ public class BiPartitionTestTemplate
     var input = sample.clone();
     PredicateDouble pred = x -> x <= split;
 
-    Double[]     reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Double[]::new);
+    Double[]     reference = boxed(input);
     Arrays.sort( reference, (x,y) -> Boolean.compare( pred.test(x), pred.test(y) ) );
 
     biPartitionArraysDouble.invoke(input, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
 
@@ -248,6 +254,7 @@ public class BiPartitionTestTemplate
     int from = sampleWithRange.getFrom(),
        until = sampleWithRange.getUntil();
 
+    @SuppressWarnings("unchecked")
     Tuple2<Boolean,Integer>[] input = range(0,sample.length).mapToObj(i -> Tuple.of(sample[i],i) ).toArray(Tuple2[]::new),
                 reference  =  input.clone();
     Arrays.sort(reference, from,until, comparing(Tuple2::get1));
@@ -271,7 +278,7 @@ public class BiPartitionTestTemplate
 
     biPartitionArraysWithRangeByte.invoke(input, from,until, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -288,7 +295,7 @@ public class BiPartitionTestTemplate
 
     biPartitionArraysWithRangeShort.invoke(input, from,until, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -300,12 +307,12 @@ public class BiPartitionTestTemplate
 
     PredicateInt pred = x -> (x >>> bit) == 1;
 
-    Integer[]    reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Integer[]::new);
+    Integer[]    reference = boxed(input);
     Arrays.sort( reference, from,until, (x,y) -> Boolean.compare( pred.test(x), pred.test(y) ) );
 
     biPartitionArraysWithRangeInt.invoke(input, from,until, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -317,12 +324,12 @@ public class BiPartitionTestTemplate
 
     PredicateLong pred = x -> (x >>> bit) == 1;
 
-    Long[]       reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Long[]::new);
+    Long[]       reference = boxed(input);
     Arrays.sort( reference, from,until, (x,y) -> Boolean.compare( pred.test(x), pred.test(y) ) );
 
     biPartitionArraysWithRangeLong.invoke(input, from,until, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -339,7 +346,7 @@ public class BiPartitionTestTemplate
 
     biPartitionArraysWithRangeChar.invoke(input, from,until, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -356,7 +363,7 @@ public class BiPartitionTestTemplate
 
     biPartitionArraysWithRangeFloat.invoke(input, from,until, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
@@ -368,11 +375,11 @@ public class BiPartitionTestTemplate
 
     PredicateDouble pred = x -> x <= split;
 
-    Double[]     reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Double[]::new);
+    Double[]     reference = boxed(input);
     Arrays.sort( reference, from,until, (x,y) -> Boolean.compare( pred.test(x), pred.test(y) ) );
 
     biPartitionArraysWithRangeDouble.invoke(input, from,until, pred);
 
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 }
