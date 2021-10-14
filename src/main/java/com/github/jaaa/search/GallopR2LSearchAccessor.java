@@ -8,9 +8,8 @@ public interface GallopR2LSearchAccessor<T> extends CompareAccessor<T>
 {
   default int gallopR2LSearch( T a, int from, int until, T b, int key )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
-    int  len = until-from;
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
+    int len = until-from;
 
     // GALLOPING PHASE
     int lo=0,
@@ -40,10 +39,9 @@ public interface GallopR2LSearchAccessor<T> extends CompareAccessor<T>
   default int gallopR2LSearchR( T a, int from, int until, T b, int key ) { return gallopR2LSearch(a,from,until, b,key, true ); }
   default int gallopR2LSearch ( T a, int from, int until, T b, int key, boolean rightBias )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
-    int  len = until-from,
-        bias = rightBias ? -1 : 0;
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
+    int len = until-from,
+       bias = rightBias ? -1 : 0;
     boolean found = false;
 
     // GALLOPING PHASE
@@ -72,9 +70,8 @@ public interface GallopR2LSearchAccessor<T> extends CompareAccessor<T>
 
   default int gallopR2LSearchGap( T a, int from, int until, T b, int key )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
-    int  len = until-from;
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
+    int len = until-from;
 
     // GALLOPING PHASE
     int lo=0,
@@ -104,10 +101,9 @@ public interface GallopR2LSearchAccessor<T> extends CompareAccessor<T>
   default int gallopR2LSearchGapR( T a, int from, int until, T b, int key ) { return gallopR2LSearchGap(a,from,until, b,key, true ); }
   default int gallopR2LSearchGap ( T a, int from, int until, T b, int key, boolean rightBias )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
-    int  len = until-from,
-        bias = rightBias ? 0 : 1;
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
+    int len = until-from,
+       bias = rightBias ? 0 : 1;
 
     // GALLOPING PHASE
     int lo=0,

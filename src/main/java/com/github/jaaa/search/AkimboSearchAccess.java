@@ -7,9 +7,7 @@ public interface AkimboSearchAccess extends CompareAccess
 {
   default int akimboSearch( int from, int until, int key )
   {
-    if( key < 0    ) throw new IllegalArgumentException();
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from > until) throw new IllegalArgumentException();
+    if(from < 0 || from > until) throw new IllegalArgumentException();
     if(from < until)
     {
       int                 mid = from+until >>> 1,
@@ -59,10 +57,8 @@ public interface AkimboSearchAccess extends CompareAccess
   default int akimboSearchR( int from, int until, int key ) { return akimboSearch(from,until, key, true ); }
   default int akimboSearch ( int from, int until, int key, boolean rightBias )
   {
-    if( key < 0    ) throw new IllegalArgumentException();
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from ==until) return ~from;
-    if(from > until) throw new IllegalArgumentException();
+    if(from < 0 || from > until) throw new IllegalArgumentException();
+    if(from == until) return ~from;
 
     int               mid = from+until >>> 1,
       c = compare(key,mid);
@@ -106,9 +102,7 @@ public interface AkimboSearchAccess extends CompareAccess
 
   default int akimboSearchGap( int from, int until, int key )
   {
-    if( key < 0    ) throw new IllegalArgumentException();
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from > until) throw new IllegalArgumentException();
+    if(from < 0 || from > until) throw new IllegalArgumentException();
     if(from < until)
     {
       int                 mid = from+until >>> 1,
@@ -157,9 +151,7 @@ public interface AkimboSearchAccess extends CompareAccess
   default int akimboSearchGapR( int from, int until, int key ) { return akimboSearchGap(from,until, key, true ); }
   default int akimboSearchGap ( int from, int until, int key, boolean rightBias )
   {
-    if( key < 0    ) throw new IllegalArgumentException();
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from > until) throw new IllegalArgumentException();
+    if(from < 0 || from > until) throw new IllegalArgumentException();
     if(from < until)
     {
       int                 mid = from+until >>> 1,

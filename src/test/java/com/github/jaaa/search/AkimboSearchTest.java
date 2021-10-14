@@ -7,13 +7,14 @@ import static com.github.jaaa.util.IMath.log2Floor;
 import static java.lang.Math.min;
 
 
+@Group
 public class AkimboSearchTest extends SearcherTestTemplate
 {
   AkimboSearchTest() {
     super(new StaticMethodsSearcher(AkimboSearch.class));
   }
 
-  private static long compLim( int from, int until, int i ) { return from==until ? 0 : 2 + 2*log2Floor( 1 + min(until-i,i-from) ); }
+  private static long compLim( int from, int until, int i ) { return from==until ? 0 : 2 + 2L*log2Floor( 1 + min(until-i,i-from) ); }
 
   @Group
   class SearcherTest extends SearcherTestTemplate

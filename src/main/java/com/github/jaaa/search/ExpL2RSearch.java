@@ -96,8 +96,7 @@ public class ExpL2RSearch
 
   public static int search( int from, int until, IntUnaryOperator compass )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
     for( int step=0; step < until-from; step = 1 + 2*step ) // <- make step have all bits set such that binary search is optimally efficient
@@ -124,8 +123,7 @@ public class ExpL2RSearch
 
   public static int searchR( int from, int until, IntUnaryOperator compass )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     boolean found = false;
 
@@ -154,8 +152,7 @@ public class ExpL2RSearch
 
   public static int searchL( int from, int until, IntUnaryOperator compass )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     boolean found = false;
 
@@ -184,8 +181,7 @@ public class ExpL2RSearch
 
   public static int searchGap( int from, int until, IntUnaryOperator compass )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
     for( int step=0; step < until-from; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
@@ -210,8 +206,7 @@ public class ExpL2RSearch
 
   public static int searchGapR( int from, int until, IntUnaryOperator compass )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
     for( int step=0; step < until-from; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient
@@ -234,8 +229,7 @@ public class ExpL2RSearch
 
   public static int searchGapL( int from, int until, IntUnaryOperator compass )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
     for( int step=0; step < until-from; step = 1 + 2*step )  // <- make step have all bits set such that binary search is optimally efficient

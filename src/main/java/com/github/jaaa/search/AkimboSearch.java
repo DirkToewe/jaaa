@@ -118,8 +118,7 @@ public class AkimboSearch
 
   public static int search( int from, int until, IntUnaryOperator compass )
   {
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from > until) throw new IllegalArgumentException();
+    if(from < 0 || from > until) throw new IllegalArgumentException();
     if(from < until)
     {
       int                        mid = from+until >>> 1,
@@ -169,9 +168,8 @@ public class AkimboSearch
   public static int searchR( int from, int until,                    IntUnaryOperator compass ) { return search(from,until, true,  compass); }
   public static int search ( int from, int until, boolean rightBias, IntUnaryOperator compass )
   {
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from ==until) return ~from;
-    if(from > until) throw new IllegalArgumentException();
+    if(from < 0 || from > until) throw new IllegalArgumentException();
+    if(from == until) return ~from;
 
     int                      mid = from+until >>> 1,
       c = compass.applyAsInt(mid);
@@ -215,8 +213,7 @@ public class AkimboSearch
 
   public static int searchGap ( int from, int until, IntUnaryOperator compass )
   {
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from > until) throw new IllegalArgumentException();
+    if(from < 0 || from > until) throw new IllegalArgumentException();
     if(from < until)
     {
       int                        mid = from+until >>> 1,
@@ -265,8 +262,7 @@ public class AkimboSearch
   public static int searchGapR( int from, int until,                    IntUnaryOperator compass ) { return searchGap(from,until, true,  compass); }
   public static int searchGap ( int from, int until, boolean rightBias, IntUnaryOperator compass )
   {
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from > until) throw new IllegalArgumentException();
+    if(from < 0 || from > until) throw new IllegalArgumentException();
     if(from < until)
     {
       int                      mid = from+until >>> 1,

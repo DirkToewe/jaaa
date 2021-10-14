@@ -6,8 +6,7 @@ public interface ExpL2RSearchAccessor<T> extends CompareAccessor<T>
 {
   default int expL2RSearch( T a, int from, int until, T b, int key )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
     for( int step=0; step < until-from; step = 1 | step<<1 ) // <- make step have all bits set such that binary search is optimally efficient
@@ -33,8 +32,7 @@ public interface ExpL2RSearchAccessor<T> extends CompareAccessor<T>
   default int expL2RSearchR( T a, int from, int until, T b, int key ) { return expL2RSearch(a,from,until, b,key, true ); }
   default int expL2RSearch ( T a, int from, int until, T b, int key, boolean rightBias )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     int bias = rightBias ? 0 : 1;
     boolean found = false;
@@ -60,8 +58,7 @@ public interface ExpL2RSearchAccessor<T> extends CompareAccessor<T>
 
   default int expL2RSearchGap( T a, int from, int until, T b, int key )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     // GALLOPING PHASE
     for( int step=0; step < until-from; step = 1 | step<<1 ) // <- make step have all bits set such that binary search is optimally efficient
@@ -87,8 +84,7 @@ public interface ExpL2RSearchAccessor<T> extends CompareAccessor<T>
   default int expL2RSearchGapR( T a, int from, int until, T b, int key ) { return expL2RSearchGap(a,from,until, b,key, true ); }
   default int expL2RSearchGap ( T a, int from, int until, T b, int key, boolean rightBias )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     int bias = rightBias ? 0 : 1;
 

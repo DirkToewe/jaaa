@@ -1,11 +1,13 @@
 package com.github.jaaa.search;
 
 import com.github.jaaa.CompareAccess;
+import net.jqwik.api.Group;
 
 import static com.github.jaaa.util.IMath.log2Floor;
 
 
-public class ExpL2RSearchAccessTest implements SearchAccessTestTemplate
+@Group
+public class ExpL2RSearchAccessTest extends SearchAccessTestTemplate
 {
   interface SrchAcc extends SearchAccess, ExpL2RSearchAccess
   {
@@ -21,6 +23,6 @@ public class ExpL2RSearchAccessTest implements SearchAccessTestTemplate
 
   @Override public long comparisonLimit( int from, int until, int i )
   {
-    return from==until ? 0 : 1 + 2*log2Floor(i-from+1);
+    return from==until ? 0 : 1 + 2L*log2Floor(i-from+1);
   }
 }

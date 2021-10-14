@@ -6,8 +6,7 @@ public interface BinarySearchAccessor<T> extends CompareAccessor<T>
 {
   default int binarySearch( T a, int from, int until, T b, int key )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     while( from < until ) {     int mid = from+until >>> 1,
                c = compare(b,key, a,mid);
@@ -22,8 +21,7 @@ public interface BinarySearchAccessor<T> extends CompareAccessor<T>
   default int binarySearchR( T a, int from, int until, T b, int key ) { return binarySearch(a,from,until, b,key, true ); }
   default int binarySearch ( T a, int from, int until, T b, int key, boolean rightBias )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     int bias = rightBias ? -1 : 0;
     boolean found = false;
@@ -40,8 +38,7 @@ public interface BinarySearchAccessor<T> extends CompareAccessor<T>
 
   default int binarySearchGap ( T a, int from, int until, T b, int key )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     while( from < until ) {     int mid = from+until >>> 1,
                c = compare(b,key, a,mid);
@@ -56,8 +53,7 @@ public interface BinarySearchAccessor<T> extends CompareAccessor<T>
   default int binarySearchGapR( T a, int from, int until, T b, int key ) { return binarySearchGap(a,from,until, b,key, true ); }
   default int binarySearchGap ( T a, int from, int until, T b, int key, boolean rightBias )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     int bias = rightBias ? -1 : 0;
 

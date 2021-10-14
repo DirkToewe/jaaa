@@ -6,9 +6,7 @@ public interface BinarySearchAccess extends CompareAccess
 {
   default int binarySearch( int from, int until, int key )
   {
-    if( key < 0    ) throw new IllegalArgumentException();
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from > until) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     while( from < until ) { int mid = from+until >>> 1,
                c = compare(key, mid);
@@ -23,9 +21,7 @@ public interface BinarySearchAccess extends CompareAccess
   default int binarySearchR( int from, int until, int key ) { return binarySearch(from,until, key, true ); }
   default int binarySearch ( int from, int until, int key, boolean rightBias )
   {
-    if( key < 0    ) throw new IllegalArgumentException();
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from > until) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     int bias = rightBias ? -1 : 0;
     boolean found = false;
@@ -41,9 +37,7 @@ public interface BinarySearchAccess extends CompareAccess
 
   default int binarySearchGap( int from, int until, int key )
   {
-    if( key < 0    ) throw new IllegalArgumentException();
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from > until) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     while( from < until ) { int mid = from+until >>> 1,
                c = compare(key, mid);
@@ -58,9 +52,7 @@ public interface BinarySearchAccess extends CompareAccess
   default int binarySearchGapR( int from, int until, int key ) { return binarySearchGap(from,until, key, true ); }
   default int binarySearchGap ( int from, int until, int key, boolean rightBias )
   {
-    if( key < 0    ) throw new IllegalArgumentException();
-    if(from < 0    ) throw new IllegalArgumentException();
-    if(from > until) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     int bias = rightBias ? -1 : 0;
 

@@ -6,6 +6,7 @@ import static com.github.jaaa.search.BinarySearch.BINARY_SEARCHER;
 import static com.github.jaaa.util.IMath.log2Floor;
 
 
+@Group
 public class BinarySearchTest extends SearcherTestTemplate
 {
   BinarySearchTest() {

@@ -10,7 +10,7 @@ import static com.github.jaaa.search.SearchAccessorTestTemplate.SearchAccessor;
 import static com.github.jaaa.util.IMath.log2Floor;
 import static java.lang.Math.abs;
 import static java.util.Objects.requireNonNull;
-import static org.assertj.core.api.Assertions.assertThat;
+
 
 @Group
 public class ExpSearchAccessorTest
@@ -18,23 +18,16 @@ public class ExpSearchAccessorTest
   private static long compLim( IntBinaryOperator startIndex, int from, int until, int i ) {
     if( from == until ) return 0;
                            i = abs( startIndex.applyAsInt(from,until) - i );
-    return 2 + 2*log2Floor(i+1);
+    return 2 + 2L*log2Floor(i+1);
   }
 
-  private static final class ExpSearchAcc<T> implements SearchAccessor<T>,
-                                                     ExpSearchAccessor<T>
+  private static record ExpSearchAcc<T>(
+    CompareAccessor<? super T> compareAccessor,
+    IntBinaryOperator startIndex
+  ) implements SearchAccessor<T>,
+            ExpSearchAccessor<T>
   {
-    private final IntBinaryOperator startIndex;
-    private final CompareAccessor<? super T> compareAccessor;
-
-    public ExpSearchAcc( CompareAccessor<? super T> _compareAccessor, IntBinaryOperator _startIndex )
-    {
-      compareAccessor = requireNonNull(_compareAccessor);
-      startIndex      = requireNonNull(_startIndex);
-    }
-
     @Override public int compare( T a, int i, T b, int j ) { return compareAccessor.compare(a,i, b,j); }
-
     @Override public int search    ( T a, int from, int until, T b, int i ) { return expSearch    (a,from,until, startIndex.applyAsInt(from,until), b,i); }
     @Override public int searchR   ( T a, int from, int until, T b, int i ) { return expSearchR   (a,from,until, startIndex.applyAsInt(from,until), b,i); }
     @Override public int searchL   ( T a, int from, int until, T b, int i ) { return expSearchL   (a,from,until, startIndex.applyAsInt(from,until), b,i); }
@@ -47,8 +40,8 @@ public class ExpSearchAccessorTest
   {
     private IntBinaryOperator startIndex;
     public ExpSearchAccTestTemplate( IntBinaryOperator _startIndex ) { startIndex = requireNonNull(_startIndex); }
-    @Override protected <T> SearchAccessor<T> createAccessor( CompareAccessor<? super T> cmpAcc ) { return new ExpSearchAcc<>(cmpAcc,startIndex); }
-    @Override protected long comparisonLimit( int from, int until, int i ) { return compLim(startIndex, from,until, i); }
+    @Override public <T> SearchAccessor<T> createAccessor( CompareAccessor<? super T> cmpAcc ) { return new ExpSearchAcc<>(cmpAcc,startIndex); }
+    @Override public long comparisonLimit( int from, int until, int i ) { return compLim(startIndex, from,until, i); }
   }
 
   @Group class ExpSearchAccessorX extends ExpSearchAccTestTemplate { ExpSearchAccessorX() { super( (i,j) -> (int) ( i-1L + Integer.toUnsignedLong( Objects.hash(i,j) ) % (2L+j-i) ) ); } }

@@ -84,42 +84,41 @@ public class BinarySearch
     @Override public int searchGapL( byte[] seq, int from, int until, byte key, ComparatorByte cmp ) { return BinarySearch.searchGapL(from,until,      i ->  cmp.compare(key,seq[i]) ); }
 
 
-    @Override public int search ( int[] seq,                      int key                    ) { return search (   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-    @Override public int search ( int[] seq, int from, int until, int key                    ) { return search (from,until,      i -> Integer.compare(key,seq[i]) ); }
-    @Override public int search ( int[] seq,                      int key, ComparatorInt cmp ) { return search (   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-    @Override public int search ( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return search (from,until,      i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int search ( int[] seq,                      int key                    ) { return BinarySearch.search (   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
+    @Override public int search ( int[] seq, int from, int until, int key                    ) { return BinarySearch.search (from,until,      i -> Integer.compare(key,seq[i]) ); }
+    @Override public int search ( int[] seq,                      int key, ComparatorInt cmp ) { return BinarySearch.search (   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int search ( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return BinarySearch.search (from,until,      i ->     cmp.compare(key,seq[i]) ); }
 
-    @Override public int searchR( int[] seq,                      int key                    ) { return searchR(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-    @Override public int searchR( int[] seq, int from, int until, int key                    ) { return searchR(from,until,      i -> Integer.compare(key,seq[i]) ); }
-    @Override public int searchR( int[] seq,                      int key, ComparatorInt cmp ) { return searchR(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-    @Override public int searchR( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return searchR(from,until,      i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int searchR( int[] seq,                      int key                    ) { return BinarySearch.searchR(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
+    @Override public int searchR( int[] seq, int from, int until, int key                    ) { return BinarySearch.searchR(from,until,      i -> Integer.compare(key,seq[i]) ); }
+    @Override public int searchR( int[] seq,                      int key, ComparatorInt cmp ) { return BinarySearch.searchR(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int searchR( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return BinarySearch.searchR(from,until,      i ->     cmp.compare(key,seq[i]) ); }
 
-    @Override public int searchL( int[] seq,                      int key                    ) { return searchL(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-    @Override public int searchL( int[] seq, int from, int until, int key                    ) { return searchL(from,until,      i -> Integer.compare(key,seq[i]) ); }
-    @Override public int searchL( int[] seq,                      int key, ComparatorInt cmp ) { return searchL(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-    @Override public int searchL( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return searchL(from,until,      i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int searchL( int[] seq,                      int key                    ) { return BinarySearch.searchL(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
+    @Override public int searchL( int[] seq, int from, int until, int key                    ) { return BinarySearch.searchL(from,until,      i -> Integer.compare(key,seq[i]) ); }
+    @Override public int searchL( int[] seq,                      int key, ComparatorInt cmp ) { return BinarySearch.searchL(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int searchL( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return BinarySearch.searchL(from,until,      i ->     cmp.compare(key,seq[i]) ); }
 
-    @Override public int searchGap ( int[] seq,                      int key                    ) { return searchGap (   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-    @Override public int searchGap ( int[] seq, int from, int until, int key                    ) { return searchGap (from,until,      i -> Integer.compare(key,seq[i]) ); }
-    @Override public int searchGap ( int[] seq,                      int key, ComparatorInt cmp ) { return searchGap (   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-    @Override public int searchGap ( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return searchGap (from,until,      i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int searchGap ( int[] seq,                      int key                    ) { return BinarySearch.searchGap (   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
+    @Override public int searchGap ( int[] seq, int from, int until, int key                    ) { return BinarySearch.searchGap (from,until,      i -> Integer.compare(key,seq[i]) ); }
+    @Override public int searchGap ( int[] seq,                      int key, ComparatorInt cmp ) { return BinarySearch.searchGap (   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int searchGap ( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return BinarySearch.searchGap (from,until,      i ->     cmp.compare(key,seq[i]) ); }
 
-    @Override public int searchGapR( int[] seq,                      int key                    ) { return searchGapR(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-    @Override public int searchGapR( int[] seq, int from, int until, int key                    ) { return searchGapR(from,until,      i -> Integer.compare(key,seq[i]) ); }
-    @Override public int searchGapR( int[] seq,                      int key, ComparatorInt cmp ) { return searchGapR(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-    @Override public int searchGapR( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return searchGapR(from,until,      i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int searchGapR( int[] seq,                      int key                    ) { return BinarySearch.searchGapR(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
+    @Override public int searchGapR( int[] seq, int from, int until, int key                    ) { return BinarySearch.searchGapR(from,until,      i -> Integer.compare(key,seq[i]) ); }
+    @Override public int searchGapR( int[] seq,                      int key, ComparatorInt cmp ) { return BinarySearch.searchGapR(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int searchGapR( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return BinarySearch.searchGapR(from,until,      i ->     cmp.compare(key,seq[i]) ); }
 
-    @Override public int searchGapL( int[] seq,                      int key                    ) { return searchGapL(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
-    @Override public int searchGapL( int[] seq, int from, int until, int key                    ) { return searchGapL(from,until,      i -> Integer.compare(key,seq[i]) ); }
-    @Override public int searchGapL( int[] seq,                      int key, ComparatorInt cmp ) { return searchGapL(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
-    @Override public int searchGapL( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return searchGapL(from,until,      i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int searchGapL( int[] seq,                      int key                    ) { return BinarySearch.searchGapL(   0,seq.length, i -> Integer.compare(key,seq[i]) ); }
+    @Override public int searchGapL( int[] seq, int from, int until, int key                    ) { return BinarySearch.searchGapL(from,until,      i -> Integer.compare(key,seq[i]) ); }
+    @Override public int searchGapL( int[] seq,                      int key, ComparatorInt cmp ) { return BinarySearch.searchGapL(   0,seq.length, i ->     cmp.compare(key,seq[i]) ); }
+    @Override public int searchGapL( int[] seq, int from, int until, int key, ComparatorInt cmp ) { return BinarySearch.searchGapL(from,until,      i ->     cmp.compare(key,seq[i]) ); }
   };
 
 
   public static int search( int from, int until, IntUnaryOperator compass )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     while( from < until ) {       int mid = from+until >>> 1,
                c = compass.applyAsInt(mid);
@@ -132,8 +131,7 @@ public class BinarySearch
 
   public static int searchR( int from, int until, IntUnaryOperator compass )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     boolean found = false;
     while( from < until ) {  int mid = from+until >>> 1,
@@ -147,8 +145,7 @@ public class BinarySearch
 
   public static int searchL( int from, int until, IntUnaryOperator compass )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     boolean found = false;
     while( from < until ) {  int mid = from+until >>> 1,
@@ -163,7 +160,7 @@ public class BinarySearch
 
   public static int searchGap ( int from, int until, IntUnaryOperator compass )
   {
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     while( from < until ) {       int mid = from + (until-from >>> 1),
                c = compass.applyAsInt(mid);
@@ -176,7 +173,7 @@ public class BinarySearch
 
   public static int searchGapR( int from, int until, IntUnaryOperator compass )
   {
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     while( from < until ) {  int mid = from + (until-from >>> 1),
           c = compass.applyAsInt(mid);
@@ -188,7 +185,7 @@ public class BinarySearch
 
   public static int searchGapL( int from, int until, IntUnaryOperator compass )
   {
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     while( from < until ) {  int mid = from + (until-from >>> 1),
           c = compass.applyAsInt(mid);

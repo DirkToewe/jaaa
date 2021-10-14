@@ -20,7 +20,7 @@ public class ExpSearchAccessTest
   private static long compLim(IntBinaryOperator startIndex, int from, int until, int i ) {
     if( from == until ) return 0;
     i = abs( startIndex.applyAsInt(from,until) - i );
-    return 2 + 2*log2Floor(i+1);
+    return 2 + 2L*log2Floor(i+1);
   }
 
   private static class ExpSearchAcc implements SearchAccessTestTemplate.SearchAccess,
@@ -45,7 +45,7 @@ public class ExpSearchAccessTest
     @Override public int searchGapL( int from, int until, int i ) { return expSearchGapL(from,until, startIndex.applyAsInt(from,until), i); }
   }
 
-  private static class ExpSearchAccTestTemplate implements SearchAccessTestTemplate
+  private static class ExpSearchAccTestTemplate extends SearchAccessTestTemplate
   {
     private IntBinaryOperator startIndex;
     public ExpSearchAccTestTemplate( IntBinaryOperator _startIndex ) { startIndex = requireNonNull(_startIndex); }

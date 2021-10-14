@@ -9,13 +9,14 @@ import static com.github.jaaa.util.IMath.log2Floor;
 import static java.lang.Integer.toUnsignedLong;
 import static java.lang.Math.abs;
 
+
 @Group
 public class ExpSearchTest
 {
   private static long compLim( ExpSearcher SEARCHER, int from, int until, int i ) {
     if( from == until ) return 0;
                            i = abs( SEARCHER.startIndex(from,until) - i );
-    return 2 + 2*log2Floor(i+1);
+    return 2 + 2L*log2Floor(i+1);
   }
 
   static final ExpSearcher

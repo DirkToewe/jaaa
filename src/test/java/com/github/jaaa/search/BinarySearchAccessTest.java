@@ -1,11 +1,13 @@
 package com.github.jaaa.search;
 
 import com.github.jaaa.CompareAccess;
+import net.jqwik.api.Group;
 
 import static com.github.jaaa.util.IMath.log2Floor;
 
 
-public class BinarySearchAccessTest implements SearchAccessTestTemplate
+@Group
+public class BinarySearchAccessTest extends SearchAccessTestTemplate
 {
   interface SrchAcc extends SearchAccess, BinarySearchAccess
   {

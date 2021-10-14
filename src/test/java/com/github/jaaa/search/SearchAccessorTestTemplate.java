@@ -1,25 +1,25 @@
 package com.github.jaaa.search;
 
-import com.github.jaaa.CompareAccessor;
-import com.github.jaaa.misc.Revert;
-import com.github.jaaa.WithIndex;
-import com.github.jaaa.WithRange;
+import com.github.jaaa.*;
+import com.github.jaaa.misc.Boxing;
 import net.jqwik.api.ForAll;
+import net.jqwik.api.Group;
 import net.jqwik.api.Property;
-import net.jqwik.api.constraints.Size;
+import net.jqwik.api.PropertyDefaults;
 
 import java.util.Arrays;
 import java.util.Comparator;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.jaaa.misc.Boxing.boxed;
+
 
 public abstract class SearchAccessorTestTemplate
 {
 // STATIC FIELDS
-  private static final int N_TRIES = 10_000,
-                          MAX_SIZE = 8192;
+  private static final int N_TRIES = 1_000;
 
-  protected static interface SearchAccessor<T>
+  interface SearchAccessor<T>
   {
     int search    ( T a, int from, int until, T b, int i );
     int searchR   ( T a, int from, int until, T b, int i );
@@ -29,9 +29,64 @@ public abstract class SearchAccessorTestTemplate
     int searchGapL( T a, int from, int until, T b, int i );
   }
 
-  protected static abstract class CountingCompareAccessor<T> implements CompareAccessor<T>
+  private static class Acc<T> implements CompareAccessor<T[]>
   {
+    // FIELDS
+    public final Comparator<? super T> cmp;
+    public final T[] vals, keys;
+    public final int from, until, iKey;
     public long nComps=0;
+    // CONSTRUCTORS
+    public Acc( WithRange<T[]> valSample, WithIndex<T[]> keySample, Comparator<? super T> _cmp ) {
+      cmp =_cmp;
+      vals  = valSample.getData();
+      from  = valSample.getFrom();
+      until = valSample.getUntil();
+      keys = keySample.getData();
+      iKey = keySample.getIndex();
+    }
+    // METHODS
+    @Override public int compare( T[] a, int i, T[] b, int j ) {
+      ++nComps;
+      if( vals==keys ) {
+        assert i==iKey && from <= j && j < until
+            || j==iKey && from <= i && i < until;
+      }
+      else if( a==vals ) { assertThat(b).isSameAs(keys); assertThat(i).isBetween(from,until-1); assertThat(j).isEqualTo(iKey); }
+      else               { assertThat(a).isSameAs(keys); assertThat(j).isBetween(from,until-1); assertThat(i).isEqualTo(iKey); assertThat(b).isSameAs(vals); }
+      return cmp.compare(a[i],b[j]);
+    }
+  }
+
+  public interface TemplateRaw extends SearchAccessTestTemplate.TemplateRaw
+  {
+    @Override default <T extends Comparable<? super T>> void findsIndex( WithRange<WithIndex<T[]>> sample, Comparator<? super T> cmp )
+    {
+      twoWithRange(sample.map(With::getData), sample.getData(), cmp);
+    }
+
+    @Property default                         void twoArrays_Boolean( @ForAll("arraysBoolean") boolean[] vals, @ForAll("arraysWithIndexBoolean") WithIndex<boolean[]> keys, @ForAll Comparator<Boolean  > cmp ) { twoArrays(boxed(vals), keys.map(Boxing::boxed), cmp); }
+    @Property default                         void twoArrays_Byte   ( @ForAll("arraysByte"   )    byte[] vals, @ForAll("arraysWithIndexByte"   ) WithIndex<   byte[]> keys, @ForAll Comparator<Byte     > cmp ) { twoArrays(boxed(vals), keys.map(Boxing::boxed), cmp); }
+    @Property default                         void twoArrays_Short  ( @ForAll("arraysShort"  )   short[] vals, @ForAll("arraysWithIndexShort"  ) WithIndex<  short[]> keys, @ForAll Comparator<Short    > cmp ) { twoArrays(boxed(vals), keys.map(Boxing::boxed), cmp); }
+    @Property default                         void twoArrays_Int    ( @ForAll("arraysInt"    )     int[] vals, @ForAll("arraysWithIndexInt"    ) WithIndex<    int[]> keys, @ForAll Comparator<Integer  > cmp ) { twoArrays(boxed(vals), keys.map(Boxing::boxed), cmp); }
+    @Property default                         void twoArrays_Long   ( @ForAll("arraysLong"   )    long[] vals, @ForAll("arraysWithIndexLong"   ) WithIndex<   long[]> keys, @ForAll Comparator<Long     > cmp ) { twoArrays(boxed(vals), keys.map(Boxing::boxed), cmp); }
+    @Property default                         void twoArrays_Char   ( @ForAll("arraysChar"   )    char[] vals, @ForAll("arraysWithIndexChar"   ) WithIndex<   char[]> keys, @ForAll Comparator<Character> cmp ) { twoArrays(boxed(vals), keys.map(Boxing::boxed), cmp); }
+    @Property default                         void twoArrays_Float  ( @ForAll("arraysFloat"  )   float[] vals, @ForAll("arraysWithIndexFloat"  ) WithIndex<  float[]> keys, @ForAll Comparator<Float    > cmp ) { twoArrays(boxed(vals), keys.map(Boxing::boxed), cmp); }
+    @Property default                         void twoArrays_Double ( @ForAll("arraysDouble" )  double[] vals, @ForAll("arraysWithIndexDouble" ) WithIndex< double[]> keys, @ForAll Comparator<Double   > cmp ) { twoArrays(boxed(vals), keys.map(Boxing::boxed), cmp); }
+    default <T extends Comparable<? super T>> void twoArrays( T[] vals, WithIndex<T[]> keySample, Comparator<? super T> cmp )
+    {
+      twoWithRange( new WithRange<>(0,vals.length,vals), keySample, cmp );
+    }
+
+    @Property default                 void twoWithRange_Boolean( @ForAll("arraysWithRangeBoolean") WithRange<boolean[]> vals, @ForAll("arraysWithIndexBoolean") WithIndex<boolean[]> keys, @ForAll Comparator<Boolean  > cmp ) { twoWithRange(vals.map(Boxing::boxed), keys.map(Boxing::boxed), cmp); }
+    @Property default                 void twoWithRange_Byte   ( @ForAll("arraysWithRangeByte"   ) WithRange<   byte[]> vals, @ForAll("arraysWithIndexByte"   ) WithIndex<   byte[]> keys, @ForAll Comparator<Byte     > cmp ) { twoWithRange(vals.map(Boxing::boxed), keys.map(Boxing::boxed), cmp); }
+    @Property default                 void twoWithRange_Short  ( @ForAll("arraysWithRangeShort"  ) WithRange<  short[]> vals, @ForAll("arraysWithIndexShort"  ) WithIndex<  short[]> keys, @ForAll Comparator<Short    > cmp ) { twoWithRange(vals.map(Boxing::boxed), keys.map(Boxing::boxed), cmp); }
+    @Property default                 void twoWithRange_Int    ( @ForAll("arraysWithRangeInt"    ) WithRange<    int[]> vals, @ForAll("arraysWithIndexInt"    ) WithIndex<    int[]> keys, @ForAll Comparator<Integer  > cmp ) { twoWithRange(vals.map(Boxing::boxed), keys.map(Boxing::boxed), cmp); }
+    @Property default                 void twoWithRange_Long   ( @ForAll("arraysWithRangeLong"   ) WithRange<   long[]> vals, @ForAll("arraysWithIndexLong"   ) WithIndex<   long[]> keys, @ForAll Comparator<Long     > cmp ) { twoWithRange(vals.map(Boxing::boxed), keys.map(Boxing::boxed), cmp); }
+    @Property default                 void twoWithRange_Char   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> vals, @ForAll("arraysWithIndexChar"   ) WithIndex<   char[]> keys, @ForAll Comparator<Character> cmp ) { twoWithRange(vals.map(Boxing::boxed), keys.map(Boxing::boxed), cmp); }
+    @Property default                 void twoWithRange_Float  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> vals, @ForAll("arraysWithIndexFloat"  ) WithIndex<  float[]> keys, @ForAll Comparator<Float    > cmp ) { twoWithRange(vals.map(Boxing::boxed), keys.map(Boxing::boxed), cmp); }
+    @Property default                 void twoWithRange_Double ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> vals, @ForAll("arraysWithIndexDouble" ) WithIndex< double[]> keys, @ForAll Comparator<Double   > cmp ) { twoWithRange(vals.map(Boxing::boxed), keys.map(Boxing::boxed), cmp); }
+    <T extends Comparable<? super T>> void twoWithRange( WithRange<T[]> valSample, WithIndex<T[]> keySample, Comparator<? super T> cmp );
   }
 
 // STATIC CONSTRUCTOR
@@ -39,1683 +94,153 @@ public abstract class SearchAccessorTestTemplate
 // STATIC METHODS
 
 // FIELDS
+  private abstract class TstTmpl implements TemplateRaw
+  {
+    @Override public int maxArraySize() { return SearchAccessorTestTemplate.this.maxArraySize(); }
+    @Override public <T extends Comparable<? super T>> void twoWithRange( WithRange<T[]> valSample, WithIndex<T[]> keySample, Comparator<? super T> cmp )
+    {
+      var acc = new Acc<>(valSample, keySample, cmp);
+
+      assertThat(acc.from ).isBetween(       0,acc.vals.length);
+      assertThat(acc.until).isBetween(acc.from,acc.vals.length);
+      assertThat(acc.iKey ).isBetween(       0,acc.keys.length);
+
+      Arrays.sort(acc.vals, acc.from,acc.until, cmp);
+      var valCpy = acc.vals.clone();
+      var keyCpy = acc.keys.clone();
+
+      int i = testImpl(createAccessor(acc), cmp, acc.vals, acc.from, acc.until, acc.keys, acc.iKey);
+      assertThat(i).isNotNegative();
+
+      assertThat(acc.vals).isEqualTo(valCpy);
+      assertThat(acc.keys).isEqualTo(keyCpy);
+      assertThat(acc.nComps).isBetween(0L, comparisonLimit(acc.from,acc.until, i));
+    }
+
+    abstract <T extends Comparable<? super T>> int testImpl( SearchAccessor<T[]> acc, Comparator<? super T> cmp, T[] vals, int from, int until, T[] keys, int iKey );
+  }
 
 // CONSTRUCTORS
 
 // METHODS
-  abstract protected <T> SearchAccessor<T> createAccessor( CompareAccessor<? super T> cmpAcc );
-  abstract protected long comparisonLimit( int from, int until, int i );
+  abstract <T> SearchAccessor<T> createAccessor( CompareAccessor<? super T> cmpAcc );
+  abstract long comparisonLimit( int from, int until, int i );
 
-    //
-   // SEARCH
-  //
-  @Property( tries = N_TRIES )
-  void searchArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
+  protected int maxArraySize() { return 8192; }
+
+  @PropertyDefaults( tries = N_TRIES )
+  @Group class Search extends TstTmpl
   {
-    byte[] array = sample.getData().clone();
-    int      key = sample.getIndex();
+    @Override <T extends Comparable<? super T>> int testImpl( SearchAccessor<T[]> acc, Comparator<? super T> cmp, T[] vals, int from, int until, T[] keys, int iKey )
+    {
+      int i = acc.search(vals,from,until, keys,iKey);
 
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
+      var key = keys[iKey];
+      if( i < 0 ) {
+          i = ~i;       assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+        if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThan(key);
+      }
+      else {
+        assertThat(i).isBetween(from,until-1);
+        assertThat(vals[i]).usingComparator(cmp).isEqualTo(key);
+      }
 
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.search(array,0,array.length, array,key);
-    assertThat(i).isBetween(0,array.length-1);
-
-    if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(array[key]);
-                assertThat(array[i  ]).usingComparator(cmp).          isEqualTo(array[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.search(array,0,array.length, array,key);
-    assertThat(i).isBetween(0,array.length-1);
-
-    if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(array[key]);
-                assertThat(array[i  ]).usingComparator(cmp).          isEqualTo(array[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
-  {
-    byte[] array = sample.getData().getData().clone();
-    int      key = sample.getData().getIndex(),
-            from = sample.getFrom(),
-           until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.search(array,from,until, array,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from,until);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i < until )
-        assertThat(array[i]).usingComparator(cmp).isGreaterThan(array[key]);
+      return i;
     }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(array[key]);
-
-    if( i > from )
-      assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(array[key]);
   }
 
-  @Property( tries = N_TRIES )
-  void searchArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
+  @PropertyDefaults( tries = N_TRIES )
+  @Group class SearchL extends TstTmpl
   {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
+    @Override <T extends Comparable<? super T>> int testImpl( SearchAccessor<T[]> acc, Comparator<? super T> cmp, T[] vals, int from, int until, T[] keys, int iKey )
+    {
+      int i = acc.searchL(vals,from,until, keys,iKey);
 
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
+      var key = keys[iKey];
+      if( i < 0 ) {
+          i = ~i;       assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+        if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThan(key);
+      }
+      else {
+                       assertThat(i).isBetween(from,until-1);
+                       assertThat(vals[i  ]).usingComparator(cmp).isEqualTo (key);
+        if( from < i ) assertThat(vals[i-1]).usingComparator(cmp).isLessThan(key);
+      }
 
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.search(array,from,until, array,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from,until);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i < until )
-        assertThat(array[i]).usingComparator(cmp).isGreaterThan(array[key]);
+      return i;
     }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(array[key]);
-
-    if( i > from )
-      assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(array[key]);
   }
 
-
-  @Property( tries = N_TRIES )
-  void search2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
+  @PropertyDefaults( tries = N_TRIES )
+  @Group class SearchR extends TstTmpl
   {
-    searchArr = searchArr.clone();
+    @Override <T extends Comparable<? super T>> int testImpl( SearchAccessor<T[]> acc, Comparator<? super T> cmp, T[] vals, int from, int until, T[] keys, int iKey )
+    {
+      int i = acc.searchR(vals,from,until, keys,iKey);
 
-    byte[] keyArray = keyArrWithIndex.getData();
-    int    key      = keyArrWithIndex.getIndex();
+      var key = keys[iKey];
+      if( i < 0 ) {
+          i = ~i;       assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+        if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThan(key);
+      }
+      else {
+                         assertThat(i).isBetween(from+1,until);
+                         assertThat(vals[i-1]).usingComparator(cmp).isEqualTo    (key);
+         if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+      }
 
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.search(searchArr,0,searchArr.length, keyArray,key);
-
-    if( i < 0 ) assertThat(i).isBetween( ~searchArr.length,~0);
-    else        assertThat(i).isBetween(0,searchArr.length);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i < searchArr.length )
-        assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArray[key]);
+      return i;
     }
-    else
-      assertThat(searchArr[i]).usingComparator(cmp).isEqualTo(keyArray[key]);
-
-    if( i > 0 )
-      assertThat(searchArr[i-1]).usingComparator(cmp).isLessThanOrEqualTo(keyArray[key]);
   }
 
-
-  @Property( tries = N_TRIES )
-  void search2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
+  @PropertyDefaults( tries = N_TRIES )
+  @Group class SearchGap extends TstTmpl
   {
-    searchArr = searchArr.clone();
+    @Override <T extends Comparable<? super T>> int testImpl( SearchAccessor<T[]> acc, Comparator<? super T> cmp, T[] vals, int from, int until, T[] keys, int iKey )
+    {
+      int i = acc.searchGap(vals,from,until, keys,iKey);
+      assertThat(i).isBetween(from,until);
 
-    int[] keyArr = keyArrWithIndex.getData();
-    int   key    = keyArrWithIndex.getIndex();
+      var key = keys[iKey];
+      if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
+      if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(key);
 
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.search(searchArr,0,searchArr.length, keyArr,key);
-
-    if( i < 0 ) assertThat(i).isBetween( ~searchArr.length,~0);
-    else        assertThat(i).isBetween(0,searchArr.length);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i < searchArr.length )
-        assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArr[key]);
+      return i;
     }
-    else
-      assertThat(searchArr[i]).usingComparator(cmp).isEqualTo(keyArr[key]);
-
-    if( i > 0 )
-      assertThat(searchArr[i-1]).usingComparator(cmp).isLessThanOrEqualTo(keyArr[key]);
   }
 
-
-  @Property( tries = N_TRIES )
-  void search2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
+  @PropertyDefaults( tries = N_TRIES )
+  @Group class SearchGapL extends TstTmpl
   {
-    byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData().clone();
-    int       key =    keyArrWithIndex.getIndex(),
-             from = searchArrWithRange.getFrom(),
-            until = searchArrWithRange.getUntil();
+    @Override <T extends Comparable<? super T>> int testImpl( SearchAccessor<T[]> acc, Comparator<? super T> cmp, T[] vals, int from, int until, T[] keys, int iKey )
+    {
+      int i = acc.searchGapL(vals,from,until, keys,iKey);
+      assertThat(i).isBetween(from,until);
 
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
+      var key = keys[iKey];
+      if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
+      if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).isLessThan            (key);
 
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.search(searchArr,from,until, keyArr,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from,until);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until )
-        assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArr[key]);
+      return i;
     }
-    else
-      assertThat(searchArr[i]).usingComparator(cmp).isEqualTo(keyArr[key]);
-
-    if( i > from )
-      assertThat(searchArr[i-1]).usingComparator(cmp).isLessThanOrEqualTo(keyArr[key]);
   }
 
-
-  @Property( tries = N_TRIES )
-  void search2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
+  @PropertyDefaults( tries = N_TRIES )
+  @Group class SearchGapR extends TstTmpl
   {
-    int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData().clone();
-    int      key =    keyArrWithIndex.getIndex(),
-            from = searchArrWithRange.getFrom(),
-           until = searchArrWithRange.getUntil();
+    @Override <T extends Comparable<? super T>> int testImpl( SearchAccessor<T[]> acc, Comparator<? super T> cmp, T[] vals, int from, int until, T[] keys, int iKey )
+    {
+      int i = acc.searchGapR(vals,from,until, keys,iKey);
+      assertThat(i).isBetween(from,until);
 
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
+      var key = keys[iKey];
+      if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan      (key);
+      if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).isLessThanOrEqualTo(key);
 
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.search(searchArr,from,until, keyArr,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from,until);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i < until )
-        assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArr[key]);
+      return i;
     }
-    else
-      assertThat(searchArr[i]).usingComparator(cmp).isEqualTo(keyArr[key]);
-
-    if( i > from )
-      assertThat(searchArr[i-1]).usingComparator(cmp).isLessThanOrEqualTo(keyArr[key]);
-  }
-
-
-    //
-   // SEARCH_L
-  //
-  @Property( tries = N_TRIES )
-  void searchLArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
-  {
-    byte[] array = sample.getData().clone();
-    int      key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchL(array,0,array.length, array,key);
-    assertThat(i).isBetween(0,array.length-1);
-
-    if( i > 0           ) assertThat(array[i-1]).usingComparator(cmp).            isLessThan(array[key]);
-    if( i < array.length) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(array[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchL(array,0,array.length, array,key);
-    assertThat(i).isBetween(0,array.length-1);
-
-    if( i > 0           ) assertThat(array[i-1]).usingComparator(cmp).            isLessThan(array[key]);
-    if( i < array.length) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(array[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchLArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
-  {
-    byte[] array = sample.getData().getData().clone();
-    int      key = sample.getData().getIndex(),
-            from = sample.getFrom(),
-           until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchL(array,from,until, array,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from,until-1);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i < until )
-        assertThat(array[i]).usingComparator(cmp).isGreaterThan(array[key]);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(array[key]);
-
-    if( i > from )
-      assertThat(array[i-1]).usingComparator(cmp).isLessThan(array[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchL(array,from,until, array,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from,until-1);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i < until )
-        assertThat(array[i]).usingComparator(cmp).isGreaterThan(array[key]);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(array[key]);
-
-    if( i > from )
-      assertThat(array[i-1]).usingComparator(cmp).isLessThan(array[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchL2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    searchArr = searchArr.clone();
-
-    byte[] keyArray = keyArrWithIndex.getData();
-    int    key      = keyArrWithIndex.getIndex();
-
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchL(searchArr,0,searchArr.length, keyArray,key);
-
-    if( i < 0 ) assertThat(i).isBetween( ~searchArr.length,~0);
-    else        assertThat(i).isBetween(0,searchArr.length-1);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < searchArr.length )
-        assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArray[key]);
-    }
-    else
-      assertThat(searchArr[i]).usingComparator(cmp).isEqualTo(keyArray[key]);
-
-    if( i > 0 )
-      assertThat(searchArr[i-1]).usingComparator(cmp).isLessThan(keyArray[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchL2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    searchArr = searchArr.clone();
-
-    int[] keyArray = keyArrWithIndex.getData();
-    int   key      = keyArrWithIndex.getIndex();
-
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchL(searchArr,0,searchArr.length, keyArray,key);
-
-    if( i < 0 ) assertThat(i).isBetween( ~searchArr.length,~0);
-    else        assertThat(i).isBetween(0,searchArr.length-1);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < searchArr.length )
-        assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArray[key]);
-    }
-    else
-      assertThat(searchArr[i]).usingComparator(cmp).isEqualTo(keyArray[key]);
-
-    if( i > 0 )
-      assertThat(searchArr[i-1]).usingComparator(cmp).isLessThan(keyArray[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchL2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData().clone();
-    int       key =    keyArrWithIndex.getIndex(),
-             from = searchArrWithRange.getFrom(),
-            until = searchArrWithRange.getUntil();
-
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchL(searchArr,from,until, keyArr,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from,until-1);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until )
-        assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArr[key]);
-    }
-    else
-      assertThat(searchArr[i]).usingComparator(cmp).isEqualTo(keyArr[key]);
-
-    if( i > from )
-      assertThat(searchArr[i-1]).usingComparator(cmp).isLessThan(keyArr[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchL2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData().clone();
-    int      key =    keyArrWithIndex.getIndex(),
-            from = searchArrWithRange.getFrom(),
-           until = searchArrWithRange.getUntil();
-
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchL(searchArr,from,until, keyArr,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from,until-1);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until )
-        assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArr[key]);
-    }
-    else
-      assertThat(searchArr[i]).usingComparator(cmp).isEqualTo(keyArr[key]);
-
-    if( i > from )
-      assertThat(searchArr[i-1]).usingComparator(cmp).isLessThan(keyArr[key]);
-  }
-
-
-    //
-   // SEARCH_R
-  //
-  @Property( tries = N_TRIES )
-  void searchRArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
-  {
-    byte[] array = sample.getData().clone();
-    int      key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchR(array,0,array.length, array,key);
-    assertThat(i).isBetween(1,array.length);
-
-    if( i > 0           ) assertThat(array[i-1]).usingComparator(cmp).    isEqualTo(array[key]);
-    if( i < array.length) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(array[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchR(array,0,array.length, array,key);
-    assertThat(i).isBetween(1,array.length);
-
-    if( i > 0           ) assertThat(array[i-1]).usingComparator(cmp).    isEqualTo(array[key]);
-    if( i < array.length) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(array[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchRArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
-  {
-    byte[] array = sample.getData().getData().clone();
-    int      key = sample.getData().getIndex(),
-            from = sample.getFrom(),
-           until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchR(array,from,until, array,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from+1,until);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i > from )
-        assertThat(array[i-1]).usingComparator(cmp).isLessThan(array[key]);
-    }
-    else
-      assertThat(array[i-1]).usingComparator(cmp).isEqualTo(array[key]);
-
-    if( i < until )
-      assertThat(array[i]).usingComparator(cmp).isGreaterThan(array[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchR(array,from,until, array,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from+1,until);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i > from )
-        assertThat(array[i-1]).usingComparator(cmp).isLessThan(array[key]);
-    }
-    else
-      assertThat(array[i-1]).usingComparator(cmp).isEqualTo(array[key]);
-
-    if( i < until )
-      assertThat(array[i]).usingComparator(cmp).isGreaterThan(array[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchR2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    searchArr = searchArr.clone();
-
-    byte[] keyArray = keyArrWithIndex.getData();
-    int    key      = keyArrWithIndex.getIndex();
-
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Byte> cmp = reversed
-            ? (x,y) -> - Byte.compare(x,y)
-            : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchR(searchArr,0,searchArr.length, keyArray,key);
-
-    if( i < 0 ) assertThat(i).isBetween( ~searchArr.length,~0);
-    else        assertThat(i).isBetween(1,searchArr.length);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i > 0 )
-        assertThat(searchArr[i-1]).usingComparator(cmp).isLessThan(keyArray[key]);
-    }
-    else
-      assertThat(searchArr[i-1]).usingComparator(cmp).isEqualTo(keyArray[key]);
-
-    if( i < searchArr.length )
-      assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArray[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchR2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    searchArr = searchArr.clone();
-
-    int[] keyArray = keyArrWithIndex.getData();
-    int   key      = keyArrWithIndex.getIndex();
-
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchR(searchArr,0,searchArr.length, keyArray,key);
-
-    if( i < 0 ) assertThat(i).isBetween( ~searchArr.length,~0);
-    else        assertThat(i).isBetween(1,searchArr.length);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i > 0 )
-        assertThat(searchArr[i-1]).usingComparator(cmp).isLessThan(keyArray[key]);
-    }
-    else
-      assertThat(searchArr[i-1]).usingComparator(cmp).isEqualTo(keyArray[key]);
-
-    if( i < searchArr.length )
-      assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArray[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchR2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData().clone();
-    int       key =    keyArrWithIndex.getIndex(),
-             from = searchArrWithRange.getFrom(),
-            until = searchArrWithRange.getUntil();
-
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
-
-    Comparator<Byte> cmp = reversed
-            ? (x,y) -> - Byte.compare(x,y)
-            : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchR(searchArr,from,until, keyArr,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from+1,until);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i > from )
-        assertThat(searchArr[i-1]).usingComparator(cmp).isLessThan(keyArr[key]);
-    }
-    else
-      assertThat(searchArr[i-1]).usingComparator(cmp).isEqualTo(keyArr[key]);
-
-    if( i < until )
-      assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArr[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchR2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData().clone();
-    int      key =    keyArrWithIndex.getIndex(),
-            from = searchArrWithRange.getFrom(),
-           until = searchArrWithRange.getUntil();
-
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
-
-    Comparator<Integer> cmp = reversed
-            ? (x,y) -> - Integer.compare(x,y)
-            : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchR(searchArr,from,until, keyArr,key);
-
-    if( i < 0 ) assertThat(i).isBetween(~until,~from);
-    else        assertThat(i).isBetween(from+1,until);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i > from )
-        assertThat(searchArr[i-1]).usingComparator(cmp).isLessThan(keyArr[key]);
-    }
-    else
-      assertThat(searchArr[i-1]).usingComparator(cmp).isEqualTo(keyArr[key]);
-
-    if( i < until )
-      assertThat(searchArr[i]).usingComparator(cmp).isGreaterThan(keyArr[key]);
-  }
-
-
-    //
-   // SEARCH_GAP
-  //
-  @Property( tries = N_TRIES )
-  void searchGapArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
-  {
-    byte[] array = sample.getData().clone();
-    int      key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGap(array,0,array.length, array,key);
-    assertThat(i).isBetween(0,array.length-1);
-
-    if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(array[key]);
-                assertThat(array[i  ]).usingComparator(cmp).          isEqualTo(array[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGap(array,0,array.length, array,key);
-    assertThat(i).isBetween(0,array.length-1);
-
-    if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(array[key]);
-                assertThat(array[i  ]).usingComparator(cmp).          isEqualTo(array[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
-  {
-    byte[] array = sample.getData().getData().clone();
-    int      key = sample.getData().getIndex(),
-            from = sample.getFrom(),
-           until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGap(array,from,until, array,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(array[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(array[key]);
-    if( i < until) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(array[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGap(array,from,until, array,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(array[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(array[key]);
-    if( i < until) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(array[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchGap2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    searchArr = searchArr.clone();
-
-    byte[] keyArray = keyArrWithIndex.getData();
-    int    key      = keyArrWithIndex.getIndex();
-
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGap(searchArr,0,searchArr.length, keyArray,key);
-    assertThat(i).isBetween(0,searchArr.length);
-
-    if( i > 0               ) assertThat(searchArr[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(keyArray[key]);
-    if( i < searchArr.length) assertThat(searchArr[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(keyArray[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGap2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    searchArr = searchArr.clone();
-
-    int[] keyArray = keyArrWithIndex.getData();
-    int   key      = keyArrWithIndex.getIndex();
-
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGap(searchArr,0,searchArr.length, keyArray,key);
-    assertThat(i).isBetween(0,searchArr.length);
-
-    if( i > 0               ) assertThat(searchArr[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(keyArray[key]);
-    if( i < searchArr.length) assertThat(searchArr[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(keyArray[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchGap2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData().clone();
-    int       key =    keyArrWithIndex.getIndex(),
-             from = searchArrWithRange.getFrom(),
-            until = searchArrWithRange.getUntil();
-
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGap(searchArr,from,until, keyArr,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(searchArr[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(keyArr[key]);
-    if( i < until) assertThat(searchArr[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(keyArr[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGap2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData().clone();
-    int      key =    keyArrWithIndex.getIndex(),
-            from = searchArrWithRange.getFrom(),
-           until = searchArrWithRange.getUntil();
-
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGap(searchArr,from,until, keyArr,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(searchArr[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(keyArr[key]);
-    if( i < until) assertThat(searchArr[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(keyArr[key]);
-  }
-
-
-    //
-   // SEARCH_GAP_L
-  //
-  @Property( tries = N_TRIES )
-  void searchGapLArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
-  {
-    byte[] array = sample.getData().clone();
-    int      key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapL(array,0,array.length, array,key);
-    assertThat(i).isBetween(0,array.length-1);
-
-    if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(array[key]);
-                assertThat(array[i  ]).usingComparator(cmp). isEqualTo(array[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapL(array,0,array.length, array,key);
-    assertThat(i).isBetween(0,array.length-1);
-
-    if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(array[key]);
-    assertThat(array[i  ]).usingComparator(cmp). isEqualTo(array[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
-  {
-    byte[] array = sample.getData().getData().clone();
-    int      key = sample.getData().getIndex(),
-            from = sample.getFrom(),
-           until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapL(array,from,until, array,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(array[i-1]).usingComparator(cmp).            isLessThan(array[key]);
-    if( i < until) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(array[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapL(array,from,until, array,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(array[i-1]).usingComparator(cmp).            isLessThan(array[key]);
-    if( i < until) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(array[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchGapL2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    searchArr = searchArr.clone();
-
-    byte[] keyArray = keyArrWithIndex.getData();
-    int    key      = keyArrWithIndex.getIndex();
-
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapL(searchArr,0,searchArr.length, keyArray,key);
-    assertThat(i).isBetween(0,searchArr.length);
-
-    if( i > 0               ) assertThat(searchArr[i-1]).usingComparator(cmp).            isLessThan(keyArray[key]);
-    if( i < searchArr.length) assertThat(searchArr[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(keyArray[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapL2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    searchArr = searchArr.clone();
-
-    int[] keyArray = keyArrWithIndex.getData();
-    int   key      = keyArrWithIndex.getIndex();
-
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapL(searchArr,0,searchArr.length, keyArray,key);
-    assertThat(i).isBetween(0,searchArr.length);
-
-    if( i > 0               ) assertThat(searchArr[i-1]).usingComparator(cmp).            isLessThan(keyArray[key]);
-    if( i < searchArr.length) assertThat(searchArr[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(keyArray[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchGapL2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData().clone();
-    int       key =    keyArrWithIndex.getIndex(),
-             from = searchArrWithRange.getFrom(),
-            until = searchArrWithRange.getUntil();
-
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapL(searchArr,from,until, keyArr,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(searchArr[i-1]).usingComparator(cmp).            isLessThan(keyArr[key]);
-    if( i < until) assertThat(searchArr[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(keyArr[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapL2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData().clone();
-    int      key =    keyArrWithIndex.getIndex(),
-            from = searchArrWithRange.getFrom(),
-           until = searchArrWithRange.getUntil();
-
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapL(searchArr,from,until, keyArr,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(searchArr[i-1]).usingComparator(cmp).            isLessThan(keyArr[key]);
-    if( i < until) assertThat(searchArr[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(keyArr[key]);
-  }
-
-
-    //
-   // SEARCH_GAP_R
-  //
-  @Property( tries = N_TRIES )
-  void searchGapRArraysByte( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> sample, @ForAll boolean reversed )
-  {
-    byte[] array = sample.getData().clone();
-    int      key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapR(array,0,array.length, array,key);
-    assertThat(i).isBetween(1,array.length);
-
-                          assertThat(array[i-1]).usingComparator(cmp).    isEqualTo(array[key]);
-    if( i < array.length) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(array[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapR(array,0,array.length, array,key);
-    assertThat(i).isBetween(1,array.length);
-
-    assertThat(array[i-1]).usingComparator(cmp).    isEqualTo(array[key]);
-    if( i < array.length) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(array[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysWithRangeByte( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) byte[]>> sample, @ForAll boolean reversed )
-  {
-    byte[] array = sample.getData().getData().clone();
-    int      key = sample.getData().getIndex(),
-            from = sample.getFrom(),
-           until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapR(array,from,until, array,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(array[key]);
-    if( i < until) assertThat(array[i  ]).usingComparator(cmp).      isGreaterThan(array[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapR(array,from,until, array,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(array[key]);
-    if( i < until) assertThat(array[i  ]).usingComparator(cmp).      isGreaterThan(array[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchGapR2ArraysByte( @ForAll byte[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    searchArr = searchArr.clone();
-
-    byte[] keyArray = keyArrWithIndex.getData();
-    int    key      = keyArrWithIndex.getIndex();
-
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapR(searchArr,0,searchArr.length, keyArray,key);
-    assertThat(i).isBetween(0,searchArr.length);
-
-    if( i > 0               ) assertThat(searchArr[i-1]).usingComparator(cmp).isLessThanOrEqualTo(keyArray[key]);
-    if( i < searchArr.length) assertThat(searchArr[i  ]).usingComparator(cmp).      isGreaterThan(keyArray[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapR2ArraysInt( @ForAll int[] searchArr, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    searchArr = searchArr.clone();
-
-    int[] keyArray = keyArrWithIndex.getData();
-    int   key      = keyArrWithIndex.getIndex();
-
-    Arrays.sort(searchArr);
-    if(reversed) Revert.revert(searchArr);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapR(searchArr,0,searchArr.length, keyArray,key);
-    assertThat(i).isBetween(0,searchArr.length);
-
-    if( i > 0               ) assertThat(searchArr[i-1]).usingComparator(cmp).isLessThanOrEqualTo(keyArray[key]);
-    if( i < searchArr.length) assertThat(searchArr[i  ]).usingComparator(cmp).      isGreaterThan(keyArray[key]);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchGapR2ArraysWithRangeByte( @ForAll WithRange<byte[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) byte[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    byte[] keyArr =    keyArrWithIndex.getData(),
-        searchArr = searchArrWithRange.getData().clone();
-    int       key =    keyArrWithIndex.getIndex(),
-             from = searchArrWithRange.getFrom(),
-            until = searchArrWithRange.getUntil();
-
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
-
-    Comparator<Byte> cmp = reversed
-      ? (x,y) -> - Byte.compare(x,y)
-      : (x,y) -> + Byte.compare(x,y);
-
-    SearchAccessor<byte[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapR(searchArr,from,until, keyArr,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(searchArr[i-1]).usingComparator(cmp).isLessThanOrEqualTo(keyArr[key]);
-    if( i < until) assertThat(searchArr[i  ]).usingComparator(cmp).      isGreaterThan(keyArr[key]);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapR2ArraysWithRangeInt( @ForAll WithRange<int[]> searchArrWithRange, @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> keyArrWithIndex, @ForAll boolean reversed )
-  {
-    int[] keyArr =    keyArrWithIndex.getData(),
-       searchArr = searchArrWithRange.getData().clone();
-    int      key =    keyArrWithIndex.getIndex(),
-            from = searchArrWithRange.getFrom(),
-           until = searchArrWithRange.getUntil();
-
-    Arrays.sort(searchArr, from,until);
-    if(reversed) Revert.revert(searchArr, from,until);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    SearchAccessor<int[]> accByte = createAccessor( (a,i, b,j) -> cmp.compare(a[i], b[j]) );
-
-    int i = accByte.searchGapR(searchArr,from,until, keyArr,key);
-    assertThat(i).isBetween(from,until);
-
-    if( i > from ) assertThat(searchArr[i-1]).usingComparator(cmp).isLessThanOrEqualTo(keyArr[key]);
-    if( i < until) assertThat(searchArr[i  ]).usingComparator(cmp).      isGreaterThan(keyArr[key]);
-  }
-
-
-    //
-   // COMPARISON LIMITS
-  //
-  @Property( tries = N_TRIES )
-  void searchComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.search(array,0,array.length, array,key);
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i) );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchComparisonLimitArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.search(array,from,until, array,key);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i) );
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchRComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-            ? (x,y) -> - Integer.compare(x,y)
-            : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.searchR(array,0,array.length, array,key);
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i) );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRComparisonLimitArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Integer> cmp = reversed
-            ? (x,y) -> - Integer.compare(x,y)
-            : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.searchR(array,from,until, array,key);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i) );
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchLComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-            ? (x,y) -> - Integer.compare(x,y)
-            : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.searchL(array,0,array.length, array,key);
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i) );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLComparisonLimitArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Integer> cmp = reversed
-            ? (x,y) -> - Integer.compare(x,y)
-            : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.searchL(array,from,until, array,key);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i) );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.searchGap(array,0,array.length, array,key);
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i) );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapComparisonLimitArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Integer> cmp = reversed
-      ? (x,y) -> - Integer.compare(x,y)
-      : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.searchGap(array,from,until, array,key);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i) );
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchGapRComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-            ? (x,y) -> - Integer.compare(x,y)
-            : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.searchGapR(array,0,array.length, array,key);
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i) );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRComparisonLimitArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Integer> cmp = reversed
-            ? (x,y) -> - Integer.compare(x,y)
-            : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.searchGapR(array,from,until, array,key);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i) );
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchGapLComparisonLimitArraysInt( @ForAll WithIndex<@Size(min=1, max=MAX_SIZE) int[]> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().clone();
-    int     key = sample.getIndex();
-
-    Arrays.sort(array);
-    if(reversed) Revert.revert(array);
-
-    Comparator<Integer> cmp = reversed
-            ? (x,y) -> - Integer.compare(x,y)
-            : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.searchGapL(array,0,array.length, array,key);
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i) );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapLComparisonLimitArraysWithRangeInt( @ForAll WithRange<WithIndex<@Size(min=1, max=MAX_SIZE) int[]>> sample, @ForAll boolean reversed )
-  {
-    int[] array = sample.getData().getData().clone();
-    int     key = sample.getData().getIndex(),
-           from = sample.getFrom(),
-          until = sample.getUntil();
-
-    Arrays.sort(array, from,until);
-    if(reversed) Revert.revert(array, from,until);
-
-    Comparator<Integer> cmp = reversed
-            ? (x,y) -> - Integer.compare(x,y)
-            : (x,y) -> + Integer.compare(x,y);
-
-    var counter = new CountingCompareAccessor<int[]>() {
-      @Override public int compare( int[] a, int i, int[] b, int j ) { ++nComps; return cmp.compare(a[i], b[j]); }
-    };
-    var accByte = createAccessor(counter);
-
-    int i = accByte.searchGapL(array,from,until, array,key);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(counter.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i) );
   }
 }

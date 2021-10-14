@@ -1,31 +1,48 @@
 package com.github.jaaa.search;
 
-import com.github.jaaa.ComparatorByte;
-import com.github.jaaa.ComparatorInt;
-import com.github.jaaa.misc.Revert;
-import com.github.jaaa.WithRange;
+import com.github.jaaa.*;
+import com.github.jaaa.misc.Boxing;
 import net.jqwik.api.ForAll;
+import net.jqwik.api.Group;
 import net.jqwik.api.Property;
+import net.jqwik.api.PropertyDefaults;
 import net.jqwik.api.constraints.IntRange;
-import net.jqwik.api.constraints.Size;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.concurrent.atomic.LongAdder;
 
+import static com.github.jaaa.misc.Boxing.boxed;
 import static com.github.jaaa.util.IMath.*;
 import static java.lang.Math.min;
-import static java.util.Comparator.naturalOrder;
 import static org.assertj.core.api.Assertions.assertThat;
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
+
 
 public abstract class SearcherTestTemplate
 {
 // STATIC FIELDS
-  static final int N_TRIES = 10_000,
-                  MAX_SIZE = 8192;
+  private static final int N_TRIES = 1_000;
 
-  private static abstract class CountingComparator<T> implements Comparator<T>
+  private static class CountingComparator<T> implements Comparator<T> {
+    public long nComp = 0;
+    private final Comparator<? super T> cmp;
+    CountingComparator( Comparator<? super T> _cmp ) { cmp =_cmp; }
+    @Override public int compare( T x, T y ) { nComp++; assert 0 < nComp; return cmp.compare(x,y); }
+  }
+
+  private static record CountingComparable<T extends Comparable<? super T>>( T cmp, LongAdder counter ) implements Comparable<CountingComparable<? extends T>>
   {
-    public long nComps = 0;
+    @Override public int compareTo( CountingComparable<? extends T> o ) {
+      counter.increment();
+      return cmp.compareTo(o.cmp);
+    }
+    @Override public String toString() { return format("CountingComparable(%s)", cmp); }
+    @Override public boolean equals( Object o ) { throw new AssertionError(); }
+    @Override public int hashCode() { throw new AssertionError(); }
   }
 
 // STATIC CONSTRUCTOR
@@ -44,22 +61,26 @@ public abstract class SearcherTestTemplate
 // METHODS
   protected abstract long comparisonLimit( int from, int until, int i );
 
+  protected int maxArraySize() { return 8192; }
+
+
+
   @Property( tries = N_TRIES )
   void searchComputesSqrt( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqrt )
   {
-    long sqr = 1L*sqrt*sqrt,
-         out = searcher.search( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - 1L*x*x) );
+    long sqr = (long) sqrt*sqrt,
+         out = searcher.search( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - (long) x*x) );
     assertThat(out).isEqualTo(sqrt);
   }
 
   @Property( tries = N_TRIES )
   void searchComputesSqrtCeil( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = searcher.search( 0,sqr+1, x -> sign(sqr - 1L*x*x) );
+    int sqrt = searcher.search( 0,sqr+1, x -> sign(sqr - (long) x*x) );
     if( sqrt < 0 )
         sqrt = ~sqrt;
     else
-        assertThat(1L*sqrt*sqrt).isEqualTo(sqr);
+        assertThat((long) sqrt*sqrt).isEqualTo(sqr);
     assertThat(sqrt).isEqualTo( sqrtCeil(sqr) );
 
   }
@@ -67,7 +88,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchComputesSqrtFloor( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = -1 + ~searcher.search( 0,sqr+1, x -> sqr < 1L*x*x ? -1 : +1 );
+    int sqrt = -1 + ~searcher.search( 0,sqr+1, x -> sqr < (long) x*x ? -1 : +1 );
     assertThat(sqrt).isEqualTo( sqrtFloor(sqr) );
   }
 
@@ -76,26 +97,26 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchLComputesSqrt( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqrt )
   {
-    long sqr = 1L*sqrt*sqrt,
-         out = searcher.searchL( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - 1L*x*x) );
+    long sqr = (long) sqrt*sqrt,
+         out = searcher.searchL( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - (long) x*x) );
     assertThat(out).isEqualTo(sqrt);
   }
 
   @Property( tries = N_TRIES )
   void searchLComputesSqrtCeil( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = searcher.searchL( 0,sqr+1, x -> sign(sqr - 1L*x*x) );
+    int sqrt = searcher.searchL( 0,sqr+1, x -> sign(sqr - (long) x*x) );
     if( sqrt < 0 )
         sqrt = ~sqrt;
     else
-        assertThat(1L*sqrt*sqrt).isEqualTo(sqr);
+        assertThat((long) sqrt*sqrt).isEqualTo(sqr);
     assertThat(sqrt).isEqualTo( sqrtCeil(sqr) );
   }
 
   @Property( tries = N_TRIES )
   void searchLComputesSqrtFloor( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = -1 + ~searcher.searchL( 0,sqr+1, x -> sqr < 1L*x*x ? -1 : +1 );
+    int sqrt = -1 + ~searcher.searchL( 0,sqr+1, x -> sqr < (long) x*x ? -1 : +1 );
     assertThat(sqrt).isEqualTo( sqrtFloor(sqr) );
   }
 
@@ -104,20 +125,20 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRComputesSqrt( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqrt )
   {
-    long sqr = 1L*sqrt*sqrt,
-         out = searcher.searchR( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - 1L*x*x) );
+    long sqr = (long) sqrt*sqrt,
+         out = searcher.searchR( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - (long) x*x) );
     assertThat(out-1).isEqualTo(sqrt);
   }
 
   @Property( tries = N_TRIES )
   void searchRComputesSqrtCeil( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = searcher.searchR( 0,sqr+1, x -> sign(sqr - 1L*x*x) );
+    int sqrt = searcher.searchR( 0,sqr+1, x -> sign(sqr - (long) x*x) );
     if( sqrt < 0 )
       sqrt = ~sqrt;
     else {
       sqrt -= 1;
-      assertThat(1L*sqrt*sqrt).isEqualTo(sqr);
+      assertThat((long) sqrt*sqrt).isEqualTo(sqr);
     }
     assertThat(sqrt).isEqualTo( sqrtCeil(sqr) );
   }
@@ -125,12 +146,12 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchRComputesSqrtFloor( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = searcher.searchR( 0,sqr+1, x -> sign(sqr - 1L*x*x) );
+    int sqrt = searcher.searchR( 0,sqr+1, x -> sign(sqr - (long) x*x) );
     if( sqrt < 0 )
         sqrt = ~sqrt - 1;
     else {
         sqrt -= 1;
-        assertThat(1L*sqrt*sqrt).isEqualTo(sqr);
+        assertThat((long) sqrt*sqrt).isEqualTo(sqr);
     }
     assertThat(sqrt).isEqualTo( sqrtFloor(sqr) );
   }
@@ -138,1457 +159,17 @@ public abstract class SearcherTestTemplate
 
 
   @Property( tries = N_TRIES )
-  void searchArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
-  {
-    Arrays.sort(array);
-    byte[] input = array.clone();
-
-    int i = searcher.search(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i  ]).isGreaterThan(key);
-      if( i > 0            ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-  }
-
-
-  @Property( tries = N_TRIES )
-  void searchArraysInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    Arrays.sort(array);
-    int[] input = array.clone();
-
-    int i = searcher.search(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i  ]).isGreaterThan(key);
-      if( i > 0            ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchArraysComparableByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
-  {
-    Arrays.sort(array);
-    Byte[] input = array.clone();
-
-    int i = searcher.search(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-        i = ~i;
-      if( i < array.length ) assertThat(array[i  ]).isGreaterThan(key);
-      if( i > 0            ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchArraysComparableInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    Arrays.sort(array);
-    Integer[] input = array.clone();
-
-    int i = searcher.search(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i  ]).isGreaterThan(key);
-      if( i > 0            ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchArraysComparatorObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array,cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.search(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(key);
-      if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchArraysComparatorObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    Comparator<Integer>cmp = naturalOrder();
-    if( reversed )     cmp = cmp.reversed();
-    Arrays.sort(array, cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.search(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(key);
-      if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchArraysComparatorByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key, @ForAll boolean reversed )
-  {
-    ComparatorByte cmp = Byte::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
-    }
-
-    byte[] input = array.clone();
-
-    int i = searcher.search(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThan(key);
-      if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp::compare).isEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchArraysComparatorInteger( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    ComparatorInt cmp = Integer::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
-    }
-
-    int[] input = array.clone();
-
-    int i = searcher.search(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThan(key);
-      if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp::compare).isEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    byte[] input = array.clone();
-
-    int i = searcher.search(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i  ]).isGreaterThan(key);
-      if( i > from  ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    int[] input = array.clone();
-
-    int i = searcher.search(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i  ]).isGreaterThan(key);
-      if( i > from  ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.search(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i  ]).isGreaterThan(key);
-      if( i > from  ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.search(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i  ]).isGreaterThan(key);
-      if( i > from  ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.search(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(key);
-      if( i > from  ) assertThat(array[i-1]).usingComparator(cmp).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchArraysWithRangeComparatorObjInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Comparator<Integer> cmp = naturalOrder();
-    if( reversed )      cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.search(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(key);
-      if( i > from  ) assertThat(array[i-1]).usingComparator(cmp).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
-
-    ComparatorByte cmp = Byte::compare;
-
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
-    }
-
-    byte[] input = array.clone();
-
-    int i = searcher.search(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThan(key);
-      if( i > from  ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp::compare).isEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchArraysWithRangeComparatorInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    ComparatorInt cmp = Integer::compare;
-
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
-    }
-
-    int[] input = array.clone();
-
-    int i = searcher.search(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThan(key);
-      if( i > from  ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan   (key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp::compare).isEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchRArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    byte[] input = array.clone();
-
-    int i = searcher.searchR(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > 0 ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i-1]).isEqualTo(key);
-
-    if( i < array.length ) assertThat(array[i]).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRArraysInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    int[] input = array.clone();
-
-    int i = searcher.searchR(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > 0 ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i-1]).isEqualTo(key);
-
-    if( i < array.length ) assertThat(array[i]).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchRArraysComparableByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    Byte[] input = array.clone();
-
-    int i = searcher.searchR(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > 0 ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i-1]).isEqualTo(key);
-
-    if( i < array.length ) assertThat(array[i]).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRArraysComparableInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    Integer[] input = array.clone();
-
-    int i = searcher.searchR(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > 0 ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i-1]).isEqualTo(key);
-
-    if( i < array.length ) assertThat(array[i]).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchRArraysComparatorByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    ComparatorByte cmp = Byte::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
-    }
-
-    byte[] input = array.clone();
-
-    int i = searcher.searchR(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-    }
-    else
-      assertThat(array[i-1]).usingComparator(cmp::compare).isEqualTo(key);
-
-    if( i < array.length ) assertThat(array[i]).usingComparator(cmp::compare).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRArraysComparatorInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    ComparatorInt cmp = Integer::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
-    }
-
-    int[] input = array.clone();
-
-    int i = searcher.searchR(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-    }
-    else
-      assertThat(array[i-1]).usingComparator(cmp::compare).isEqualTo(key);
-
-    if( i < array.length ) assertThat(array[i]).usingComparator(cmp::compare).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchRArraysComparatorObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array,cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchR(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-    }
-    else
-      assertThat(array[i-1]).usingComparator(cmp).isEqualTo(key);
-
-    if( i < array.length ) assertThat(array[i]).usingComparator(cmp).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRArraysComparatorObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    Comparator<Integer> cmp = naturalOrder();
-    if( reversed )      cmp = cmp.reversed();
-    Arrays.sort(array,  cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchR(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-    }
-    else
-      assertThat(array[i-1]).usingComparator(cmp).isEqualTo(key);
-
-    if( i < array.length ) assertThat(array[i]).usingComparator(cmp).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchRArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    byte[] input = array.clone();
-
-    int i = searcher.searchR(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > from ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i-1]).isEqualTo(key);
-
-    if( i < until ) assertThat(array[i]).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    int[] input = array.clone();
-
-    int i = searcher.searchR(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > from ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i-1]).isEqualTo(key);
-
-    if( i < until ) assertThat(array[i]).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchRArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchR(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > from ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i-1]).isEqualTo(key);
-
-    if( i < until ) assertThat(array[i]).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchR(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > from ) assertThat(array[i-1]).isLessThan   (key);
-    }
-    else
-      assertThat(array[i-1]).isEqualTo(key);
-
-    if( i < until ) assertThat(array[i]).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchRArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    ComparatorByte cmp = Byte::compare;
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
-    }
-
-    byte[] input = array.clone();
-
-    int i = searcher.searchR(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > from ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-    }
-    else
-      assertThat(array[i-1]).usingComparator(cmp::compare).isEqualTo(key);
-
-    if( i < until ) assertThat(array[i]).usingComparator(cmp::compare).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRArraysWithRangeComparatorInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    ComparatorInt cmp = Integer::compare;
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
-    }
-
-    int[] input = array.clone();
-
-    int i = searcher.searchR(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > from ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-    }
-    else
-      assertThat(array[i-1]).usingComparator(cmp::compare).isEqualTo(key);
-
-    if( i < until ) assertThat(array[i]).usingComparator(cmp::compare).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchRArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchR(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > from ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-    }
-    else
-      assertThat(array[i-1]).usingComparator(cmp).isEqualTo(key);
-
-    if( i < until ) assertThat(array[i]).usingComparator(cmp).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRArraysWithRangeComparatorObjInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Comparator<Integer>      cmp = naturalOrder();
-    if( reversed )           cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchR(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i > from ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-    }
-    else
-      assertThat(array[i-1]).usingComparator(cmp).isEqualTo(key);
-
-    if( i < until ) assertThat(array[i]).usingComparator(cmp).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchLArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    byte[] input = array.clone();
-
-    int i = searcher.searchL(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i]).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-
-    if( i > 0 ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLArraysInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    int[] input = array.clone();
-
-    int i = searcher.searchL(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i]).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-
-    if( i > 0 ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchLArraysComparableByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    Byte[] input = array.clone();
-
-    int i = searcher.searchL(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i]).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-
-    if( i > 0 ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLArraysComparableInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    Integer[] input = array.clone();
-
-    int i = searcher.searchL(input,key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i]).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-
-    if( i > 0 ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchLArraysComparatorByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    ComparatorByte cmp = Byte::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
-    }
-
-    byte[] input = array.clone();
-
-    int i = searcher.searchL(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i]).usingComparator(cmp::compare).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp::compare).isEqualTo(key);
-
-    if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLArraysComparatorInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    ComparatorInt cmp = Integer::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
-    }
-
-    int[] input = array.clone();
-
-    int i = searcher.searchL(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i]).usingComparator(cmp::compare).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp::compare).isEqualTo(key);
-
-    if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchLArraysComparatorObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array,cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchL(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i]).usingComparator(cmp).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(key);
-
-    if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLArraysComparatorObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    Comparator<Integer> cmp = naturalOrder();
-    if( reversed )      cmp = cmp.reversed();
-    Arrays.sort(array,  cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchL(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < array.length ) assertThat(array[i]).usingComparator(cmp).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(key);
-
-    if( i > 0 ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchLArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    byte[] input = array.clone();
-
-    int i = searcher.searchL(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i]).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-
-    if( i > from ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    int[] input = array.clone();
-
-    int i = searcher.searchL(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i]).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-
-    if( i > from ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchLArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchL(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i]).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-
-    if( i > from ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchL(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i]).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).isEqualTo(key);
-
-    if( i > from ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchLArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    ComparatorByte cmp = Byte::compare;
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
-    }
-
-    byte[] input = array.clone();
-
-    int i = searcher.searchL(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i]).usingComparator(cmp::compare).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp::compare).isEqualTo(key);
-
-    if( i > from ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLArraysWithRangeComparatorInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    ComparatorInt cmp = Integer::compare;
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
-    }
-
-    int[] input = array.clone();
-
-    int i = searcher.searchL(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i]).usingComparator(cmp::compare).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp::compare).isEqualTo(key);
-
-    if( i > from ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchLArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchL(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i]).usingComparator(cmp).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(key);
-
-    if( i > from ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLArraysWithRangeComparatorObjInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Comparator<Integer>      cmp = naturalOrder();
-    if( reversed )           cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchL(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < 0 ) {
-      i = ~i;
-      if( i < until ) assertThat(array[i]).usingComparator(cmp).isGreaterThan(key);
-    }
-    else
-      assertThat(array[i]).usingComparator(cmp).isEqualTo(key);
-
-    if( i > from ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchSatisfiesComparisonLimitByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.search(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchSatisfiesComparisonLimitInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.search(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchRSatisfiesComparisonLimitByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchR(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRSatisfiesComparisonLimitInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchR(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchLSatisfiesComparisonLimitByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchL(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLSatisfiesComparisonLimitInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchL(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.search(array,key, cmp);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.search(array,key, cmp);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchRSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchR(array,key, cmp);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchR(array,key, cmp);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchLSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchL(array,key, cmp);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    array = array.clone();
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchL(array,key, cmp);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-
-
-    //============//
-   // SEARCH GAP //
-  //============//
-  @Property( tries = N_TRIES )
   void searchGapComputesSqrt( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqrt )
   {
-    long sqr = 1L*sqrt*sqrt,
-         out = searcher.searchGap( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - 1L*x*x) );
+    long sqr = (long) sqrt*sqrt,
+         out = searcher.searchGap( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - (long) x*x) );
     assertThat(out).isEqualTo(sqrt);
   }
 
   @Property( tries = N_TRIES )
   void searchGapComputesSqrtCeil( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = searcher.searchGap( 0,sqr+1, x -> sign(sqr - 1L*x*x) );
+    int sqrt = searcher.searchGap( 0,sqr+1, x -> sign(sqr - (long) x*x) );
     assertThat(sqrt).isEqualTo( sqrtCeil(sqr) );
 
   }
@@ -1596,7 +177,7 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapComputesSqrtFloor( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = -1 + searcher.searchGap( 0,sqr+1, x -> sqr < 1L*x*x ? -1 : +1 );
+    int sqrt = -1 + searcher.searchGap( 0,sqr+1, x -> sqr < (long) x*x ? -1 : +1 );
     assertThat(sqrt).isEqualTo( sqrtFloor(sqr) );
   }
 
@@ -1605,22 +186,22 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapLComputesSqrt( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqrt )
   {
-    long sqr = 1L*sqrt*sqrt,
-         out = searcher.searchGapL( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - 1L*x*x) );
+    long sqr = (long) sqrt*sqrt,
+         out = searcher.searchGapL( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - (long) x*x) );
     assertThat(out).isEqualTo(sqrt);
   }
 
   @Property( tries = N_TRIES )
   void searchGapLComputesSqrtCeil( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = searcher.searchGapL( 0,sqr+1, x -> sign(sqr - 1L*x*x) );
+    int sqrt = searcher.searchGapL( 0,sqr+1, x -> sign(sqr - (long) x*x) );
     assertThat(sqrt).isEqualTo( sqrtCeil(sqr) );
   }
 
   @Property( tries = N_TRIES )
   void searchGapLComputesSqrtFloor( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = -1 + searcher.searchGapL( 0,sqr+1, x -> sqr < 1L*x*x ? -1 : +1 );
+    int sqrt = -1 + searcher.searchGapL( 0,sqr+1, x -> sqr < (long) x*x ? -1 : +1 );
     assertThat(sqrt).isEqualTo( sqrtFloor(sqr) );
   }
 
@@ -1629,1554 +210,781 @@ public abstract class SearcherTestTemplate
   @Property( tries = N_TRIES )
   void searchGapRComputesSqrt( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqrt )
   {
-    long sqr = 1L*sqrt*sqrt,
-         out = searcher.searchGapR( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - 1L*x*x) );
+    long sqr = (long) sqrt*sqrt,
+            out = searcher.searchGapR( 0, (int) min(Integer.MAX_VALUE, sqr+1), x -> sign(sqr - (long) x*x) );
     assertThat(out-1).isEqualTo(sqrt);
   }
 
   @Property( tries = N_TRIES )
   void searchGapRComputesSqrtCeil( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = +1 - searcher.searchGapR( -sqr,1, x -> sign(1L*x*x - sqr) );
+    int sqrt = sqr+1 - searcher.searchGapR( 0,sqr+1, x -> {
+      x-=sqr;
+      return sign((long) x*x - sqr);
+    });
     assertThat(sqrt).isEqualTo( sqrtCeil(sqr) );
   }
 
   @Property( tries = N_TRIES )
   void searchGapRComputesSqrtFloor( @ForAll @IntRange(min=0, max=Integer.MAX_VALUE-1) int sqr )
   {
-    int sqrt = -1 + searcher.searchGapR( 0,sqr+1, x -> sign(sqr - 1L*x*x) );
+    int sqrt = -1 + searcher.searchGapR( 0,sqr+1, x -> sign(sqr - (long) x*x) );
     assertThat(sqrt).isEqualTo( sqrtFloor(sqr) );
   }
 
 
 
-  @Property( tries = N_TRIES )
-  void searchGapArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
+  @Group class ByCompass extends SearchAccessorTestTemplate
   {
-    array = array.clone();
-
-    Arrays.sort(array);
-    byte[] input = array.clone();
-
-    int i = searcher.searchGap(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).   isLessThanOrEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysInteger( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    int[] input = array.clone();
-
-    int i = searcher.searchGap(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).   isLessThanOrEqualTo(key);
+    @Override public int maxArraySize() { return SearcherTestTemplate.this.maxArraySize(); }
+    @Override long comparisonLimit( int from, int until, int i ) { return SearcherTestTemplate.this.comparisonLimit(from,until, i); }
+    @Override <T> SearchAccessor<T> createAccessor( CompareAccessor<? super T> acc ) {
+      return new SearchAccessor<>() {
+        @Override public int search    ( T b, int from, int until, T a, int i ) { return searcher.search    (from,until, j -> acc.compare(a,i, b,j)); }
+        @Override public int searchL   ( T b, int from, int until, T a, int i ) { return searcher.searchL   (from,until, j -> acc.compare(a,i, b,j)); }
+        @Override public int searchR   ( T b, int from, int until, T a, int i ) { return searcher.searchR   (from,until, j -> acc.compare(a,i, b,j)); }
+        @Override public int searchGap ( T b, int from, int until, T a, int i ) { return searcher.searchGap (from,until, j -> acc.compare(a,i, b,j)); }
+        @Override public int searchGapL( T b, int from, int until, T a, int i ) { return searcher.searchGapL(from,until, j -> acc.compare(a,i, b,j)); }
+        @Override public int searchGapR( T b, int from, int until, T a, int i ) { return searcher.searchGapR(from,until, j -> acc.compare(a,i, b,j)); }
+      };
+    }
   }
 
 
 
-  @Property( tries = N_TRIES )
-  void searchGapArraysComparableByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
+  @PropertyDefaults( tries = N_TRIES )
+  @Group class BoxedComparable
   {
-    array = array.clone();
+    abstract class Template implements ArrayProviderTemplate
+    {
+      @Override public int maxArraySize() { return SearcherTestTemplate.this.maxArraySize(); }
 
-    Arrays.sort(array);
-    Byte[] input = array.clone();
+      @Property                         void noRange_idx_Boolean( @ForAll("arraysWithIndexBoolean") WithIndex<boolean[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Byte   ( @ForAll("arraysWithIndexByte"   ) WithIndex<   byte[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Short  ( @ForAll("arraysWithIndexShort"  ) WithIndex<  short[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Int    ( @ForAll("arraysWithIndexInt"    ) WithIndex<    int[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Long   ( @ForAll("arraysWithIndexLong"   ) WithIndex<   long[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Char   ( @ForAll("arraysWithIndexChar"   ) WithIndex<   char[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Float  ( @ForAll("arraysWithIndexFloat"  ) WithIndex<  float[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Double ( @ForAll("arraysWithIndexDouble" ) WithIndex< double[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_key_Boolean( @ForAll("arraysBoolean") boolean[] vals, @ForAll boolean key ) { noRange(boxed(vals), key); }
+      @Property                         void noRange_key_Byte   ( @ForAll("arraysByte"   )    byte[] vals, @ForAll    byte key ) { noRange(boxed(vals), key); }
+      @Property                         void noRange_key_Short  ( @ForAll("arraysShort"  )   short[] vals, @ForAll   short key ) { noRange(boxed(vals), key); }
+      @Property                         void noRange_key_Int    ( @ForAll("arraysInt"    )     int[] vals, @ForAll     int key ) { noRange(boxed(vals), key); }
+      @Property                         void noRange_key_Long   ( @ForAll("arraysLong"   )    long[] vals, @ForAll    long key ) { noRange(boxed(vals), key); }
+      @Property                         void noRange_key_Char   ( @ForAll("arraysChar"   )    char[] vals, @ForAll    char key ) { noRange(boxed(vals), key); }
+      @Property                         void noRange_key_Float  ( @ForAll("arraysFloat"  )   float[] vals, @ForAll   float key ) { noRange(boxed(vals), key); }
+      @Property                         void noRange_key_Double ( @ForAll("arraysDouble" )  double[] vals, @ForAll  double key ) { noRange(boxed(vals), key); }
+      <T extends Comparable<? super T>> void noRange( T[] vals, T key )
+      {
+        Arrays.sort(vals);
+        var valCpy = vals.clone();
+        noRange_testImpl(vals,key);
+        assertThat(vals).isEqualTo(valCpy);
+      }
+      abstract <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key );
 
-    int i = searcher.searchGap(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).   isLessThanOrEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysComparableInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGap(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).   isLessThanOrEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysComparatorByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    ComparatorByte cmp = Byte::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
+      @Property                         void withRange_idx_Boolean( @ForAll("arraysWithIndexWithRangeBoolean") WithRange<WithIndex<boolean[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Byte   ( @ForAll("arraysWithIndexWithRangeByte"   ) WithRange<WithIndex<   byte[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Short  ( @ForAll("arraysWithIndexWithRangeShort"  ) WithRange<WithIndex<  short[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Int    ( @ForAll("arraysWithIndexWithRangeInt"    ) WithRange<WithIndex<    int[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Long   ( @ForAll("arraysWithIndexWithRangeLong"   ) WithRange<WithIndex<   long[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Char   ( @ForAll("arraysWithIndexWithRangeChar"   ) WithRange<WithIndex<   char[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Float  ( @ForAll("arraysWithIndexWithRangeFloat"  ) WithRange<WithIndex<  float[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Double ( @ForAll("arraysWithIndexWithRangeDouble" ) WithRange<WithIndex< double[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_key_Boolean( @ForAll("arraysWithRangeBoolean") WithRange<boolean[]> vals, @ForAll boolean key ) { withRange(vals.map(Boxing::boxed), key); }
+      @Property                         void withRange_key_Byte   ( @ForAll("arraysWithRangeByte"   ) WithRange<   byte[]> vals, @ForAll    byte key ) { withRange(vals.map(Boxing::boxed), key); }
+      @Property                         void withRange_key_Short  ( @ForAll("arraysWithRangeShort"  ) WithRange<  short[]> vals, @ForAll   short key ) { withRange(vals.map(Boxing::boxed), key); }
+      @Property                         void withRange_key_Int    ( @ForAll("arraysWithRangeInt"    ) WithRange<    int[]> vals, @ForAll     int key ) { withRange(vals.map(Boxing::boxed), key); }
+      @Property                         void withRange_key_Long   ( @ForAll("arraysWithRangeLong"   ) WithRange<   long[]> vals, @ForAll    long key ) { withRange(vals.map(Boxing::boxed), key); }
+      @Property                         void withRange_key_Char   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> vals, @ForAll    char key ) { withRange(vals.map(Boxing::boxed), key); }
+      @Property                         void withRange_key_Float  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> vals, @ForAll   float key ) { withRange(vals.map(Boxing::boxed), key); }
+      @Property                         void withRange_key_Double ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> vals, @ForAll  double key ) { withRange(vals.map(Boxing::boxed), key); }
+      <T extends Comparable<? super T>> void withRange( WithRange<T[]> sample, T key )
+      {
+        Arrays.sort( sample.getData() );
+        var vals = sample.getData().clone();
+        withRange_testImpl(vals, sample.getFrom(),sample.getUntil(), key);
+        assertThat(vals).isEqualTo( sample.getData() );
+      }
+      abstract <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key );
     }
 
-    byte[] input = array.clone();
+    class LimitTemplate extends Template
+    {
+      interface Searcher          { <T extends Comparable<? super T>> int search(T[] arr, T key ); }
+      interface SearcherWithRange { <T extends Comparable<? super T>> int search( T[] arr, int from, int until, T key ); }
+      private final Searcher          searcher;
+      private final SearcherWithRange searcherWithRange;
+      LimitTemplate( Searcher _searcher, SearcherWithRange _searcherWithRange ) {
+        searcher          =_searcher;
+        searcherWithRange =_searcherWithRange;
+      }
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key )
+      {
+        var counter = new LongAdder();
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        CountingComparable<T>[] ccs = stream(vals).map( x -> new CountingComparable(x,counter) ).toArray(CountingComparable[]::new);
 
-    int i = searcher.searchGap(input,key, cmp);
-    assertThat(input).isEqualTo(array);
+        int        i =           searcher.search(ccs, new CountingComparable<>(key,counter) );
+        assertThat(i).isEqualTo( searcher.search(vals,key) );
+        if( i < 0 )
+            i = ~i;
 
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp::compare).   isLessThanOrEqualTo(key);
-  }
+        assertThat(counter.sum()).isBetween( 0L, comparisonLimit(0,vals.length,i) );
+      }
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key )
+      {
+        var counter = new LongAdder();
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        CountingComparable<T>[] ccs = stream(vals).map( x -> new CountingComparable(x,counter) ).toArray(CountingComparable[]::new);
 
-  @Property( tries = N_TRIES )
-  void searchGapArraysComparatorInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    ComparatorInt cmp = Integer::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
+        int        i =           searcherWithRange.search(ccs, from,until, new CountingComparable<>(key,counter) );
+        assertThat(i).isEqualTo( searcherWithRange.search(vals,from,until, key) );
+        if( i < 0 )
+            i = ~i;
+        assertThat(counter.sum()).isBetween( 0L, comparisonLimit(from,until,i) );
+      }
     }
 
-    int[] input = array.clone();
+    @Group class Limits_Search     extends LimitTemplate { public Limits_Search    () { super(searcher::search    , searcher::search    ); } }
+    @Group class Limits_SearchL    extends LimitTemplate { public Limits_SearchL   () { super(searcher::searchL   , searcher::searchL   ); } }
+    @Group class Limits_SearchR    extends LimitTemplate { public Limits_SearchR   () { super(searcher::searchR   , searcher::searchR   ); } }
+    @Group class Limits_SearchGap  extends LimitTemplate { public Limits_SearchGap () { super(searcher::searchGap , searcher::searchGap ); } }
+    @Group class Limits_SearchGapL extends LimitTemplate { public Limits_SearchGapL() { super(searcher::searchGapL, searcher::searchGapL); } }
+    @Group class Limits_SearchGapR extends LimitTemplate { public Limits_SearchGapR() { super(searcher::searchGapR, searcher::searchGapR); } }
 
-    int i = searcher.searchGap(input,key, cmp);
-    assertThat(input).isEqualTo(array);
+    @Group class Search extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key )
+      {
+        int i = searcher.search(vals, key),
+         from = 0,
+        until = vals.length;
 
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp::compare).   isLessThanOrEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysComparatorObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array,cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchGap(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysComparatorObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    Comparator<Integer> cmp = naturalOrder();
-    if( reversed )      cmp = cmp.reversed();
-    Arrays.sort(array,  cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGap(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    byte[] input = array.clone();
-
-    int i = searcher.searchGap(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < until ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).   isLessThanOrEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    int[] input = array.clone();
-
-    int i = searcher.searchGap(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < until ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).   isLessThanOrEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchGap(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < until ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).   isLessThanOrEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGap(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < until ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).   isLessThanOrEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
-
-    ComparatorByte cmp = Byte::compare;
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).   isLessThan(key);
+        }
+        else {
+          assertThat(i).isBetween(from,until-1);
+          assertThat(vals[i]).isEqualTo(key);
+        }
+      }
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key )
+      {
+        int i = searcher.search(vals, from,until, key);
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).   isLessThan(key);
+        }
+        else {
+          assertThat(i).isBetween(from,until-1);
+          assertThat(vals[i]).isEqualTo(key);
+        }
+      }
     }
 
-    byte[] input = array.clone();
+    @Group class SearchL extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key )
+      {
+        int i = searcher.searchL(vals, key),
+         from = 0,
+        until = vals.length;
 
-    int i = searcher.searchGap(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp::compare).   isLessThanOrEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysWithRangeComparatorInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    ComparatorInt cmp = Integer::compare;
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).   isLessThan(key);
+        }
+        else {
+                         assertThat(i).isBetween(from,until-1);
+                         assertThat(vals[i  ]).isEqualTo (key);
+          if( from < i ) assertThat(vals[i-1]).isLessThan(key);
+        }
+      }
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key )
+      {
+        int i = searcher.searchL(vals, from,until, key);
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).   isLessThan(key);
+        }
+        else {
+                         assertThat(i).isBetween(from,until-1);
+                         assertThat(vals[i  ]).isEqualTo (key);
+          if( from < i ) assertThat(vals[i-1]).isLessThan(key);
+        }
+      }
     }
 
-    int[] input = array.clone();
+    @Group class SearchR extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key )
+      {
+        int i = searcher.searchR(vals, key),
+         from = 0,
+        until = vals.length;
 
-    int i = searcher.searchGap(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).   isLessThan(key);
+        }
+        else {
+                          assertThat(i).isBetween(from+1,until);
+                          assertThat(vals[i-1]).isEqualTo    (key);
+          if( i < until ) assertThat(vals[i  ]).isGreaterThan(key);
+        }
+      }
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key )
+      {
+        int i = searcher.searchR(vals, from,until, key);
 
-    assertThat(i).isBetween(0,array.length);
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp::compare).   isLessThanOrEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchGap(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapArraysWithRangeComparatorObjInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Comparator<Integer>      cmp = naturalOrder();
-    if( reversed )           cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGap(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    byte[] input = array.clone();
-
-    int i = searcher.searchGapR(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i > 0            ) assertThat(array[i-1]).isLessThanOrEqualTo(key);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    int[] input = array.clone();
-
-    int i = searcher.searchGapR(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i > 0            ) assertThat(array[i-1]).isLessThanOrEqualTo(key);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysComparableByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    Byte[] input = array.clone();
-
-    int i = searcher.searchGapR(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i > 0            ) assertThat(array[i-1]).isLessThanOrEqualTo(key);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysComparableInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGapR(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i > 0            ) assertThat(array[i-1]).isLessThanOrEqualTo(key);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysComparatorByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    ComparatorByte cmp = Byte::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).   isLessThan(key);
+        }
+        else {
+                          assertThat(i).isBetween(from+1,until);
+                          assertThat(vals[i-1]).isEqualTo    (key);
+          if( i < until ) assertThat(vals[i  ]).isGreaterThan(key);
+        }
+      }
     }
 
-    byte[] input = array.clone();
-
-    int i = searcher.searchGapR(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThanOrEqualTo(key);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysComparatorInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    ComparatorInt cmp = Integer::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
+    @Group class SearchGap extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key )
+      {
+        int i = searcher.searchGap(vals, key),
+         from = 0,
+        until = vals.length;
+                        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).isGreaterThanOrEqualTo(key);
+        if( i > from  ) assertThat(vals[i-1]).   isLessThanOrEqualTo(key);
+      }
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key )
+      {
+        int i = searcher.searchGap(vals, from,until, key);
+                        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).isGreaterThanOrEqualTo(key);
+        if( i > from  ) assertThat(vals[i-1]).   isLessThanOrEqualTo(key);
+      }
     }
 
-    int[] input = array.clone();
-
-    int i = searcher.searchGapR(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThanOrEqualTo(key);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysComparatorObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array,cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchGapR(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(key);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysComparatorObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    Comparator<Integer> cmp = naturalOrder();
-    if( reversed )      cmp = cmp.reversed();
-    Arrays.sort(array,  cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGapR(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(key);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    byte[] input = array.clone();
-
-    int i = searcher.searchGapR(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(from,until);
-    if( i > from  ) assertThat(array[i-1]).isLessThanOrEqualTo(key);
-    if( i < until ) assertThat(array[i  ]).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    int[] input = array.clone();
-
-    int i = searcher.searchGapR(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(from,until);
-    if( i > from  ) assertThat(array[i-1]).isLessThanOrEqualTo(key);
-    if( i < until ) assertThat(array[i  ]).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchGapR(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(from,until);
-    if( i > from  ) assertThat(array[i-1]).isLessThanOrEqualTo(key);
-    if( i < until ) assertThat(array[i  ]).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGapR(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(from,until);
-    if( i > from  ) assertThat(array[i-1]).isLessThanOrEqualTo(key);
-    if( i < until ) assertThat(array[i  ]).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    ComparatorByte cmp = Byte::compare;
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
+    @Group class SearchGapL extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key )
+      {
+        int i = searcher.searchGapL(vals, key),
+         from = 0,
+        until = vals.length;
+                        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).isGreaterThanOrEqualTo(key);
+        if( i > from  ) assertThat(vals[i-1]).   isLessThan         (key);
+      }
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key )
+      {
+        int i = searcher.searchGapL(vals, from,until, key);
+                        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).isGreaterThanOrEqualTo(key);
+        if( i > from  ) assertThat(vals[i-1]).   isLessThan         (key);
+      }
     }
 
-    byte[] input = array.clone();
-
-    int i = searcher.searchGapR(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(from,until);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThanOrEqualTo(key);
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThan(key);
+    @Group class SearchGapR extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key )
+      {
+        int i = searcher.searchGapR(vals, key),
+         from = 0,
+        until = vals.length;
+                        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).isGreaterThan         (key);
+        if( i > from  ) assertThat(vals[i-1]).   isLessThanOrEqualTo(key);
+      }
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key )
+      {
+        int i = searcher.searchGapR(vals, from,until, key);
+                        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).isGreaterThan         (key);
+        if( i > from  ) assertThat(vals[i-1]).   isLessThanOrEqualTo(key);
+      }
+    }
   }
 
-  @Property( tries = N_TRIES )
-  void searchGapRArraysWithRangeComparatorInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
 
-    ComparatorInt cmp = Integer::compare;
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
+
+  @PropertyDefaults( tries = N_TRIES )
+  @Group class BoxedComparator
+  {
+    abstract class Template implements ArrayProviderTemplate
+    {
+      @Override public int maxArraySize() { return SearcherTestTemplate.this.maxArraySize(); }
+
+      @Property                         void noRange_idx_Boolean( @ForAll("arraysWithIndexBoolean") WithIndex<boolean[]> sample, @ForAll Comparator<  Boolean> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Byte   ( @ForAll("arraysWithIndexByte"   ) WithIndex<   byte[]> sample, @ForAll Comparator<     Byte> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Short  ( @ForAll("arraysWithIndexShort"  ) WithIndex<  short[]> sample, @ForAll Comparator<    Short> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Int    ( @ForAll("arraysWithIndexInt"    ) WithIndex<    int[]> sample, @ForAll Comparator<  Integer> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Long   ( @ForAll("arraysWithIndexLong"   ) WithIndex<   long[]> sample, @ForAll Comparator<     Long> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Char   ( @ForAll("arraysWithIndexChar"   ) WithIndex<   char[]> sample, @ForAll Comparator<Character> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Float  ( @ForAll("arraysWithIndexFloat"  ) WithIndex<  float[]> sample, @ForAll Comparator<    Float> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Double ( @ForAll("arraysWithIndexDouble" ) WithIndex< double[]> sample, @ForAll Comparator<   Double> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_key_Boolean( @ForAll("arraysBoolean") boolean[] vals, @ForAll boolean key, @ForAll Comparator<  Boolean> cmp ) { noRange(boxed(vals), key, cmp); }
+      @Property                         void noRange_key_Byte   ( @ForAll("arraysByte"   )    byte[] vals, @ForAll    byte key, @ForAll Comparator<     Byte> cmp ) { noRange(boxed(vals), key, cmp); }
+      @Property                         void noRange_key_Short  ( @ForAll("arraysShort"  )   short[] vals, @ForAll   short key, @ForAll Comparator<    Short> cmp ) { noRange(boxed(vals), key, cmp); }
+      @Property                         void noRange_key_Int    ( @ForAll("arraysInt"    )     int[] vals, @ForAll     int key, @ForAll Comparator<  Integer> cmp ) { noRange(boxed(vals), key, cmp); }
+      @Property                         void noRange_key_Long   ( @ForAll("arraysLong"   )    long[] vals, @ForAll    long key, @ForAll Comparator<     Long> cmp ) { noRange(boxed(vals), key, cmp); }
+      @Property                         void noRange_key_Char   ( @ForAll("arraysChar"   )    char[] vals, @ForAll    char key, @ForAll Comparator<Character> cmp ) { noRange(boxed(vals), key, cmp); }
+      @Property                         void noRange_key_Float  ( @ForAll("arraysFloat"  )   float[] vals, @ForAll   float key, @ForAll Comparator<    Float> cmp ) { noRange(boxed(vals), key, cmp); }
+      @Property                         void noRange_key_Double ( @ForAll("arraysDouble" )  double[] vals, @ForAll  double key, @ForAll Comparator<   Double> cmp ) { noRange(boxed(vals), key, cmp); }
+      <T extends Comparable<? super T>> void noRange( T[] vals, T key, Comparator<? super T> cmp )
+      {
+        Arrays.sort(vals,cmp);
+        var copy = vals.clone();
+        noRange_testImpl(vals,key,cmp);
+        assertThat(vals).isEqualTo(copy);
+      }
+      abstract <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp );
+
+      @Property                         void withRange_idx_Boolean( @ForAll("arraysWithIndexWithRangeBoolean") WithRange<WithIndex<boolean[]>> sample, @ForAll Comparator<  Boolean> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Byte   ( @ForAll("arraysWithIndexWithRangeByte"   ) WithRange<WithIndex<   byte[]>> sample, @ForAll Comparator<     Byte> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Short  ( @ForAll("arraysWithIndexWithRangeShort"  ) WithRange<WithIndex<  short[]>> sample, @ForAll Comparator<    Short> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Int    ( @ForAll("arraysWithIndexWithRangeInt"    ) WithRange<WithIndex<    int[]>> sample, @ForAll Comparator<  Integer> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Long   ( @ForAll("arraysWithIndexWithRangeLong"   ) WithRange<WithIndex<   long[]>> sample, @ForAll Comparator<     Long> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Char   ( @ForAll("arraysWithIndexWithRangeChar"   ) WithRange<WithIndex<   char[]>> sample, @ForAll Comparator<Character> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Float  ( @ForAll("arraysWithIndexWithRangeFloat"  ) WithRange<WithIndex<  float[]>> sample, @ForAll Comparator<    Float> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Double ( @ForAll("arraysWithIndexWithRangeDouble" ) WithRange<WithIndex< double[]>> sample, @ForAll Comparator<   Double> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_key_Boolean( @ForAll("arraysWithRangeBoolean") WithRange<boolean[]> vals, @ForAll boolean key, @ForAll Comparator<  Boolean> cmp ) { withRange(vals.map(Boxing::boxed), key, cmp); }
+      @Property                         void withRange_key_Byte   ( @ForAll("arraysWithRangeByte"   ) WithRange<   byte[]> vals, @ForAll    byte key, @ForAll Comparator<     Byte> cmp ) { withRange(vals.map(Boxing::boxed), key, cmp); }
+      @Property                         void withRange_key_Short  ( @ForAll("arraysWithRangeShort"  ) WithRange<  short[]> vals, @ForAll   short key, @ForAll Comparator<    Short> cmp ) { withRange(vals.map(Boxing::boxed), key, cmp); }
+      @Property                         void withRange_key_Int    ( @ForAll("arraysWithRangeInt"    ) WithRange<    int[]> vals, @ForAll     int key, @ForAll Comparator<  Integer> cmp ) { withRange(vals.map(Boxing::boxed), key, cmp); }
+      @Property                         void withRange_key_Long   ( @ForAll("arraysWithRangeLong"   ) WithRange<   long[]> vals, @ForAll    long key, @ForAll Comparator<     Long> cmp ) { withRange(vals.map(Boxing::boxed), key, cmp); }
+      @Property                         void withRange_key_Char   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> vals, @ForAll    char key, @ForAll Comparator<Character> cmp ) { withRange(vals.map(Boxing::boxed), key, cmp); }
+      @Property                         void withRange_key_Float  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> vals, @ForAll   float key, @ForAll Comparator<    Float> cmp ) { withRange(vals.map(Boxing::boxed), key, cmp); }
+      @Property                         void withRange_key_Double ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> vals, @ForAll  double key, @ForAll Comparator<   Double> cmp ) { withRange(vals.map(Boxing::boxed), key, cmp); }
+      <T extends Comparable<? super T>> void withRange( WithRange<T[]> sample, T key, Comparator<? super T> cmp )
+      {
+        int from = sample.getFrom(),
+           until = sample.getUntil();
+        Arrays.sort( sample.getData(), from,until, cmp );
+        var vals = sample.getData().clone();
+        withRange_testImpl(vals,from,until, key, cmp);
+        assertThat(vals).isEqualTo( sample.getData() );
+      }
+      abstract <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp );
     }
 
-    int[] input = array.clone();
+    @Group class Search extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
-    int i = searcher.searchGapR(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
+        int i = searcher.search(vals, key, ctr),
+         from = 0,
+        until = vals.length;
 
-    assertThat(i).isBetween(from,until);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThanOrEqualTo(key);
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThan(key);
-  }
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThan(key);
+        }
+        else {
+          assertThat(i).isBetween(from,until-1);
+          assertThat(vals[i]).usingComparator(cmp).isEqualTo(key);
+        }
 
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
+      }
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
+        int i = searcher.search(vals, from,until, key, ctr);
 
-  @Property( tries = N_TRIES )
-  void searchGapRArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-            until = arrayWithRange.getUntil();
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThan(key);
+        }
+        else {
+          assertThat(i).isBetween(from,until-1);
+          assertThat(vals[i]).usingComparator(cmp).isEqualTo(key);
+        }
 
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchGapR(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(from,until);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(key);
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRArraysWithRangeComparatorObjInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Comparator<Integer>      cmp = naturalOrder();
-    if( reversed )           cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGapR(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(from,until);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp).isLessThanOrEqualTo(key);
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    byte[] input = array.clone();
-
-    int i = searcher.searchGapL(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    int[] input = array.clone();
-
-    int i = searcher.searchGapL(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysComparableByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    Byte[] input = array.clone();
-
-    int i = searcher.searchGapL(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysComparableInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGapL(input,key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysComparatorByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    ComparatorByte cmp = Byte::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
+      }
     }
 
-    byte[] input = array.clone();
+    @Group class SearchL extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
-    int i = searcher.searchGapL(input,key, cmp);
-    assertThat(input).isEqualTo(array);
+        int i = searcher.searchL(vals, key, ctr),
+         from = 0,
+        until = vals.length;
 
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-  }
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThan(key);
+        }
+        else {
+                         assertThat(i).isBetween(from,until-1);
+                         assertThat(vals[i  ]).usingComparator(cmp).isEqualTo (key);
+          if( from < i ) assertThat(vals[i-1]).usingComparator(cmp).isLessThan(key);
+        }
 
-  @Property( tries = N_TRIES )
-  void searchGapLArraysComparatorInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key, @ForAll boolean reversed )
-  {
-    array = array.clone();
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
+      }
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
-    ComparatorInt cmp = Integer::compare;
-    Arrays.sort(array);
-    if( reversed ) {
-      Revert.revert(array);
-      cmp = cmp.reversed();
+        int i = searcher.searchL(vals, from,until, key, ctr);
+
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThan(key);
+        }
+        else {
+                         assertThat(i).isBetween(from,until-1);
+                         assertThat(vals[i  ]).usingComparator(cmp).isEqualTo (key);
+          if( from < i ) assertThat(vals[i-1]).usingComparator(cmp).isLessThan(key);
+        }
+
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
+      }
     }
 
-    int[] input = array.clone();
+    @Group class SearchR extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
-    int i = searcher.searchGapL(input,key, cmp);
-    assertThat(input).isEqualTo(array);
+        int i = searcher.searchR(vals, key, ctr),
+         from = 0,
+        until = vals.length;
 
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-  }
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThan(key);
+        }
+        else {
+                          assertThat(i).isBetween(from+1,until);
+                          assertThat(vals[i-1]).usingComparator(cmp).isEqualTo    (key);
+          if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+        }
 
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
+      }
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
+        int i = searcher.searchR(vals, from,until, key, ctr);
 
-  @Property( tries = N_TRIES )
-  void searchGapLArraysComparatorObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    array = array.clone();
+        if( i < 0 ) {
+            i = ~i;       assertThat(i).isBetween(from,until);
+          if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+          if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThan(key);
+        }
+        else {
+                          assertThat(i).isBetween(from+1,until);
+                          assertThat(vals[i-1]).usingComparator(cmp).isEqualTo    (key);
+          if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
+        }
 
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array,cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchGapL(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysComparatorObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    array = array.clone();
-
-    Comparator<Integer> cmp = naturalOrder();
-    if( reversed )      cmp = cmp.reversed();
-    Arrays.sort(array,  cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGapL(input,key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(0,array.length);
-    if( i < array.length ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
-    if( i > 0            ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    byte[] input = array.clone();
-
-    int i = searcher.searchGapL(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(from,until);
-    if( i < until ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    int[] input = array.clone();
-
-    int i = searcher.searchGapL(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(from,until);
-    if( i < until ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysWithRangeComparableByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchGapL(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(from,until);
-    if( i < until ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysWithRangeComparableInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGapL(input, from,until, key);
-    assertThat(input).isEqualTo(array);
-
-    assertThat(i).isBetween(from,until);
-    if( i < until ) assertThat(array[i  ]).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysWithRangeComparatorByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key, @ForAll boolean reversed )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    ComparatorByte cmp = Byte::compare;
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
+      }
     }
 
-    byte[] input = array.clone();
+    @Group class SearchGap extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
-    int i = searcher.searchGapL(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
+        int i = searcher.searchGap(vals, key, ctr),
+         from = 0,
+        until = vals.length;
 
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-  }
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
 
-  @Property( tries = N_TRIES )
-  void searchGapLArraysWithRangeComparatorInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key, @ForAll boolean reversed )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
+                        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
+        if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(key);
+      }
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
-    ComparatorInt cmp = Integer::compare;
-    Arrays.sort(array, from,until);
-    if( reversed ) {
-      Revert.revert(array, from,until);
-      cmp = cmp.reversed();
+        int i = searcher.searchGap(vals, from,until, key, ctr);
+
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
+
+                        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
+        if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(key);
+      }
     }
 
-    int[] input = array.clone();
+    @Group class SearchGapL extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
-    int i = searcher.searchGapL(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
+        int i = searcher.searchGapL(vals, key, ctr),
+         from = 0,
+        until = vals.length;
 
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp::compare).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp::compare).isLessThan(key);
-  }
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
 
-
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysWithRangeComparatorObjByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Byte[]> arrayWithRange, @ForAll Byte key, @ForAll boolean reversed )
-  {
-    Byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Comparator<Byte>  cmp = naturalOrder();
-    if( reversed )    cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Byte[] input = array.clone();
-
-    int i = searcher.searchGapL(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapLArraysWithRangeComparatorObjInteger( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) Integer[]> arrayWithRange, @ForAll Integer key, @ForAll boolean reversed )
-  {
-    Integer[] array = arrayWithRange.getData().clone();
-    int        from = arrayWithRange.getFrom(),
-              until = arrayWithRange.getUntil();
-
-    Comparator<Integer>      cmp = naturalOrder();
-    if( reversed )           cmp = cmp.reversed();
-    Arrays.sort(array, from,until, cmp);
-
-    Integer[] input = array.clone();
-
-    int i = searcher.searchGapL(input, from,until, key, cmp);
-    assertThat(input).isEqualTo(array);
-
-    if( i < until ) assertThat(array[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
-    if( i > from  ) assertThat(array[i-1]).usingComparator(cmp).isLessThan(key);
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapSatisfiesComparisonLimitByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-      ++nComps;
-      return x.compareTo(y);
+        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
+        if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThan         (key);
       }
-    };
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
-    int i = searcher.searchGap(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
+        int i = searcher.searchGapL(vals, from,until, key, ctr);
 
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
 
-  @Property( tries = N_TRIES )
-  void searchGapSatisfiesComparisonLimitInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-      ++nComps;
-      return x.compareTo(y);
+                        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
+        if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThan         (key);
       }
-    };
+    }
 
-    int i = searcher.searchGap(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
+    @Group class SearchGapR extends Template
+    {
+      @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
+        int i = searcher.searchGapR(vals, key, ctr),
+                from = 0,
+                until = vals.length;
 
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
 
-
-  @Property( tries = N_TRIES )
-  void searchGapRSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-        ++nComps;
-        return x.compareTo(y);
+                        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan         (key);
+        if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(key);
       }
-    };
+      @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
+      {
+        var ctr = new CountingComparator<>(cmp);
 
-    int i = searcher.searchGapR(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
+        int i = searcher.searchGapR(vals, from,until, key, ctr);
 
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
+        assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
 
-  @Property( tries = N_TRIES )
-  void searchGapRSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-        ++nComps;
-        return x.compareTo(y);
+                        assertThat(i).isBetween(from,until);
+        if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan         (key);
+        if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(key);
       }
-    };
-
-    int i = searcher.searchGapR(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
+    }
   }
 
 
 
-  @Property( tries = N_TRIES )
-  void searchGapLSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] array, @ForAll byte key )
+  @PropertyDefaults( tries = N_TRIES )
+  @Group class Unboxed implements ArrayProviderTemplate
   {
-    array = array.clone();
+  // STATIC FIELDS
+    interface Searcher                       <U,C> { int search( U unboxed,                      C key ); }
+    interface SearcherWithRange              <U,C> { int search( U unboxed, int from, int until, C key ); }
+    interface SearcherWithComparator         <U,C> { int search( U unboxed,                      C key, Comparator<? super C> cmp ); }
+    interface SearcherWithComparatorWithRange<U,C> { int search( U unboxed, int from, int until, C key, Comparator<? super C> cmp ); }
+  // STATIC CONSTRUCTOR
+  // STATIC METHODS
+  // FIELDS
+  // CONSTRUCTORS
+  // METHODS
+    @Override public int maxArraySize() { return SearcherTestTemplate.this.maxArraySize(); }
 
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-        ++nComps;
-        return x.compareTo(y);
+    <U,C extends Comparable<? super C>> void test( U unboxed, C key, Searcher<U,C> searchUnboxed, Searcher<C[],C> searchBoxed )
+    {
+      var sample = new WithRange<>(0, Array.getLength(unboxed), unboxed);
+      withRange_test(sample, key, (w,x,y,z) -> searchUnboxed.search(w,z), (w,x,y,z) -> searchBoxed.search(w,z));
+    }
+    @SuppressWarnings("unchecked")
+    <U,C extends Comparable<? super C>> void withRange_test( WithRange<U> sample, C key, SearcherWithRange<U,C> searchUnboxed, SearcherWithRange<C[],C> searchBoxed )
+    {
+      U unboxed = sample.getData();
+      int len = Array.getLength(unboxed),
+         from = sample.getFrom(),
+        until = sample.getUntil();
+      var unboxed_class = unboxed.getClass();
+      C[] boxed;
+      try {
+        Arrays.class.getMethod("sort", unboxed_class, int.class, int.class).invoke(null,unboxed, from,until);
+        boxed = (C[]) Boxing.class.getDeclaredMethod("boxed", unboxed_class).invoke(null,unboxed);
+      } catch( IllegalAccessException|InvocationTargetException|NoSuchMethodException e ) {
+        throw new AssertionError(e);
       }
-    };
+      U backup = (U) Array.newInstance(unboxed_class.getComponentType(), len);
+      System.arraycopy(unboxed,0, backup,0, len);
 
-    int i = searcher.searchGapL(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
+      int        i =           searchUnboxed.search(unboxed, from,until, key);
+      assertThat(i).isEqualTo( searchBoxed  .search(  boxed, from,until, key) );
 
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
+      assertThat(unboxed).isEqualTo(backup);
+    }
 
-  @Property( tries = N_TRIES )
-  void searchGapLSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) int[] array, @ForAll int key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-        ++nComps;
-        return x.compareTo(y);
+    <U,C extends Comparable<? super C>> void withComparator_test( U unboxed, C key, Comparator<? super C> cmp, SearcherWithComparator<U,C> searchUnboxed, SearcherWithComparator<C[],C> searchBoxed )
+    {
+      var sample = new WithRange<>(0, Array.getLength(unboxed), unboxed);
+      withComparator_withRange_test(sample, key, cmp, (w,x,y,z,c) -> searchUnboxed.search(w,z,c), (w,x,y,z,c) -> searchBoxed.search(w,z,c));
+    }
+    @SuppressWarnings("unchecked")
+    <U,C extends Comparable<? super C>> void withComparator_withRange_test( WithRange<U> sample, C key, Comparator<? super C> cmp, SearcherWithComparatorWithRange<U,C> searchUnboxed, SearcherWithComparatorWithRange<C[],C> searchBoxed )
+    {
+      U unboxed = sample.getData();
+      int len = Array.getLength(unboxed),
+         from = sample.getFrom(),
+        until = sample.getUntil();
+      var unboxed_class = unboxed.getClass();
+      C[] boxed;
+      try {
+        Arrays.class.getMethod("sort", unboxed_class, int.class, int.class).invoke(null,unboxed, from,until);
+        boxed = (C[]) Boxing.class.getMethod("boxed", unboxed_class).invoke(null,unboxed);
+      } catch( IllegalAccessException|InvocationTargetException|NoSuchMethodException e ) {
+        throw new AssertionError(e);
       }
-    };
-
-    int i = searcher.searchGapL(array,key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGap(array,key, cmp);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGap(array,key, cmp);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapRSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGapR(array,key, cmp);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGapR(array,key, cmp);
-    if( i < 0 )
-        i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapLSatisfiesComparisonLimitObjByte( @ForAll @Size(min=0, max=MAX_SIZE) Byte[] array, @ForAll Byte key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGapL(array,key, cmp);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapLSatisfiesComparisonLimitObjInteger( @ForAll @Size(min=0, max=MAX_SIZE) Integer[] array, @ForAll Integer key )
-  {
-    array = array.clone();
-
-    Arrays.sort(array);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-      ++nComps;
-      return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGapL(array,key, cmp);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(0,array.length, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGap(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGap(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapRSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGapR(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapRSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGapR(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchGapLSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGapL(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchGapLSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchGapL(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.search(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.search(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchRSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchR(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchRSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchR(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
-  }
-
-
-
-  @Property( tries = N_TRIES )
-  void searchLSatisfiesComparisonLimitWithRangeByte( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) byte[]> arrayWithRange, @ForAll byte key )
-  {
-    byte[] array = arrayWithRange.getData().clone();
-    int     from = arrayWithRange.getFrom(),
-           until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Byte>() {
-      @Override public int compare( Byte x, Byte y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchL(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
-  }
-
-  @Property( tries = N_TRIES )
-  void searchLSatisfiesComparisonLimitWithRangeInt( @ForAll WithRange<@Size(min=0, max=MAX_SIZE) int[]> arrayWithRange, @ForAll int key )
-  {
-    int[] array = arrayWithRange.getData().clone();
-    int    from = arrayWithRange.getFrom(),
-          until = arrayWithRange.getUntil();
-
-    Arrays.sort(array, from,until);
-
-    var cmp = new CountingComparator<Integer>() {
-      @Override public int compare( Integer x, Integer y ) {
-        ++nComps;
-        return x.compareTo(y);
-      }
-    };
-
-    int i = searcher.searchL(array, from,until, key, cmp::compare);
-    if( i < 0 )
-      i = ~i;
-
-    assertThat(cmp.nComps).isLessThanOrEqualTo( comparisonLimit(from,until, i)  );
+      U backup = (U) Array.newInstance(unboxed_class.getComponentType(), len);
+      System.arraycopy(unboxed,0, backup,0, len);
+
+      var ctr = new CountingComparator<>(cmp);
+
+      int        i =           searchUnboxed.search(unboxed, from,until, key, ctr);
+      assertThat(i).isEqualTo( searchBoxed  .search(  boxed, from,until, key, cmp) );
+
+      assertThat(unboxed).isEqualTo(backup);
+
+      if( i < 0 )
+          i = ~i;
+      assertThat(ctr.nComp).isBetween(0L, comparisonLimit(from,until,i));
+    }
+
+    @Group class ArraysByte
+    {
+      @Property void                search                        ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::search    ,searcher::search    ); }
+      @Property void                searchL                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::searchL   ,searcher::searchL   ); }
+      @Property void                searchR                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::searchR   ,searcher::searchR   ); }
+      @Property void                searchGap                     ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::searchGap ,searcher::searchGap ); }
+      @Property void                searchGapL                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::searchGapL,searcher::searchGapL); }
+      @Property void                searchGapR                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withIndex_search              ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::search    ,searcher::search    ); }
+      @Property void                withIndex_searchL             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withIndex_searchR             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withIndex_searchGap           ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withIndex_searchGapL          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withIndex_searchGapR          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withRange_search              ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::search    ,searcher::search    ); }
+      @Property void                withRange_searchL             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withRange_searchR             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withRange_searchGap           ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withRange_searchGapL          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withRange_searchGapR          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::search    ,searcher::search    ); }
+      @Property void                withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapR,searcher::searchGapR); }
+      @Property void withComparator_search                        ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
+      @Property void withComparator_searchL                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_searchR                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_searchGap                     ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_searchGapL                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_searchGapR                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withIndex_search              ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
+      @Property void withComparator_withIndex_searchL             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withIndex_searchR             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withIndex_searchGap           ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withIndex_searchGapL          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withIndex_searchGapR          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withRange_search              ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
+      @Property void withComparator_withRange_searchL             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withRange_searchR             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withRange_searchGap           ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withRange_searchGapL          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withRange_searchGapR          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
+      @Property void withComparator_withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
+    }
+
+    @Group class ArraysInt
+    {
+      @Property void                search                        ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::search    ,searcher::search    ); }
+      @Property void                searchL                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::searchL   ,searcher::searchL   ); }
+      @Property void                searchR                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::searchR   ,searcher::searchR   ); }
+      @Property void                searchGap                     ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::searchGap ,searcher::searchGap ); }
+      @Property void                searchGapL                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::searchGapL,searcher::searchGapL); }
+      @Property void                searchGapR                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withIndex_search              ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::search    ,searcher::search    ); }
+      @Property void                withIndex_searchL             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withIndex_searchR             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withIndex_searchGap           ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withIndex_searchGapL          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withIndex_searchGapR          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withRange_search              ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::search    ,searcher::search    ); }
+      @Property void                withRange_searchL             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withRange_searchR             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withRange_searchGap           ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withRange_searchGapL          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withRange_searchGapR          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::search    ,searcher::search    ); }
+      @Property void                withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapR,searcher::searchGapR); }
+      @Property void withComparator_search                        ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
+      @Property void withComparator_searchL                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_searchR                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_searchGap                     ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_searchGapL                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_searchGapR                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withIndex_search              ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
+      @Property void withComparator_withIndex_searchL             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withIndex_searchR             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withIndex_searchGap           ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withIndex_searchGapL          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withIndex_searchGapR          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withRange_search              ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
+      @Property void withComparator_withRange_searchL             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withRange_searchR             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withRange_searchGap           ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withRange_searchGapL          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withRange_searchGapR          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
+      @Property void withComparator_withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
+    }
   }
 }
