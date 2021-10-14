@@ -4,7 +4,7 @@ import com.github.jaaa.CompareAccess;
 import com.github.jaaa.misc.RotateAccess;
 
 
-public interface TapeMergeV1Access extends CompareAccess, RotateAccess
+public interface TapeMergeAccess extends CompareAccess, RotateAccess
 {
   default void tapeMergeV1( int from, int mid, int until )
   {

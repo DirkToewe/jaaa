@@ -3,10 +3,10 @@ package com.github.jaaa.merge;
 import com.github.jaaa.CompareSwapAccess;
 
 
-public class TapeMergeV1AccessTest extends MergeAccessTestTemplate
+public class TapeMergeAccessTest extends MergeAccessTestTemplate
 {
   // STATIC FIELDS
-  private static class ExpMrgAcc implements TapeMergeV1Access, MergeAccess
+  private static class ExpMrgAcc implements TapeMergeAccess, MergeAccess
   {
     private final CompareSwapAccess acc;
     public ExpMrgAcc( CompareSwapAccess _acc ) { acc =_acc; }
