@@ -10,9 +10,9 @@ import static java.lang.System.arraycopy;
 public class TapeMerge
 {
   public static <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
+    T a, int i, int m,
+    T b, int j, int n,
+    T c, int k, CompareRandomAccessor<T> acc
   ) {
     new TapeMergeAccessor<T>() {
       @Override public T malloc( int len ) { return acc.malloc(len); }
@@ -30,7 +30,7 @@ public class TapeMerge
   ) {
     new TapeMergeAccessor<T[]>() {
       @Override public T[] malloc( int len ) { throw new UnsupportedOperationException(); }
-      @Override public void      copy( T[] a, int i, T[] b, int j ) { }
+      @Override public void      copy( T[] a, int i, T[] b, int j ) { b[j] = a[i]; }
       @Override public void      swap( T[] a, int i, T[] b, int j ) { Swap.swap(a,i, b,j); }
       @Override public void copyRange( T[] a, int i, T[] b, int j, int len ) { arraycopy(a,i, b,j, len); }
       @Override public int    compare( T[] a, int i, T[] b, int j ) { return cmp.compare(a[i],b[j]); }
