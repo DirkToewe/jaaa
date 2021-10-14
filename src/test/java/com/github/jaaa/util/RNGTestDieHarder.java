@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Random;
+import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 
 import static java.lang.Runtime.getRuntime;
@@ -21,6 +22,42 @@ public class RNGTestDieHarder
     out.flush();
   }
 
+  public static void testRNG( IntSupplier randInt ) throws IOException
+  {
+    Process             proc = getRuntime().exec("dieharder -k 2 -a -g 200");
+    OutputStream pin  = proc.getOutputStream();
+    InputStream  pout = proc.getInputStream(),
+                 perr = proc.getErrorStream();
+
+    byte[] buf = new byte[1024];
+    if( buf.length%4 != 0 )
+      throw new IllegalArgumentException();
+
+    for(;;)
+    {
+      pump(perr,err, buf);
+      pump(pout,out, buf);
+
+      for( int i=0; i < buf.length; )
+      {
+        int nxt = randInt.getAsInt();
+        for( int j=0; j < 2; j++ )
+          buf[i++] = (byte) (0xFF & nxt >>> 2*j);
+      }
+
+      if( ! proc.isAlive() )
+        break;
+
+      try {
+        pin.write(buf, 0, buf.length);
+      }
+      catch( IOException ioe ) {}
+    }
+
+    if( proc.exitValue() != 0 )
+      throw new AssertionError();
+  }
+
   public static void testRNG( LongSupplier randLong ) throws IOException
   {
     Process             proc = getRuntime().exec("dieharder -k 2 -a -g 200");
@@ -28,7 +65,7 @@ public class RNGTestDieHarder
      InputStream pout = proc.getInputStream(),
                  perr = proc.getErrorStream();
 
-    byte[] buf = new byte[16*1024];
+    byte[] buf = new byte[1024];
     if( buf.length%8 != 0 )
       throw new IllegalArgumentException();
 
@@ -62,7 +99,12 @@ public class RNGTestDieHarder
     out.println("\n  //=====//");
     out.println(  " // RNG //");
     out.println(  "//=====//\n");
-    testRNG( new RNG( nanoTime() )::nextLong );
+    var rng = new RNG( nanoTime() );
+    testRNG( () -> rng.nextInt(0, 1<<16) );
+//    out.println("\n  //=====//");
+//    out.println(  " // RNG //");
+//    out.println(  "//=====//\n");
+//    testRNG( new RNG( nanoTime() )::nextLong );
     out.println("\n  //==================//");
     out.println(  " // java.util.Random //");
     out.println(  "//==================//\n");

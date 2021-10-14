@@ -1,8 +1,8 @@
 package com.github.jaaa.util;
 
+
 public class RNG
 {
-  private static final double TWO_POW_64_MINUS_1 = Math.pow(2, -64);
   private long u,v,w;
 
   static {
@@ -28,7 +28,7 @@ public class RNG
     v ^= v >>> 17;
     v ^= v <<  31;
     v ^= v >>>  8;
-    w = 4_294_957_665L * (w & 0xffff_ffff) + (w >>> 32);
+    w = 4_294_957_665L * (w & 0xFFFF_FFFFL) + (w >>> 32);
     long x = u ^ (u << 21);
     x ^= x >>> 35;
     x ^= x <<   4;
@@ -38,8 +38,8 @@ public class RNG
   public double nextDouble()
   {
     long bits = nextLong();
-    double lo = ( 0xFFFF_FFFF & bits >>>  0 ),
-           hi = ( 0xFFFF_FFFF & bits >>> 32 ) * (double) (1L << 32);
+    double lo = ( 0xFFFF_FFFFL & bits ),
+           hi = ( 0xFFFF_FFFFL & bits >>> 32 ) * (double) (1L << 32);
     return 5.42101086242752217E-20 * (lo + hi);
   }
 
@@ -52,9 +52,7 @@ public class RNG
   {
     if( from >= until )
       throw new IllegalArgumentException();
-    double s = nextDouble(),
-          lo = from,
-          hi = until;
-    return from + (int) ( s * (hi-lo) );
+    double s = nextDouble();
+    return (int) ( from + s * ((double) until-from) );
   }
 }

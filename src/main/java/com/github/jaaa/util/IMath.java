@@ -65,16 +65,13 @@ public final class IMath
 
   public static int sqrtCeil( int n )
   {
-    if( n < 0 )
-      throw new ArithmeticException();
+    if( n < 0 ) throw new ArithmeticException();
     return (int) ceil( sqrt(n) );
   }
 
   public static int sqrtFloor( int n )
   {
-    if( n < 0 )
-      throw new ArithmeticException();
-
+    if( n < 0 ) throw new ArithmeticException();
     return (int) Math.sqrt(n);
   }
 
