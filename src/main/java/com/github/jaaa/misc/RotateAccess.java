@@ -143,17 +143,14 @@ public interface RotateAccess extends RevertAccess
 
   default void rotate( int from, int until, int rot )
   {
-    if( from < 0     ) throw new IllegalArgumentException();
-    if( from > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > until ) throw new IllegalArgumentException();
 
     int len = until - from;
-    if( len <= 1 ) return;
-        rot %= len;
-    if( rot == 0 ) return;
+    if( len <= 1 || 0 == (rot %= len) ) return;
         rot += len & -(rot>>>31);
 
-    for( int i=from,     j=until   ; i < --j; i++ ) swap(i,j);
-    for( int i=from,     j=from+rot; i < --j; i++ ) swap(i,j);
-    for( int i=from+rot, j=until   ; i < --j; i++ ) swap(i,j);
+    revert(from,         until);
+    revert(from,from+rot      );
+    revert(     from+rot,until);
   }
 }

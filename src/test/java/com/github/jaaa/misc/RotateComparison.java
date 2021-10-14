@@ -9,11 +9,8 @@ import com.github.jaaa.util.IMath;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Random;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.jaaa.misc.Shuffle.shuffle;
@@ -81,7 +78,7 @@ public class RotateComparison
   {
     int N_SAMPLES = 1_000;
     int LEN = 100_000_000;
-    var rng = new Random(1337);
+    var rng = new SplittableRandom(1337);
 
     int[] x = rng.ints(N_SAMPLES, 1,1+LEN).toArray();
     Arrays.sort(x);

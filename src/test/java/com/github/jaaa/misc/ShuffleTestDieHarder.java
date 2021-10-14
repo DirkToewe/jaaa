@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.function.Consumer;
 
 import static com.github.jaaa.misc.Shuffle.shuffle;
@@ -29,7 +29,7 @@ public class ShuffleTestDieHarder
   {
     System.out.println("\no---------------------o\n| shuffle(boolean[]) |\no---------------------o\n");
     testWith( new Consumer<>() {
-      Random rng = new Random();
+      SplittableRandom rng = new SplittableRandom();
       @Override public void accept( byte[] buf ) {
         var bits = new boolean[buf.length*8];
         Arrays.fill(bits,0,buf.length*4, true);
@@ -46,7 +46,7 @@ public class ShuffleTestDieHarder
 
     System.out.println("\no----------------o\n| shuffle(byte[]) |\no----------------o\n");
     testWith( new Consumer<>() {
-      Random rng = new Random();
+      SplittableRandom rng = new SplittableRandom();
       @Override public void accept( byte[] buf ) {
         for( int i=0; i < buf.length; i++ )
           buf[i] = (byte) i;

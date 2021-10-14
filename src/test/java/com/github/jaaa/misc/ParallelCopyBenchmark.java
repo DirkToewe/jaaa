@@ -1,7 +1,5 @@
 package com.github.jaaa.misc;
 
-import com.github.jaaa.util.EntryFn;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,33 +9,35 @@ import java.util.Random;
 import static java.awt.Desktop.getDesktop;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
-import static java.util.stream.Collectors.joining;
 
 public class ParallelCopyBenchmark
 {
-  private static String PLOT_TEMPLATE
-    =        "<!DOCTYPE html>"
-    + "\n" + "<html lang=\"en\">"
-    + "\n" + "  <head>"
-    + "\n" + "    <meta charset=\"utf-8\">"
-    + "\n" + "    <script src=\"https://cdn.plot.ly/plotly-latest.js\"></script>"
-    + "\n" + "  </head>"
-    + "\n" + "  <body>"
-    + "\n" + "    <script>"
-    + "\n" + "      'use strict';"
-    + "\n" + "\n"
-    + "\n" + "      const plot = document.createElement('div');"
-    + "\n" + "      plot.style = 'width: 100%%; height: 95vh;';"
-    + "\n" + "      document.body.appendChild(plot);"
-    + "\n" + "\n"
-    + "\n" + "      const layout = %1$s;"
-    + "\n" + "      document.title = layout.title;"
-    + "\n" + "\n"
-    + "\n" + "      Plotly.plot(plot, {layout, data: %2$s});"
-    + "\n" + "    </script>"
-    + "\n" + "  </body>"
-    + "\n" + "</html>"
-    + "\n";
+  private static String PLOT_TEMPLATE = """
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <script src="https://cdn.plot.ly/plotly-latest.js"></script>
+      </head>
+      <body>
+        <script>
+          'use strict';
+
+
+          const plot = document.createElement('div');
+          plot.style = 'width: 100%%; height: 95vh;';
+          document.body.appendChild(plot);
+
+
+          const layout = %1$s;
+          document.title = layout.title;
+
+
+          Plotly.plot(plot, {layout, data: %2$s});
+        </script>
+      </body>
+    </html>
+  """;
 
   public static void main( String... args ) throws IOException
   {
