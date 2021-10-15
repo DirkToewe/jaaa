@@ -26,10 +26,10 @@ public interface InsertionAdaptiveSortAccess extends CompareSwapAccess
          mid = hi+lo >>> 1 )
       {
         int c = compare(i,mid);
-        if( c < 0 )  hi = mid-1;
+        if( c < 0 )  hi = mid;
         else         lo = mid+1;
 
-        if( lo > hi ) break;
+        if( lo >= hi ) break;
       }
 
       for( int k=i; k > lo; )

@@ -4,20 +4,16 @@ import com.github.jaaa.fn.EntryConsumer;
 import com.github.jaaa.fn.EntryFn;
 import com.github.jaaa.sort.datagen.RandomSortDataGenerator;
 import com.github.jaaa.util.PlotlyUtils;
+import com.github.jaaa.util.Progress;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static com.github.jaaa.misc.Shuffle.shuffled;
-import static java.awt.Desktop.getDesktop;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 import static java.util.Arrays.stream;
 import static java.util.Map.entry;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
 
 
@@ -56,7 +52,7 @@ public class BenchmarkSort
 //      entry("HeapSortFast",            HeapSortFast::sort),
 //      entry("QuickSort",                  QuickSort::sort),
 //      entry("MergeSort",                  MergeSort::sort),
-      entry("KiwiSortV1",                KiwiSortV1::sort),
+//      entry("KiwiSortV1",                KiwiSortV1::sort),
       entry("KiwiSortV2",                KiwiSortV2::sort),
       entry("KiwiSortV3",                KiwiSortV3::sort),
       entry("KiwiSortV4",                KiwiSortV4::sort),
@@ -86,13 +82,8 @@ public class BenchmarkSort
     });
 
     var mergersEntries  = new ArrayList<>( mergers.entrySet() );
-    var progressCounter = new AtomicLong();
 
-    stream( shuffled( range(0,N_SAMPLES).toArray() ) ).forEach( i -> {
-      var progress = progressCounter.incrementAndGet();
-      if( progress % 10 == 0  )
-        System.out.printf("%5d / %d\n", progress, N_SAMPLES);
-
+    Progress.print( stream( shuffled( range(0,N_SAMPLES).toArray() ) ) ).forEach( i -> {
       int len = x[i];
 //      int[] data = gen.nextMixed(len);
       int[] data = gen.nextUniform(len);

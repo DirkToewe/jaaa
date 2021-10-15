@@ -24,10 +24,9 @@ public interface MergeSortAccessor<T> extends CompareRandomAccessor<T>,
 
   default void mergeSort( T arr, int arr0, int arr1, T buf, int buf0, int buf1 )
   {
-    if( arr0 < 0    ) throw new IndexOutOfBoundsException();
-    if( arr0 > arr1 ) throw new IndexOutOfBoundsException();
-    if( buf0 < 0    ) throw new IndexOutOfBoundsException();
-    if( buf0 > buf1 ) throw new IndexOutOfBoundsException();
+    if( arr0 < 0 || arr0 > arr1
+     || buf0 < 0 || buf0 > buf1 )
+      throw new IndexOutOfBoundsException();
 
     int bufLen = buf1 - buf0,
         arrLen = arr1 - arr0;
@@ -44,14 +43,14 @@ public interface MergeSortAccessor<T> extends CompareRandomAccessor<T>,
     for( int i=arr0; i < arr1; )
     {
       int nxt = i+RUN_LEN;
-      if( nxt > arr1 || nxt < 0 )
+      if( nxt > arr1 || nxt < 0 ) // <- (nxt < 0) to prevent overflow
           nxt = arr1;
 
       mergeSort_sortRun(arr, i,nxt);
 
       // merge runs of equal length
-      lenR = nxt-i;
-      for( int s=++stack, lenL=RUN_LEN; (s & 1) == 0;  s>>>=1, lenL<<=1 )
+                          lenR = nxt-i;
+      for( int s=++stack, lenL = RUN_LEN; (s & 1) == 0;  s>>>=1, lenL<<=1 )
       {
         copyRange(arr,i,buf,buf0, lenR);
                                i-=lenL;

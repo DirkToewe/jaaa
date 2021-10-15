@@ -4,14 +4,13 @@ import com.github.jaaa.*;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.util.Comparator;
 
 import static java.lang.invoke.MethodType.methodType;
 
-/** A {@link SorterInplace} which relays all sort calls to the static sort methods of a class.
- *  Used to test static sort methods the same way as any other {@link SorterInplace}.
+/** A {@link SorterInPlace} which relays all sort calls to the static sort methods of a class.
+ *  Used to test static sort methods the same way as any other {@link SorterInPlace}.
  */
-public abstract class StaticMethodsSorterInplace extends StaticMethodsSorter implements SorterInplace
+public abstract class StaticMethodsSorterInPlace extends StaticMethodsSorter implements SorterInPlace
 {
 // STATIC FIELDS
 
@@ -23,7 +22,7 @@ public abstract class StaticMethodsSorterInplace extends StaticMethodsSorter imp
   private final MethodHandle access;
 
 // CONSTRUCTORS
-  public StaticMethodsSorterInplace( Class<?> sortClass )
+  public StaticMethodsSorterInPlace(Class<?> sortClass )
   {
     super(sortClass);
     MethodHandles.Lookup lookup = MethodHandles.publicLookup();

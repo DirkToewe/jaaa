@@ -9,8 +9,8 @@ import java.util.Comparator;
 
 import static java.lang.invoke.MethodType.methodType;
 
-/** A {@link SorterInplace} which relays all sort calls to the static sort methods of a class.
- *  Used to test static sort methods the same way as any other {@link SorterInplace}.
+/** A {@link SorterInPlace} which relays all sort calls to the static sort methods of a class.
+ *  Used to test static sort methods the same way as any other {@link SorterInPlace}.
  */
 public abstract class StaticMethodsSorter implements Sorter
 {
@@ -87,15 +87,15 @@ public abstract class StaticMethodsSorter implements Sorter
 
   public StaticMethodsSorter( Class<?> sortClass )
   {
-    arrayByte   = new ArraySortMethod(sortClass,   byte[].class, ComparatorByte  .class);
-    arrayShort  = new ArraySortMethod(sortClass,  short[].class, ComparatorShort .class);
-    arrayInt    = new ArraySortMethod(sortClass,    int[].class, ComparatorInt   .class);
-    arrayLong   = new ArraySortMethod(sortClass,   long[].class, ComparatorLong  .class);
-    arrayChar   = new ArraySortMethod(sortClass,   char[].class, ComparatorChar  .class);
-    arrayFloat  = new ArraySortMethod(sortClass,  float[].class, ComparatorFloat .class);
-    arrayDouble = new ArraySortMethod(sortClass, double[].class, ComparatorDouble.class);
-    arrayObject = new ArraySortMethod(sortClass, Object[].class, Comparator      .class);
-    bufInt      = new ArraySortMethod(sortClass,IntBuffer.class, ComparatorInt   .class);
+    arrayByte   = new ArraySortMethod<>(sortClass,   byte[].class, ComparatorByte  .class);
+    arrayShort  = new ArraySortMethod<>(sortClass,  short[].class, ComparatorShort .class);
+    arrayInt    = new ArraySortMethod<>(sortClass,    int[].class, ComparatorInt   .class);
+    arrayLong   = new ArraySortMethod<>(sortClass,   long[].class, ComparatorLong  .class);
+    arrayChar   = new ArraySortMethod<>(sortClass,   char[].class, ComparatorChar  .class);
+    arrayFloat  = new ArraySortMethod<>(sortClass,  float[].class, ComparatorFloat .class);
+    arrayDouble = new ArraySortMethod<>(sortClass, double[].class, ComparatorDouble.class);
+    arrayObject = new ArraySortMethod<>(sortClass, Object[].class, Comparator      .class);
+    bufInt      = new ArraySortMethod<>(sortClass,IntBuffer.class, ComparatorInt   .class);
 
     MethodHandles.Lookup lookup = MethodHandles.publicLookup();
     try {

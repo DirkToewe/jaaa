@@ -63,19 +63,14 @@ public class InsertionAdaptiveSortTest
     {
       int  from = sample.getFrom(),
           until = sample.getUntil();
-      var array = sample.getData();
-
-      Comparator<Tuple2<Integer,Integer>> cmp = comparing(Tuple2::get1);
-
-      @SuppressWarnings("unchecked")
-      Tuple2<Integer,Integer>[] reference = range(0,array.length).mapToObj(i -> Tuple.of(array[i],i) ).toArray(Tuple2[]::new);
-      Arrays.sort(reference, from,until, cmp);
-      var input = reference.clone();
+      var input = sample.getData();
+      Arrays.sort(input, from,until);
+      var reference = input.clone();
 
       class CountAcc implements CompareSwapAccess {
         public long nSwaps = 0L,
                     nComps = 0L;
-        @Override public int compare( int i, int j ) { nComps++; return cmp.compare(input[i], input[j]); }
+        @Override public int compare( int i, int j ) { nComps++; return input[i].compareTo(input[j]); }
         @Override public void   swap( int i, int j ) { nSwaps++; Swap.swap(input,i,j); }
       }
 

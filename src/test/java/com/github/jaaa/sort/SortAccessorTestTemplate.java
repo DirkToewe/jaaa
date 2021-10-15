@@ -18,7 +18,7 @@ import static net.jqwik.api.Tuple.Tuple2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@PropertyDefaults( tries = 10_000 )
+@PropertyDefaults( tries = 1_000 )
 public interface SortAccessorTestTemplate extends ArrayProviderTemplate
 {
 // STATIC FIELDS
@@ -39,9 +39,9 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
 
   boolean isStable();
 
-
-
-  @Property default void sortsArraysByte( @ForAll("arraysByte") byte[] ref )
+  @Property default void sortsArraysByte_smallPermutations( @ForAll("arraysByte_smallPermutations") byte[] ref ) { sortsArraysByte(ref); }
+  @Property default void sortsArraysByte_limitedRange     ( @ForAll("arraysByte_limitedRange"     ) byte[] ref ) { sortsArraysByte(ref); }
+  @Property default void sortsArraysByte                  ( @ForAll("arraysByte"                  ) byte[] ref )
   {
         ref = ref.clone();
     var tst = ref.clone();
@@ -302,6 +302,7 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
   @Property default void                         sortsStablyArraysTupleString ( @ForAll("arraysString" )  String[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple(       sample , reversed ); }
   private <T extends Comparable<? super T>> void sortsStablyArraysTuple( T[] sample, boolean reversed )
   {
+    @SuppressWarnings("unchecked")
     Tuple2<T,Integer>[] ref = range(0,sample.length).mapToObj( i -> Tuple.of(sample[i],i) ).toArray(Tuple2[]::new);
     var           tst = ref.clone();
 
@@ -312,6 +313,7 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
     Arrays.sort(ref,cmp);
     var CMP = cmp;
     var acc = createAccessor( new CompareRandomAccessorArrObj<Tuple2<T,Integer>>() {
+      @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public int compare( Tuple2<T,Integer>[] a, int i,
                                     Tuple2<T,Integer>[] b, int j ) { return CMP.compare(a[i], b[j]); }
@@ -336,6 +338,7 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
     int   from = sampleRange.getFrom(),
          until = sampleRange.getUntil();
     var sample = sampleRange.getData();
+    @SuppressWarnings("unchecked")
     Tuple2<T,Integer>[] ref = range(0,sample.length).mapToObj( i -> Tuple.of(sample[i],i) ).toArray(Tuple2[]::new);
     var           tst = ref.clone();
 
@@ -346,6 +349,7 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
     Arrays.sort(ref, from,until, cmp);
     var CMP = cmp;
     var acc = createAccessor( new CompareRandomAccessorArrObj<Tuple2<T,Integer>>() {
+      @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public int compare( Tuple2<T,Integer>[] a, int i,
                                     Tuple2<T,Integer>[] b, int j ) { return CMP.compare(a[i], b[j]); }

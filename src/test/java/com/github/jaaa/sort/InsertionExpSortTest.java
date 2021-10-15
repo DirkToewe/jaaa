@@ -6,7 +6,6 @@ import com.github.jaaa.WithRange;
 import com.github.jaaa.misc.Boxing;
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.Tuple2;
-import net.jqwik.api.constraints.Positive;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -61,32 +60,32 @@ public class InsertionExpSortTest
     });
   }
 
-  private final SorterInplace sorter = new StaticMethodsSorterInplace(InsertionExpSort.class) {
+  private final SorterInPlace sorter = new StaticMethodsSorterInPlace(InsertionExpSort.class) {
     @Override public boolean isStable    () { return INSERTION_EXP_SORTER.isStable    (); }
     @Override public boolean isThreadSafe() { return INSERTION_EXP_SORTER.isThreadSafe(); }
   };
 
   @Group class SortTestSmall implements TestTemplate {
     @Override public int maxArraySize() { return 100; }
-    @Override public SorterInplace sorter() { return sorter; }
+    @Override public SorterInPlace sorter() { return sorter; }
   }
   @Group class SortTestMedium implements TestTemplate {
     @Override public int maxArraySize() { return 10_000; }
-    @Override public SorterInplace sorter() { return sorter; }
+    @Override public SorterInPlace sorter() { return sorter; }
   }
 
   @Group class SorterTestSmall implements TestTemplate {
     @Override public int maxArraySize() { return 100; }
-    @Override public SorterInplace sorter() { return INSERTION_EXP_SORTER; }
+    @Override public SorterInPlace sorter() { return INSERTION_EXP_SORTER; }
   }
   @Group class SorterTestMedium implements TestTemplate {
     @Override public int maxArraySize() { return 10_000; }
-    @Override public SorterInplace sorter() { return INSERTION_EXP_SORTER; }
+    @Override public SorterInPlace sorter() { return INSERTION_EXP_SORTER; }
   }
 
-  interface TestTemplate extends SorterInplaceTestTemplate
+  interface TestTemplate extends SorterInPlaceTestTemplate
   {
-    @Override default long nCompMax( int len ) { return range(1,len).mapToLong( n -> 2*log2Floor(n+1) ).sum(); }
+    @Override default long nCompMax( int len ) { return range(1,len).mapToLong( n -> 2L*log2Floor(n+1) ).sum(); }
     @Override default long nCompMin( int len ) { return len-1; }
     @Override default long nSwapMax( int len ) { return len*(len-1L) / 2; }
 
@@ -107,6 +106,7 @@ public class InsertionExpSortTest
 
       Comparator<Tuple2<Integer,Integer>> cmp = comparing(Tuple2::get1);
 
+      @SuppressWarnings("unchecked")
       Tuple2<Integer,Integer>[] reference = range(0,array.length).mapToObj(i -> Tuple.of(array[i],i) ).toArray(Tuple2[]::new);
       Arrays.sort(reference, from,until, cmp);
       var input = reference.clone();
@@ -116,7 +116,7 @@ public class InsertionExpSortTest
                     nComps = 0L;
         @Override public int compare( int i, int j ) { nComps++; return cmp.compare(input[i], input[j]); }
         @Override public void   swap( int i, int j ) { nSwaps++; Swap.swap(input,i,j); }
-      };
+      }
 
       var acc = new CountAcc() {};
 

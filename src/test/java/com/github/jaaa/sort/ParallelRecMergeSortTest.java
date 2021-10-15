@@ -22,7 +22,7 @@ public class ParallelRecMergeSortTest
     @Override public int maxArraySize() { return 10_000; }
     @Override public Sorter sorter() { return sorter; }
   }
-  @PropertyDefaults( tries = 1_000 )
+  @PropertyDefaults( tries = 100 )
   @Group class SortTestLarge implements SorterTestTemplate {
     @Override public int maxArraySize() { return 1_000_000; }
     @Override public Sorter sorter() { return sorter; }
@@ -36,7 +36,7 @@ public class ParallelRecMergeSortTest
     @Override public int maxArraySize() { return 10_000; }
     @Override public Sorter sorter() { return PARALLEL_REC_MERGE_SORTER; }
   }
-  @PropertyDefaults( tries = 1_000 )
+  @PropertyDefaults( tries = 100 )
   @Group class SorterTestLarge implements SorterTestTemplate {
     @Override public int maxArraySize() { return 1_000_000; }
     @Override public Sorter sorter() { return PARALLEL_REC_MERGE_SORTER; }

@@ -19,7 +19,7 @@ import static java.util.Map.Entry.comparingByValue;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@PropertyDefaults( tries = 10_000 )
+@PropertyDefaults( tries = 1_000 )
 public interface SorterInPlaceTestTemplate extends SorterTestTemplate
 {
 // STATIC FIELDS

@@ -2,28 +2,31 @@ package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
 import com.github.jaaa.misc.Boxing;
+import com.github.jaaa.util.ZipWithIndex;
 import net.jqwik.api.*;
-import net.jqwik.api.Tuple.Tuple2;
 
 import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map.Entry;
 
 import static com.github.jaaa.misc.Boxing.boxed;
 import static com.github.jaaa.misc.Boxing.unboxed;
 import static com.github.jaaa.misc.Revert.revert;
 import static java.lang.String.format;
-import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
+import static java.util.Map.Entry.comparingByKey;
+import static java.util.Map.Entry.comparingByValue;
 import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.jaaa.util.ZipWithIndex.zipWithIndex;
 
 
-@PropertyDefaults( tries = 10_000 )
+@PropertyDefaults( tries = 1_000 )
 public interface SorterTestTemplate extends ArrayProviderTemplate
 {
 // STATIC FIELDS
-  abstract class CmpIdx<T extends Comparable<? super T>> implements Comparable<CmpIdx<T>>
+  abstract class CmpIdx<T> implements Comparable<CmpIdx<T>>
   {
     protected final  T  val;
     protected final int idx;
@@ -34,7 +37,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
 
     @Override public boolean equals( Object o ) {
       assert getClass().isInstance(o);
-      CmpIdx cmp = (CmpIdx) o;
+      var cmp = (CmpIdx<?>) o;
       return cmp.val==val
           && cmp.idx==idx;
     }
@@ -63,80 +66,57 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
 
   @Example
   default void usesCorrectTestTemplate() {
-    assertThat( sorter() ).isNotInstanceOf( SorterInplace.class );
+    assertThat( sorter() ).isNotInstanceOf( SorterInPlace.class );
   }
 
-  default <T extends Comparable<? super T>> CmpIdx<T> CmpIdx( T val, int idx, boolean reversed )
+  default <T> CmpIdx<T> CmpIdx( T val, int idx, Comparator<? super T> comparator )
   {
-    if( sorter().isStable() ) {
-      if( reversed )
-        return new CmpIdx<T>(val,idx) {
-          @Override public int compareTo( CmpIdx<T> cmp ) {
-            assert getClass().isInstance(cmp);
-            return -val.compareTo(cmp.val);
-          }
-        };
-      return new CmpIdx<T>(val,idx) {
-        @Override public int compareTo(CmpIdx<T> cmp ) {
-          assert getClass().isInstance(cmp);
-          return +val.compareTo(cmp.val);
-        }
-      };
-    }
-
-    if( reversed )
-      return new CmpIdx<T>(val,idx) {
+    if( sorter().isStable() )
+      return new CmpIdx<>(val,idx) {
         @Override public int compareTo( CmpIdx<T> cmp ) {
           assert getClass().isInstance(cmp);
-          int result = val.compareTo(cmp.val);
-          if( result==0 )
-              result = Integer.compare(idx, cmp.idx);
-          return -result;
+          return comparator.compare(val, cmp.val);
         }
       };
-
-    return new CmpIdx<T>(val,idx) {
-      @Override public int compareTo(CmpIdx<T> cmp ) {
-        assert getClass().isInstance(cmp);
-        int result = val.compareTo(cmp.val);
-        if( result==0 )
-            result = Integer.compare(idx, cmp.idx);
-        return +result;
-      }
-    };
+    else
+      return new CmpIdx<>(val,idx) {
+        @Override public int compareTo(CmpIdx<T> cmp ) {
+          assert getClass().isInstance(cmp);
+          int result = comparator.compare(val, cmp.val);
+          if( result==0 )
+              result = Integer.compare(idx, cmp.idx);
+          return result;
+        }
+      };
   }
 
-  @Property default                         void sortsStablyAccessorWithRangeBoolean( @ForAll("arraysWithRangeBoolean") WithRange<boolean[]> sample, @ForAll boolean reversed ) { sortsStablyAccessorWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyAccessorWithRangeByte   ( @ForAll("arraysWithRangeByte"   ) WithRange<   byte[]> sample, @ForAll boolean reversed ) { sortsStablyAccessorWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyAccessorWithRangeShort  ( @ForAll("arraysWithRangeShort"  ) WithRange<  short[]> sample, @ForAll boolean reversed ) { sortsStablyAccessorWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyAccessorWithRangeInt    ( @ForAll("arraysWithRangeInt"    ) WithRange<    int[]> sample, @ForAll boolean reversed ) { sortsStablyAccessorWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyAccessorWithRangeLong   ( @ForAll("arraysWithRangeLong"   ) WithRange<   long[]> sample, @ForAll boolean reversed ) { sortsStablyAccessorWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyAccessorWithRangeChar   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> sample, @ForAll boolean reversed ) { sortsStablyAccessorWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyAccessorWithRangeFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample, @ForAll boolean reversed ) { sortsStablyAccessorWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyAccessorWithRangeDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample, @ForAll boolean reversed ) { sortsStablyAccessorWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyAccessorWithRangeString ( @ForAll("arraysWithRangeString" ) WithRange< String[]> sample, @ForAll boolean reversed ) { sortsStablyAccessorWithRange(sample                   , reversed); }
-  private <T extends Comparable<? super T>> void sortsStablyAccessorWithRange( WithRange<T[]> sample, boolean reversed )
+  @Property default void sortsStablyAccessorWithRangeBoolean( @ForAll("arraysWithRangeBoolean") WithRange<boolean[]> sample, @ForAll Comparator<Boolean  > cmp ) { sortsStablyAccessorWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyAccessorWithRangeByte   ( @ForAll("arraysWithRangeByte"   ) WithRange<   byte[]> sample, @ForAll Comparator<Byte     > cmp ) { sortsStablyAccessorWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyAccessorWithRangeShort  ( @ForAll("arraysWithRangeShort"  ) WithRange<  short[]> sample, @ForAll Comparator<Short    > cmp ) { sortsStablyAccessorWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyAccessorWithRangeInt    ( @ForAll("arraysWithRangeInt"    ) WithRange<    int[]> sample, @ForAll Comparator<Integer  > cmp ) { sortsStablyAccessorWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyAccessorWithRangeLong   ( @ForAll("arraysWithRangeLong"   ) WithRange<   long[]> sample, @ForAll Comparator<Long     > cmp ) { sortsStablyAccessorWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyAccessorWithRangeChar   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> sample, @ForAll Comparator<Character> cmp ) { sortsStablyAccessorWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyAccessorWithRangeFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample, @ForAll Comparator<Float    > cmp ) { sortsStablyAccessorWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyAccessorWithRangeDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample, @ForAll Comparator<Double   > cmp ) { sortsStablyAccessorWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  private <T>       void sortsStablyAccessorWithRange( WithRange<Entry<T,Integer>[]> sample, Comparator<? super T> comparator )
   {
     int  from = sample.getFrom(),
         until = sample.getUntil();
-    var array = sample.getData();
+    var input = sample.getData();
 
-    Comparator<Tuple2<T,Integer>> cmp = comparing(Tuple2::get1);
-    if( reversed )          cmp = cmp.reversed();
-
-    if( ! sorter().isStable() )
-      cmp = cmp.thenComparing(Tuple2::get2);
+    Comparator<Entry<T,Integer>> cmp = comparingByKey(comparator);
+    if( ! sorter().isStable() )  cmp = cmp.thenComparing(comparingByValue());
 
     var CMP = cmp;
-    var acc = new CountingAccessor<Tuple2<T,Integer>[]>() {
-      @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
-      @Override public void      swap( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
-      @Override public void copy     ( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { b[j] = a[i]; }
-      @Override public void copyRange( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
-      @Override public int    compare( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { nComps++; return CMP.compare(a[i], b[j]); }
+    var acc = new CountingAccessor<Entry<T,Integer>[]>() {
+      @SuppressWarnings("unchecked")
+      @Override public Entry<T,Integer>[] malloc( int len ) { return new Entry[len]; }
+      @Override public void      swap( Entry<T,Integer>[] a, int i, Entry<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
+      @Override public void copy     ( Entry<T,Integer>[] a, int i, Entry<T,Integer>[] b, int j ) { b[j] = a[i]; }
+      @Override public void copyRange( Entry<T,Integer>[] a, int i, Entry<T,Integer>[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
+      @Override public int    compare( Entry<T,Integer>[] a, int i, Entry<T,Integer>[] b, int j ) { nComps++; return CMP.compare(a[i], b[j]); }
     };
 
-    var     input = range(0,array.length).mapToObj( i -> Tuple.of(array[i],i) ).toArray(acc::malloc);
     var reference = input.clone();
 
     Arrays  .sort(reference, from,until, cmp);
@@ -242,18 +222,19 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
 
 
 
-  @Property default                         void sortsStablyArraysComparableBoolean( @ForAll("arraysBoolean") boolean[] sample, @ForAll boolean reversed ) { sortsStablyArraysComparable(boxed(sample),reversed); }
-  @Property default                         void sortsStablyArraysComparableByte   ( @ForAll("arraysByte"   )    byte[] sample, @ForAll boolean reversed ) { sortsStablyArraysComparable(boxed(sample),reversed); }
-  @Property default                         void sortsStablyArraysComparableShort  ( @ForAll("arraysShort"  )   short[] sample, @ForAll boolean reversed ) { sortsStablyArraysComparable(boxed(sample),reversed); }
-  @Property default                         void sortsStablyArraysComparableInt    ( @ForAll("arraysInt"    )     int[] sample, @ForAll boolean reversed ) { sortsStablyArraysComparable(boxed(sample),reversed); }
-  @Property default                         void sortsStablyArraysComparableLong   ( @ForAll("arraysLong"   )    long[] sample, @ForAll boolean reversed ) { sortsStablyArraysComparable(boxed(sample),reversed); }
-  @Property default                         void sortsStablyArraysComparableChar   ( @ForAll("arraysChar"   )    char[] sample, @ForAll boolean reversed ) { sortsStablyArraysComparable(boxed(sample),reversed); }
-  @Property default                         void sortsStablyArraysComparableFloat  ( @ForAll("arraysFloat"  )   float[] sample, @ForAll boolean reversed ) { sortsStablyArraysComparable(boxed(sample),reversed); }
-  @Property default                         void sortsStablyArraysComparableDouble ( @ForAll("arraysDouble" )  double[] sample, @ForAll boolean reversed ) { sortsStablyArraysComparable(boxed(sample),reversed); }
-  @Property default                         void sortsStablyArraysComparableString ( @ForAll("arraysString" )  String[] sample, @ForAll boolean reversed ) { sortsStablyArraysComparable(      sample, reversed); }
-  private <T extends Comparable<? super T>> void sortsStablyArraysComparable( T[] sample, boolean reversed )
+  @Property default                         void sortsStablyArraysComparableBoolean( @ForAll("arraysBoolean") boolean[] sample, @ForAll Comparator<Boolean  > cmp ) { sortsStablyArraysComparable(boxed(sample), cmp); }
+  @Property default                         void sortsStablyArraysComparableByte   ( @ForAll("arraysByte"   )    byte[] sample, @ForAll Comparator<Byte     > cmp ) { sortsStablyArraysComparable(boxed(sample), cmp); }
+  @Property default                         void sortsStablyArraysComparableShort  ( @ForAll("arraysShort"  )   short[] sample, @ForAll Comparator<Short    > cmp ) { sortsStablyArraysComparable(boxed(sample), cmp); }
+  @Property default                         void sortsStablyArraysComparableInt    ( @ForAll("arraysInt"    )     int[] sample, @ForAll Comparator<Integer  > cmp ) { sortsStablyArraysComparable(boxed(sample), cmp); }
+  @Property default                         void sortsStablyArraysComparableLong   ( @ForAll("arraysLong"   )    long[] sample, @ForAll Comparator<Long     > cmp ) { sortsStablyArraysComparable(boxed(sample), cmp); }
+  @Property default                         void sortsStablyArraysComparableChar   ( @ForAll("arraysChar"   )    char[] sample, @ForAll Comparator<Character> cmp ) { sortsStablyArraysComparable(boxed(sample), cmp); }
+  @Property default                         void sortsStablyArraysComparableFloat  ( @ForAll("arraysFloat"  )   float[] sample, @ForAll Comparator<Float    > cmp ) { sortsStablyArraysComparable(boxed(sample), cmp); }
+  @Property default                         void sortsStablyArraysComparableDouble ( @ForAll("arraysDouble" )  double[] sample, @ForAll Comparator<Double   > cmp ) { sortsStablyArraysComparable(boxed(sample), cmp); }
+  @Property default                         void sortsStablyArraysComparableString ( @ForAll("arraysString" )  String[] sample, @ForAll Comparator<String   > cmp ) { sortsStablyArraysComparable(      sample,  cmp); }
+  private <T extends Comparable<? super T>> void sortsStablyArraysComparable( T[] sample, Comparator<? super T> cmp )
   {
-    CmpIdx<T>[] input = range(0,sample.length).mapToObj( i -> CmpIdx(sample[i],i,reversed) ).toArray(CmpIdx[]::new),
+    @SuppressWarnings("unchecked")
+    CmpIdx<T>[] input = range(0,sample.length).mapToObj( i -> CmpIdx(sample[i],i,cmp) ).toArray(CmpIdx[]::new),
        backup = input.clone();
     Arrays.sort(backup);
     sorter().sort(input);
@@ -359,25 +340,22 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
 
 
 
-  @Property default void                         sortsStablyArraysTupleBoolean( @ForAll("arraysBoolean") boolean[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple( boxed(sample), reversed ); }
-  @Property default void                         sortsStablyArraysTupleByte   ( @ForAll("arraysByte"   )    byte[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple( boxed(sample), reversed ); }
-  @Property default void                         sortsStablyArraysTupleShort  ( @ForAll("arraysShort"  )   short[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple( boxed(sample), reversed ); }
-  @Property default void                         sortsStablyArraysTupleInt    ( @ForAll("arraysInt"    )     int[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple( boxed(sample), reversed ); }
-  @Property default void                         sortsStablyArraysTupleLong   ( @ForAll("arraysLong"   )    long[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple( boxed(sample), reversed ); }
-  @Property default void                         sortsStablyArraysTupleChar   ( @ForAll("arraysChar"   )    char[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple( boxed(sample), reversed ); }
-  @Property default void                         sortsStablyArraysTupleFloat  ( @ForAll("arraysFloat"  )   float[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple( boxed(sample), reversed ); }
-  @Property default void                         sortsStablyArraysTupleDouble ( @ForAll("arraysDouble" )  double[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple( boxed(sample), reversed ); }
-  @Property default void                         sortsStablyArraysTupleString ( @ForAll("arraysString" )  String[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple(       sample , reversed ); }
-  private <T extends Comparable<? super T>> void sortsStablyArraysTuple( T[] sample, boolean reversed )
+  @Property default void sortsStablyArraysTupleBoolean( @ForAll("arraysBoolean") boolean[] sample, @ForAll Comparator<Boolean  > cmp ) { sortsStablyArraysTuple(zipWithIndex(sample), cmp); }
+  @Property default void sortsStablyArraysTupleByte   ( @ForAll("arraysByte"   )    byte[] sample, @ForAll Comparator<Byte     > cmp ) { sortsStablyArraysTuple(zipWithIndex(sample), cmp); }
+  @Property default void sortsStablyArraysTupleShort  ( @ForAll("arraysShort"  )   short[] sample, @ForAll Comparator<Short    > cmp ) { sortsStablyArraysTuple(zipWithIndex(sample), cmp); }
+  @Property default void sortsStablyArraysTupleInt    ( @ForAll("arraysInt"    )     int[] sample, @ForAll Comparator<Integer  > cmp ) { sortsStablyArraysTuple(zipWithIndex(sample), cmp); }
+  @Property default void sortsStablyArraysTupleLong   ( @ForAll("arraysLong"   )    long[] sample, @ForAll Comparator<Long     > cmp ) { sortsStablyArraysTuple(zipWithIndex(sample), cmp); }
+  @Property default void sortsStablyArraysTupleChar   ( @ForAll("arraysChar"   )    char[] sample, @ForAll Comparator<Character> cmp ) { sortsStablyArraysTuple(zipWithIndex(sample), cmp); }
+  @Property default void sortsStablyArraysTupleFloat  ( @ForAll("arraysFloat"  )   float[] sample, @ForAll Comparator<Float    > cmp ) { sortsStablyArraysTuple(zipWithIndex(sample), cmp); }
+  @Property default void sortsStablyArraysTupleDouble ( @ForAll("arraysDouble" )  double[] sample, @ForAll Comparator<Double   > cmp ) { sortsStablyArraysTuple(zipWithIndex(sample), cmp); }
+  private <T>       void sortsStablyArraysTuple( Entry<T,Integer>[] input, Comparator<? super T> comparator )
   {
-    Tuple2<T,Integer>[] input = range(0,sample.length).mapToObj( i -> Tuple.of(sample[i],i) ).toArray(Tuple2[]::new),
-            reference = input.clone();
+    var reference = input.clone();
 
-    Comparator<Tuple2<T,Integer>> cmp = comparing(Tuple2::get1);
-    if( reversed )          cmp = cmp.reversed();
+    Comparator<Entry<T,Integer>> cmp = comparingByKey(comparator);
 
     if( ! sorter().isStable() )
-      cmp = cmp.thenComparing(Tuple2::get2);
+      cmp = cmp.thenComparing(comparingByValue());
 
     Arrays  .sort(reference,cmp);
     sorter().sort(input,    cmp);
@@ -482,7 +460,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property default                         void sortsArraysWithRangeComparableChar   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> sample ) { sortsArraysWithRangeComparable( sample.map(Boxing::boxed) ); }
   @Property default                         void sortsArraysWithRangeComparableFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample ) { sortsArraysWithRangeComparable( sample.map(Boxing::boxed) ); }
   @Property default                         void sortsArraysWithRangeComparableDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample ) { sortsArraysWithRangeComparable( sample.map(Boxing::boxed) ); }
-  @Property default                         void sortsArraysWithRangeComparableString ( @ForAll("arraysWithRangeString" ) WithRange< String[]> sample ) { sortsArraysWithRangeComparable( sample.map(x->x.clone() ) ); }
+  @Property default                         void sortsArraysWithRangeComparableString ( @ForAll("arraysWithRangeString" ) WithRange< String[]> sample ) { sortsArraysWithRangeComparable( sample.map(String[]::clone) ); }
   private <T extends Comparable<? super T>> void sortsArraysWithRangeComparable( WithRange<T[]> sample )
   {
     int      from = sample.getFrom(),
@@ -496,21 +474,22 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
 
 
 
-  @Property default                         void sortsStablyArraysWithRangeComparableBoolean( @ForAll("arraysWithRangeBoolean") WithRange<boolean[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyArraysWithRangeComparableByte   ( @ForAll("arraysWithRangeByte"   ) WithRange<   byte[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyArraysWithRangeComparableShort  ( @ForAll("arraysWithRangeShort"  ) WithRange<  short[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyArraysWithRangeComparableInt    ( @ForAll("arraysWithRangeInt"    ) WithRange<    int[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyArraysWithRangeComparableLong   ( @ForAll("arraysWithRangeLong"   ) WithRange<   long[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyArraysWithRangeComparableChar   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyArraysWithRangeComparableFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyArraysWithRangeComparableDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyArraysWithRangeComparableString ( @ForAll("arraysWithRangeString" ) WithRange< String[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeComparable(sample,                    reversed); }
-  default <T extends Comparable<? super T>> void sortsStablyArraysWithRangeComparable( WithRange<T[]> sampleWithRange, boolean reversed )
+  @Property default                         void sortsStablyArraysWithRangeComparableBoolean( @ForAll("arraysWithRangeBoolean") WithRange<boolean[]> sample, @ForAll Comparator<Boolean  > cmp ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), cmp); }
+  @Property default                         void sortsStablyArraysWithRangeComparableByte   ( @ForAll("arraysWithRangeByte"   ) WithRange<   byte[]> sample, @ForAll Comparator<Byte     > cmp ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), cmp); }
+  @Property default                         void sortsStablyArraysWithRangeComparableShort  ( @ForAll("arraysWithRangeShort"  ) WithRange<  short[]> sample, @ForAll Comparator<Short    > cmp ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), cmp); }
+  @Property default                         void sortsStablyArraysWithRangeComparableInt    ( @ForAll("arraysWithRangeInt"    ) WithRange<    int[]> sample, @ForAll Comparator<Integer  > cmp ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), cmp); }
+  @Property default                         void sortsStablyArraysWithRangeComparableLong   ( @ForAll("arraysWithRangeLong"   ) WithRange<   long[]> sample, @ForAll Comparator<Long     > cmp ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), cmp); }
+  @Property default                         void sortsStablyArraysWithRangeComparableChar   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> sample, @ForAll Comparator<Character> cmp ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), cmp); }
+  @Property default                         void sortsStablyArraysWithRangeComparableFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample, @ForAll Comparator<Float    > cmp ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), cmp); }
+  @Property default                         void sortsStablyArraysWithRangeComparableDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample, @ForAll Comparator<Double   > cmp ) { sortsStablyArraysWithRangeComparable(sample.map(Boxing::boxed), cmp); }
+  @Property default                         void sortsStablyArraysWithRangeComparableString ( @ForAll("arraysWithRangeString" ) WithRange< String[]> sample, @ForAll Comparator<String   > cmp ) { sortsStablyArraysWithRangeComparable(sample,                    cmp); }
+  default <T extends Comparable<? super T>> void sortsStablyArraysWithRangeComparable( WithRange<T[]> sampleWithRange, Comparator<? super T> cmp )
   {
     int   from = sampleWithRange.getFrom(),
          until = sampleWithRange.getUntil();
     var sample = sampleWithRange.getData();
-    CmpIdx<String>[] input = range(0,sample.length).mapToObj( i -> CmpIdx(sample[i],i,reversed) ).toArray(CmpIdx[]::new),
+    @SuppressWarnings("unchecked")
+    CmpIdx<String>[] input = range(0,sample.length).mapToObj( i -> CmpIdx(sample[i],i,cmp) ).toArray(CmpIdx[]::new),
             backup = input.clone();
     Arrays  .sort(backup, from,until);
     sorter().sort(input,  from,until);
@@ -628,29 +607,23 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
 
 
 
-  @Property default                         void sortsStablyTupleArraysWithRangeBoolean( @ForAll("arraysWithRangeBoolean") WithRange<boolean[]> sample, @ForAll boolean reversed ) { sortsStablyTupleArraysWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyTupleArraysWithRangeByte   ( @ForAll("arraysWithRangeByte"   ) WithRange<   byte[]> sample, @ForAll boolean reversed ) { sortsStablyTupleArraysWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyTupleArraysWithRangeShort  ( @ForAll("arraysWithRangeShort"  ) WithRange<  short[]> sample, @ForAll boolean reversed ) { sortsStablyTupleArraysWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyTupleArraysWithRangeInt    ( @ForAll("arraysWithRangeInt"    ) WithRange<    int[]> sample, @ForAll boolean reversed ) { sortsStablyTupleArraysWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyTupleArraysWithRangeLong   ( @ForAll("arraysWithRangeLong"   ) WithRange<   long[]> sample, @ForAll boolean reversed ) { sortsStablyTupleArraysWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyTupleArraysWithRangeChar   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> sample, @ForAll boolean reversed ) { sortsStablyTupleArraysWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyTupleArraysWithRangeFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample, @ForAll boolean reversed ) { sortsStablyTupleArraysWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyTupleArraysWithRangeDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample, @ForAll boolean reversed ) { sortsStablyTupleArraysWithRange(sample.map(Boxing::boxed), reversed); }
-  @Property default                         void sortsStablyTupleArraysWithRangeString ( @ForAll("arraysWithRangeString" ) WithRange< String[]> sample, @ForAll boolean reversed ) { sortsStablyTupleArraysWithRange(sample                   , reversed); }
-  private <T extends Comparable<? super T>> void sortsStablyTupleArraysWithRange( WithRange<T[]> sample, boolean reversed )
+  @Property default void sortsStablyTupleArraysWithRangeBoolean( @ForAll("arraysWithRangeBoolean") WithRange<boolean[]> sample, @ForAll Comparator<Boolean  > cmp ) { sortsStablyTupleArraysWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyTupleArraysWithRangeByte   ( @ForAll("arraysWithRangeByte"   ) WithRange<   byte[]> sample, @ForAll Comparator<Byte     > cmp ) { sortsStablyTupleArraysWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyTupleArraysWithRangeShort  ( @ForAll("arraysWithRangeShort"  ) WithRange<  short[]> sample, @ForAll Comparator<Short    > cmp ) { sortsStablyTupleArraysWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyTupleArraysWithRangeInt    ( @ForAll("arraysWithRangeInt"    ) WithRange<    int[]> sample, @ForAll Comparator<Integer  > cmp ) { sortsStablyTupleArraysWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyTupleArraysWithRangeLong   ( @ForAll("arraysWithRangeLong"   ) WithRange<   long[]> sample, @ForAll Comparator<Long     > cmp ) { sortsStablyTupleArraysWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyTupleArraysWithRangeChar   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> sample, @ForAll Comparator<Character> cmp ) { sortsStablyTupleArraysWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyTupleArraysWithRangeFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample, @ForAll Comparator<Float    > cmp ) { sortsStablyTupleArraysWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  @Property default void sortsStablyTupleArraysWithRangeDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample, @ForAll Comparator<Double   > cmp ) { sortsStablyTupleArraysWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
+  private <T>       void sortsStablyTupleArraysWithRange( WithRange<Entry<T,Integer>[]> sample, Comparator<? super T> comparator )
   {
-    int  from = sample.getFrom(),
-        until = sample.getUntil();
-    var array = sample.getData();
+    int      from = sample.getFrom(),
+            until = sample.getUntil();
+    var     input = sample.getData();
+    var reference = input.clone();
 
-    Tuple2<T,Integer>[] input = range(0,array.length).mapToObj( i -> Tuple.of(array[i],i) ).toArray(Tuple2[]::new),
-            reference = input.clone();
-
-    Comparator<Tuple2<T,Integer>> cmp = comparing(Tuple2::get1);
-    if( reversed )                cmp = cmp.reversed();
-
-    if( ! sorter().isStable() )
-      cmp = cmp.thenComparing(Tuple2::get2);
+    Comparator<Entry<T,Integer>> cmp = comparingByKey(comparator);
+    if( ! sorter().isStable() )  cmp = cmp.thenComparing(comparingByValue());
 
     Arrays  .sort(reference, from, until, cmp);
     sorter().sort(input,     from, until, cmp);
@@ -663,7 +636,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   default void sortsBufInt( @ForAll("arraysInt") int[] seq )
   {
     seq = seq.clone();
-    var backup = boxed(seq);
+    var backup = seq;
     Arrays.sort(backup);
     sorter().sort( IntBuffer.wrap(seq) );
     assertThat(seq).isEqualTo(backup);
@@ -720,7 +693,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
     var reference = boxed(input);
     Arrays.sort(reference, from,until, cmp::compare);
     sorter().sort( IntBuffer.wrap(input), from, until, cmp );
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 
   @Property()
@@ -735,6 +708,6 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
     var reference = boxed(input);
     Arrays.sort(reference, from,until, cmp::compare);
     sorter().sort( IntBuffer.wrap(input,from,until-from), cmp );
-    assertThat(input).isEqualTo(reference);
+    assertThat(input).isEqualTo( unboxed(reference) );
   }
 }

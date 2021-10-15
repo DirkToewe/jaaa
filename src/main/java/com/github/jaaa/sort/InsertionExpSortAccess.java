@@ -16,7 +16,7 @@ import static java.lang.Math.subtractExact;
 //  Swaps worst: O(n*n)
 public interface InsertionExpSortAccess extends ExpR2LSearchAccess, CompareSwapAccess
 {
-  public default void insertionExpSort( int from, int until )
+  default void insertionExpSort( int from, int until )
   {
     if( from > until )
       throw new IllegalArgumentException();
