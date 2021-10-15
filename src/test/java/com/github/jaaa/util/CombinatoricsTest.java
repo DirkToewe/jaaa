@@ -5,19 +5,15 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.PropertyDefaults;
 import net.jqwik.api.constraints.IntRange;
-import org.bytedeco.javacpp.annotation.Const;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static com.github.jaaa.misc.Boxing.boxed;
 import static com.github.jaaa.util.Combinatorics.factorial;
 import static com.github.jaaa.util.Combinatorics.permutations;
 import static java.util.Arrays.asList;
 import static java.util.Collections.newSetFromMap;
-import static java.util.stream.Collectors.toUnmodifiableList;
-import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -37,14 +33,14 @@ public class CombinatoricsTest
     assertThat( factorial(n) ).isEqualTo( factorial(n-1)*n );
   }
 
-  @Property     void test_permutations_tryAdvance( @ForAll @IntRange(min=0, max=10) int n ) {
+  @Property void test_permutations_tryAdvance( @ForAll @IntRange(min=0, max=10) int n ) {
     var spltr = permutations(n).spliterator();
     var perms = new ArrayList<byte[]>( (int) factorial(n) );
     Consumer<byte[]>               perms_add = perms::add;
     do {} while ( spltr.tryAdvance(perms_add) );
     test_permutations(n,perms);
   }
-  @Property     void test_permutations_forEachRemaining( @ForAll @IntRange(min=0, max=10) int n ) {
+  @Property void test_permutations_forEachRemaining( @ForAll @IntRange(min=0, max=10) int n ) {
     var perms = new ArrayList<byte[]>( (int) factorial(n) );
     permutations(n).spliterator().forEachRemaining(perms::add);
     test_permutations(n,perms);
@@ -61,8 +57,14 @@ public class CombinatoricsTest
         {
           var left = rest.trySplit();
           if( left != null ) {
-            collect(left);
-            collect(rest);
+            if( rng.nextBoolean() ) {
+              collect(left);
+              collect(rest);
+            }
+            else {
+              collect(rest);
+              collect(left);
+            }
             return;
           }
         }

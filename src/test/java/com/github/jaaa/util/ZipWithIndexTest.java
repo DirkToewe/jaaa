@@ -4,11 +4,11 @@ import com.github.jaaa.ArrayProviderTemplate;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 
-import static com.github.jaaa.util.ZipWithIndex.zipWithIndex;
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Map.Entry;
 
 import static com.github.jaaa.misc.Boxing.boxed;
-import java.util.Map.Entry;
+import static com.github.jaaa.util.ZipWithIndex.zipWithIndex;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class ZipWithIndexTest implements ArrayProviderTemplate
@@ -37,14 +37,14 @@ public class ZipWithIndexTest implements ArrayProviderTemplate
   }
 
 
-  @Property                           void unboxed_boolean( @ForAll("arraysBoolean") boolean[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
-  @Property                           void unboxed_byte   ( @ForAll("arraysByte"   )    byte[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
-  @Property                           void unboxed_short  ( @ForAll("arraysShort"  )   short[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
-  @Property                           void unboxed_int    ( @ForAll("arraysInt"    )     int[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
-  @Property                           void unboxed_long   ( @ForAll("arraysLong"   )    long[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
-  @Property                           void unboxed_char   ( @ForAll("arraysChar"   )    char[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
-  @Property                           void unboxed_float  ( @ForAll("arraysFloat"  )   float[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
-  @Property                           void unboxed_double ( @ForAll("arraysDouble" )  double[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
+  @Property                         void unboxed_boolean( @ForAll("arraysBoolean") boolean[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
+  @Property                         void unboxed_byte   ( @ForAll("arraysByte"   )    byte[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
+  @Property                         void unboxed_short  ( @ForAll("arraysShort"  )   short[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
+  @Property                         void unboxed_int    ( @ForAll("arraysInt"    )     int[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
+  @Property                         void unboxed_long   ( @ForAll("arraysLong"   )    long[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
+  @Property                         void unboxed_char   ( @ForAll("arraysChar"   )    char[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
+  @Property                         void unboxed_float  ( @ForAll("arraysFloat"  )   float[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
+  @Property                         void unboxed_double ( @ForAll("arraysDouble" )  double[] arr ) { unboxed_impl(zipWithIndex(arr), boxed(arr)); }
   <C extends Comparable<? super C>> void unboxed_impl( Entry<C,Integer>[] zip, C[] boxed )
   {
     assertThat(zip).isEqualTo( zipWithIndex(boxed) );

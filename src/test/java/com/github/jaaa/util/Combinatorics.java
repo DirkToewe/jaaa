@@ -1,25 +1,11 @@
 package com.github.jaaa.util;
 
-import com.github.jaaa.Swap;
-import com.github.jaaa.misc.Rotate;
-
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static java.lang.Math.multiplyExact;
-import static java.lang.Math.signum;
-import static java.util.Spliterator.CONCURRENT;
-import static java.util.Spliterator.DISTINCT;
-import static java.util.Spliterator.IMMUTABLE;
-import static java.util.Spliterator.NONNULL;
-import static java.util.Spliterator.ORDERED;
-import static java.util.Spliterator.SIZED;
-import static java.util.Spliterator.SORTED;
-import static java.util.Spliterator.SUBSIZED;
 import static com.github.jaaa.Swap.swap;
+import static java.lang.Math.multiplyExact;
 import static java.util.stream.StreamSupport.stream;
 
 
