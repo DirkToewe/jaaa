@@ -1,4 +1,4 @@
 package com.github.jaaa.sort;
 
-public class QuickSortStable {
+public class QuickSortV1Stable {
 }

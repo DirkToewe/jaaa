@@ -1,18 +1,21 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.util.IntBiConsumer;
+import com.github.jaaa.fn.Int2Consumer;
 
+import java.util.SplittableRandom;
 import java.util.function.IntBinaryOperator;
 
-public interface QuickSortAccess extends InsertionAdaptiveSortAccess
+public interface QuickSortV1Access extends InsertionAdaptiveSortAccess
 {
-  IntBinaryOperator newRNG();
+  default IntBinaryOperator quickSortV1_newRNG() {
+    return new SplittableRandom()::nextInt;
+  }
 
-  default void quickSort( int from, int until )
+  default void quickSortV1( int from, int until )
   {
-    var rng = newRNG();
-    new IntBiConsumer()
+    new Int2Consumer()
     {
+      private final IntBinaryOperator rng = quickSortV1_newRNG();
       @Override public void accept( int from, int until )
       {
         if( until-from <= 32 )

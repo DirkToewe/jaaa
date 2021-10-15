@@ -9,22 +9,20 @@ import java.util.function.IntBinaryOperator;
 
 
 @Group
-public class QuickSortAccessTest
+public class QuickSortV1AccessTest
 {
-  private static class Acc<T> implements SortAccessorTestTemplate.SortAccessor<T>
+  private static record Acc<T>( CompareRandomAccessor<T> acc ) implements SortAccessorTestTemplate.SortAccessor<T>
   {
-    private final CompareRandomAccessor<T> acc;
-    public Acc(   CompareRandomAccessor<T> _acc ) { acc=_acc; }
     @Override public void sort( T arr, int from, int until) {
-      new QuickSortAccess() {
-        @Override public IntBinaryOperator newRNG() { return new RNG(1337)::nextInt; }
+      new QuickSortV1Access() {
+        @Override public IntBinaryOperator quickSortV1_newRNG() { return new RNG(1337)::nextInt; }
         @Override public void swap( int i, int j ) { acc.swap(arr,i, arr,j); }
         @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-      }.quickSort(from,until);
+      }.quickSortV1(from,until);
     }
   }
   private interface TestTemplate extends SortAccessorTestTemplate {
-    @Override default <T> SortAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) { return new Acc(acc); }
+    @Override default <T> SortAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) { return new Acc<>(acc); }
     @Override default boolean isStable() { return false; }
   }
 

@@ -1,12 +1,10 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.CompareRandomAccessor;
 import net.jqwik.api.Group;
-import net.jqwik.api.PropertyDefaults;
 
 
 @Group
-public class QuickSortStableAccessorTest
+public class QuickSortV1StableAccessorTest
 {
 //  private static class Acc<T> implements SortAccessorTestTemplate.SortAccessor<T>, QuickSortAccessor<T>
 //  {
