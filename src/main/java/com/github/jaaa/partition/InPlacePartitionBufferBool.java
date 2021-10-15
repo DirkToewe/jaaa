@@ -1,9 +1,10 @@
 package com.github.jaaa.partition;
 
 import com.github.jaaa.PredicateSwapAccess;
+import com.github.jaaa.buf.BufferBool;
 
 
-final class InPlacePartitionBufferBool
+final class InPlacePartitionBufferBool implements BufferBool
 {
 // STATIC FIELDS
 
@@ -12,46 +13,48 @@ final class InPlacePartitionBufferBool
 // STATIC METHODS
 
 // FIELDS
-  private final int a, b, size;
+  private final int a, b, len;
   private final PredicateSwapAccess acc;
   private boolean tru = true;
 
 // CONSTRUCTORS
-  public InPlacePartitionBufferBool(PredicateSwapAccess _acc, int _a, int _b, int _size )
+  public InPlacePartitionBufferBool( PredicateSwapAccess _acc, int _a, int _b, int _len )
   {
-    assert      _size >= 0;
+    assert      _len >= 0;
     assert _a         >= 0;
     assert _b         >= 0;
-    assert _a + _size >= 0 : "Integer overflow.";
-    assert _b + _size >= 0 : "Integer overflow.";
+    assert _a + _len >= 0 : "Integer overflow.";
+    assert _b + _len >= 0 : "Integer overflow.";
     assert _acc != null;
 
-//    assert range(_a,_a+_size).noneMatch(_acc::predicate);
-//    assert range(_b,_b+_size). allMatch(_acc::predicate);
+//    assert range(_a,_a+_len).noneMatch(_acc::predicate);
+//    assert range(_b,_b+_len). allMatch(_acc::predicate);
 
     acc = _acc;
     a = _a;
     b = _b;
-    size = _size;
+    len = _len;
   }
 
 // METHODS
+  public int len() { return len; }
+
   public boolean get( int i ) {
     assert i >= 0;
-    assert i <  size;
+    assert i < len;
     return acc.predicate(a+i) == tru;
   }
 
   public void flip( int i ) {
     assert i >= 0;
-    assert i <  size;
+    assert i < len;
     acc.swap(a+i, b+i);
   }
 
   public void flipRange( int from, int until ) {
     assert 0 <= from;
     assert      from <= until;
-    assert              until <= size;
+    assert              until <= len;
     while( until-- > from )
       acc.swap(a+until, b+until);
   }
