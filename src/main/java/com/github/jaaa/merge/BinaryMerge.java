@@ -1,11 +1,12 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.Swap;
 import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.Swap;
 
 import java.util.Comparator;
 
 import static java.lang.System.arraycopy;
+
 
 public final class BinaryMerge
 {

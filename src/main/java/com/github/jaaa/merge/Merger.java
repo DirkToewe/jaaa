@@ -8,8 +8,8 @@ import java.nio.IntBuffer;
 import java.util.Comparator;
 
 
-// I am fully aware that the definition of Merger is the process/state of things being merged, not something that merges
-// something... but Mergerer just sounds annoying and is awful to type.
+// I am fully aware that the dictionary definition of Merger is the process/state of things being merged, not something
+// that merges something... but Mergerer just sounds annoying and is awful to type.
 
 public interface Merger
 {

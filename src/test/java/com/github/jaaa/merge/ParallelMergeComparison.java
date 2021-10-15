@@ -2,7 +2,9 @@ package com.github.jaaa.merge;
 
 import com.github.jaaa.CompareRandomAccessor;
 import com.github.jaaa.Swap;
-import com.github.jaaa.util.EntryFn;
+import com.github.jaaa.fn.EntryFn;
+import com.github.jaaa.util.PlotlyUtils;
+import com.github.jaaa.util.Progress;
 import net.jqwik.api.Tuple;
 import net.jqwik.api.Tuple.Tuple3;
 
@@ -13,8 +15,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.github.jaaa.merge.ParallelRebelMerge.PARALLEL_REBEL_MERGER;
-import static com.github.jaaa.merge.ParallelZenMerge.PARALLEL_ZEN_MERGER;
 import static com.github.jaaa.merge.ParallelSkipMerge.PARALLEL_SKIP_MERGER;
+import static com.github.jaaa.merge.ParallelZenMerge.PARALLEL_ZEN_MERGER;
 import static com.github.jaaa.misc.Shuffle.shuffled;
 import static java.awt.Desktop.getDesktop;
 import static java.lang.String.format;
@@ -23,46 +25,22 @@ import static java.lang.System.nanoTime;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparingInt;
 import static java.util.Map.entry;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
 
 public class ParallelMergeComparison
 {
-  // STATIC FIELDS
-  private static String PLOT_TEMPLATE
-    =        "<!DOCTYPE html>"
-    + "\n" + "<html lang=\"en\">"
-    + "\n" + "  <head>"
-    + "\n" + "    <meta charset=\"utf-8\">"
-    + "\n" + "    <script src=\"https://cdn.plot.ly/plotly-latest.js\"></script>"
-    + "\n" + "  </head>"
-    + "\n" + "  <body>"
-    + "\n" + "    <script>"
-    + "\n" + "      'use strict';"
-    + "\n" + "\n"
-    + "\n" + "      const plot = document.createElement('div');"
-    + "\n" + "      plot.style = 'width: 100%%; height: 95vh;';"
-    + "\n" + "      document.body.appendChild(plot);"
-    + "\n" + "\n"
-    + "\n" + "      const layout = %1$s;"
-    + "\n" + "      document.title = layout.title;"
-    + "\n" + "\n"
-    + "\n" + "      Plotly.plot(plot, {layout, data: %2$s});"
-    + "\n" + "    </script>"
-    + "\n" + "  </body>"
-    + "\n" + "</html>"
-    + "\n";
+// STATIC FIELDS
 
-  // STATIC CONSTRUCTOR
+// STATIC CONSTRUCTOR
   static {
     boolean ea = false;
     assert  ea = true;
-    if( ! ea ) throw new AssertionError("Assertions not enabled.");
+      if( ! ea ) throw new AssertionError("Assertions not enabled.");
   }
 
   private interface MergeFn
   {
-    public <T> void merge(
+    <T> void merge(
       T a, int i, int m,
       T b, int j, int n,
       T c, int k, CompareRandomAccessor<T> cmp
@@ -89,7 +67,7 @@ public class ParallelMergeComparison
   // STATIC METHODS
   public static void main( String... args ) throws IOException
   {
-    var rng = new Random();
+    var rng = new SplittableRandom();
     var gen = new RandomMergeInputGenerator(rng);
 
     Map<String,MergeFn> mergers = Map.ofEntries(
@@ -123,21 +101,11 @@ public class ParallelMergeComparison
 
     CompRandAccessor<Tuple3<Integer,Integer,Integer>> acc = (a,i, b,j) -> cmp.compare(a[i],b[j]);
 
-    var count = new AtomicLong(0);
-
-    long tStart = nanoTime();
-
-    stream( shuffled(range(0,N_SAMPLES).toArray()) ).forEach( i -> {
-      info: {
-        long run = count.getAndIncrement();
-        double dt = (nanoTime() - tStart) / 1e9 / (60*60);
-        if( run % 1 == 0 )
-          System.out.printf("%4d / %d (ETA: %.2fh)\n", run, N_SAMPLES, dt / run * (N_SAMPLES-run) );
-      }
-
+    Progress.print( stream( shuffled(range(0,N_SAMPLES).toArray()) ) ).forEach(i -> {
       int lenA = x[i],
           lenB = LEN - lenA;
 
+      @SuppressWarnings("unchecked")
       Tuple3<Integer,Integer,Integer>[]
          aRef = range(0,lenA).mapToObj( z -> Tuple.of( rng.nextInt(256), rng.nextInt(256), rng.nextInt() ) ).toArray(Tuple3[]::new),
          bRef = range(0,lenB).mapToObj( z -> Tuple.of( rng.nextInt(256), rng.nextInt(256), rng.nextInt() ) ).toArray(Tuple3[]::new);
@@ -166,6 +134,7 @@ public class ParallelMergeComparison
 //        acc.nWrite = 0;
 //        System.out.println("  "+k);
 
+        @SuppressWarnings("unchecked")
         Tuple3<Integer,Integer,Integer>[]
           aTest = aRef.clone(),
           bTest = bRef.clone(),
@@ -189,30 +158,30 @@ public class ParallelMergeComparison
       });
     });
 
-//    plot_results("comparisons", x, resultsComps);
-//    plot_results("write",       x, resultsWrite);
+    plot_results("comparisons", x, resultsComps);
+    plot_results("write",       x, resultsWrite);
     plot_results("timings",     x, resultsTimes);
   }
 
   private static void plot_results( String type, int[] x, Map<String,double[]> results ) throws IOException
   {
-    String data = results.entrySet().stream().map( EntryFn.of(
-            (method,y) -> format(
-                    "{\n  type: 'scatter2d',\n  name: '%s',\n  x: %s,\n  y: %s\n}",
-                    method,
-                    Arrays.toString(x),
-                    Arrays.toString(y)
-            )
-    )).collect( joining(",", "[", "]") );
+    var data = results.entrySet().stream().map( EntryFn.of(
+      (method,y) -> format(
+        "{\n  type: 'scatter2d',\n  name: '%s',\n  x: %s,\n  y: %s\n}",
+        method,
+        Arrays.toString(x),
+        Arrays.toString(y)
+      )
+    )).toArray(String[]::new);
 
     String layout = format(
-            "{ title: 'Merge %s Benchmark (L = %d)', xaxis: {title: 'Split Position'}, yaxis: {title: 'Time [msec.]'} }",
-            type,
-            x.length
+      "{ title: 'Merge %s Benchmark (L = %d)', xaxis: {title: 'Split Position'}, yaxis: {title: 'Time [msec.]'} }",
+      type,
+      x.length
     );
 
     Path tmp = Files.createTempFile("merge_"+type+"_", ".html");
-    Files.writeString(  tmp, format(PLOT_TEMPLATE, layout, data) );
+    PlotlyUtils.plot(layout,data);
     getDesktop().browse(tmp.toUri());
   }
 }
