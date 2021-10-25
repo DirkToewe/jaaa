@@ -13,7 +13,7 @@ import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class KiwiMergeAccessTest extends MergeAccessTestTemplate
+public class KiwiMergeAccessTest implements MergeAccessTestTemplate
 {
   // STATIC FIELDS
   private static class KiwiMergeAcc implements KiwiMergeAccess, MergeAccess, ExpMergeV2Access
@@ -73,6 +73,6 @@ public class KiwiMergeAccessTest extends MergeAccessTestTemplate
     }
   }
 
-  @Override protected boolean isStable() { return true; }
-  @Override protected MergeAccess createAccess( CompareSwapAccess acc ) { return new KiwiMergeAcc(acc); }
+  @Override public boolean isStable() { return true; }
+  @Override public MergeAccess createAccess( CompareSwapAccess acc ) { return new KiwiMergeAcc(acc); }
 }

@@ -12,7 +12,7 @@ import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class StableOptimalBlockMergeAccessTest extends MergeAccessTestTemplate
+public class StableOptimalBlockMergeAccessTest implements MergeAccessTestTemplate
 {
 // STATIC FIELDS
   private static class MergeAcc implements StableOptimalBlockMergeAccess, MergeAccess, ExpMergeV2Access
@@ -49,6 +49,6 @@ public class StableOptimalBlockMergeAccessTest extends MergeAccessTestTemplate
     }
   }
 
-  @Override protected boolean isStable() { return true; }
-  @Override protected MergeAccess createAccess( CompareSwapAccess acc ) { return new MergeAcc(acc); }
+  @Override public boolean isStable() { return true; }
+  @Override public MergeAccess createAccess( CompareSwapAccess acc ) { return new MergeAcc(acc); }
 }

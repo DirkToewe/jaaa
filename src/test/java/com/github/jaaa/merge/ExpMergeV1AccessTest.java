@@ -3,7 +3,7 @@ package com.github.jaaa.merge;
 import com.github.jaaa.CompareSwapAccess;
 
 
-public class ExpMergeV1AccessTest extends MergeAccessTestTemplate
+public class ExpMergeV1AccessTest implements MergeAccessTestTemplate
 {
 // STATIC FIELDS
   private static class ExpMrgAcc implements ExpMergeV1Access, MergeAccess
@@ -24,6 +24,6 @@ public class ExpMergeV1AccessTest extends MergeAccessTestTemplate
 // CONSTRUCTORS
 
   // METHODS
-  @Override protected boolean isStable() { return true; }
-  @Override protected MergeAccess createAccess( CompareSwapAccess acc ) { return new ExpMrgAcc(acc); }
+  @Override public boolean isStable() { return true; }
+  @Override public MergeAccess createAccess( CompareSwapAccess acc ) { return new ExpMrgAcc(acc); }
 }

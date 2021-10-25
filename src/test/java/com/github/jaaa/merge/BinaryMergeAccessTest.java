@@ -3,7 +3,7 @@ package com.github.jaaa.merge;
 import com.github.jaaa.CompareSwapAccess;
 
 
-public class BinaryMergeAccessTest extends MergeAccessTestTemplate
+public class BinaryMergeAccessTest implements MergeAccessTestTemplate
 {
 // STATIC FIELDS
   private static class BinMrgAcc implements BinaryMergeAccess, MergeAccess
@@ -24,6 +24,6 @@ public class BinaryMergeAccessTest extends MergeAccessTestTemplate
 // CONSTRUCTORS
 
 // METHODS
-  @Override protected boolean isStable() { return true; }
-  @Override protected MergeAccess createAccess( CompareSwapAccess acc ) { return new BinMrgAcc(acc); }
+  @Override public boolean isStable() { return true; }
+  @Override public MergeAccess createAccess( CompareSwapAccess acc ) { return new BinMrgAcc(acc); }
 }

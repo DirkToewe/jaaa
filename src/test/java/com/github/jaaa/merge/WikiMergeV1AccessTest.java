@@ -6,7 +6,7 @@ import net.jqwik.api.Example;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class WikiMergeV1AccessTest extends MergeAccessTestTemplate
+public class WikiMergeV1AccessTest implements MergeAccessTestTemplate
 {
   // STATIC FIELDS
   private static class WikiMergeAcc implements WikiMergeV1Access, MergeAccess
@@ -62,6 +62,6 @@ public class WikiMergeV1AccessTest extends MergeAccessTestTemplate
 //    }
 //  }
 
-  @Override protected boolean isStable() { return true; }
-  @Override protected MergeAccess createAccess( CompareSwapAccess acc ) { return new WikiMergeAcc(acc); }
+  @Override public boolean isStable() { return true; }
+  @Override public MergeAccess createAccess( CompareSwapAccess acc ) { return new WikiMergeAcc(acc); }
 }

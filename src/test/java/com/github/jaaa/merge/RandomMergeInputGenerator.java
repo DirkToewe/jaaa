@@ -32,26 +32,32 @@ public class RandomMergeInputGenerator
     shuffle(isB, rng::nextInt);
 
     int val = 0;
-    var wasB = false;
 
     int[] A = new int[lenA],
           B = new int[lenB];
-    int a=0, b=0;
+    if( 0 < lenA || 0 < lenB )
+    {
+      int a=0, b=0;
 
-    for( int i=0; i < len; i++ )
-      if( isB[i] ) {
-        B[b++] = val += rng.nextInt(2);
-        wasB = true;
-      }
-      else if( wasB ) {
-        A[a++] = val += 1;
-        wasB = false;
-      }
-      else
-        A[a++] = val += rng.nextInt(2);
+      var wasB = isB[0];
+      if( wasB ) b++;
+      else       a++;
 
-    assert a == lenA;
-    assert b == lenB;
+      for( int i=0; ++i < len; )
+        if( isB[i] ) {
+          B[b++] = val += rng.nextInt(2);
+          wasB = true;
+        }
+        else if( wasB ) {
+          A[a++] = ++val;
+          wasB = false;
+        }
+        else
+          A[a++] = val += rng.nextInt(2);
+
+      assert a == lenA;
+      assert b == lenB;
+    }
 
     return Tuple.of(A,B);
   }

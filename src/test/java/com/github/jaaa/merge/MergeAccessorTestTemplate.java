@@ -31,9 +31,9 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
   abstract protected boolean mergesInplaceL2R();
   abstract protected boolean mergesInplaceR2L();
 
-  public static interface MergeAccessor<T>
+  public interface MergeAccessor<T>
   {
-    public void merge(
+    void merge(
       T a, int a0, int aLen,
       T b, int b0, int bLen,
       T c, int c0
@@ -217,15 +217,17 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
       cmp = _cmp;
     }
 
+    @SuppressWarnings("unchecked")
     Tuple2<T,Integer>[]
-            aRef  = range(0,aRefRaw.length).mapToObj( i -> Tuple.of(aRefRaw[i],i) ).sorted(cmp).toArray(Tuple2[]::new),
-            bRef  = range(0,bRefRaw.length).mapToObj( i -> Tuple.of(bRefRaw[i],i) ).sorted(cmp).toArray(Tuple2[]::new),
-            cRef  =                     Stream.concat( stream(aRef), stream(bRef) ).sorted(cmp).toArray(Tuple2[]::new),
-            aTest = aRef.clone(),
-            bTest = bRef.clone(),
-            cTest = new Tuple2[aTest.length + bTest.length];
+      aRef  = range(0,aRefRaw.length).mapToObj( i -> Tuple.of(aRefRaw[i],i) ).sorted(cmp).toArray(Tuple2[]::new),
+      bRef  = range(0,bRefRaw.length).mapToObj( i -> Tuple.of(bRefRaw[i],i) ).sorted(cmp).toArray(Tuple2[]::new),
+      cRef  =                     Stream.concat( stream(aRef), stream(bRef) ).sorted(cmp).toArray(Tuple2[]::new),
+      aTest = aRef.clone(),
+      bTest = bRef.clone(),
+      cTest = new Tuple2[aTest.length + bTest.length];
 
     var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+      @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public void   copy( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { b[j] = a[i]; }
       @Override public void   swap( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -261,6 +263,7 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
 
     int split = sample.getIndex();
 
+    @SuppressWarnings("unchecked")
     Tuple2<T,Integer>[]
       cTest, cRef = range(0,sample.getData().length).mapToObj( i -> Tuple.of(sample.getData()[i],i) ).toArray(Tuple2[]::new),
       aTest, aRef = copyOfRange(cRef, 0,split);
@@ -273,6 +276,7 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
     Arrays.sort(cRef,cmp);
 
     var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+      @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public void   copy( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { b[j] = a[i]; }
       @Override public void   swap( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -319,6 +323,7 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
 
     int split = sample.getIndex();
 
+    @SuppressWarnings("unchecked")
     Tuple2<T,Integer>[]
       cTest, cRef = range(0,sample.getData().length).mapToObj( i -> Tuple.of(sample.getData()[i],i) ).toArray(Tuple2[]::new),
       aTest, aRef = copyOfRange(cRef, split,cRef.length);
@@ -331,6 +336,7 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
     Arrays.sort(cRef,cmp);
 
     var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+      @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public void   copy( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { b[j] = a[i]; }
       @Override public void   swap( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }

@@ -3,7 +3,7 @@ package com.github.jaaa.merge;
 import com.github.jaaa.CompareSwapAccess;
 
 
-public class BlockRotationMergeAccessTest extends MergeAccessTestTemplate
+public class BlockRotationMergeAccessTest implements MergeAccessTestTemplate
 {
   private static record ExpMrgAcc( CompareSwapAccess acc ) implements BlockRotationMergeAccess, MergeAccess
   {
@@ -12,6 +12,6 @@ public class BlockRotationMergeAccessTest extends MergeAccessTestTemplate
     @Override public void  merge( int from, int mid, int until ) { blockRotationMerge(from,mid,until); }
   }
 
-  @Override protected boolean isStable() { return true; }
-  @Override protected MergeAccess createAccess( CompareSwapAccess acc ) { return new ExpMrgAcc(acc); }
+  @Override public boolean isStable() { return true; }
+  @Override public MergeAccess createAccess( CompareSwapAccess acc ) { return new ExpMrgAcc(acc); }
 }
