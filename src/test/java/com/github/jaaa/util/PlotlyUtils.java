@@ -29,7 +29,11 @@ public final class PlotlyUtils
           document.body.appendChild(plot);
 
           const layout = %1$s;
-          document.title = layout.title;
+          if( 'title' in layout )
+            document.title = layout.title;
+
+          if( 'paper_bgcolor' in layout )
+            document.body.style.background = 'black';
 
           Plotly.plot(plot, {layout, data: %2$s});
         </script>

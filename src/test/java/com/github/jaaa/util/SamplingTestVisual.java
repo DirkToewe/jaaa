@@ -19,7 +19,7 @@ public class SamplingTestVisual
 
   private static void plot2d() throws IOException
   {
-    var xy = lhs(8192, 2);
+    var xy = lhs(8192, new double[]{-1,3}, new double[]{2,7});
     IntFunction<String> getCoord = i -> stream(xy).map( row -> Double.toString(row[i]) ).collect( joining(", ","[","]"));
 
     PlotlyUtils.plot(

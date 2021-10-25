@@ -1,13 +1,11 @@
 package com.github.jaaa.util;
 
 
-import static com.github.jaaa.Swap.swap;
-
 import java.util.Arrays;
-import java.util.NoSuchElementException;
-import java.util.PrimitiveIterator;
 import java.util.SplittableRandom;
 import java.util.function.IntUnaryOperator;
+
+import static com.github.jaaa.Swap.swap;
 
 
 public class Sampling
@@ -31,23 +29,22 @@ public class Sampling
 
     return result;
   }
-
-  public static PrimitiveIterator.OfDouble linSpace( double from, double to, int n )
+  public static double[][] lhs( int nSamples, double[] lower, double[] upper ) { return lhs(nSamples,lower,upper, new SplittableRandom()::nextInt); }
+  public static double[][] lhs( int nSamples, double[] lower, double[] upper, IntUnaryOperator randInt )
   {
-    if( n < 2 )
+    if( lower.length != upper.length )
       throw new IllegalArgumentException();
-    return new PrimitiveIterator.OfDouble()
-    {
-      private int i=0;
-      @Override
-      public boolean hasNext() { return i < n; }
 
-      @Override
-      public double nextDouble() {
-        if( i >= n ) throw new NoSuchElementException();
-        double s = i++ / (n-1d);
-        return from*(1-s) + s*to;
-      }
-    };
+    int nFeatures = lower.length;
+    var result = lhs(nSamples,nFeatures,randInt);
+
+    for( var row: result )
+    for( int j=0; j < nFeatures; j++ )
+    {
+      double s = row[j];
+      row[j] = lower[j]*(1-s) + s*upper[j];
+    }
+
+    return result;
   }
 }
