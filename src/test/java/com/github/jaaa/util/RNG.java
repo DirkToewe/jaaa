@@ -53,6 +53,7 @@ public class RNG
     if( from >= until )
       throw new IllegalArgumentException();
     double s = nextDouble();
-    return (int) ( from + s * ((double) until-from) );
+    from += (long) (s * ((double) until-from));
+    return from;
   }
 }

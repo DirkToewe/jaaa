@@ -29,8 +29,8 @@ public class RNGTestDieHarder
     InputStream  pout = proc.getInputStream(),
                  perr = proc.getErrorStream();
 
-    byte[] buf = new byte[1024];
-    if( buf.length%4 != 0 )
+    byte[] buf = new byte[3*1024];
+    if( buf.length%8 != 0 )
       throw new IllegalArgumentException();
 
     for(;;)
@@ -41,8 +41,8 @@ public class RNGTestDieHarder
       for( int i=0; i < buf.length; )
       {
         int nxt = randInt.getAsInt();
-        for( int j=0; j < 2; j++ )
-          buf[i++] = (byte) (0xFF & nxt >>> 2*j);
+        for( int j=0; j < 3; j++ )
+          buf[i++] = (byte) (0xFF & nxt >>> 8*j);
       }
 
       if( ! proc.isAlive() )
@@ -100,11 +100,13 @@ public class RNGTestDieHarder
     out.println(  " // RNG //");
     out.println(  "//=====//\n");
     var rng = new RNG( nanoTime() );
-    testRNG( () -> rng.nextInt(0, 1<<16) );
-//    out.println("\n  //=====//");
-//    out.println(  " // RNG //");
-//    out.println(  "//=====//\n");
-//    testRNG( new RNG( nanoTime() )::nextLong );
+    testRNG( () -> rng.nextInt(0, 1<<24) );
+
+    out.println("\n  //=====//");
+    out.println(  " // RNG //");
+    out.println(  "//=====//\n");
+    testRNG( new RNG( nanoTime() )::nextLong );
+
     out.println("\n  //==================//");
     out.println(  " // java.util.Random //");
     out.println(  "//==================//\n");
