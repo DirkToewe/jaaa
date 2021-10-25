@@ -11,8 +11,9 @@ public interface ExpMergeV1Access extends RotateAccess,
 {
   default void expMergeV1( int from, int mid, int until )
   {
-    assert from <= mid;
-    assert         mid <= until;
+    if( 0 > from || from > mid || mid > until )
+      throw new IllegalArgumentException();
+
     while( from <  mid && mid < until )
     {
       int nL =       mid-from,
