@@ -90,7 +90,7 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
 
     // MERGE LOOP
     // ----------
-    if( min(aLen,bLen) > 0 )
+    if( 0 < aLen && 0 < bLen )
       outer: for(;;)
       {
         int count1 = 0, // Number of times in a row that first run won
@@ -146,7 +146,9 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
          if( aLen!=0 ) copyRange(a,a0, c,c0, aLen);
     else if( bLen!=0 ) copyRange(b,b0, c,c0, bLen);
 
-    return max(1,minGallop);
+    if(1 > minGallop)
+           minGallop = 1;
+    return minGallop;
   }
 
   default int _timMergeR2L(
@@ -168,7 +170,7 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
 
     // MERGE LOOP
     // ----------
-    if( min(aLen,bLen) > 0 )
+    if( 0 < aLen && 0 < bLen )
       outer: for(;;)
       {
         int count1 = 0, // Number of times in a row that first run won
@@ -221,10 +223,11 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
            minGallop+= 2;  // Penalize for leaving gallop mode
       }
 
-    assert ! (aLen != 0 && bLen != 0);
          if( aLen!=0 ) copyRange(a,a0-aLen, c,c0-aLen, aLen);
     else if( bLen!=0 ) copyRange(b,b0-bLen, c,c0-bLen, bLen);
 
-    return max(1,minGallop);
+    if(1 > minGallop)
+           minGallop = 1;
+    return minGallop;
   }
 }

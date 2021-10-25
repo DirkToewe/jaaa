@@ -3,14 +3,14 @@ package com.github.jaaa.merge;
 import com.github.jaaa.CompareSwapAccess;
 
 
-public class TapeMergeV1AccessTest implements MergeAccessTestTemplate
+public class TimMergeAccessTest implements MergeAccessTestTemplate
 {
   // STATIC FIELDS
-  private static record ExpMrgAcc( CompareSwapAccess acc ) implements TapeMergeV1Access, MergeAccess
+  private static record ExpMrgAcc( CompareSwapAccess acc ) implements TimMergeAccess, MergeAccess
   {
     @Override public int compare( int i, int j ) { return acc.compare(i,j); }
     @Override public void   swap( int i, int j ) {        acc.   swap(i,j); }
-    @Override public void  merge( int from, int mid, int until ) { tapeMergeV1(from,mid,until); }
+    @Override public void  merge( int from, int mid, int until ) { timMerge(from,mid,until); }
   }
 
 // STATIC CONSTRUCTOR
