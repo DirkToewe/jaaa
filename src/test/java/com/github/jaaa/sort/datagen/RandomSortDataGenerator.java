@@ -1,6 +1,9 @@
 package com.github.jaaa.sort.datagen;
 
+import com.github.jaaa.misc.Shuffle;
+
 import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -8,12 +11,12 @@ import static java.util.Objects.requireNonNull;
 
 public class RandomSortDataGenerator
 {
-  private final Random rng;
+  private final SplittableRandom rng;
 
-  public RandomSortDataGenerator( Random _rng ) {
+  public RandomSortDataGenerator( SplittableRandom _rng ) {
     rng = requireNonNull(_rng);
   }
-  public RandomSortDataGenerator() { this( new Random() ); }
+  public RandomSortDataGenerator() { this( new SplittableRandom() ); }
 
   private void nextUniform( int[] array, int from, int until, int step )
   {
@@ -23,13 +26,13 @@ public class RandomSortDataGenerator
       array[i] = rng.nextInt(mag) + off;
   }
 
-  private void nextGaussian( int[] array, int from, int until, int step )
-  {
-    int mag = rng.nextInt(array.length*2+1),
-        off = rng.nextInt(array.length*2+1) - array.length;
-    for( int i=from; i < until; i+= step )
-      array[i] = (int) (rng.nextGaussian()*mag + off);
-  }
+//  private void nextGaussian( int[] array, int from, int until, int step )
+//  {
+//    int mag = rng.nextInt(array.length*2+1),
+//        off = rng.nextInt(array.length*2+1) - array.length;
+//    for( int i=from; i < until; i+= step )
+//      array[i] = (int) (rng.nextGaussian()*mag + off);
+//  }
 
   private void nextAscending( int[] array, int from, int until, int step )
   {
@@ -84,13 +87,22 @@ public class RandomSortDataGenerator
         }
       }
     }
-    else switch( rng.nextInt(4) ) {
+    else switch( rng.nextInt(3) ) {
       case 0 : nextAscending (array, from,until,step); break;
       case 1 : nextDescending(array, from,until,step); break;
       case 2 : nextUniform   (array, from,until,step); break;
-      case 3 : nextGaussian  (array, from,until,step); break;
+//      case 3 : nextGaussian  (array, from,until,step); break;
       default: throw new AssertionError();
     }
+  }
+
+  public int[] nextShuffled( int len )
+  {
+    int[] result = new int[len];
+    for( int i=len; i-- > 0; )
+      result[i] = i;
+    Shuffle.shuffle(result, rng::nextInt);
+    return result;
   }
 
   public int[] nextUniform( int len )
@@ -100,12 +112,12 @@ public class RandomSortDataGenerator
     return result;
   }
 
-  public int[] nextGaussian( int len )
-  {
-    int[] result = new int[len];
-    nextGaussian(result, 0,result.length, 1);
-    return result;
-  }
+//  public int[] nextGaussian( int len )
+//  {
+//    int[] result = new int[len];
+//    nextGaussian(result, 0,result.length, 1);
+//    return result;
+//  }
 
   public int[] nextAscending( int len )
   {

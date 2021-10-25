@@ -1,9 +1,6 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.CompareRandomAccessor;
-import com.github.jaaa.merge.BlockRotationMergeAccess;
-import com.github.jaaa.merge.ExpMergeV2Access;
-import com.github.jaaa.merge.ExpMergeV2Accessor;
 import net.jqwik.api.Example;
 import net.jqwik.api.Group;
 import net.jqwik.api.PropertyDefaults;
@@ -30,12 +27,10 @@ public class KiwiSortV2AccessTest
   private static record Acc<T>( CompareRandomAccessor<T> acc ) implements SortAccessorTestTemplate.SortAccessor<T>
   {
     @Override public void sort( T arr, int from, int until) {
-      class SortAcc implements KiwiSortV2Access
-      {
-        @Override public void swap(int i, int j ) { acc.swap(arr,i, arr,j); }
+      new KiwiSortV2Access() {
+        @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
         @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-      }
-      new SortAcc().kiwiSortV2(from,until);
+      }.kiwiSortV2(from,until);
     }
   }
   private interface TestTemplate extends SortAccessorTestTemplate {

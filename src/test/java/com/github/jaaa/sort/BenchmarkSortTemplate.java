@@ -4,8 +4,9 @@ import com.github.jaaa.sort.datagen.RandomSortDataGenerator;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.Arrays;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.TimeUnit;
+
 import static java.util.stream.IntStream.range;
 
 @BenchmarkMode(Mode.AverageTime)
@@ -18,7 +19,7 @@ import static java.util.stream.IntStream.range;
 @State(Scope.Benchmark)
 public abstract class BenchmarkSortTemplate
 {
-  ;{
+  {
     boolean ea = false;
     assert  ea = true;
        if( !ea ) throw new IllegalStateException();
@@ -26,7 +27,7 @@ public abstract class BenchmarkSortTemplate
 
   abstract protected int len();
 
-  private final Random rng = new Random();
+  private final SplittableRandom rng = new SplittableRandom();
   private final RandomSortDataGenerator gen = new RandomSortDataGenerator(rng);
 
   private     int[]  ref = null;

@@ -3,11 +3,10 @@ package com.github.jaaa.sort;
 import com.github.jaaa.sort.datagen.RandomSortDataGenerator;
 
 import java.util.Arrays;
-import java.util.Random;
+import java.util.SplittableRandom;
 
 import static com.github.jaaa.misc.Boxing.boxed;
 import static java.lang.System.nanoTime;
-import static java.util.Arrays.stream;
 
 public class ParallelMergeSortComparison
 {
@@ -26,7 +25,7 @@ public class ParallelMergeSortComparison
 
     double sampleCount = 0;
 
-    var rng = new Random();
+    var rng = new SplittableRandom();
     var gen = new RandomSortDataGenerator(rng);
 
     boolean[] order = {false, true};

@@ -12,6 +12,7 @@ import java.util.*;
 import static com.github.jaaa.misc.Shuffle.shuffled;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
+import static java.lang.System.out;
 import static java.util.Arrays.stream;
 import static java.util.Map.entry;
 import static java.util.stream.IntStream.range;
@@ -41,32 +42,31 @@ public class BenchmarkSort
 // STATIC METHODS
   public static void main( String... args ) throws IOException
   {
+    out.println( System.getProperty("java.vm.name") + " " + System.getProperty("java.vm.version") );
+    out.println( "Java " + System.getProperty("java.version") );
+
 //    System.out.println("WAIT");
 //    new java.util.Scanner(System.in).next();
 //    System.out.println("GO");
 
     Map<String,SortFn> mergers = Map.ofEntries(
-      entry("TimSort",                      TimSort::sort),
-//      entry("JDK",                           Arrays::sort),
-//      entry("HeapSort",                    HeapSort::sort),
-//      entry("HeapSortFast",            HeapSortFast::sort),
-//      entry("QuickSort",                  QuickSort::sort),
-//      entry("MergeSort",                  MergeSort::sort),
-//      entry("KiwiSortV1",                KiwiSortV1::sort),
-      entry("KiwiSortV2",                KiwiSortV2::sort),
-      entry("KiwiSortV3",                KiwiSortV3::sort),
-      entry("KiwiSortV4",                KiwiSortV4::sort),
-      entry("ComparatorWikiSort", new SortFn() {
-        @Override public <T> void sort( T[] arr, Comparator<? super T> cmp ) {
-          new ComparatorWikiSort<T>(null).Sort(arr,cmp);
-        }
-      })
+      entry("TimSort",                                 TimSort::sort),
+      entry("JDK",                                      Arrays::sort),
+//      entry("HeapSort",                               HeapSort::sort),
+//      entry("HeapSortFast",                       HeapSortFast::sort),
+//      entry("QuickSort",                             QuickSort::sort),
+//      entry("MergeSort",                             MergeSort::sort),
+//      entry("KiwiSortV1",                           KiwiSortV1::sort),
+      entry("KiwiSortV2",                           KiwiSortV2::sort),
+      entry("KiwiSortV3",                           KiwiSortV3::sort),
+      entry("KiwiSortV4",                           KiwiSortV4::sort),
+      entry("ComparatorWikiSort", new ComparatorWikiSort(null)::sort)
     );
 
     int     LEN = 1_000_000,
       N_SAMPLES =    10_000;
 
-    var rng = new Random();
+    var rng = new SplittableRandom();
     var gen = new RandomSortDataGenerator(rng);
 
 //    int[] x = rng.doubles(N_SAMPLES, 0,Math.log(LEN+1)).mapToInt( y -> (int) Math.round(Math.exp(y)) ).toArray();
@@ -86,7 +86,7 @@ public class BenchmarkSort
     Progress.print( stream( shuffled( range(0,N_SAMPLES).toArray() ) ) ).forEach( i -> {
       int len = x[i];
 //      int[] data = gen.nextMixed(len);
-      int[] data = gen.nextUniform(len);
+      int[] data = gen.nextShuffled(len);
       assert len == data.length;
 
       int sign = rng.nextBoolean() ? -1 : +1;
@@ -127,7 +127,7 @@ public class BenchmarkSort
       (method,y) -> format(
         """
         {
-          type: 'scatter2d',
+          type: 'scattergl',
           mode: 'markers',
           marker: {
             size: 4,

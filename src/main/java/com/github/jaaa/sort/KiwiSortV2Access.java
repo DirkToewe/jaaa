@@ -2,7 +2,6 @@ package com.github.jaaa.sort;
 
 import com.github.jaaa.ArgMinAccess;
 import com.github.jaaa.merge.BlockRotationMergeAccess;
-import com.github.jaaa.merge.ExpMergeV2Access;
 import com.github.jaaa.merge.TimMergeAccessor;
 import com.github.jaaa.misc.BlockSwapAccess;
 import com.github.jaaa.search.ExpL2RSearch;
@@ -10,7 +9,7 @@ import com.github.jaaa.search.ExpL2RSearch;
 import static java.lang.Math.*;
 
 
-public interface KiwiSortV2Access extends ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExpMergeV2Access, ExtractSortBufOrdinalAccess, InsertionAdaptiveSortAccess, HeapSortFastAccess
+public interface KiwiSortV2Access extends ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExtractSortBufOrdinalAccess, HeapSortFastAccess, InsertionAdaptiveSortAccess
 {
   int MIN_RUN_LEN = 16;
 
