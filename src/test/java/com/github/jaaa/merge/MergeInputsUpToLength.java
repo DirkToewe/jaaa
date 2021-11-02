@@ -1,6 +1,7 @@
 package com.github.jaaa.merge;
 
 import com.github.jaaa.search.ExpR2LSearch;
+import static java.lang.Math.addExact;
 
 import java.util.AbstractList;
 
@@ -14,7 +15,7 @@ class MergeInputsUpToLength extends AbstractList<MergeInput<byte[]>>
   static {
     LOOKUP[0] = 1;
     for( int i=0; ++i < LOOKUP.length; )
-      LOOKUP[i] = LOOKUP[i-1] + MergeInputsOfLength.nSamples(i);
+      LOOKUP[i] = addExact( LOOKUP[i-1], MergeInputsOfLength.nSamples(i) );
   }
 
 // STATIC METHODS

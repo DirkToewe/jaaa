@@ -10,15 +10,18 @@ import static java.lang.Math.multiplyExact;
 class MergeInputsOfLength extends AbstractList<MergeInput<byte[]>>
 {
 // STATIC FIELDS
+  // LOOKUP[LOOKUP.length - 2*len] contains the number of distinct possible merge inputs of length `len`,
+  //                               that start with an A-element in the merged result.
+  // LOOKUP[LOOKUP.length - 2*len+1] contains the number of distinct possible merge inputs of length `len`,
+  //                                 that start with an B-element in the merged result.
   private static final int[] LOOKUP = new int[17*2];
 
 // STATIC CONSTRUCTOR
   static {
-    assert LOOKUP.length % 2 == 0;
-    for( int nA=1, nB=1, i=LOOKUP.length; (i-=2) >= 0; )
+    for( int nA=1, nB=1, i=LOOKUP.length; i > 0; )
     {
-      LOOKUP[i  ] = nA;
-      LOOKUP[i+1] = nB;
+      LOOKUP[--i] = nB;
+      LOOKUP[--i] = nA;
       int a2 = multiplyExact(2,nA),
           b2 = multiplyExact(2,nB);
       nB = addExact(nA, b2);
