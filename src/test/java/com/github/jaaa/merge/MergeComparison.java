@@ -187,6 +187,20 @@ public class MergeComparison
           }.wikiMergeV2(k, k+m, k+m+n);
         }
       }),
+      entry("WikiV3Acc", new MergeFn() {
+        @Override public <T> void merge(
+          T a, int i, int m,
+          T b, int j, int n,
+          T c, int k, CompareRandomAccessor<T> acc
+        ) {
+          acc.copyRange(a,i, c,k,   m);
+          acc.copyRange(b,j, c,k+m, n);
+          new WikiMergeV3Access() {
+            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
+            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
+          }.wikiMergeV3(k, k+m, k+m+n);
+        }
+      }),
       entry("KiwiAcc", new MergeFn() {
         @Override public <T> void merge(
           T a, int i, int m,

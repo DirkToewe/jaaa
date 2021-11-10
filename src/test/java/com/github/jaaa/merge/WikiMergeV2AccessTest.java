@@ -31,17 +31,18 @@ public class WikiMergeV2AccessTest implements MergeAccessTestTemplate
   {
     for( int len=3; ++len >= 0; )
     {
-      long m = WikiMergeV2Access.minBufLenMIB(len),
-           n = WikiMergeV2Access.minBufLenMER(len);
+      long mib = WikiMergeV2Access.minBufLenMIB(len),
+           mer = WikiMergeV2Access.minBufLenMER(len);
 
-      assertThat(m).isNotNegative();
-      assertThat(m).isLessThanOrEqualTo(n);
-      assertThat(n).isLessThanOrEqualTo(len);
-      assertThat(m+n).isLessThan(len);
-      assertThat(m*n).isGreaterThanOrEqualTo(len - m - n);
-      assertThat( (m-1)*n ).isLessThan(len - (m-1) - n);
-      assertThat( (n-1)*m ).isLessThan(len - (n-1) - m);
-      assertThat( (n-1)*(n-1) ).isLessThan( len - (n-1) - (n-1) );
+      assertThat(mib).isNotNegative();
+      assertThat(mib).isLessThanOrEqualTo(mer);
+      assertThat(mer).isLessThanOrEqualTo(len);
+      assertThat(mib+mer).isLessThan(len);
+      assertThat(mib*mer).isGreaterThanOrEqualTo( len - mib - mer );
+      assertThat( (mib-1)*mer ).isLessThan(len - (mib-1) - mer);
+      assertThat( (mer-1)*mib ).isLessThan(len - (mer-1) - mib);
+      assertThat( (mer-1)*(mer-1) ).isLessThan( len - (mer-1) - (mer-1) );
+      assertThat( (mer+1)*(mib-1) ).isLessThan( len - mib - mer ); // make sure mer is as large as possible
     }
   }
 

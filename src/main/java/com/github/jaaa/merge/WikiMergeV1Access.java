@@ -45,14 +45,13 @@ public interface WikiMergeV1Access extends ArgMinAccess, BlockRotationMergeAcces
 
   default void wikiMergeV1_L2R( int from, int mid, int until )
   {
-    if( from < 0   ) throw new IllegalArgumentException();
-    if( from > mid ) throw new IllegalArgumentException(); if( mid == until) return;
-    if(until < mid ) throw new IllegalArgumentException(); if( mid == from ) return;
+    if( from < 0 || from > mid || until < mid ) throw new IllegalArgumentException();
+    if( mid == until || mid == from ) return;
 
     int lenL =   mid-from,
-        lenR = until-mid;
+        len  = until-from;
 
-    if( lenL < 5 || lenL < sqrt(lenR) ) {
+    if( lenL < 7 || lenL < sqrt(len) ) {
       wikiMergeV1_mergeInPlace(from,mid,until);
       return;
     }
@@ -71,9 +70,9 @@ public interface WikiMergeV1Access extends ArgMinAccess, BlockRotationMergeAcces
     {
       int mib_len=0, mer=from,                          mer_len = extractMergeBuf_ordinal_l_min_unsorted(mer,mid, MER_desiredLen, mer), mib = mer+mer_len;
       if( mer_len < MER_desiredLen || MIB_desiredLen > (mib_len = extractMergeBuf_ordinal_l_min_unsorted(mib,mid, MIB_desiredLen, mib)) ) {
-        int len = mib_len;
-                  mib_len = mer_len;
-                            mer_len = len;
+        int buf_len = mib_len;
+                      mib_len = mer_len;
+                                mer_len = buf_len;
         mib = from;
         mer = mib+mib_len;
       }

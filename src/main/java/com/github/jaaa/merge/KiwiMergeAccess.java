@@ -53,11 +53,13 @@ public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess,
 
   default void kiwiMergeL2R(int from, int mid, int until )
   {
-    if( from < 0   ) throw new IllegalArgumentException();
-    if( from > mid ) throw new IllegalArgumentException(); if( mid == until) return;
-    if(until < mid ) throw new IllegalArgumentException(); if( mid == from ) return;
-    int lenL = mid-from;
-    if( lenL < 4 || lenL < sqrt(lenL) )
+    if( from < 0 || from > mid || until < mid ) throw new IllegalArgumentException();
+    if( mid == until || mid == from ) return;
+
+    int lenL =   mid-from,
+        len  = until-from;
+
+    if( lenL < 7 || lenL < sqrt(len*2) )
       kiwiMerge_mergeInPlace(from,mid,until);
     else {
       // STEP 1: Extract BUFFER
@@ -72,11 +74,10 @@ public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess,
 
   default void kiwiMergeL2R_usingBuffer( int from, int mid, int until, int buf, int bufLen )
   {
-    if(   from <  0 ) throw new IllegalArgumentException();
-    if( buf    <  0 ) throw new IllegalArgumentException();
-    if( bufLen <= 0 ) throw new IllegalArgumentException();
-    if(  from > mid ) throw new IllegalArgumentException(); if( mid == until) return;
-    if( until < mid ) throw new IllegalArgumentException(); if( mid == from ) return;
+    if( from < 0 || buf < 0 || bufLen <= 0 || from > mid )
+      throw new IllegalArgumentException();
+    if( mid == until) return; if( until < mid ) throw new IllegalArgumentException();
+    if( mid == from ) return;
 
     int lenL =   mid-from,
         lenR = until-mid;
