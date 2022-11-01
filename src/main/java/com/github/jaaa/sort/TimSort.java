@@ -1,6 +1,7 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
+import com.github.jaaa.misc.Revert;
 
 import java.lang.reflect.Array;
 import java.nio.IntBuffer;
@@ -87,14 +88,14 @@ public final class TimSort
 // STATIC METHODS
   static int optimalRunLength( int minRunLen, int len )
   {
-    if( minRunLen <= 0 ) throw new IllegalArgumentException();
-    if(       len <  0 ) throw new IllegalArgumentException();
-    int                             s = 0;
-    if(   len>>> 16 >= minRunLen )  s =16;
-    if(   len>>>s+8 >= minRunLen )  s+= 8;
-    if(   len>>>s+4 >= minRunLen )  s+= 4;
-    if(   len>>>s+2 >= minRunLen )  s+= 2;
-    if(   len>>>s+1 >= minRunLen )  s+= 1;
+    if( minRunLen <= 0 || len <  0 )
+      throw new IllegalArgumentException();
+    int                              s = 0;
+    if(   len>>>  16  >= minRunLen ) s =16;
+    if(   len>>>(s|8) >= minRunLen ) s|= 8;
+    if(   len>>>(s|4) >= minRunLen ) s|= 4;
+    if(   len>>>(s|2) >= minRunLen ) s|= 2;
+    if(   len>>>(s|1) >= minRunLen ) s|= 1;
     int l=len>>>s;
     return l<<s != len ? l+1 : l;
   }
@@ -135,7 +136,7 @@ public final class TimSort
       @Override public int timSort_prepareNextRun( T[] arr, int from, int until, int minRunLen )
       {
         int start = from+1;
-        if( start >= until ) return start;
+        if( start >= until ) return until;
 
         boolean ascending = compare(arr,start++, arr,from) >= 0;
 
@@ -143,7 +144,7 @@ public final class TimSort
              ++start;
 
         if( ! ascending )
-          revert(arr, from,start);
+          Revert.revert(arr, from,start);
 
                       until = min(from+minRunLen, until);
         for(; start < until; start++)
@@ -172,7 +173,7 @@ public final class TimSort
       @Override public int timSort_prepareNextRun( T[] arr, int from, int until, int minRunLen )
       {
         int start = from+1;
-        if( start >= until ) return start;
+        if( start >= until ) return until;
 
         boolean ascending = compare(arr,start++, arr,from) >= 0;
 
@@ -180,7 +181,7 @@ public final class TimSort
              ++start;
 
         if( ! ascending )
-          revert(arr, from,start);
+          Revert.revert(arr, from,start);
 
                       until = min(from+minRunLen, until);
         for(; start < until; start++)

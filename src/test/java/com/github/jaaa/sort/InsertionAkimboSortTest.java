@@ -68,7 +68,7 @@ public class InsertionAkimboSortTest
 
       class CountAcc implements CompareSwapAccess {
         public long nSwaps = 0L,
-                nComps = 0L;
+                    nComps = 0L;
         @Override public int compare( int i, int j ) { nComps++; return input[i].compareTo(input[j]); }
         @Override public void   swap( int i, int j ) { nSwaps++; Swap.swap(input,i,j); }
       }

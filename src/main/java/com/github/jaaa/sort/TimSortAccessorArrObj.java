@@ -10,11 +10,11 @@ import static java.lang.System.arraycopy;
 public interface TimSortAccessorArrObj<T> extends TimSortAccessor<T[]>,
                                              RandomAccessorArrObj<T>
 {
-  default int timSort_prepareNextRun(T[] arr, int from, int until, int minRunLen )
+  default int timSort_prepareNextRun( T[] arr, int from, int until, int minRunLen )
   {
     // TODO: improve adaptive inplace sorting of the runs
     int start  = from+1;
-    if( start >= until ) return start;
+    if( start >= until ) return until;
 
     boolean ascending = compare(arr,start++, arr,from) >= 0;
 

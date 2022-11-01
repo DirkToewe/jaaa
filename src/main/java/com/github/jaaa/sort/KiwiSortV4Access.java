@@ -4,7 +4,6 @@ import com.github.jaaa.ArgMinAccess;
 import com.github.jaaa.fn.Int4Consumer;
 import com.github.jaaa.fn.Int4Op;
 import com.github.jaaa.merge.BlockRotationMergeAccess;
-import com.github.jaaa.merge.ExpMergeV2Access;
 import com.github.jaaa.merge.TimMergeAccessor;
 import com.github.jaaa.misc.BlockSwapAccess;
 import com.github.jaaa.search.ExpL2RSearch;
@@ -14,9 +13,18 @@ import static java.lang.Integer.numberOfTrailingZeros;
 import static java.lang.Math.*;
 
 
-public interface KiwiSortV4Access extends ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExpMergeV2Access, ExtractSortBufOrdinalAccess, HeapSortFastAccess, InsertionAdaptiveSortAccess, QuickSelectV1Access
+// KiwiSort implementation that uses recursive merge order instead of bottom-up.
+public interface KiwiSortV4Access extends ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExtractSortBufOrdinalAccess, HeapSortFastAccess, InsertionAdaptiveSortAccess, QuickSelectV1Access
 {
   int MIN_RUN_LEN = 16;
+
+  TimMergeAccessor<KiwiSortV4Access> _TIM_MERGE_ACCESSOR = new TimMergeAccessor<>()
+  {
+    @Override public KiwiSortV4Access malloc( int len ) { throw new AssertionError(); }
+    @Override public int compare( KiwiSortV4Access a, int i, KiwiSortV4Access b, int j ) { return a.compare(i,j); }
+    @Override public void   swap( KiwiSortV4Access a, int i, KiwiSortV4Access b, int j ) {        a.   swap(i,j); }
+    @Override public void   copy( KiwiSortV4Access a, int i, KiwiSortV4Access b, int j ) {        a.   swap(i,j); }
+  };
 
   static int minBufLen( int len )
   {
@@ -37,12 +45,13 @@ public interface KiwiSortV4Access extends ArgMinAccess, BlockRotationMergeAccess
                                          int b0, int bLen,
                                          int c0 )
   {
-    new TimMergeAccessor<Void>() {
-      @Override public Void malloc( int len ) { throw new AssertionError(); }
-      @Override public int compare( Void a, int i, Void b, int j ) { return KiwiSortV4Access.this.compare(i,j); }
-      @Override public void   swap( Void a, int i, Void b, int j ) {        KiwiSortV4Access.this.   swap(i,j); }
-      @Override public void   copy( Void a, int i, Void b, int j ) {        KiwiSortV4Access.this.   swap(i,j); }
-    }._timMergeL2R(TimMergeAccessor.MIN_GALLOP, null,a0,aLen, null,b0,bLen, null,c0);
+//    new TimMergeAccessor<Void>() {
+//      @Override public Void malloc( int len ) { throw new AssertionError(); }
+//      @Override public int compare( Void a, int i, Void b, int j ) { return KiwiSortV4Access.this.compare(i,j); }
+//      @Override public void   swap( Void a, int i, Void b, int j ) {        KiwiSortV4Access.this.   swap(i,j); }
+//      @Override public void   copy( Void a, int i, Void b, int j ) {        KiwiSortV4Access.this.   swap(i,j); }
+//    }._timMergeL2R(TimMergeAccessor.MIN_GALLOP, null,a0,aLen, null,b0,bLen, null,c0);
+    _TIM_MERGE_ACCESSOR._timMergeL2R(TimMergeAccessor.MIN_GALLOP, this,a0,aLen, this,b0,bLen, this,c0);
   }
 
   default void kiwiSortV4( int from, int until )
@@ -95,7 +104,7 @@ public interface KiwiSortV4Access extends ArgMinAccess, BlockRotationMergeAccess
 
       int mergeEnd = mid + lenR,
           nBlocksL = lenL/B;
-      if( nBlocksL*B == lenL ) // <- if there's no rest, we can rearrange with one block less
+      if( nBlocksL*B == lenL && nBlocksL <= 3 ) // <- if there's no rest, we can rearrange with one block less, to avoid a partialSort
         --nBlocksL;
       if( nBlocksL > 2 ) {
         int nUnsortedMax = bufLen - nBlocksL;
@@ -109,7 +118,7 @@ public interface KiwiSortV4Access extends ArgMinAccess, BlockRotationMergeAccess
 
       int firstBlock = mid - B*nBlocksL;
 
-      if( 0 < nBlocksL )
+      if( nBlocksL > 0 )
       {
         int nBlocks  = lenR/B + nBlocksL;
 

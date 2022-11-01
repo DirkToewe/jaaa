@@ -13,18 +13,18 @@ group = "org.example"
 version = "1.0-SNAPSHOT"
 
 repositories {
+  mavenLocal()
   mavenCentral()
-//  maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
+  maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots") }
 }
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_16
+  sourceCompatibility = JavaVersion.VERSION_17
 }
 
-val v_jqwik = "1.5.6"
-// val v_assertj = "3.12.2"
-val v_assertj = "3.21.0"
-val v_jmh = "1.32"
+val v_jqwik = "1.7.0"
+val v_assertj = "3.23.1"//"3.21.0"
+val v_jmh = "1.35"
 
 tasks.compileTestJava {
   options.compilerArgs.addAll( listOf("-parameters") )
@@ -76,28 +76,28 @@ tasks.test {
 tasks.register<JavaExec>("benchParallelMergeSort") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
-  main = "com.github.jaaa.sort.ParallelMergeSortComparison"
+  mainClass.set("com.github.jaaa.sort.ParallelMergeSortComparison")
   jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx12g")
 }
 
 tasks.register<JavaExec>("compareMerge") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
-  main = "com.github.jaaa.merge.MergeComparison"
+  mainClass.set("com.github.jaaa.merge.MergeComparison")
   jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15")
 }
 
 tasks.register<JavaExec>("compareSort") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
-  main = "com.github.jaaa.sort.BenchmarkSort"
+  mainClass.set("com.github.jaaa.sort.BenchmarkSort")
   jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx12g")
 }
 
 tasks.register<JavaExec>("compareMergeParallel") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
-  main = "com.github.jaaa.merge.ParallelMergeComparison"
+  mainClass.set("com.github.jaaa.merge.ParallelMergeComparison")
   jvmArgs = listOf(
     "-ea",
     "--illegal-access=warn",
@@ -109,23 +109,37 @@ tasks.register<JavaExec>("compareMergeParallel") {
   )
 }
 
+tasks.register<JavaExec>("compareGcd_int") {
+  dependsOn(tasks.compileTestJava)
+  classpath = sourceSets.test.get().runtimeClasspath
+  mainClass.set("com.github.jaaa.util.IMathBenchmark_gcd_int")
+  jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx6g")
+}
+
+tasks.register<JavaExec>("compareGcd_long") {
+  dependsOn(tasks.compileTestJava)
+  classpath = sourceSets.test.get().runtimeClasspath
+  mainClass.set("com.github.jaaa.util.IMathBenchmark_gcd_long")
+  jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx6g")
+}
+
 tasks.register<JavaExec>("compareBiPartition") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
-  main = "com.github.jaaa.partition.BiPartitionComparison"
+  mainClass.set("com.github.jaaa.partition.BiPartitionComparison")
   jvmArgs = listOf("-ea", "-XX:MaxInlineLevel=15", "-Xmx48g")
 }
 
 dependencies {
-  testImplementation("com.github.haifengl:smile-core:2.6.0")
-  testImplementation("org.bytedeco:openblas:0.3.17-1.5.6:linux-x86_64")
-  testImplementation("org.bytedeco:arpack-ng:3.8.0-1.5.6:linux-x86_64")
+  testImplementation("com.github.haifengl:smile-core:3.0.0")
+  testImplementation("org.bytedeco:openblas:0.3.19-1.5.7:linux-x86_64")
+  testImplementation("org.bytedeco:arpack-ng:3.8.0-1.5.7:linux-x86_64")
   testImplementation("net.jqwik:jqwik:$v_jqwik")
   testImplementation("net.jqwik:jqwik-engine:$v_jqwik")
   testImplementation("org.assertj:assertj-core:$v_assertj")
   testImplementation("org.apache.commons:commons-math3:3.6.1")
   testImplementation("org.openjdk.jmh:jmh-core:$v_jmh")
   testImplementation("org.jparsec:jparsec:3.1")
-  testImplementation("org.json:json:20210307")
+  testImplementation("org.json:json:20220924")
   testAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:$v_jmh")
 }

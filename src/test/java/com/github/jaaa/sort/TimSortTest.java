@@ -1,5 +1,6 @@
 package com.github.jaaa.sort;
 
+import com.github.jaaa.util.IMath;
 import net.jqwik.api.*;
 import net.jqwik.api.constraints.IntRange;
 import net.jqwik.api.constraints.Positive;
@@ -45,23 +46,35 @@ public class TimSortTest
         return l;
       }
 
-      private int minRunLenJaaaV2( int n )
+      private int minRunLenJaaaV2( int len )
       {
-        assert 0 <= n;
-        int     s = 0, RUN_LEN = 16;
-        if( n>>> 16 >= RUN_LEN ) s += 16;
-        if( n>>>s+8 >= RUN_LEN ) s +=  8;
-        if( n>>>s+4 >= RUN_LEN ) s +=  4;
-        if( n>>>s+2 >= RUN_LEN ) s +=  2;
-        if( n>>>s+1 >= RUN_LEN ) s +=  1;
-        int    l = n>>>s;
-        return l<<s != n ? l+1 : l;
+        int minRunLen = 16;
+        if( minRunLen <= 0 || len <  0 ) throw new IllegalArgumentException();
+        int                              s = 0;
+        if(   len>>>  16  >= minRunLen ) s =16;
+        if(   len>>>(s|8) >= minRunLen ) s|= 8;
+        if(   len>>>(s|4) >= minRunLen ) s|= 4;
+        if(   len>>>(s|2) >= minRunLen ) s|= 2;
+        if(   len>>>(s|1) >= minRunLen ) s|= 1;
+        int l=len>>> s;
+        return l<<s != len ? l+1 : l;
+      }
+
+      private int minRunLenJaaaV3( int len )
+      {
+        int minRunLen = 16;
+        if( len < 0 ) throw new IllegalArgumentException();
+        if( len <= minRunLen ) return len;
+        int s = IMath.log2Floor(len/minRunLen);
+        int l=len>>>s;
+        return l<<s != len ? l+1 : l;
       }
 
       {
-        for( int n=0; n >= 0; n++ ) {                        int runLen = minRunLenJDK(n);
+        for( int n=-1; ++n >= 0; ) {                         int runLen = minRunLenJDK(n);
           assertThat(             minRunLenJaaaV1(n) ).isEqualTo(runLen);
           assertThat(             minRunLenJaaaV2(n) ).isEqualTo(runLen);
+          assertThat(             minRunLenJaaaV3(n) ).isEqualTo(runLen);
           assertThat( TimSort.optimalRunLength(16,n) ).isEqualTo(runLen);
         }
       }

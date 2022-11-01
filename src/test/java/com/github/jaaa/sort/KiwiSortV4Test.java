@@ -1,6 +1,5 @@
 package com.github.jaaa.sort;
 
-import net.jqwik.api.Example;
 import net.jqwik.api.Group;
 import net.jqwik.api.PropertyDefaults;
 

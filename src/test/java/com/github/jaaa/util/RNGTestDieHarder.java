@@ -11,6 +11,7 @@ import java.util.function.LongSupplier;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.System.*;
 
+
 public class RNGTestDieHarder
 {
   private static void pump( InputStream in, PrintStream out, byte[] buf ) throws IOException
@@ -26,8 +27,8 @@ public class RNGTestDieHarder
   {
     Process             proc = getRuntime().exec("dieharder -k 2 -a -g 200");
     OutputStream pin  = proc.getOutputStream();
-    InputStream  pout = proc.getInputStream(),
-                 perr = proc.getErrorStream();
+    InputStream  pOut = proc.getInputStream(),
+                 pErr = proc.getErrorStream();
 
     byte[] buf = new byte[3*1024];
     if( buf.length%8 != 0 )
@@ -35,8 +36,8 @@ public class RNGTestDieHarder
 
     for(;;)
     {
-      pump(perr,err, buf);
-      pump(pout,out, buf);
+      pump(pErr,err, buf);
+      pump(pOut,out, buf);
 
       for( int i=0; i < buf.length; )
       {
@@ -51,7 +52,10 @@ public class RNGTestDieHarder
       try {
         pin.write(buf, 0, buf.length);
       }
-      catch( IOException ioe ) {}
+      catch( IOException ioe ) {
+        if( proc.isAlive() )
+          throw ioe;
+      }
     }
 
     if( proc.exitValue() != 0 )
@@ -71,6 +75,7 @@ public class RNGTestDieHarder
 
     for(;;)
     {
+      Thread.yield();
       pump(perr,err, buf);
       pump(pout,out, buf);
 
@@ -87,7 +92,10 @@ public class RNGTestDieHarder
       try {
         pin.write(buf, 0, buf.length);
       }
-      catch( IOException ioe ) {}
+      catch( IOException ioe ) {
+        if( proc.isAlive() )
+          throw ioe;
+      }
     }
 
     if( proc.exitValue() != 0 )
@@ -110,6 +118,6 @@ public class RNGTestDieHarder
     out.println("\n  //==================//");
     out.println(  " // java.util.Random //");
     out.println(  "//==================//\n");
-    testRNG( new Random()::nextLong );
+    testRNG( (LongSupplier) new Random()::nextLong );
   }
 }

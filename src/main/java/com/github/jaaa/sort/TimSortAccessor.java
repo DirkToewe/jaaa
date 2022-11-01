@@ -42,17 +42,11 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
     }
   };
 
-  private static int minRunLen( int n )
-  {
-    assert 1 == Integer.bitCount(MIN_RUN_LEN);
-    return TimSort.optimalRunLength(MIN_RUN_LEN,n);
-  }
-
   default int timSort_prepareNextRun( T arr, int from, int until, int minRunLen )
   {
     // TODO: improve adaptive in-place sorting of the runs
     int start = from+1;
-    if( start >= until ) return start;
+    if( start >= until ) return until;
 
     boolean ascending = compare(arr,start++, arr,from) >= 0;
 
@@ -102,7 +96,7 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
                   bufLen = _buf1 - _buf0,
                 stackTop = 0,
                minGallop = MIN_GALLOP;
-      private final int minRunLen = minRunLen(length);
+      private final int minRunLen = TimSort.optimalRunLength(MIN_RUN_LEN,length);
       private final int[] stack = new int[ STACK_LEN_FN.applyAsInt(length) ];
 
     // CONSTRUCTOR
@@ -144,10 +138,8 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
 //        assert      from < mid;
 //        assert             mid < until;
 
-        from  = expL2RSearchGapR(arr,from,mid,       arr,mid  ); if( from == mid ) return; // <- trivially mergeable case
-        until = expR2LSearchGapL(arr,   1+mid,until, arr,mid-1); // 1+mid since trivially mergeable case is caught above
-//        from  = gallopL2RSearchGapR(arr,from,mid,       arr,mid  ); if( from == mid ) return; // <- trivially mergeable case
-//        until = gallopR2LSearchGapL(arr,   1+mid,until, arr,mid-1); // 1+mid since trivially mergeable case is caught above
+        from  = expL2RSearchGap(arr,from,mid,       arr,mid  ,true ); if( from == mid ) return; // <- trivially mergeable case
+        until = expR2LSearchGap(arr,   1+mid,until, arr,mid-1,false); // 1+mid since trivially mergeable case is caught above
 
         int aLen =       mid-from,
             bLen = until-mid;
@@ -187,7 +179,7 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
 
       private void mergeCollapse()
       {
-        loop: for(; stackTop > 1; stackTop--) {
+        for(; stackTop > 1; stackTop--) {
           int pos = stackTop;
           block: {          int l2 = runLen(pos  ),
                                 l1 = runLen(pos-1);
@@ -199,7 +191,7 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
                 break block;
               }
             }
-            if( l1 > l2 ) break loop;
+            if( l1 > l2 ) break;
           }
           merge(
             stack[pos-2],

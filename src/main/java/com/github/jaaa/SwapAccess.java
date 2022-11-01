@@ -13,5 +13,5 @@ public interface SwapAccess
    *  @param i Index of the first element.
    *  @param j Index of the second element.
    */
-  public void swap( int i, int j );
+  void swap( int i, int j );
 }

@@ -15,14 +15,22 @@ public interface KiwiSortV3Access extends ArgMinAccess, BlockRotationMergeAccess
 {
   int MIN_RUN_LEN = 16;
 
+  TimMergeAccessor<KiwiSortV3Access> _TIM_MERGE_ACCESSOR = new TimMergeAccessor<>() // <- FIXME: should be private but JDK won't let me
+  {
+    @Override public KiwiSortV3Access malloc( int len ) { throw new AssertionError(); }
+    @Override public int compare( KiwiSortV3Access a, int i, KiwiSortV3Access b, int j ) { return a.compare(i,j); }
+    @Override public void   swap( KiwiSortV3Access a, int i, KiwiSortV3Access b, int j ) {        a.   swap(i,j); }
+    @Override public void   copy( KiwiSortV3Access a, int i, KiwiSortV3Access b, int j ) {        a.   swap(i,j); }
+  };
+
   static int minBufLen( int len )
   {
     // bufLen == (len-bufLen) / bufLen;
     if( len < 0 ) throw new IllegalArgumentException();
     int         bufLen = (int) ceil( ( sqrt(len*8d + 1) - 5 ) / 4 );
     int l = len-bufLen;
-        l -= l+1>>>1;
-    if(1 > bufLen || l/bufLen > bufLen )
+        l-= l+1>>>1;
+    if(1 > bufLen || l/bufLen > bufLen)
          ++bufLen;
     return bufLen;
   }
@@ -34,12 +42,13 @@ public interface KiwiSortV3Access extends ArgMinAccess, BlockRotationMergeAccess
                                          int b0, int bLen,
                                          int c0 )
   {
-    new TimMergeAccessor<Void>() {
-      @Override public Void malloc( int len ) { throw new AssertionError(); }
-      @Override public int compare( Void a, int i, Void b, int j ) { return KiwiSortV3Access.this.compare(i,j); }
-      @Override public void   swap( Void a, int i, Void b, int j ) {        KiwiSortV3Access.this.   swap(i,j); }
-      @Override public void   copy( Void a, int i, Void b, int j ) {        KiwiSortV3Access.this.   swap(i,j); }
-    }._timMergeL2R(TimMergeAccessor.MIN_GALLOP, null,a0,aLen, null,b0,bLen, null,c0);
+//    new TimMergeAccessor<Void>() {
+//      @Override public Void malloc( int len ) { throw new AssertionError(); }
+//      @Override public int compare( Void a, int i, Void b, int j ) { return KiwiSortV3Access.this.compare(i,j); }
+//      @Override public void   swap( Void a, int i, Void b, int j ) {        KiwiSortV3Access.this.   swap(i,j); }
+//      @Override public void   copy( Void a, int i, Void b, int j ) {        KiwiSortV3Access.this.   swap(i,j); }
+//    }._timMergeL2R(TimMergeAccessor.MIN_GALLOP, null,a0,aLen, null,b0,bLen, null,c0);
+    _TIM_MERGE_ACCESSOR._timMergeL2R(TimMergeAccessor.MIN_GALLOP, this,a0,aLen, this,b0,bLen, this,c0);
   }
 
   default void kiwiSortV3( int from, int until )
@@ -52,10 +61,10 @@ public interface KiwiSortV3Access extends ArgMinAccess, BlockRotationMergeAccess
 
     // STEP 1: Buffer Extraction
     // -------------------------
-    int         len = until-from,
-      desiredBufLen = minBufLen(len),
-             bufLen = extractSortBuf_ordinal_l_sorted(from,until, desiredBufLen, from),
-             buf    = from;
+    int        len = until-from,
+     desiredBufLen = minBufLen(len),
+            bufLen = extractSortBuf_ordinal_l_sorted(from,until, desiredBufLen, from),
+            buf    = from;
     from += bufLen;
     len  -= bufLen;
 
@@ -76,7 +85,10 @@ public interface KiwiSortV3Access extends ArgMinAccess, BlockRotationMergeAccess
 
     /* A broadcast version of @StableOptimalBlockMergeV2Access,
      * which allows to first rearrange all blocks and then merge
-     * them in a consecutive step. This avoids
+     * them in a consecutive step. This reduces the number of times
+     * the buffer has to be sorted since the buffer remains sorted
+     * during an entire rearrangement phase and unsorted during an
+     * entire local merge phase.
      */
     final class KiwiMerger
     {
