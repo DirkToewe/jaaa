@@ -6,8 +6,6 @@ import com.github.jaaa.search.ExpR2LSearchAccessor;
 
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeL2R;
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeR2L;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 
 
 //  REFERENCES
@@ -32,8 +30,6 @@ import static java.lang.Math.min;
 //
 
 public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
-//                                           GallopL2RSearchAccessor<T>,
-//                                           GallopR2LSearchAccessor<T>
                                               ExpR2LSearchAccessor<T>,
                                               ExpL2RSearchAccessor<T>
 {

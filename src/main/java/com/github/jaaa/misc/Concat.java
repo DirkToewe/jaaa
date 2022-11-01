@@ -7,7 +7,6 @@ import static java.lang.System.arraycopy;
 public class Concat
 {
 // STATIC FIELDS
-  private static final Object[] EMPTY_ARRAY = {};
 
 // STATIC CONSTRUCTOR
 

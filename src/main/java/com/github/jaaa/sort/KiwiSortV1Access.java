@@ -6,6 +6,7 @@ import static java.lang.Math.ceil;
 import static java.lang.Math.sqrt;
 
 
+// KiwiSort is closely related to WikiSort.
 public interface KiwiSortV1Access extends ExtractSortBufOrdinalAccess, InsertionSortAccess, KiwiMergeAccess
 {
   int MIN_RUN_LEN = 16;

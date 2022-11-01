@@ -25,30 +25,35 @@ public interface HeapSortAccess extends BinaryHeapAccess
       }
 
       if( root < until-1 )
-        ++root;
+        ++root; // <- heap building phase
       else
-        swap(from++,root);
+        swap(from++,root); // <- extract min. phase
     }
   }
 
 //  default void heapSort( int from, int until )
 //  {
-//    binHeapMinR_build(from,until);
+//    if( from < 0 || from > until ) throw new IllegalArgumentException();
 //
-//    int           root = until-1;
-//    while( from < root )
-//    { // EXTRACT MIN
-//      swap(from++,root);
+//    final int                    lastParent = -1 + (from+until-- >>> 1);
+//    heap_building: for( int root=lastParent; from < until; )
+//    {
 //      // SIFT DOWN
-//      for( int parent=root;; ) {
-//        int child = (parent<<1) - until;
-//        if( child < from ) break;
-//        if( child > from )
-//            child -= compare(child-1,child)>>>31;
-//        if( compare(parent,child) > 0 )
+//      for( int parent=root;; )
+//      {
+//        int child = (parent<<1) + 1 - from;
+//        if( child > until ) break;
+//        if( child < until )
+//            child += compare(child,child+1)>>>31;
+//        if( compare(parent,child) < 0 )
 //          swap(parent,parent=child);
 //        else break;
 //      }
+//
+//      if( root > from )
+//        --root;    // <- HEAP BUILDING PHASE
+//      else
+//        swap(until--,root);
 //    }
 //  }
 }

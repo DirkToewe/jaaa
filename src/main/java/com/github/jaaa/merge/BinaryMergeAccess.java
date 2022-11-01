@@ -4,7 +4,7 @@ import com.github.jaaa.misc.RotateAccess;
 import com.github.jaaa.search.BinarySearchAccess;
 
 public interface BinaryMergeAccess extends RotateAccess,
-                                            BinarySearchAccess
+                                           BinarySearchAccess
 {
   default void binaryMerge( int from, int mid, int until )
   {

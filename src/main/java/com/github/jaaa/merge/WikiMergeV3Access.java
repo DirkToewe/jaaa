@@ -4,6 +4,10 @@ import com.github.jaaa.fn.Int4Consumer;
 
 import static java.lang.Math.*;
 
+
+// Like WikiMergeV2 but with actual merging phase out-sourced into the `wikiMergeV3_L2R_usingBuffer`.
+// This way the method can be used in a basic WikiSort implementation. Additional the wikiMerge now
+// falls back to kiwiMerge if the buffer is not large enough.
 public interface WikiMergeV3Access extends KiwiMergeAccess
 {
   static int minBufLen( int len )
@@ -40,11 +44,6 @@ public interface WikiMergeV3Access extends KiwiMergeAccess
       @Override public int compare( Void a, int i, Void b, int j ) { return WikiMergeV3Access.this.compare(i,j); }
     }.timMerge(null,a0,aLen, null,b0,bLen, null,c0);
   }
-
-//  private void wikiMergeV3_copyToBufferAndMerge( int l, int m, int r, int buf, int nL )
-//  {
-//
-//  }
 
   default void wikiMergeV3( int from, int mid, int until )
   {
@@ -176,7 +175,7 @@ public interface WikiMergeV3Access extends KiwiMergeAccess
 
       --nRemain;
 
-      // move min. block to the very left so it is in place
+      // move min. block to the very right, so it is in place
       blockSwap( pos + nRemain*B, pos + min*B, B );
       swap(MIB+nRemain, MIB+min); // <- as a side effect this sorts the MIB
 
