@@ -9,6 +9,17 @@ import com.github.jaaa.sort.HeapSortFastAccess;
 import static java.lang.Math.*;
 
 
+// KiwiMerge is closely related to WikiMerge. Both are optimized variants of
+// StableOptimalBlockMerge, which was originally presented in [1]. The two
+// variants find different ways to get rid of the "block distribution storage"
+// (BDS) used in the original algorithm.
+//
+// KiwiMerge gets rid of the BDS by simply realizing that the block rearrangement
+// of StableOptimalBlockMerge is stable. A BDS is therefore not necessary to
+// ensure stability during local merges. KiwiMerge is therefore able to get rid
+// of the BDS all together. It therefore requires only (roughly) half the merge
+// buffer size of WikiMerge.
+//
 // References
 // ----------
 // .. [1] "Ratio Based Stable In-Place Merging"
@@ -30,7 +41,6 @@ public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess,
          ++buf_len;
     return buf_len;
   }
-
 
   default void kiwiMerge_mergeInPlace ( int from, int mid, int until ) { blockRotationMerge(from,mid,until); }
   default void kiwiMerge_mergeBuffered( int a0, int aLen,
@@ -109,10 +119,10 @@ public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess,
 
     int mergeEnd = until,
         nBlocksL = lenL/B;
-    if( nBlocksL*B == lenL ) // <- if there's no rest, we can rearrange with one block less
-        nBlocksL--;
+    if( B == lenL ) // <- merge single blocks without block rearrangement
+       nBlocksL--;
 
-    int firstBlock = mid - B*nBlocksL;
+    int block0 = mid - B*nBlocksL;
 
     if( 0 < nBlocksL )
     {
@@ -132,8 +142,8 @@ public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess,
         nRemain = nBlocksL;; // <- number of blocks not yet in place
       )
       {
-        int key = firstBlock + B*(pos+min),
-            idx = ExpL2RSearch.searchGapL( pos+nRemain,nBlocks, i -> compare(key, firstBlock + i*B + B-1) );
+        int key = block0 + B*(pos+min),
+            idx = ExpL2RSearch.searchGapL( pos+nRemain,nBlocks, i -> compare(key, block0 + i*B + B-1) );
             idx -= nRemain;
 
         // adjust min index and MIB to account for the block rolling
@@ -144,10 +154,10 @@ public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess,
 
         // block roll forward
         for( ; pos < idx; pos++ )
-          blockSwap( firstBlock + B*pos, firstBlock + B*(pos+nRemain), B );
+          blockSwap( block0 + B*pos, block0 + B*(pos+nRemain), B );
 
         // move min. block to the very left to its final destination
-        blockSwap( firstBlock + B*pos, firstBlock + B*(pos+min), B );
+        blockSwap( block0 + B*pos, block0 + B*(pos+min), B );
         swap(mib, mib+min); // <- as a side effect this sorts the MIB
 
         if( --nRemain <= 0 )
@@ -178,9 +188,9 @@ public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess,
       //
       // So all we have to go from right to left through all blocks,
       // find such neighbors and merge them with the right side.
-      for( int i=firstBlock + nBlocks*B < until ? nBlocks : nBlocks-1; i > 0; i-- )
+      for( int i=block0 + nBlocks*B < until ? nBlocks : nBlocks-1; i > 0; i-- )
       {
-        int m = firstBlock + i*B;
+        int m = block0 + i*B;
         if( compare(m-1,m) > 0 ) {
           int          l = m-B,       pos = expL2RSearchGap(m,min(m+B,mergeEnd), l, false); // <- find pos. of 1st elem.
           merge.accept(l,mergeEnd, B, pos);
@@ -191,8 +201,8 @@ public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess,
 
     // STEP 4: Merge up left odd ends
     // =============================
-    if( from < firstBlock )
-      merge.accept( from,mergeEnd, firstBlock-from, expL2RSearchGap(firstBlock,mergeEnd, from, false) );
+    if( from < block0 )
+      merge.accept( from,mergeEnd, block0-from, expL2RSearchGap(block0,mergeEnd, from, false) );
 
     // if we used MIB as merge buffer, it might be out of order
     if( useBufferedMerge )
@@ -201,9 +211,8 @@ public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess,
 
   default void kiwiMergeR2L(int from, int mid, int until )
   {
-    if( from  < 0   ) throw new IllegalArgumentException();
-    if( from  > mid ) throw new IllegalArgumentException();
-    if( until < mid ) throw new IllegalArgumentException();
+    if( 0 > from || from > mid || mid > until )
+      throw new IllegalArgumentException();
 
     int last = until-1;
     new KiwiMergeAccess()
