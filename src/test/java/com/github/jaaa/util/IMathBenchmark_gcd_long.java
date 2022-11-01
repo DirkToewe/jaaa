@@ -13,43 +13,47 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.min;
 
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 
-@Warmup     (iterations = 8, time = 8/*sec*/)
-@Measurement(iterations = 8, time = 8/*sec*/)
-@Fork( value=4, jvmArgsAppend={"-ea", "-XX:MaxInlineLevel=15", "-Xmx16g"} )
+@Warmup     (iterations = 64, time = 16/*sec*/)
+@Measurement(iterations = 16, time = 16/*sec*/)
+@Fork(
+  value = 4,
+  jvmArgsAppend = {"-XX:MaxInlineLevel=15", "-Xmx8g"}
+)
 
 @State(Scope.Benchmark)
 public class IMathBenchmark_gcd_long
 {
 // STATIC FIELDS
 
-  // STATIC CONSTRUCTOR
-  static {
-    boolean ea = false;
-    assert  ea = true;
-       if( !ea ) throw new IllegalStateException();
-  }
+// STATIC CONSTRUCTOR
 
-  // STATIC METHODS
+// STATIC METHODS
   public static void main( String... args ) throws RunnerException, IOException
   {
+    boolean ea = false;
+    assert  ea = true;
+    if   ( !ea ) throw new IllegalStateException();
+
     var rng = new Random(1337);
-    System.out.print("Running tests...");
+    System.out.print("\nRunning tests...");
     for( int run=0; run++ < 1_000_000; )
     {
       long x = rng.nextLong(),
            y = rng.nextLong();
       assert gcd1(x,y) == gcd2(x,y);
+      assert gcd1(x,y) == gcd3(x,y);
     }
-    System.out.println(" passed!");
+    System.out.println(" passed!\n");
 
     var opt = new OptionsBuilder()
-            .include( IMathBenchmark_gcd_long.class.getCanonicalName() )
-            .build();
+      .include( IMathBenchmark_gcd_long.class.getCanonicalName() )
+      .build();
 
     Collection<RunResult> results = new Runner(opt).run();
   }
@@ -99,6 +103,28 @@ public class IMathBenchmark_gcd_long
     }
   }
 
+  private static long gcd3( long x, long y )
+  {
+    x = abs(x);
+    y = abs(y);
+    int l = Long.numberOfTrailingZeros(x); x >>>= l;
+    int r = Long.numberOfTrailingZeros(y); y >>>= r;
+    int shift = min(l,r);
+    if( x > y ) {
+      long z = x; x = y; y = z;
+    }
+    while( x != 0 ) {
+      // Interleave euclidean and binary GCD.
+      // Ensures that y halves each iteration.
+      long z = x > (y>>>1) ? y-x : y%x;
+      y = x;
+      x = z;
+      // Invariant: x <= y && (y is odd)
+      x >>>= Long.numberOfTrailingZeros(x);
+    }
+    return y << shift;
+  }
+
   // FIELDS
   private final Random rng = new Random();
 
@@ -116,5 +142,12 @@ public class IMathBenchmark_gcd_long
     long x = rng.nextLong(),
          y = rng.nextLong();
     blackhole.consume( gcd2(x,y) );
+  }
+
+  @Benchmark
+  public void gcd3( Blackhole blackhole ) {
+    long x = rng.nextLong(),
+         y = rng.nextLong();
+    blackhole.consume( gcd3(x,y) );
   }
 }

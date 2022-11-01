@@ -31,36 +31,44 @@ public final class IMath
   {
     x = abs(x);
     y = abs(y);
-    for( int shift=0;;) {
-      int l = Integer.numberOfTrailingZeros(x); x >>>= l;
-      int r = Integer.numberOfTrailingZeros(y); y >>>= r;
-      shift += min(l,r);
-
-      if( x==0 || x==y || y==0 )
-        return (x|y) << shift;
-
-      int z = abs(x-y) >>> 1;
-      x = min(x,y);
-      y = z;
+    int l = Integer.numberOfTrailingZeros(x); x >>>= l;
+    int r = Integer.numberOfTrailingZeros(y); y >>>= r;
+    int shift = min(l,r);
+    if( x > y ) {
+      int z = x; x = y; y = z;
     }
+    while( x != 0 ) {
+      // Interleave euclidean and binary GCD.
+      // Ensures that y halves each iteration.
+      int z = x > (y>>>1) ? y-x : y%x;
+      y = x;
+      x = z;
+      // Invariant: x <= y && (y is odd)
+      x >>>= Integer.numberOfTrailingZeros(x);
+    }
+    return y << shift;
   }
 
   public static long gcd( long x, long y )
   {
     x = abs(x);
     y = abs(y);
-    for( int shift=0;;) {
-      int l = Long.numberOfTrailingZeros(x); x >>>= l;
-      int r = Long.numberOfTrailingZeros(y); y >>>= r;
-      shift += min(l,r);
-
-      if( x==0 || x==y || y==0 )
-        return (x|y) << shift;
-
-      long z = abs(x-y) >>> 1;
-      x = min(x,y);
-      y = z;
+    int l = Long.numberOfTrailingZeros(x); x >>>= l;
+    int r = Long.numberOfTrailingZeros(y); y >>>= r;
+    int shift = min(l,r);
+    if( x > y ) {
+      long z = x; x = y; y = z;
     }
+    while( x != 0 ) {
+      // Interleave euclidean and binary GCD.
+      // Ensures that y halves each iteration.
+      long z = x > (y>>>1) ? y-x : y%x;
+      y = x;
+      x = z;
+      // Invariant: x <= y && (y is odd)
+      x >>>= Long.numberOfTrailingZeros(x);
+    }
+    return y << shift;
   }
 
   public static int sqrtCeil( int n )
