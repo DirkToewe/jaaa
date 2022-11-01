@@ -1,8 +1,7 @@
 package com.github.jaaa.sort.datagen;
 
-import com.github.jaaa.misc.Shuffle;
+import com.github.jaaa.misc.RandomShuffle;
 
-import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -67,8 +66,8 @@ public class RandomSortDataGenerator
       if( rng.nextDouble() < 0.5 ) {
         // INTERLEAVE
         int s = rng.nextInt(2)+2; // <- TODO: increase number of interleaves, maybe to sqrt(len) or something?
-        nextMixed(array, from+step*0,until, step*s);
-        nextMixed(array, from+step*1,until, step*s);
+        nextMixed(array, from       ,until, step*s);
+        nextMixed(array, from+step  ,until, step*s);
         nextMixed(array, from+step*2,until, step*s);
       }
       else {
@@ -87,12 +86,12 @@ public class RandomSortDataGenerator
         }
       }
     }
-    else switch( rng.nextInt(3) ) {
-      case 0 : nextAscending (array, from,until,step); break;
-      case 1 : nextDescending(array, from,until,step); break;
-      case 2 : nextUniform   (array, from,until,step); break;
+    else switch (rng.nextInt(3)) {
+      case 0 -> nextAscending(array, from, until, step);
+      case 1 -> nextDescending(array, from, until, step);
+      case 2 -> nextUniform(array, from, until, step);
 //      case 3 : nextGaussian  (array, from,until,step); break;
-      default: throw new AssertionError();
+      default -> throw new AssertionError();
     }
   }
 
@@ -101,7 +100,7 @@ public class RandomSortDataGenerator
     int[] result = new int[len];
     for( int i=len; i-- > 0; )
       result[i] = i;
-    Shuffle.shuffle(result, rng::nextInt);
+    RandomShuffle.shuffle(result, rng::nextInt);
     return result;
   }
 

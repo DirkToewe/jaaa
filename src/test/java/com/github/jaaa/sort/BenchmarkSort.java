@@ -9,7 +9,7 @@ import com.github.jaaa.util.Progress;
 import java.io.IOException;
 import java.util.*;
 
-import static com.github.jaaa.misc.Shuffle.shuffled;
+import static com.github.jaaa.misc.RandomShuffle.shuffled;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 import static java.lang.System.out;
@@ -50,17 +50,20 @@ public class BenchmarkSort
 //    System.out.println("GO");
 
     Map<String,SortFn> mergers = Map.ofEntries(
-      entry("TimSort",                                 TimSort::sort),
-      entry("JDK",                                      Arrays::sort),
 //      entry("HeapSort",                               HeapSort::sort),
 //      entry("HeapSortFast",                       HeapSortFast::sort),
 //      entry("QuickSort",                             QuickSort::sort),
 //      entry("MergeSort",                             MergeSort::sort),
 //      entry("KiwiSortV1",                           KiwiSortV1::sort),
-      entry("KiwiSortV2",                           KiwiSortV2::sort),
-      entry("KiwiSortV3",                           KiwiSortV3::sort),
-      entry("KiwiSortV4",                           KiwiSortV4::sort),
-      entry("ComparatorWikiSort", new ComparatorWikiSort(null)::sort)
+//      entry("KiwiSortV2",                           KiwiSortV2::sort),
+//      entry("KiwiSortV3",                           KiwiSortV3::sort),
+//      entry("KiwiSortV4",                           KiwiSortV4::sort),
+//      entry("KiwiSortV5",                           KiwiSortV5::sort),
+//      entry("KiwiSortV6",                           KiwiSortV6::sort),
+//      entry("WikiSortV1",                           WikiSortV1::sort),
+      entry("ComparatorWikiSort", new ComparatorWikiSort(null)::sort),
+      entry("TimSort",                                 TimSort::sort),
+      entry("JDK",                                      Arrays::sort)
     );
 
     int     LEN = 1_000_000,
@@ -123,6 +126,10 @@ public class BenchmarkSort
 
   private static void plot_results( String type, int[] x, Map<String,double[]> results ) throws IOException
   {
+
+    var vm = System.getProperty("java.vm.name") + " " + System.getProperty("java.vm.version");
+    var jv = "Java " + System.getProperty("java.version");
+
     var data = results.entrySet().stream().map( EntryFn.of(
       (method,y) -> format(
         """
@@ -147,12 +154,12 @@ public class BenchmarkSort
     String layout = format(
       """
       {
-        title: 'Merge %s Benchmark (L = %d)',
+        title: 'Sort %s Benchmark (L = %d)<br>%s<br>%s',
         xaxis: {title: 'Split Position'},
         yaxis: {title: 'Time [msec.]'  }
       }
       """,
-      type, x.length
+      type, x.length, vm, jv
     );
 
     PlotlyUtils.plot(layout, data);

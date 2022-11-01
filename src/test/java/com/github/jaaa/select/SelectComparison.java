@@ -5,23 +5,26 @@ import com.github.jaaa.Swap;
 import com.github.jaaa.fn.EntryConsumer;
 import com.github.jaaa.fn.EntryFn;
 import com.github.jaaa.util.PlotlyUtils;
+import com.github.jaaa.util.Progress;
+import smile.math.kernel.GaussianKernel;
+import smile.regression.GaussianProcessRegression;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.SplittableRandom;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-import static com.github.jaaa.misc.Shuffle.shuffle;
+import static com.github.jaaa.misc.RandomShuffle.shuffle;
 import static com.github.jaaa.util.Sampling.lhs;
 import static java.awt.Desktop.getDesktop;
 import static java.lang.Math.round;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
+import static java.lang.System.out;
 import static java.util.Arrays.stream;
 import static java.util.Map.entry;
 import static java.util.stream.Collectors.joining;
@@ -61,19 +64,22 @@ public class SelectComparison
 // STATIC METHODS
   public static void main( String... args ) throws IOException
   {
+    out.println( System.getProperty("java.vm.name") + " " + System.getProperty("java.vm.version") );
+    out.println( "Java " + System.getProperty("java.version") );
+
     Map<String,SelectFn> selectors = Map.ofEntries(
-//      entry("HeapV1Acc", (l,m,r,acc) ->
-//        new HeapSelectV1V2Access() {
-//          @Override public void   swap( int i, int j ) {        acc.   swap(i,j); }
-//          @Override public int compare( int i, int j ) { return acc.compare(i,j); }
-//        }.heapSelectV1(l,m,r)
-//      ),
-//      entry("HeapV2Acc", (l,m,r,acc) ->
-//        new HeapSelectV1V2Access() {
-//          @Override public void   swap( int i, int j ) {        acc.   swap(i,j); }
-//          @Override public int compare( int i, int j ) { return acc.compare(i,j); }
-//        }.heapSelectV2(l,m,r)
-//      ),
+      entry("HeapV1Acc", (l,m,r,acc) ->
+        new HeapSelectV1V2Access() {
+          @Override public void   swap( int i, int j ) {        acc.   swap(i,j); }
+          @Override public int compare( int i, int j ) { return acc.compare(i,j); }
+        }.heapSelectV1(l,m,r)
+      ),
+      entry("HeapV2Acc", (l,m,r,acc) ->
+        new HeapSelectV1V2Access() {
+          @Override public void   swap( int i, int j ) {        acc.   swap(i,j); }
+          @Override public int compare( int i, int j ) { return acc.compare(i,j); }
+        }.heapSelectV2(l,m,r)
+      ),
       entry("HeapV3Acc", (l,m,r,acc) ->
         new HeapSelectV3V4Access() {
           @Override public void   swap( int i, int j ) {        acc.   swap(i,j); }
@@ -100,9 +106,12 @@ public class SelectComparison
       )
     );
 
-    compare_over_split(selectors, 1_000_000);
-
-    compare_over_both(selectors, 1_000_000);
+    for( int len: new int[]{100_000, 1_000_000} )
+    {
+      out.printf("len: %d\n", len);
+      compare_over_split(selectors, len);
+      compare_over_both (selectors, len);
+    }
 //    for( var split: new double[]{ 0.5 } )//, 0.25, 0.75 } )
 //      compare_over_length(selectors, 1_000_000, split);
   }
@@ -116,10 +125,10 @@ public class SelectComparison
    */
   private static void compare_over_split( Map<String,SelectFn> selectors, final int length ) throws IOException
   {
-    int N_SAMPLES = 10_000;
+    int N_SAMPLES = 2048;
     var rng = new SplittableRandom();
 
-    int[] x = rng.ints(N_SAMPLES, 0,length+1).toArray();
+    double[] x = rng.ints(N_SAMPLES, 0,length+1).asDoubleStream().toArray();
     Arrays.sort(x);
 
     Map<String,double[]>
@@ -135,29 +144,23 @@ public class SelectComparison
     @SuppressWarnings("unchecked")
     Entry<String,SelectFn>[] selectorsArr = selectors.entrySet().toArray(Entry[]::new);
 
-    var progress = new AtomicInteger(0);
-
     var      order = range(0,N_SAMPLES).toArray();
     shuffle(order,rng::nextInt);
-    stream(order).forEach( i -> {
-      int prog = progress.incrementAndGet();
-      if( prog % 100 == 0 )
-        System.out.printf("%5d / %d\n", prog, N_SAMPLES);
-
-      int split = x[i];
-
-//      int[] ref = new int[length];
-//      for( int j=0; ++j < length; )
-//        ref[j] = ref[j-1] + rng.nextInt(2);
-//      shuffle(ref, rng::nextInt);
-
-//      int[] ref = new int[length];
-//      for( int j=0; ++j < length; )
-//        ref[j] = ref[j-1] + rng.nextInt(2);
+    Progress.print( stream(order) ).forEach(i -> {
+      int split = (int) x[i];
 
       int[] ref = new int[length];
       for( int j=0; ++j < length; )
-        ref[j] = ref[j-1] - 1;//rng.nextInt(2);
+        ref[j] = ref[j-1] + rng.nextInt(2);
+      shuffle(ref, rng::nextInt);
+
+//      int[] ref = new int[length];
+//      for( int j=0; ++j < length; )
+//        ref[j] = ref[j-1] + rng.nextInt(2);
+
+//      int[] ref = new int[length];
+//      for( int j=0; ++j < length; )
+//        ref[j] = ref[j-1] - 1;//rng.nextInt(2);
 
       shuffle(selectorsArr, rng::nextInt);
       stream(selectorsArr).forEach( EntryConsumer.of( (k, v) -> {
@@ -191,7 +194,7 @@ public class SelectComparison
     int N_SAMPLES = 10_000;
     var rng = new SplittableRandom();
 
-    int[] x = rng.ints(N_SAMPLES, 0,max_length+1).toArray();
+    var x = rng.ints(N_SAMPLES, 0,max_length+1).asDoubleStream().toArray();
     Arrays.sort(x);
 
     Map<String,double[]>
@@ -207,16 +210,10 @@ public class SelectComparison
     @SuppressWarnings("unchecked")
     Entry<String,SelectFn>[] selectorsArr = selectors.entrySet().toArray(Entry[]::new);
 
-    var progress = new AtomicInteger(0);
-
     var      order = range(0,N_SAMPLES).toArray();
     shuffle(order,rng::nextInt);
-    stream(order).forEach( i -> {
-      int prog = progress.incrementAndGet();
-      if( prog % 100 == 0 )
-        System.out.printf("%5d / %d\n", prog, N_SAMPLES);
-
-      final int length = x[i],
+    Progress.print( stream(order) ).forEach( i -> {
+      final int length = (int) x[i],
                  split = (int) round(length*splitRatio);
 
       int[] ref = new int[length];
@@ -277,30 +274,24 @@ public class SelectComparison
     @SuppressWarnings("unchecked")
     Entry<String,SelectFn>[] selectorsArr = selectors.entrySet().toArray(Entry[]::new);
 
-    var progress = new AtomicInteger(0);
-
     var      order = range(0,N_SAMPLES).toArray();
     shuffle(order,rng::nextInt);
-    stream(order).forEach( i -> {
-      int prog = progress.incrementAndGet();
-      if( prog % 100 == 0 )
-        System.out.printf("%5d / %d\n", prog, N_SAMPLES);
-
+    Progress.print( stream(order) ).forEach( i -> {
       final int split = (int) x[i],
                length = (int)(x[i] + y[i]);
 
-//      int[] ref = new int[length];
-//      for( int j=0; ++j < length; )
-//        ref[j] = ref[j-1] + rng.nextInt(2);
-//      shuffle(ref, rng::nextInt);
-
-//      int[] ref = new int[length];
-//      for( int j=0; ++j < length; )
-//        ref[j] = ref[j-1] + rng.nextInt(2);
-
       int[] ref = new int[length];
       for( int j=0; ++j < length; )
-        ref[j] = ref[j-1] - 1;//rng.nextInt(2);
+        ref[j] = ref[j-1] + rng.nextInt(2);
+      shuffle(ref, rng::nextInt);
+
+//      int[] ref = new int[length];
+//      for( int j=0; ++j < length; )
+//        ref[j] = ref[j-1] + rng.nextInt(2);
+
+//      int[] ref = new int[length];
+//      for( int j=0; ++j < length; )
+//        ref[j] = ref[j-1] - 1;//rng.nextInt(2);
 
       shuffle(selectorsArr, rng::nextInt);
       stream(selectorsArr).forEach( EntryConsumer.of( (k,v) -> {
@@ -325,31 +316,106 @@ public class SelectComparison
     plot3d(    "Select timings Benchmark", "Left Length", x, "Right Length", y, "Time [msec.]", resultsTimes);
   }
 
-  private static void plot2d( String title, String x_label, int[] x, String y_label, Map<String,double[]> ys ) throws IOException
+  private static void plot2d( String title, String x_label, double[] x, String y_label, Map<String,double[]> ys ) throws IOException
   {
-    String[] data = ys.entrySet().stream().map( EntryFn.of(
-      (method,y) -> format(
-        """
+    var colorList = List.of(
+      "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#999999"
+    );
+    var col = new AtomicInteger();
+
+    String[] data = Progress.print( ys.entrySet().stream() ).flatMap(
+      new Function<Entry<String, double[]>, Stream<String>>() {
+        public  Stream<String> apply( Entry<String, double[]> entry ) { return apply(entry.getKey(), entry.getValue()); }
+        private Stream<String> apply( String method, double[] y )
         {
-          type: 'scattergl',
-          mode: 'markers',
-          name: '%s',
-          marker: {
-            size: 4,
-            opacity: 0.6
-          },
-          x: %s,
-          y: %s
+          var X = stream(x).mapToObj( x -> new double[]{x} ).toArray(double[][]::new);
+          var color = colorList.get( col.getAndIncrement() );
+
+          var scatter2d = format(
+            """
+            {
+              type: 'scattergl',
+              mode: 'markers',
+              name: '%s',
+              marker: {
+                color: '%s',
+                size: 5,
+                opacity: 0.2
+              },
+              x: %s,
+              y: %s
+            }
+            """,
+            method,
+            color,
+            Arrays.toString(x),
+            Arrays.toString(y)
+          );
+
+          var avg = stream(y).average().getAsDouble();
+          var var = stream(y).map( x -> { x-=avg; return x*x; } ).average().getAsDouble();
+
+          var gpr = GaussianProcessRegression.fit(
+            X,y.clone(), new GaussianKernel(8),
+            /*noise=*/var / 1e9, /*normalize=*/true, /*tol=*/1e-8, /*maxIter=*/1024
+          );
+
+          var fit = format(
+            """
+            {
+              type: 'scattergl',
+              mode: 'lines',
+              name: '%s (fit)',
+              line: {
+                color: '%s',
+                width: 2
+              },
+              x: %s,
+              y: %s
+            }
+            """,
+            method,
+            color,
+            Arrays.toString(x),
+            stream(X).mapToDouble(gpr::predict).mapToObj(Double::toString).collect( joining(", ", "[", "]") )
+          );
+
+          return Stream.of(scatter2d, fit);
         }
-        """,
-        method,
-        Arrays.toString(x),
-        Arrays.toString(y)
-      )
-    )).toArray(String[]::new);
+      }
+    ).toArray(String[]::new);
+
+//    String[] data = ys.entrySet().stream().map( EntryFn.of(
+//      (method,y) -> format(
+//        """
+//        {
+//          type: 'scattergl',
+//          mode: 'markers',
+//          name: '%s',
+//          marker: {
+//            size: 4,
+//            opacity: 0.6
+//          },
+//          x: %s,
+//          y: %s
+//        }
+//        """,
+//        method,
+//        Arrays.toString(x),
+//        Arrays.toString(y)
+//      )
+//    )).toArray(String[]::new);
 
     String layout = format(
-      "{ title: '%s', xaxis: {title: '%s'}, yaxis: {title: '%s'} }",
+      """
+      {
+        title: '%s',
+        xaxis: {title: '%s'},
+        yaxis: {title: '%s'},
+        paper_bgcolor: 'black',
+        plot_bgcolor: 'black'
+      }
+      """,
       title,
       x_label,
       y_label

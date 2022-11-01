@@ -3,11 +3,10 @@ package com.github.jaaa.sort.tiny;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.Arrays;
-import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.jaaa.misc.Shuffle.shuffle;
+import static com.github.jaaa.misc.RandomShuffle.shuffle;
 import static java.lang.System.arraycopy;
 
 
@@ -21,7 +20,7 @@ import static java.lang.System.arraycopy;
 @State(Scope.Benchmark)
 public abstract class BenchmarkTinySortTemplate
 {
-  {
+  static {
     boolean ea = false;
     assert  ea = true;
        if( !ea ) throw new IllegalStateException();
