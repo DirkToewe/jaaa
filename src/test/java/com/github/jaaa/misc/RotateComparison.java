@@ -13,8 +13,8 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.github.jaaa.misc.Shuffle.shuffle;
-import static com.github.jaaa.misc.Shuffle.shuffled;
+import static com.github.jaaa.misc.RandomShuffle.shuffle;
+import static com.github.jaaa.misc.RandomShuffle.shuffled;
 import static java.awt.Desktop.getDesktop;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
@@ -27,7 +27,7 @@ import static java.util.stream.IntStream.range;
 public class RotateComparison
 {
   // STATIC FIELDS
-  private static String PLOT_TEMPLATE = """
+  private static final String PLOT_TEMPLATE = """
     <!DOCTYPE html>
     <html lang="en">
       <head>

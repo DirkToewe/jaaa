@@ -8,13 +8,13 @@ import java.util.Arrays;
 import java.util.SplittableRandom;
 import java.util.function.Consumer;
 
-import static com.github.jaaa.misc.Shuffle.shuffle;
+import static com.github.jaaa.misc.RandomShuffle.shuffle;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.System.err;
 import static java.lang.System.out;
 
 
-public class ShuffleTestDieHarder
+public class RandomShuffleTestDieHarder
 {
   private static void pump( InputStream in, PrintStream out, byte[] buf ) throws IOException
   {
@@ -29,7 +29,7 @@ public class ShuffleTestDieHarder
   {
     System.out.println("\no---------------------o\n| shuffle(boolean[]) |\no---------------------o\n");
     testWith( new Consumer<>() {
-      SplittableRandom rng = new SplittableRandom();
+      final SplittableRandom rng = new SplittableRandom();
       @Override public void accept( byte[] buf ) {
         var bits = new boolean[buf.length*8];
         Arrays.fill(bits,0,buf.length*4, true);
@@ -46,7 +46,7 @@ public class ShuffleTestDieHarder
 
     System.out.println("\no----------------o\n| shuffle(byte[]) |\no----------------o\n");
     testWith( new Consumer<>() {
-      SplittableRandom rng = new SplittableRandom();
+      final SplittableRandom rng = new SplittableRandom();
       @Override public void accept( byte[] buf ) {
         for( int i=0; i < buf.length; i++ )
           buf[i] = (byte) i;

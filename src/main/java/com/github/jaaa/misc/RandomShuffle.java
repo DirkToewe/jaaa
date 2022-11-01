@@ -8,7 +8,7 @@ import java.util.function.IntBinaryOperator;
 import static com.github.jaaa.misc.CheckArgsMisc.checkArgs_fromUntil;
 
 
-public class Shuffle
+public class RandomShuffle
 {
 // STATIC FIELDS
 
@@ -21,10 +21,10 @@ public class Shuffle
   public static void shuffle( boolean[] arr, int from, int until, IntBinaryOperator randInt )
   {
     checkArgs_fromUntil(from,until, arr.length);
-    new ShuffleAccess() {
-      @Override public IntBinaryOperator shuffle_newRNG() { return randInt; }
+    new RandomShuffleAccess() {
+      @Override public IntBinaryOperator randomShuffle_newRNG() { return randInt; }
       @Override public void swap( int i, int j ) { Swap.swap(arr, i,j); }
-    }.shuffle(from,until);
+    }.randomShuffle(from,until);
   }
 
   public static void shuffle( byte[] arr                                                 ) { shuffle(arr,    0,arr.length, new SplittableRandom()::nextInt); }
@@ -33,10 +33,10 @@ public class Shuffle
   public static void shuffle( byte[] arr, int from, int until, IntBinaryOperator randInt )
   {
     checkArgs_fromUntil(from,until, arr.length);
-    new ShuffleAccess() {
-      @Override public IntBinaryOperator shuffle_newRNG() { return randInt; }
+    new RandomShuffleAccess() {
+      @Override public IntBinaryOperator randomShuffle_newRNG() { return randInt; }
       @Override public void swap( int i, int j ) { Swap.swap(arr, i,j); }
-    }.shuffle(from,until);
+    }.randomShuffle(from,until);
   }
 
   public static void shuffle( int[] arr                                                 ) { shuffle(arr,    0,arr.length, new SplittableRandom()::nextInt); }
@@ -45,10 +45,10 @@ public class Shuffle
   public static void shuffle( int[] arr, int from, int until, IntBinaryOperator randInt )
   {
     checkArgs_fromUntil(from,until, arr.length);
-    new ShuffleAccess() {
-      @Override public IntBinaryOperator shuffle_newRNG() { return randInt; }
+    new RandomShuffleAccess() {
+      @Override public IntBinaryOperator randomShuffle_newRNG() { return randInt; }
       @Override public void swap( int i, int j ) { Swap.swap(arr, i,j); }
-    }.shuffle(from,until);
+    }.randomShuffle(from,until);
   }
 
   public static int[] shuffled( int[] arr ) {
@@ -68,10 +68,10 @@ public class Shuffle
   public static void shuffle( double[] arr, int from, int until, IntBinaryOperator randInt )
   {
     checkArgs_fromUntil(from,until, arr.length);
-    new ShuffleAccess() {
-      @Override public IntBinaryOperator shuffle_newRNG() { return randInt; }
+    new RandomShuffleAccess() {
+      @Override public IntBinaryOperator randomShuffle_newRNG() { return randInt; }
       @Override public void swap( int i, int j ) { Swap.swap(arr, i,j); }
-    }.shuffle(from,until);
+    }.randomShuffle(from,until);
   }
 
   public static <T> void shuffle( T[] arr                                                 ) { shuffle(arr,    0,arr.length, new SplittableRandom()::nextInt); }
@@ -80,10 +80,10 @@ public class Shuffle
   public static <T> void shuffle( T[] arr, int from, int until, IntBinaryOperator randInt )
   {
     checkArgs_fromUntil(from,until, arr.length);
-    new ShuffleAccess() {
-      @Override public IntBinaryOperator shuffle_newRNG() { return randInt; }
+    new RandomShuffleAccess() {
+      @Override public IntBinaryOperator randomShuffle_newRNG() { return randInt; }
       @Override public void swap( int i, int j ) { Swap.swap(arr, i,j); }
-    }.shuffle(from,until);
+    }.randomShuffle(from,until);
   }
 
 // FIELDS
