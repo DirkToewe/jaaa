@@ -5,23 +5,46 @@ import com.github.jaaa.fn.Int4Consumer;
 import com.github.jaaa.misc.BlockSwapAccess;
 import com.github.jaaa.sort.HeapSortFastAccess;
 
-import static java.lang.Math.ceil;
-import static java.lang.Math.sqrt;
+import static java.lang.Math.*;
 
 
+// Same implementation as WikiMergeV1, except that `extractMergeBuf_ordinal_l_min_unsorted` is used
+// to extract both merge and movement-imitation buffer at once.
 public interface WikiMergeV2Access extends ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExtractMergeBufOrdinalAccess, HeapSortFastAccess
 {
+  private static int minBufLen( int len )
+  {
+    // x: minBufLen/2
+    // l: len
+    // l-2*x = x²  =>  l = x² + 2*x = (x+1) - 1  =>  x = √(l+1) - 1
+    if( len < 0 ) throw new IllegalArgumentException();
+    return (int) ceil( sqrt(len+1d)*2 - 2 );
+  }
+
   static int minBufLenMIB( int len )
   {
     if( len < 0 ) throw new IllegalArgumentException();
-    int           MER_len = minBufLenMER(len);
-    return len / (MER_len+1);
+    // x*(b-x) = l   =>  x = (b - √(b² - 4l)) / 2
+    int         bufLen = minBufLen(len);
+    double  b = bufLen,
+        delta = b*b - 4d*(len-bufLen);
+    if( delta < 0 ) return 0;
+    int x = (int)( (b + sqrt(delta)) / 2 ),
+        y = bufLen - x;
+    return min(x,y);
   }
 
   static int minBufLenMER( int len )
   {
     if( len < 0 ) throw new IllegalArgumentException();
-    return (int) ceil(sqrt(len+1d)) - 1;
+    // x*(b-x) = l   =>  x = (b - √(b² - 4l)) / 2
+    int         bufLen = minBufLen(len);
+    double  b = bufLen,
+        delta = b*b - 4d*(len-bufLen);
+    if( delta < 0 ) return 0;
+    int x = (int)( (b + sqrt(delta)) / 2 ),
+        y = bufLen - x;
+    return max(x,y);
   }
 
   default void wikiMergeV2_mergeInPlace ( int from, int mid, int until ) { blockRotationMerge(from,mid,until); }
@@ -76,8 +99,8 @@ public interface WikiMergeV2Access extends ArgMinAccess, BlockRotationMergeAcces
     heapSortFast(MIB,MIB+MIB_len);
 
     final int B = MER_len==0 ? (lenL+1) / (MIB_len+1) : MER_len,
-        blocksL = (lenL-MIB_len-MER_len) / B,
-         block0 = mid - blocksL*B;
+        nBlocksL = (lenL-MIB_len-MER_len) / B,
+         block0 = mid - nBlocksL*B;
 
     assert MER_len == MER_desiredLen
      || (lenL-MIB_len-MER_len) /  B   <= MIB_len
@@ -117,7 +140,7 @@ public interface WikiMergeV2Access extends ArgMinAccess, BlockRotationMergeAcces
 
     loop: for(
       int min = 0,
-      nRemain = blocksL;; // <- number of blocks not yet in place
+      nRemain = nBlocksL;; // <- number of blocks not yet in place
     )
     {
       int end = pos + nRemain*B;
@@ -149,7 +172,7 @@ public interface WikiMergeV2Access extends ArgMinAccess, BlockRotationMergeAcces
 
       --nRemain;
 
-      // move min. block to the very left so it is in place
+      // move min. block to the very right so it is in place
       blockSwap( pos + nRemain*B, pos + min*B, B );
       swap(MIB+nRemain, MIB+min); // <- as a side effect this sorts the MIB
 
@@ -167,11 +190,11 @@ public interface WikiMergeV2Access extends ArgMinAccess, BlockRotationMergeAcces
     // =============================
     int buf_end = from+MER_len+MIB_len;
     if( buf_end < block0 ) {
-      firstDest -= blocksL*B;
+      firstDest -= nBlocksL*B;
       merge.accept( buf_end,firstDest, block0-buf_end, expL2RSearchGap(block0,firstDest, buf_end, false) );
     }
 
-    revert(MIB, MIB+blocksL); // <- during block rearrangement, MIB was reverted
+    revert(MIB, MIB+nBlocksL); // <- during block rearrangement, MIB was reverted
 
     if( MER_len==0 )
       wikiMergeV2_mergeInPlace(MIB, MIB+MIB_len, until);
