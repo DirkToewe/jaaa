@@ -12,6 +12,8 @@ public class BlockRotationMergeAccessTest implements MergeAccessTestTemplate
     @Override public void  merge( int from, int mid, int until ) { blockRotationMerge(from,mid,until); }
   }
 
+  @Override public int maxArraySize() { return 10_000; }
+
   @Override public boolean isStable() { return true; }
   @Override public MergeAccess createAccess( CompareSwapAccess acc ) { return new ExpMrgAcc(acc); }
 }

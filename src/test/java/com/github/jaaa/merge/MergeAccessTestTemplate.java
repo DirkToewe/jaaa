@@ -1,10 +1,13 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.*;
+import com.github.jaaa.ComparatorByte;
+import com.github.jaaa.CompareSwapAccess;
+import com.github.jaaa.Swap;
+import com.github.jaaa.misc.Boxing;
+import com.github.jaaa.util.ZipWithIndex;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.PropertyDefaults;
-import net.jqwik.api.constraints.Size;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -12,18 +15,15 @@ import java.util.Map.Entry;
 
 import static com.github.jaaa.misc.Boxing.boxed;
 import static com.github.jaaa.misc.Boxing.unboxed;
-import static com.github.jaaa.util.ZipWithIndex.zipWithIndex;
 import static java.util.Map.Entry.comparingByKey;
 import static java.util.Map.Entry.comparingByValue;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
+@PropertyDefaults( tries = 1_000 )
 public interface MergeAccessTestTemplate extends MergeDataProviderTemplate
 {
-  // STATIC FIELDS
-  int N_TRIES = 100_000,
-     MAX_SIZE = 8192;
-
+// STATIC FIELDS
   boolean isStable();
 
   interface MergeAccess {
@@ -41,20 +41,14 @@ public interface MergeAccessTestTemplate extends MergeDataProviderTemplate
 // METHODS
   MergeAccess createAccess( CompareSwapAccess srtAcc );
 
-  @Property(tries=N_TRIES) default void mergesArr_limitedRanges(
-    @ForAll("mergeSamples_limitedRanges") WithInsertIndex<WithRange<Byte[]>> sample, @ForAll Comparator<Byte> cmp
-  ) { mergesArr(sample,cmp); }
 
-  @Property(tries=N_TRIES) default void mergesStablyArr_limitedRanges(
-    @ForAll("mergeSamples_limitedRanges") WithInsertIndex<WithRange<Byte[]>> sample, @ForAll Comparator<Byte> cmp
-  ) { mergesStablyArr(sample,cmp); }
-
-  @Property(tries=2_200_000) default void merges_exhaustive_small( @ForAll("mergeSamples_exhaustive_small") MergeInput<byte[]> sample ) { merges_exhaustive(sample); }
-  @Property(tries=2_200_000) default void merges_exhaustive_len13( @ForAll("mergeSamples_exhaustive_len13") MergeInput<byte[]> sample ) { merges_exhaustive(sample); }
-  @Property(tries=2_200_000) default void merges_exhaustive_len14( @ForAll("mergeSamples_exhaustive_len14") MergeInput<byte[]> sample ) { merges_exhaustive(sample); }
-  @Property(tries=2_200_000) default void merges_exhaustive_len15( @ForAll("mergeSamples_exhaustive_len15") MergeInput<byte[]> sample ) { merges_exhaustive(sample); }
-  @Property(tries=2_200_000) default void merges_exhaustive_len16( @ForAll("mergeSamples_exhaustive_len16") MergeInput<byte[]> sample ) { merges_exhaustive(sample); }
-  private                            void merges_exhaustive      (                                          MergeInput<byte[]> sample ) {
+  @Property(tries=4_000_000) default void merges_uByte_exhaustive   ( @ForAll("mergeInputs_uByte_exhaustive") MergeInput<byte[]> sample ) { merges_byte(sample); }
+  @Property(tries=2_000_000) default void merges_uByte_len13        ( @ForAll("mergeInputs_uByte_len13"     ) MergeInput<byte[]> sample ) { merges_byte(sample); }
+  @Property(tries=2_000_000) default void merges_uByte_len14        ( @ForAll("mergeInputs_uByte_len14"     ) MergeInput<byte[]> sample ) { merges_byte(sample); }
+  @Property(tries=2_000_000) default void merges_uByte_len15        ( @ForAll("mergeInputs_uByte_len15"     ) MergeInput<byte[]> sample ) { merges_byte(sample); }
+  @Property(tries=2_000_000) default void merges_uByte_len16        ( @ForAll("mergeInputs_uByte_len16"     ) MergeInput<byte[]> sample ) { merges_byte(sample); }
+  @Property(tries=2_000_000) default void merges_uByte_len17        ( @ForAll("mergeInputs_uByte_len17"     ) MergeInput<byte[]> sample ) { merges_byte(sample); }
+  private                            void merges_byte               (                                         MergeInput<byte[]> sample ) {
     var tst = sample.array().clone();
     int mid = sample.mid(),
        from = sample.from(),
@@ -72,12 +66,14 @@ public interface MergeAccessTestTemplate extends MergeDataProviderTemplate
     assertThat(tst).isEqualTo(ref);
   }
 
-  @Property(tries=2_200_000) default void mergesStably_exhaustive_small( @ForAll("mergeSamples_exhaustive_small") MergeInput<byte[]> sample ) { mergesStabily_exhaustive(sample); }
-  @Property(tries=2_200_000) default void mergesStably_exhaustive_len13( @ForAll("mergeSamples_exhaustive_len13") MergeInput<byte[]> sample ) { mergesStabily_exhaustive(sample); }
-  @Property(tries=2_200_000) default void mergesStably_exhaustive_len14( @ForAll("mergeSamples_exhaustive_len14") MergeInput<byte[]> sample ) { mergesStabily_exhaustive(sample); }
-  @Property(tries=2_200_000) default void mergesStably_exhaustive_len15( @ForAll("mergeSamples_exhaustive_len15") MergeInput<byte[]> sample ) { mergesStabily_exhaustive(sample); }
-  @Property(tries=2_200_000) default void mergesStably_exhaustive_len16( @ForAll("mergeSamples_exhaustive_len16") MergeInput<byte[]> sample ) { mergesStabily_exhaustive(sample); }
-  private                            void mergesStabily_exhaustive      (                                         MergeInput<byte[]> sample ) {
+
+  @Property(tries=8_000_000) default void mergesStably_uByte_exhaustive   ( @ForAll("mergeInputs_uByte_exhaustive") MergeInput<byte[]> sample ) { mergesStably_uByte(sample); }
+  @Property(tries=2_000_000) default void mergesStably_uByte_len13        ( @ForAll("mergeInputs_uByte_len13"     ) MergeInput<byte[]> sample ) { mergesStably_uByte(sample); }
+  @Property(tries=2_000_000) default void mergesStably_uByte_len14        ( @ForAll("mergeInputs_uByte_len14"     ) MergeInput<byte[]> sample ) { mergesStably_uByte(sample); }
+  @Property(tries=2_000_000) default void mergesStably_uByte_len15        ( @ForAll("mergeInputs_uByte_len15"     ) MergeInput<byte[]> sample ) { mergesStably_uByte(sample); }
+  @Property(tries=2_000_000) default void mergesStably_uByte_len16        ( @ForAll("mergeInputs_uByte_len16"     ) MergeInput<byte[]> sample ) { mergesStably_uByte(sample); }
+  @Property(tries=2_000_000) default void mergesStably_uByte_len17        ( @ForAll("mergeInputs_uByte_len17"     ) MergeInput<byte[]> sample ) { mergesStably_uByte(sample); }
+  private                            void mergesStably_uByte              (                                         MergeInput<byte[]> sample ) {
     var tst = sample.array().clone();
     int mid = sample.mid(),
        from = sample.from(),
@@ -93,8 +89,8 @@ public interface MergeAccessTestTemplate extends MergeDataProviderTemplate
         tst[i] ^= -1;
 
       cmp = (x,y) -> {
-        if( x < 0 ) x ^= -1;
-        if( y < 0 ) y ^= -1;
+        x ^= x>>31;
+        y ^= y>>31;
         return Byte.compare(x,y);
       };
     }
@@ -112,28 +108,30 @@ public interface MergeAccessTestTemplate extends MergeDataProviderTemplate
     assertThat(tst).isEqualTo( unboxed(ref) );
   }
 
-  @Property(tries=N_TRIES)          default void mergesArrBoolean  ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)   Boolean[]>> sample, @ForAll Comparator<  Boolean> cmp ) { mergesArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesArrByte     ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)      Byte[]>> sample, @ForAll Comparator<     Byte> cmp ) { mergesArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesArrShort    ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)     Short[]>> sample, @ForAll Comparator<    Short> cmp ) { mergesArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesArrInteger  ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)   Integer[]>> sample, @ForAll Comparator<  Integer> cmp ) { mergesArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesArrLong     ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)      Long[]>> sample, @ForAll Comparator<     Long> cmp ) { mergesArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesArrCharacter( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE) Character[]>> sample, @ForAll Comparator<Character> cmp ) { mergesArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesArrFloat    ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)     Float[]>> sample, @ForAll Comparator<    Float> cmp ) { mergesArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesArrDouble   ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)    Double[]>> sample, @ForAll Comparator<   Double> cmp ) { mergesArr(sample,cmp); }
-  private <T extends Comparable<? super T>> void mergesArr         (         WithInsertIndex<WithRange<                                   T[]>> sample,         Comparator<? super T> cmp )
-  {
-    var ref = sample.getData().getData().clone();
-    var tst = ref.clone();
-    int mid = sample.getIndex(),
-       from = sample.getData().getFrom(),
-      until = sample.getData().getUntil();
 
-    Arrays.sort(ref,from,    until,cmp);
-    Arrays.sort(tst,from,mid,      cmp);
-    Arrays.sort(tst,     mid,until,cmp);
+  @Property                         default void mergesArr_byte_limitedRanges( @ForAll("mergeInputs_byte_limitedRanges") MergeInput<   byte[]> sample ) { mergesArr( sample.map(Boxing::boxed) ); }
+  @Property                         default void mergesArr_boolean           ( @ForAll("mergeInputs_boolean"           ) MergeInput<boolean[]> sample ) { mergesArr( sample.map(Boxing::boxed) ); }
+  @Property                         default void mergesArr_byte              ( @ForAll("mergeInputs_byte"              ) MergeInput<   byte[]> sample ) { mergesArr( sample.map(Boxing::boxed) ); }
+  @Property                         default void mergesArr_short             ( @ForAll("mergeInputs_short"             ) MergeInput<  short[]> sample ) { mergesArr( sample.map(Boxing::boxed) ); }
+  @Property                         default void mergesArr_int_v1            ( @ForAll("mergeInputs_int_v1"            ) MergeInput<    int[]> sample ) { mergesArr( sample.map(Boxing::boxed) ); }
+  @Property                         default void mergesArr_int_v2            ( @ForAll("mergeInputs_int_v2"            ) MergeInput<    int[]> sample ) { mergesArr( sample.map(Boxing::boxed) ); }
+  @Property                         default void mergesArr_long              ( @ForAll("mergeInputs_long"              ) MergeInput<   long[]> sample ) { mergesArr( sample.map(Boxing::boxed) ); }
+  @Property                         default void mergesArr_char              ( @ForAll("mergeInputs_char"              ) MergeInput<   char[]> sample ) { mergesArr( sample.map(Boxing::boxed) ); }
+  @Property                         default void mergesArr_float             ( @ForAll("mergeInputs_float"             ) MergeInput<  float[]> sample ) { mergesArr( sample.map(Boxing::boxed) ); }
+  @Property                         default void mergesArr_double            ( @ForAll("mergeInputs_double"            ) MergeInput< double[]> sample ) { mergesArr( sample.map(Boxing::boxed) ); }
+  private <T extends Comparable<? super T>> void mergesArr                   (                                           MergeInput<      T[]> sample )
+  {
+
+    int mid = sample.mid(),
+       from = sample.from(),
+      until = sample.until();
+
+    var tst = sample.array().clone(); Arrays.sort(tst,from,mid      );
+                                      Arrays.sort(tst,     mid,until);
+    var ref = tst.clone();            Arrays.sort(ref,from,    until);
 
     var acc = createAccess(new CompareSwapAccess() {
-      @Override public int compare( int i, int j ) { return cmp.compare(tst[i], tst[j]); }
+      @Override public int compare( int i, int j ) { return tst[i].compareTo(tst[j]); }
       @Override public void   swap( int i, int j ) { Swap.swap(tst,i,j); }
     });
 
@@ -142,32 +140,31 @@ public interface MergeAccessTestTemplate extends MergeDataProviderTemplate
   }
 
 
-  @Property(tries=N_TRIES)          default void mergesStablyArrBoolean  ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)   Boolean[]>> sample, @ForAll Comparator<  Boolean> cmp ) { mergesStablyArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesStablyArrByte     ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)      Byte[]>> sample, @ForAll Comparator<     Byte> cmp ) { mergesStablyArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesStablyArrShort    ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)     Short[]>> sample, @ForAll Comparator<    Short> cmp ) { mergesStablyArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesStablyArrInteger  ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)   Integer[]>> sample, @ForAll Comparator<  Integer> cmp ) { mergesStablyArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesStablyArrLong     ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)      Long[]>> sample, @ForAll Comparator<     Long> cmp ) { mergesStablyArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesStablyArrCharacter( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE) Character[]>> sample, @ForAll Comparator<Character> cmp ) { mergesStablyArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesStablyArrFloat    ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)     Float[]>> sample, @ForAll Comparator<    Float> cmp ) { mergesStablyArr(sample,cmp); }
-  @Property(tries=N_TRIES)          default void mergesStablyArrDouble   ( @ForAll WithInsertIndex<WithRange<@Size(min=0, max=MAX_SIZE)    Double[]>> sample, @ForAll Comparator<   Double> cmp ) { mergesStablyArr(sample,cmp); }
-  private <T extends Comparable<? super T>> void mergesStablyArr         (         WithInsertIndex<WithRange<                                   T[]>> sample,         Comparator<? super T> comparator )
+  @Property                         default void mergesStablyArr_byte_limitedRanges( @ForAll("mergeInputs_byte_limitedRanges") MergeInput<            byte[]> sample ) { mergesStablyArr( sample.map(ZipWithIndex::zipWithIndex) ); }
+  @Property                         default void mergesStablyArr_boolean           ( @ForAll("mergeInputs_boolean"           ) MergeInput<         boolean[]> sample ) { mergesStablyArr( sample.map(ZipWithIndex::zipWithIndex) ); }
+  @Property                         default void mergesStablyArr_byte              ( @ForAll("mergeInputs_byte"              ) MergeInput<            byte[]> sample ) { mergesStablyArr( sample.map(ZipWithIndex::zipWithIndex) ); }
+  @Property                         default void mergesStablyArr_short             ( @ForAll("mergeInputs_short"             ) MergeInput<           short[]> sample ) { mergesStablyArr( sample.map(ZipWithIndex::zipWithIndex) ); }
+  @Property                         default void mergesStablyArr_int_v1            ( @ForAll("mergeInputs_int_v1"            ) MergeInput<             int[]> sample ) { mergesStablyArr( sample.map(ZipWithIndex::zipWithIndex) ); }
+  @Property                         default void mergesStablyArr_int_v2            ( @ForAll("mergeInputs_int_v2"            ) MergeInput<             int[]> sample ) { mergesStablyArr( sample.map(ZipWithIndex::zipWithIndex) ); }
+  @Property                         default void mergesStablyArr_long              ( @ForAll("mergeInputs_long"              ) MergeInput<            long[]> sample ) { mergesStablyArr( sample.map(ZipWithIndex::zipWithIndex) ); }
+  @Property                         default void mergesStablyArr_char              ( @ForAll("mergeInputs_char"              ) MergeInput<            char[]> sample ) { mergesStablyArr( sample.map(ZipWithIndex::zipWithIndex) ); }
+  @Property                         default void mergesStablyArr_float             ( @ForAll("mergeInputs_float"             ) MergeInput<           float[]> sample ) { mergesStablyArr( sample.map(ZipWithIndex::zipWithIndex) ); }
+  @Property                         default void mergesStablyArr_double            ( @ForAll("mergeInputs_double"            ) MergeInput<          double[]> sample ) { mergesStablyArr( sample.map(ZipWithIndex::zipWithIndex) ); }
+  private <T extends Comparable<? super T>> void mergesStablyArr                   (                                           MergeInput<Entry<T,Integer>[]> sample )
   {
-    Comparator<Entry<T,Integer>> cmp =             comparingByKey(comparator);
+    Comparator<Entry<T,Integer>> cmp =             comparingByKey();
     if( ! isStable() )     cmp = cmp.thenComparing(comparingByValue());
 
-    var ref = zipWithIndex( sample.getData().getData() );
-    var tst = ref.clone();
+    int mid = sample.mid(),
+       from = sample.from(),
+      until = sample.until();
 
-    int mid = sample.getIndex(),
-       from = sample.getData().getFrom(),
-      until = sample.getData().getUntil();
-
-    Arrays.sort(ref,from,    until,cmp);
-    Arrays.sort(tst,from,mid,      cmp);
-    Arrays.sort(tst,     mid,until,cmp);
+    var tst = sample.array().clone(); Arrays.sort(tst,from,mid,      cmp);
+                                      Arrays.sort(tst,     mid,until,cmp);
+    var ref = tst.clone();            Arrays.sort(ref,from,    until,cmp);
 
     var CMP = cmp;
-    var acc = createAccess(new CompareSwapAccess() {
+    var acc = createAccess( new CompareSwapAccess() {
       @Override public int compare( int i, int j ) { return CMP.compare(tst[i], tst[j]); }
       @Override public void   swap( int i, int j ) { Swap.swap(tst,i,j); }
     });

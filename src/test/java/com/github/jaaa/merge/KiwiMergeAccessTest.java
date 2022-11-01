@@ -34,15 +34,7 @@ public class KiwiMergeAccessTest implements MergeAccessTestTemplate
 // CONSTRUCTORS
 
 // METHODS
-//  @Property( tries = 1_000_000 ) void test_desiredBufLen( @ForAll @IntRange(min=0) int len )
-//  {
-//    int      n = new BinMrgAcc(null).stableOptimalBlockMergeV2_desiredBufLen(len);
-//    if( 3 <  n ) assertThat( (len-n  ) /  n   ).isGreaterThan      (0);
-//    if( 0 <  n ) assertThat( (len-n  ) /  n   ).isLessThanOrEqualTo(n);
-//    if( 1 <  n ) assertThat( (len-n+1) / (n-1)).isGreaterThan      (n-1);
-//    if( 1 == n ) assertThat(len).isIn(1,2);
-//    if( 0 == n ) assertThat(len).isEqualTo(0);
-//  }
+  @Override public int maxArraySize() { return 10_000; }
 
   @Example void test_minMergeBufLen()
   {

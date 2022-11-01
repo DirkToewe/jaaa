@@ -22,6 +22,8 @@ public class PracticalInplaceMergeAccessTest implements MergeAccessTestTemplate
 // CONSTRUCTORS
 
 // METHODS
+  @Override public int maxArraySize() { return 10_000; }
+
   @Override public boolean isStable() { return false; }
   @Override public MergeAccess createAccess( CompareSwapAccess acc ) { return new ExpMrgAcc(acc); }
 }

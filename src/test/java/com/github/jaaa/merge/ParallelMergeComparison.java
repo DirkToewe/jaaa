@@ -12,12 +12,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static com.github.jaaa.merge.ParallelRebelMerge.PARALLEL_REBEL_MERGER;
 import static com.github.jaaa.merge.ParallelSkipMerge.PARALLEL_SKIP_MERGER;
 import static com.github.jaaa.merge.ParallelZenMerge.PARALLEL_ZEN_MERGER;
-import static com.github.jaaa.misc.Shuffle.shuffled;
+import static com.github.jaaa.misc.RandomShuffle.shuffled;
 import static java.awt.Desktop.getDesktop;
 import static java.lang.String.format;
 import static java.lang.System.arraycopy;

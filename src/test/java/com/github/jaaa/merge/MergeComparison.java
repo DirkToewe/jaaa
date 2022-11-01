@@ -17,7 +17,7 @@ import java.util.SplittableRandom;
 import java.util.TreeMap;
 import java.util.function.DoubleSupplier;
 
-import static com.github.jaaa.misc.Shuffle.shuffle;
+import static com.github.jaaa.misc.RandomShuffle.shuffle;
 import static java.awt.Desktop.getDesktop;
 import static java.lang.Math.round;
 import static java.lang.String.format;
@@ -199,6 +199,34 @@ public class MergeComparison
             @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
             @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
           }.wikiMergeV3(k, k+m, k+m+n);
+        }
+      }),
+      entry("WikiV4Acc", new MergeFn() {
+        @Override public <T> void merge(
+          T a, int i, int m,
+          T b, int j, int n,
+          T c, int k, CompareRandomAccessor<T> acc
+        ) {
+          acc.copyRange(a,i, c,k,   m);
+          acc.copyRange(b,j, c,k+m, n);
+          new WikiMergeV4Access() {
+            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
+            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
+          }.wikiMergeV4(k, k+m, k+m+n);
+        }
+      }),
+      entry("WikiV5Acc", new MergeFn() {
+        @Override public <T> void merge(
+          T a, int i, int m,
+          T b, int j, int n,
+          T c, int k, CompareRandomAccessor<T> acc
+        ) {
+          acc.copyRange(a,i, c,k,   m);
+          acc.copyRange(b,j, c,k+m, n);
+          new WikiMergeV5Access() {
+            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
+            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
+          }.wikiMergeV5(k, k+m, k+m+n);
         }
       }),
       entry("KiwiAcc", new MergeFn() {

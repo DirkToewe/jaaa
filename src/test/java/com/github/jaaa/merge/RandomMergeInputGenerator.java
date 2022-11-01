@@ -3,11 +3,15 @@ package com.github.jaaa.merge;
 import net.jqwik.api.Tuple;
 
 import java.util.Arrays;
+import java.util.Random;
 import java.util.SplittableRandom;
+import java.util.function.IntBinaryOperator;
 
-import static com.github.jaaa.misc.Shuffle.shuffle;
+import static com.github.jaaa.misc.RandomShuffle.shuffle;
 import static java.util.Objects.requireNonNull;
 import static net.jqwik.api.Tuple.Tuple2;
+import static java.lang.Math.subtractExact;
+import static java.lang.Math.addExact;
 
 
 public class RandomMergeInputGenerator
@@ -16,20 +20,21 @@ public class RandomMergeInputGenerator
 // STATIC CONSTRUCTOR
 // STATIC METHODS
 // FIELDS
-  private final SplittableRandom rng;
+  private final IntBinaryOperator rng;
 
 // CONSTRUCTORS
-  public RandomMergeInputGenerator()                        { rng = new SplittableRandom(); }
-  public RandomMergeInputGenerator( long seed )             { rng = new SplittableRandom(seed); }
-  public RandomMergeInputGenerator( SplittableRandom _rng ) { rng = requireNonNull(_rng); }
+  public RandomMergeInputGenerator()                        { this( new SplittableRandom() ); }
+  public RandomMergeInputGenerator( long seed )             { this( new SplittableRandom(seed) ); }
+  public RandomMergeInputGenerator( SplittableRandom _rng ) { rng = _rng::nextInt; }
+  public RandomMergeInputGenerator(           Random _rng ) { rng = (lo,hi) -> _rng.nextInt( subtractExact(hi,lo) ) + lo; }
 
 // METHODS
   public Tuple2<int[],int[]> next( int lenA, int lenB )
   {
-    int                   len = lenA + lenB;
+    int                   len = addExact(lenA,lenB);
     var isB = new boolean[len];
     Arrays.fill(isB,0,lenB, true);
-    shuffle(isB, rng::nextInt);
+    shuffle(isB, rng::applyAsInt);
 
     int val = 0;
 
@@ -45,7 +50,7 @@ public class RandomMergeInputGenerator
 
       for( int i=0; ++i < len; )
         if( isB[i] ) {
-          B[b++] = val += rng.nextInt(2);
+          B[b++] = val += rng.applyAsInt(0,2);
           wasB = true;
         }
         else if( wasB ) {
@@ -53,7 +58,7 @@ public class RandomMergeInputGenerator
           wasB = false;
         }
         else
-          A[a++] = val += rng.nextInt(2);
+          A[a++] = val += rng.applyAsInt(0,2);
 
       assert a == lenA;
       assert b == lenB;

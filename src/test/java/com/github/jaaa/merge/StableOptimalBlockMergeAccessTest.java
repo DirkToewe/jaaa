@@ -33,6 +33,8 @@ public class StableOptimalBlockMergeAccessTest implements MergeAccessTestTemplat
 // CONSTRUCTORS
 
 // METHODS
+  @Override public int maxArraySize() { return 10_000; }
+
   @Property( tries = 64*1024 ) void testRotationMin( @ForAll @Size(max=8192) int[] array, @ForAll @Negative int rot )
   {
     if( array.length > 0 )

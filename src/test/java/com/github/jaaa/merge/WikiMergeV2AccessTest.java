@@ -27,9 +27,11 @@ public class WikiMergeV2AccessTest implements MergeAccessTestTemplate
 // CONSTRUCTORS
 
 // METHODS
+  @Override public int maxArraySize() { return 10_000; }
+
   @Example void minBufLengths()
   {
-    for( int len=3; ++len >= 0; )
+    for( int len=2; ++len >= 0; )
     {
       long mib = WikiMergeV2Access.minBufLenMIB(len),
            mer = WikiMergeV2Access.minBufLenMER(len);
@@ -38,11 +40,10 @@ public class WikiMergeV2AccessTest implements MergeAccessTestTemplate
       assertThat(mib).isLessThanOrEqualTo(mer);
       assertThat(mer).isLessThanOrEqualTo(len);
       assertThat(mib+mer).isLessThan(len);
-      assertThat(mib*mer).isGreaterThanOrEqualTo( len - mib - mer );
-      assertThat( (mib-1)*mer ).isLessThan(len - (mib-1) - mer);
-      assertThat( (mer-1)*mib ).isLessThan(len - (mer-1) - mib);
-      assertThat( (mer-1)*(mer-1) ).isLessThan( len - (mer-1) - (mer-1) );
-      assertThat( (mer+1)*(mib-1) ).isLessThan( len - mib - mer ); // make sure mer is as large as possible
+      assertThat(mib*mer).isGreaterThanOrEqualTo( len    - mer - mib ); // ◀─── make sure buffers are large enough
+      assertThat( (mib-1)* mer      ).isLessThan( len+1L - mer - mib ); // ◀─┬─ make sure total buffer is as small as possible
+      assertThat( (mer-1)* mib      ).isLessThan( len+1L - mer - mib ); // ◀─╯
+      assertThat( (mer+1)*(mib-1)   ).isLessThan( len    - mer - mib ); // ◀─── make sure merge buffer is as large as possible
     }
   }
 

@@ -23,7 +23,9 @@ public class ExpMergeV1AccessTest implements MergeAccessTestTemplate
 
 // CONSTRUCTORS
 
-  // METHODS
+// METHODS
+  @Override public int maxArraySize() { return 10_000; }
+
   @Override public boolean isStable() { return true; }
   @Override public MergeAccess createAccess( CompareSwapAccess acc ) { return new ExpMrgAcc(acc); }
 }

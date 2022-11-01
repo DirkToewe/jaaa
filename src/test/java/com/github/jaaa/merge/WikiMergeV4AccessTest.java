@@ -6,16 +6,16 @@ import net.jqwik.api.Example;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class WikiMergeV3AccessTest implements MergeAccessTestTemplate
+public class WikiMergeV4AccessTest implements MergeAccessTestTemplate
 {
-// STATIC FIELDS
-  private static class WikiMergeAcc implements WikiMergeV3Access, MergeAccess
+  // STATIC FIELDS
+  private static class WikiMergeAcc implements WikiMergeV4Access, MergeAccess
   {
     private final CompareSwapAccess access;
     public WikiMergeAcc( CompareSwapAccess acc ) { access = acc; }
     @Override public int compare( int i, int j ) { return access.compare(i,j); }
     @Override public void   swap( int i, int j ) { access.swap(i,j); }
-    @Override public void  merge( int from, int mid, int until ) { wikiMergeV3(from,mid,until); }
+    @Override public void  merge( int from, int mid, int until ) { wikiMergeV4(from,mid,until); }
   }
 
 // STATIC CONSTRUCTOR
@@ -26,21 +26,21 @@ public class WikiMergeV3AccessTest implements MergeAccessTestTemplate
 
 // CONSTRUCTORS
 
-// METHODS
+  // METHODS
   @Override public int maxArraySize() { return 10_000; }
 
   @Example void minBufLen()
   {
     for( int len=-1; ++len >= 0; )
     {
-      int b = WikiMergeV3Access.minBufLen(len);
+      int b = WikiMergeV4Access.minBufLen(len);
 
       assertThat(b).isEqualTo(
           WikiMergeV2Access.minBufLenMER(len)
         + WikiMergeV2Access.minBufLenMIB(len)
       );
 
-      long mer = WikiMergeV3Access.merBufLen(len-b, b),
+      long mer = WikiMergeV4Access.merBufLen(len-b, b),
            mib = b-mer;
 
       assertThat(mer).isNotNegative();
@@ -64,9 +64,9 @@ public class WikiMergeV3AccessTest implements MergeAccessTestTemplate
     for( long len=-1; len++ < 10_000; )
     for( long buf=-1; buf++ < len;    )
     {
-      long mer = WikiMergeV3Access.merBufLen( (int)(len-buf), (int)buf ),
+      long mer = WikiMergeV4Access.merBufLen( (int)(len-buf), (int)buf ),
            mib = buf-mer,
-        minLen = WikiMergeV3Access.minBufLen( (int)len );
+        minLen = WikiMergeV4Access.minBufLen( (int)len );
 
       if( buf < minLen ) {
         assertThat(mer).isZero();

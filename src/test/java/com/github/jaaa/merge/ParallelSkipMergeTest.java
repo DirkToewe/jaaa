@@ -17,14 +17,6 @@ public class ParallelSkipMergeTest
   @Group class MergeTestSmall implements MergerTestTemplate {
     @Override public int maxArraySize() { return 100; }
     @Override public Merger merger() { return merger; }
-
-    @Example
-    void test() {
-      int[] a = {},
-            b = {0},
-            c = {0};
-      merger().merge(a,0,0, b,0,1, c,0);
-    }
   }
   @Group class MergeTestMedium implements MergerTestTemplate {
     @Override public int maxArraySize() { return 10_000; }
