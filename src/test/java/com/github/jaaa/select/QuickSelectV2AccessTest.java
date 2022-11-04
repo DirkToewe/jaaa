@@ -1,23 +1,21 @@
 package com.github.jaaa.select;
 
-import com.github.jaaa.CompareSwapAccess;
+import com.github.jaaa.CompareRandomAccessor;
 import net.jqwik.api.Group;
 import net.jqwik.api.PropertyDefaults;
-
-import static com.github.jaaa.select.SelectAccessTestTemplate.SelectAccess;
 
 
 @Group
 public class QuickSelectV2AccessTest
 {
-  private static record Acc( CompareSwapAccess acc ) implements SelectAccess, QuickSelectV2Access
-  {
-    @Override public void select( int from, int mid, int until ) { quickSelectV2(from,mid,until); }
-    @Override public void   swap( int i, int j ) {        acc.   swap(i,j); }
-    @Override public int compare( int i, int j ) { return acc.compare(i,j); }
-  }
-  private interface TestTemplate extends SelectAccessTestTemplate {
-    @Override default SelectAccess createAccess( CompareSwapAccess acc ) { return new Acc(acc); }
+  private interface TestTemplate extends SelectAccessorTestTemplate {
+    @Override default <T> SelectAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) {
+      return (arr, from, mid, until) ->
+        new QuickSelectV2Access() {
+          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
+          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
+        }.quickSelectV2(from,mid,until);
+    }
     @Override default boolean isStable() { return false; }
   }
 

@@ -20,11 +20,11 @@ import static java.util.Map.Entry.comparingByValue;
 
 
 @PropertyDefaults( tries = 10_000 )
-public interface SelectAccessTestTemplate extends ArrayProviderTemplate
+public interface SelectAccessorTestTemplate extends ArrayProviderTemplate
 {
 // STATIC FIELDS
-  interface SelectAccess {
-    void select( int from, int mid, int until );
+  interface SelectAccessor<T> {
+    void select( T arr, int from, int mid, int until );
   }
 
 // STATIC CONSTRUCTOR
@@ -36,9 +36,11 @@ public interface SelectAccessTestTemplate extends ArrayProviderTemplate
 // CONSTRUCTORS
 
 // METHODS
-  SelectAccess createAccess( CompareSwapAccess srtAcc );
+  <T> SelectAccessor<T> createAccessor( CompareRandomAccessor<T> srtAcc );
 
   boolean isStable();
+  default boolean sortsLHS( int from, int mid, int until ) { return false; }
+  default boolean sortsRHS( int from, int mid, int until ) { return false; }
 
   @Property default void selectsBoolean( @ForAll("arraysWithInsertIndexBoolean") WithInsertIndex<boolean[]> sample ) { selects( sample.map( x -> new WithRange<>(0,x.length, boxed(x)) ) ); }
   @Property default void selectsByte   ( @ForAll("arraysWithInsertIndexByte"   ) WithInsertIndex<   byte[]> sample ) { selects( sample.map( x -> new WithRange<>(0,x.length, boxed(x)) ) ); }
@@ -65,22 +67,20 @@ public interface SelectAccessTestTemplate extends ArrayProviderTemplate
       until = sample.getData().getUntil();
     var tst = sample.getData().getData().clone();
 
-    var acc = createAccess( new CompareSwapAccess() {
-      @Override public int compare( int i, int j ) {
-        assertThat(i).isBetween(from,until-1);
-        assertThat(j).isBetween(from,until-1);
-        return tst[i].compareTo(tst[j]);
+    var acc = createAccessor( new CompareRandomAccessorArrObj<T>() {
+      @Override public T[] malloc( int len ) {
+        return (T[]) new Comparable[len];
       }
-      @Override public void swap( int i, int j ) {
-        assertThat(i).isBetween(from,until-1);
-        assertThat(j).isBetween(from,until-1);
-        Swap.swap(tst,i,j);
+      @Override public int compare( T[] a, int i, T[] b, int j ) {
+        if( a == tst ) assertThat(i).isBetween(from,until-1);
+        if( b == tst ) assertThat(j).isBetween(from,until-1);
+        return tst[i].compareTo(tst[j]);
       }
     });
 
-    acc.select(from,mid,until);
-    Arrays.sort(tst, from,mid);
-    Arrays.sort(tst,      mid,until);
+    acc.select(tst,from,mid,until);
+    if( ! sortsLHS(from,mid,until) ) Arrays.sort(tst, from,mid);
+    if( ! sortsRHS(from,mid,until) ) Arrays.sort(tst,      mid,until);
 
     var ref = sample.getData().getData().clone();
     Arrays.sort(ref, from,until);
@@ -117,22 +117,20 @@ public interface SelectAccessTestTemplate extends ArrayProviderTemplate
     if( ! isStable() )     cmp = cmp.thenComparing(comparingByValue());
 
     var CMP = cmp;
-    var acc = createAccess( new CompareSwapAccess() {
-      @Override public int compare( int i, int j ) {
-        assertThat(i).isBetween(from,until-1);
-        assertThat(j).isBetween(from,until-1);
-        return CMP.compare(tst[i], tst[j]);
+    var acc = createAccessor( new CompareRandomAccessorArrObj<Entry<T,Integer>>() {
+      @Override public Entry<T,Integer>[] malloc( int len ) {
+        return (Entry<T,Integer>[]) new Entry[len];
       }
-      @Override public void swap( int i, int j ) {
-        assertThat(i).isBetween(from,until-1);
-        assertThat(j).isBetween(from,until-1);
-        Swap.swap(tst,i,j);
+      @Override public int compare( Entry<T,Integer>[] a, int i, Entry<T,Integer>[] b, int j ) {
+        if( a == tst ) assertThat(i).isBetween(from,until-1);
+        if( b == tst ) assertThat(j).isBetween(from,until-1);
+        return CMP.compare(tst[i],tst[j]);
       }
     });
 
-    acc.select(from,mid,until);
-    Arrays.sort(tst,from,mid,      cmp);
-    Arrays.sort(tst,     mid,until,cmp);
+    acc.select(tst,from,mid,until);
+    if( ! sortsLHS(from,mid,until) ) Arrays.sort(tst,from,mid,      cmp);
+    if( ! sortsRHS(from,mid,until) ) Arrays.sort(tst,     mid,until,cmp);
 
     var ref = sample.getData().getData().clone();
     Arrays.sort(ref, from,until, cmp);
