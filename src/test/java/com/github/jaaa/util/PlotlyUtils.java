@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static java.awt.Desktop.getDesktop;
+import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
@@ -13,7 +13,7 @@ import static java.util.stream.Collectors.joining;
 public final class PlotlyUtils
 {
 // STATIC FIELDS
-  private static String PLOT_TEMPLATE = """
+  private static final String PLOT_TEMPLATE = """
     <!DOCTYPE html>
     <html lang="en">
       <head>
@@ -48,7 +48,8 @@ public final class PlotlyUtils
   {
     var  tmp = Files.createTempFile("plot_",".html");
     plot(tmp, layout, data);
-    getDesktop().browse(tmp.toUri());
+    var cmd = format("xdg-open %s", tmp);
+    getRuntime().exec(cmd);
     return tmp;
   }
   public static void plot( Path path, String layout, String... data ) throws IOException

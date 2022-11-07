@@ -97,7 +97,7 @@ public interface KiwiSortV5Access extends ArgMinAccess, BlockRotationMergeAccess
       if( nBlocksL > 2 ) {
         int nUnsortedMax = bufLen - nBlocksL;
         if( nUnsortedMax < nUnsorted ) {
-          partialSort(buf, buf+nUnsortedMax, buf+nUnsorted);
+          kiwiSortV5_selectAndSortR(buf, buf+nUnsortedMax, buf+nUnsorted);
           nUnsorted = nUnsortedMax;
         }
       }
@@ -210,12 +210,12 @@ public interface KiwiSortV5Access extends ArgMinAccess, BlockRotationMergeAccess
     kiwiSortV5_mergeInPlace(buf,from,until);
   }
 
-  /** Partially sorts a range <code>[from,until)</code> such
-   *  that the beginning of the range <code>[mid,until)</code>
+  /** Partially (unstably) sorts a range <code>[from,until)</code>
+   *  such that the beginning of the range <code>[mid,until)</code>
    *  contains the largest <code>until-mid</code> elements from
    *  range <code>[from,until)</code> in sorted order.
    */
-  private void partialSort( int from, int mid, int until )
+  private void kiwiSortV5_selectAndSortR( int from, int mid, int until )
   {
     quickSelectV1(from,mid,until);
     heapSortFast(mid,until);

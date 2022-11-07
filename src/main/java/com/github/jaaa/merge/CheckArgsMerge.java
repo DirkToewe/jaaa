@@ -1,10 +1,9 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.RandomAccessor;
-
 import static java.lang.Math.min;
 
-class CheckArgsMerge
+
+public class CheckArgsMerge
 {
 // STATIC FIELDS
 

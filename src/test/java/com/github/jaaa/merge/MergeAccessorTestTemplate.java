@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
-@PropertyDefaults( tries = 100_000 )
+@PropertyDefaults( tries = 10_000 )
 public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
 {
 // STATIC FIELDS
@@ -97,8 +97,8 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
 
     var acc = createAccessor(new CompareRandomAccessor<int[]>() {
       @Override public int[] malloc( int len ) { return new int[len]; }
-      @Override public void copy( int[] a, int i, int[] b, int j ) { b[j] = a[i]; }
-      @Override public void swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
+      @Override public void   copy( int[] a, int i, int[] b, int j ) { b[j] = a[i]; }
+      @Override public void   swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
       @Override public int compare( int[] a, int i, int[] b, int j ) {
         return reversed
           ? -Integer.compare(a[i],b[j])
@@ -140,8 +140,8 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
 
     var acc = createAccessor(new CompareRandomAccessor<byte[]>() {
       @Override public byte[] malloc( int len ) { return new byte[len]; }
-      @Override public void copy( byte[] a, int i, byte[] b, int j ) { b[j] = a[i]; }
-      @Override public void swap( byte[] a, int i, byte[] b, int j ) { Swap.swap(a,i, b,j); }
+      @Override public void   copy( byte[] a, int i, byte[] b, int j ) { b[j] = a[i]; }
+      @Override public void   swap( byte[] a, int i, byte[] b, int j ) { Swap.swap(a,i, b,j); }
       @Override public int compare( byte[] a, int i, byte[] b, int j ) {
         return reversed
           ? -Integer.compare(a[i],b[j])
@@ -181,8 +181,8 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
 
     var acc = createAccessor(new CompareRandomAccessor<int[]>() {
       @Override public int[] malloc( int len ) { return new int[len]; }
-      @Override public void copy( int[] a, int i, int[] b, int j ) { b[j] = a[i]; }
-      @Override public void swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
+      @Override public void   copy( int[] a, int i, int[] b, int j ) { b[j] = a[i]; }
+      @Override public void   swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
       @Override public int compare( int[] a, int i, int[] b, int j ) {
         return reversed
           ? -Integer.compare(a[i],b[j])

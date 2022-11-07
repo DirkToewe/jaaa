@@ -1,16 +1,14 @@
 package com.github.jaaa.merge;
 
 import com.github.jaaa.CompareRandomAccessor;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 
-import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergePartR2L;
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergePartL2R;
+import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergePartR2L;
 
 
 public interface TapeMergePartAccessor<T> extends CompareRandomAccessor<T>
 {
-  public default void tapeMergePartL2R(
+  default void tapeMergePartL2R(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0, int cLen
@@ -20,13 +18,17 @@ public interface TapeMergePartAccessor<T> extends CompareRandomAccessor<T>
       b, b0, bLen,
       c, c0, cLen
     );
-    for( int i=0,j=0,k=0; k < cLen; k++ )
-      if( j >= bLen || i < aLen && compare(a,a0+i, b,b0+j) <= 0 )
-           copy(a,a0+i++, c,c0+k);
-      else copy(b,b0+j++, c,c0+k);
+    aLen += a0;
+    bLen += b0;
+    cLen += c0;
+    for(; c0 <  cLen; c0++ ) {
+      if( b0 >= bLen || a0 < aLen && compare(a,a0, b,b0) <= 0 )
+           copy(a,a0++, c,c0);
+      else copy(b,b0++, c,c0);
+    }
   }
 
-  public default void tapeMergePartR2L(
+  default void tapeMergePartR2L(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0, int cLen
@@ -36,13 +38,13 @@ public interface TapeMergePartAccessor<T> extends CompareRandomAccessor<T>
       b, b0, bLen,
       c, c0, cLen
     );
-    for( int i=aLen-1,
-             j=bLen-1,
-             k=cLen; k > 0; )
+    for( int i = a0 + aLen-1,
+             j = b0 + bLen-1,
+             k = c0 + cLen; k-- > c0; )
     {
-      if( j < 0 || i >= 0 && compare(a,a0+i, b,b0+j) > 0 )
-           copy(a,a0 + i--, c,c0 + --k);
-      else copy(b,b0 + j--, c,c0 + --k);
+      if( j < b0 || i >= a0 && compare(a,i, b,j) > 0 )
+           copy(a,i--, c,k);
+      else copy(b,j--, c,k);
     }
   }
 }
