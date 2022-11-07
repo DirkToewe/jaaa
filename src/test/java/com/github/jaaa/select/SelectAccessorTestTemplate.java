@@ -3,7 +3,6 @@ package com.github.jaaa.select;
 import com.github.jaaa.*;
 import com.github.jaaa.misc.Boxing;
 import com.github.jaaa.util.ZipWithIndex;
-import net.jqwik.api.Example;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.PropertyDefaults;
@@ -14,9 +13,9 @@ import java.util.Map.Entry;
 
 import static com.github.jaaa.misc.Boxing.boxed;
 import static com.github.jaaa.util.ZipWithIndex.zipWithIndex;
-import static org.assertj.core.api.Assertions.assertThat;
 import static java.util.Map.Entry.comparingByKey;
 import static java.util.Map.Entry.comparingByValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 @PropertyDefaults( tries = 10_000 )
@@ -74,7 +73,7 @@ public interface SelectAccessorTestTemplate extends ArrayProviderTemplate
       @Override public int compare( T[] a, int i, T[] b, int j ) {
         if( a == tst ) assertThat(i).isBetween(from,until-1);
         if( b == tst ) assertThat(j).isBetween(from,until-1);
-        return tst[i].compareTo(tst[j]);
+        return a[i].compareTo(b[j]);
       }
     });
 
@@ -124,7 +123,7 @@ public interface SelectAccessorTestTemplate extends ArrayProviderTemplate
       @Override public int compare( Entry<T,Integer>[] a, int i, Entry<T,Integer>[] b, int j ) {
         if( a == tst ) assertThat(i).isBetween(from,until-1);
         if( b == tst ) assertThat(j).isBetween(from,until-1);
-        return CMP.compare(tst[i],tst[j]);
+        return CMP.compare(a[i],b[j]);
       }
     });
 

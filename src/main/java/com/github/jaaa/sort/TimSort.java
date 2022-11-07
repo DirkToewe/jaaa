@@ -86,7 +86,7 @@ public final class TimSort
 // STATIC CONSTRUCTOR
 
 // STATIC METHODS
-  static int optimalRunLength( int minRunLen, int len )
+  public static int optimalRunLength( int minRunLen, int len )
   {
     if( minRunLen <= 0 || len <  0 )
       throw new IllegalArgumentException();
