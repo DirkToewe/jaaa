@@ -8,7 +8,7 @@ import com.github.jaaa.fn.Int3Op;
 import java.util.SplittableRandom;
 
 
-public interface QuickSelectV2Access extends ArgMaxAccess, ArgMinAccess, CompareSwapAccess, HeapSelectV3V4Access
+public interface QuickSelectV2Access extends ArgMaxAccess, ArgMinAccess, CompareSwapAccess, HeapSelectV1V2Access
 {
   default Int3Op quickSelectV2_newPivotChooser() {
     var rng = new SplittableRandom();
@@ -19,7 +19,7 @@ public interface QuickSelectV2Access extends ArgMaxAccess, ArgMinAccess, Compare
         int j = rng.nextInt(from+i,until);
         swap(from+i,j);
       }
-      int pivot = from+(N>>>1); heapSelectV3(from, pivot, from+N);
+      int pivot = from+(N>>>1); heapSelectV1(from, pivot, from+N);
       swap( pivot, pivot=from+until>>>1 );
       return  pivot;
     };
@@ -38,7 +38,7 @@ public interface QuickSelectV2Access extends ArgMaxAccess, ArgMinAccess, Compare
 
   default void quickSelectV2_detSelect( int from, int mid, int until )
   {
-    heapSelectV4(from,mid,until);
+    heapSelectV1(from,mid,until);
   }
 
   default void quickSelectV2( int from, int mid, int until )

@@ -27,7 +27,7 @@ import static java.util.stream.IntStream.range;
 public class SelectComparison
 {
 // STATIC FIELDS
-  private static final int N_SAMPLES_DEFAULT = 8192;
+  private static final int N_SAMPLES_DEFAULT = 1<<14;
 
 // STATIC CONSTRUCTOR
   static {
@@ -79,18 +79,6 @@ public class SelectComparison
           @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
           @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
         }.heapSelectV2(l,m,r)
-      ),
-      entry("HeapV3", (arr,l,m,r) ->
-        new HeapSelectV3V4Access() {
-          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.heapSelectV3(l,m,r)
-      ),
-      entry("HeapV4", (arr,l,m,r) ->
-        new HeapSelectV3V4Access() {
-          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.heapSelectV4(l,m,r)
       ),
       entry("QuickV1", (arr,l,m,r) ->
         new QuickSelectV1Access() {
@@ -187,7 +175,7 @@ public class SelectComparison
     @SuppressWarnings("unchecked")
     Entry<String,SelectFn<int[]>>[] selectorsArr = selectors.entrySet().toArray(Entry[]::new);
 
-    var      order = range(0,N_SAMPLES).toArray();
+    var     order = range(0,N_SAMPLES).toArray();
     shuffle(order,rng::nextInt);
     Progress.print( stream(order) ).forEach(i -> {
       int split = (int) x[i];

@@ -10,7 +10,7 @@ import java.util.SplittableRandom;
 import static java.lang.Math.min;
 
 
-public interface QuickSelectV1Access extends ArgMaxAccess, ArgMinAccess, CompareSwapAccess, HeapSelectV3V4Access
+public interface QuickSelectV1Access extends ArgMaxAccess, ArgMinAccess, CompareSwapAccess, HeapSelectV1V2Access
 {
   default Int3Op quickSelectV1_newPivotChooser() {
     var rng = new SplittableRandom();
@@ -34,7 +34,7 @@ public interface QuickSelectV1Access extends ArgMaxAccess, ArgMinAccess, Compare
 
   default void quickSelectV1_detSelect( int from, int mid, int until )
   {
-    heapSelectV3(from,mid,until);
+    heapSelectV1(from,mid,until);
   }
 
   default void quickSelectV1( int from, int mid, int until )
