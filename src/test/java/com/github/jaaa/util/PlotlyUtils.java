@@ -33,7 +33,7 @@ public final class PlotlyUtils
             document.title = layout.title;
 
           if( 'paper_bgcolor' in layout )
-            document.body.style.background = 'black';
+            document.body.style.background = layout.paper_bgcolor;
 
           Plotly.plot(plot, {layout, data: %2$s});
         </script>

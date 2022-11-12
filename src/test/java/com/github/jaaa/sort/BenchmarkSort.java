@@ -50,8 +50,8 @@ public class BenchmarkSort
 //    System.out.println("GO");
 
     Map<String,SortFn> mergers = Map.ofEntries(
-//      entry("HeapSort",                               HeapSort::sort),
-//      entry("HeapSortFast",                       HeapSortFast::sort),
+      entry("HeapSort",                               HeapSort::sort),
+      entry("HeapSortFast",                       HeapSortFast::sort),
 //      entry("QuickSort",                             QuickSort::sort),
 //      entry("MergeSort",                             MergeSort::sort),
 //      entry("KiwiSortV1",                           KiwiSortV1::sort),
@@ -62,7 +62,7 @@ public class BenchmarkSort
 //      entry("KiwiSortV6",                           KiwiSortV6::sort),
 //      entry("WikiSortV1",                           WikiSortV1::sort),
       entry("ComparatorWikiSort", new ComparatorWikiSort(null)::sort),
-      entry("TimSort",                                 TimSort::sort),
+//      entry("TimSort",                                 TimSort::sort),
       entry("JDK",                                      Arrays::sort)
     );
 
