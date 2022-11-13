@@ -40,7 +40,7 @@ public interface QuickSelectV1Access extends ArgMaxAccess, ArgMinAccess, Compare
 
     var choosePivot = quickSelectV1_newPivotChooser();
 
-    while( quickSelectV1_detSelect_performance(from,mid,until) > 3L*(until - from) )
+    while( from < until-1 && quickSelectV1_detSelect_performance(from,mid,until) > 3L*(until - from) )
     {
       // SELECT RANDOM PIVOT
       // -------------------

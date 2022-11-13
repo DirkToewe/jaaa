@@ -46,7 +46,7 @@ public interface QuickSelectV2Access extends ArgMaxAccess, ArgMinAccess, Compare
 
     var choosePivot = quickSelectV2_newPivotChooser();
 
-    while( quickSelectV2_detSelect_performance(from,mid,until) > 3L*(until - from) )
+    while( from < until-1 && quickSelectV2_detSelect_performance(from,mid,until) > 3L*(until - from) )
     {
       // SELECT RANDOM PIVOT
       // -------------------
