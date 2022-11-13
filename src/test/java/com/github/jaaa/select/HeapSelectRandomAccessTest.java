@@ -6,18 +6,18 @@ import net.jqwik.api.PropertyDefaults;
 
 
 @Group
-public class HeapSelectHybridAccessTest
+public class HeapSelectRandomAccessTest
 {
   @Group
-  class HeapSelectHybridL
+  class HeapSelectRandom
   {
     private interface TestTemplate extends SelectAccessorTestTemplate {
       @Override default <T> SelectAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) {
         return (arr, from, mid, until) ->
-          new HeapSelectHybridAccess() {
+          new HeapSelectRandomAccess() {
             @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
             @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-          }.heapSelectHybridL(from,mid,until);
+          }.heapSelectRandom(from,mid,until);
       }
       @Override default boolean isStable() { return false; }
     }
@@ -26,15 +26,15 @@ public class HeapSelectHybridAccessTest
     @PropertyDefaults(tries = 10000) @Group class Small  implements TestTemplate { @Override public int maxArraySize() {return       100;} }
   }
   @Group
-  class HeapSelectHybridR
+  class HeapSelectRandomL
   {
     private interface TestTemplate extends SelectAccessorTestTemplate {
       @Override default <T> SelectAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) {
         return (arr, from, mid, until) ->
-          new HeapSelectHybridAccess() {
+          new HeapSelectRandomAccess() {
             @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
             @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-          }.heapSelectHybridR(from,mid,until);
+          }.heapSelectRandomL(from,mid,until);
       }
       @Override default boolean isStable() { return false; }
     }
@@ -43,32 +43,15 @@ public class HeapSelectHybridAccessTest
     @PropertyDefaults(tries = 10000) @Group class Small  implements TestTemplate { @Override public int maxArraySize() {return       100;} }
   }
   @Group
-  class HeapSelectHybridV1
+  class HeapSelectRandomR
   {
     private interface TestTemplate extends SelectAccessorTestTemplate {
       @Override default <T> SelectAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) {
         return (arr, from, mid, until) ->
-          new HeapSelectHybridAccess() {
+          new HeapSelectRandomAccess() {
             @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
             @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-          }.heapSelectHybridV1(from,mid,until);
-      }
-      @Override default boolean isStable() { return false; }
-    }
-    @PropertyDefaults(tries =   100) @Group class Large  implements TestTemplate { @Override public int maxArraySize() {return 1_000_000;} }
-    @PropertyDefaults(tries =  1000) @Group class Medium implements TestTemplate { @Override public int maxArraySize() {return    10_000;} }
-    @PropertyDefaults(tries = 10000) @Group class Small  implements TestTemplate { @Override public int maxArraySize() {return       100;} }
-  }
-  @Group
-  class HeapSelectHybridV2
-  {
-    private interface TestTemplate extends SelectAccessorTestTemplate {
-      @Override default <T> SelectAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) {
-        return (arr, from, mid, until) ->
-          new HeapSelectHybridAccess() {
-            @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-            @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-          }.heapSelectHybridV2(from,mid,until);
+          }.heapSelectRandomR(from,mid,until);
       }
       @Override default boolean isStable() { return false; }
     }

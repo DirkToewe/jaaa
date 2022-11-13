@@ -17,8 +17,10 @@ public interface InsertionSelectAccess extends CompareSwapAccess
     if( from < 0 || from > mid || mid > until )
       throw new IllegalArgumentException();
 
-    if( from == mid ) return;
+    if( mid < until )
+      ++mid;
 
+    // Sort left-hand side
     int      i = from;
     while( ++i < mid )
     {
@@ -37,6 +39,7 @@ public interface InsertionSelectAccess extends CompareSwapAccess
         swap(k,--k);
     }
 
+    // Insert from other side
     for(; i < until; i++)
     {
            int lo = from;
@@ -62,6 +65,7 @@ public interface InsertionSelectAccess extends CompareSwapAccess
 
     if( mid == until ) return;
 
+    // Sort right-hand side
     int    i = until-1;
     while( i > mid )
     {
@@ -80,6 +84,7 @@ public interface InsertionSelectAccess extends CompareSwapAccess
         swap(k,++k);
     }
 
+    // Insert from other side
     while( i-- > from )
     {
            int lo = mid;
@@ -96,28 +101,5 @@ public interface InsertionSelectAccess extends CompareSwapAccess
       for( int j=i, k=mid; k < lo; j = k++ )
         swap(j,k);
     }
-
-//    for(; i < until; i++)
-//    {
-//           int lo = mid;
-//      for( int hi = until;; )
-//      {
-//        int               j = lo+hi >>> 1;
-//        int c = compare(i,j);
-//        if( c < 0 )  hi = j;
-//        else         lo = j+1;
-//
-//        if( lo >= hi ) break;
-//      }
-//
-//      for( int k=i; k < lo-1; )
-//        swap(k,++k);
-//
-//      if( mid < lo ) {
-//        swap(i,mid);
-//        for( int k=mid; k < lo-1; )
-//          swap(k,++k);
-//      }
-//    }
   }
 }

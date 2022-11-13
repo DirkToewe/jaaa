@@ -3,7 +3,7 @@ package com.github.jaaa.select;
 import com.github.jaaa.ArgMaxAccessor;
 import com.github.jaaa.ArgMinAccessor;
 import com.github.jaaa.merge.ExpMergeOffsetAccessor;
-import com.github.jaaa.merge.TapeMergeAccessor;
+import com.github.jaaa.merge.TimMergeAccessor;
 import com.github.jaaa.sort.InsertionSortAccessor;
 import com.github.jaaa.sort.TimSort;
 
@@ -16,7 +16,7 @@ public interface MergeSelectAccessor<T> extends ArgMaxAccessor<T>,
                                                 ArgMinAccessor<T>,
                                         ExpMergeOffsetAccessor<T>,
                                          InsertionSortAccessor<T>,
-                                             TapeMergeAccessor<T>
+                                              TimMergeAccessor<T>
 {
   default void mergeSelect_sortRun( T a, int from, int until ) { insertionSort(a,from,until); }
   default  int mergeSelect_runLen( int len, int nSelect ) {
@@ -35,7 +35,7 @@ public interface MergeSelectAccessor<T> extends ArgMaxAccessor<T>,
     T b, int b0, int bLen,
     T c, int c0
   ) {
-    tapeMergeL2R(a,a0,aLen, b,b0,bLen, c,c0);
+    timMergeL2R(a,a0,aLen, b,b0,bLen, c,c0);
   }
 
   default void mergeSelect_mergeR2L(
@@ -43,7 +43,7 @@ public interface MergeSelectAccessor<T> extends ArgMaxAccessor<T>,
     T b, int b0, int bLen,
     T c, int c0
   ) {
-    tapeMergeR2L(a,a0,aLen, b,b0,bLen, c,c0);
+    timMergeR2L(a,a0,aLen, b,b0,bLen, c,c0);
   }
 
   default void mergeSelect( T arr, int from, int mid, int until, T buf, int buf0, int buf1 ) {
@@ -58,14 +58,12 @@ public interface MergeSelectAccessor<T> extends ArgMaxAccessor<T>,
     if( from < 0 || from > mid || mid > until || buff0 < 0 || buff0 > buff1 )
       throw new IndexOutOfBoundsException();
 
-    if( from >= mid-1 ) {
-      if( from < mid )
-        for( int i = argMinL(arr,from,until); from < i; )
-          swap(arr,i, arr,--i);
+    if( mid == from && from < until ) {
+      swap(arr,from, arr,argMinL(arr,from,until));
       return;
     }
 
-    final int N_SELECT = mid - from;
+    final int N_SELECT = min(mid+1,until) - from;
 
     new Object() {
       T   buf    = buff;
@@ -139,10 +137,9 @@ public interface MergeSelectAccessor<T> extends ArgMaxAccessor<T>,
     if( from < 0 || from > mid || mid > until || buff0 < 0 || buff0 > buff1 )
       throw new IndexOutOfBoundsException();
 
-    if( mid >= until-1 ) {
-      if( mid < until )
-        for( int i = argMaxR(arr,from,until); i < until-1; )
-          swap(arr,i, arr,++i);
+    if( mid == until ) return;
+    if( mid == until-1 ) {
+      swap(arr,mid, arr,argMaxR(arr,from,until));
       return;
     }
 

@@ -24,9 +24,9 @@ public class MergeSelectAccessorTest
           }.mergeSelect(arr,from,mid,until, null,0,0);
       }
     }
-    @PropertyDefaults(tries =   100) @Group class Large  extends TestTemplate { @Override public int maxArraySize() {return 1_000_000;} }
-    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return    10_000;} }
-    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return       100;} }
+    @PropertyDefaults(tries =   100) @Group class Large  extends TestTemplate { @Override public int maxArraySize() {return 100_000;} }
+    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return  10_000;} }
+    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return     100;} }
   }
   @Group
   public class MergeSelectL {
@@ -44,9 +44,9 @@ public class MergeSelectAccessorTest
           }.mergeSelectL(arr,from,mid,until, null,0,0);
       }
     }
-    @PropertyDefaults(tries =   100) @Group class Large  extends TestTemplate { @Override public int maxArraySize() {return 1_000_000;} }
-    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return    10_000;} }
-    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return       100;} }
+    @PropertyDefaults(tries =   100) @Group class Large  extends TestTemplate { @Override public int maxArraySize() {return 100_000;} }
+    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return  10_000;} }
+    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return     100;} }
   }
   @Group
   public class MergeSelectR {
@@ -64,8 +64,8 @@ public class MergeSelectAccessorTest
           }.mergeSelectR(arr,from,mid,until, null,0,0);
       }
     }
-    @PropertyDefaults(tries =   100) @Group class Large  extends TestTemplate { @Override public int maxArraySize() {return 1_000_000;} }
-    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return    10_000;} }
-    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return       100;} }
+    @PropertyDefaults(tries =   100) @Group class Large  extends TestTemplate { @Override public int maxArraySize() {return 100_000;} }
+    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return  10_000;} }
+    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return     100;} }
   }
 }

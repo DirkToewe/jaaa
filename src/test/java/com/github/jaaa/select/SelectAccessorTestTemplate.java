@@ -13,12 +13,13 @@ import java.util.Map.Entry;
 
 import static com.github.jaaa.misc.Boxing.boxed;
 import static com.github.jaaa.util.ZipWithIndex.zipWithIndex;
+import static java.lang.Math.min;
 import static java.util.Map.Entry.comparingByKey;
 import static java.util.Map.Entry.comparingByValue;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@PropertyDefaults( tries = 10_000 )
+@PropertyDefaults( tries = 100_000 )
 public interface SelectAccessorTestTemplate extends ArrayProviderTemplate
 {
 // STATIC FIELDS
@@ -78,8 +79,9 @@ public interface SelectAccessorTestTemplate extends ArrayProviderTemplate
     });
 
     acc.select(tst,from,mid,until);
-    if( ! sortsLHS(from,mid,until) ) Arrays.sort(tst, from,mid);
-    if( ! sortsRHS(from,mid,until) ) Arrays.sort(tst,      mid,until);
+
+    if( ! sortsLHS(from,mid,until) ) Arrays.sort(tst, from, mid);
+    if( ! sortsRHS(from,mid,until) ) Arrays.sort(tst, min(1+mid,until), until);
 
     var ref = sample.getData().getData().clone();
     Arrays.sort(ref, from,until);
@@ -128,8 +130,9 @@ public interface SelectAccessorTestTemplate extends ArrayProviderTemplate
     });
 
     acc.select(tst,from,mid,until);
-    if( ! sortsLHS(from,mid,until) ) Arrays.sort(tst,from,mid,      cmp);
-    if( ! sortsRHS(from,mid,until) ) Arrays.sort(tst,     mid,until,cmp);
+
+    if( ! sortsLHS(from,mid,until) ) Arrays.sort(tst, from, mid, CMP);
+    if( ! sortsRHS(from,mid,until) ) Arrays.sort(tst, min(1+mid,until), until, CMP);
 
     var ref = sample.getData().getData().clone();
     Arrays.sort(ref, from,until, cmp);

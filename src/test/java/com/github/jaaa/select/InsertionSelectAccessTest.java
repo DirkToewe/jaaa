@@ -5,6 +5,7 @@ import net.jqwik.api.Group;
 import net.jqwik.api.PropertyDefaults;
 
 
+@Group
 public class InsertionSelectAccessTest
 {
   @Group
@@ -21,7 +22,6 @@ public class InsertionSelectAccessTest
           }.insertionSelect(from,mid,until);
       }
     }
-    @PropertyDefaults(tries =   100) @Group class Large  extends TestTemplate { @Override public int maxArraySize() {return 1_000_000;} }
     @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return    10_000;} }
     @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return       100;} }
   }
@@ -39,7 +39,6 @@ public class InsertionSelectAccessTest
           }.insertionSelectL(from,mid,until);
       }
     }
-    @PropertyDefaults(tries =   100) @Group class Large  extends TestTemplate { @Override public int maxArraySize() {return 1_000_000;} }
     @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return    10_000;} }
     @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return       100;} }
   }
@@ -57,7 +56,6 @@ public class InsertionSelectAccessTest
           }.insertionSelectR(from,mid,until);
       }
     }
-    @PropertyDefaults(tries =   100) @Group class Large  extends TestTemplate { @Override public int maxArraySize() {return 1_000_000;} }
     @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return    10_000;} }
     @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return       100;} }
   }

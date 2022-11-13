@@ -8,18 +8,18 @@ import com.github.jaaa.fn.Int3Op;
 import java.util.SplittableRandom;
 
 
-public interface QuickSelectV2Access extends ArgMaxAccess, ArgMinAccess, CompareSwapAccess, HeapSelectV1V2Access
+public interface QuickSelectV2Access extends ArgMaxAccess, ArgMinAccess, CompareSwapAccess, HeapSelectAccess
 {
   default Int3Op quickSelectV2_newPivotChooser() {
     var rng = new SplittableRandom();
     return (from,mid,until) -> {
-      int N = 3;
+      int    N = 3;
       assert N <= until-from;
       for( int i=0; i < N; i++ ) {
         int j = rng.nextInt(from+i,until);
         swap(from+i,j);
       }
-      int pivot = from+(N>>>1); heapSelectV1(from, pivot, from+N);
+      int pivot = from+(N>>>1); heapSelectMajor(from, pivot, from+N);
       swap( pivot, pivot=from+until>>>1 );
       return  pivot;
     };
@@ -29,26 +29,24 @@ public interface QuickSelectV2Access extends ArgMaxAccess, ArgMinAccess, Compare
    *  more efficient thant quick selection. Returns <code>true</code> if
    *  deterministic merging was applied, <code>false</code> otherwise.
    */
-  default boolean quickSelectV2_detSelect_isSlower( int from, int mid, int until )
+  default long quickSelectV2_detSelect_performance( int from, int mid, int until )
   {
-    return 16 < until-from;
-//    int    s = min(mid-from, until-mid);
-//    return s > 8 && 3L*(until-from) < heapSelectV3_worstCasePerformance(from,mid,until);
+    return heapSelectMajor_performance(from,mid,until);
   }
 
   default void quickSelectV2_detSelect( int from, int mid, int until )
   {
-    heapSelectV1(from,mid,until);
+    heapSelectMajor(from,mid,until);
   }
 
   default void quickSelectV2( int from, int mid, int until )
   {
     if( 0 > from || from > mid | mid > until ) throw new IllegalArgumentException();
-    if( from == mid || mid == until ) return;
+    if( mid == until ) return;
 
     var choosePivot = quickSelectV2_newPivotChooser();
 
-    while( quickSelectV2_detSelect_isSlower(from,mid,until) )
+    while( quickSelectV2_detSelect_performance(from,mid,until) > 3L*(until - from) )
     {
       // SELECT RANDOM PIVOT
       // -------------------

@@ -7,10 +7,8 @@ import com.github.jaaa.fn.Int3Op;
 
 import java.util.SplittableRandom;
 
-import static java.lang.Math.min;
 
-
-public interface QuickSelectV1Access extends ArgMaxAccess, ArgMinAccess, CompareSwapAccess, HeapSelectV1V2Access
+public interface QuickSelectV1Access extends ArgMaxAccess, ArgMinAccess, CompareSwapAccess, HeapSelectAccess
 {
   default Int3Op quickSelectV1_newPivotChooser() {
     var rng = new SplittableRandom();
@@ -25,26 +23,24 @@ public interface QuickSelectV1Access extends ArgMaxAccess, ArgMinAccess, Compare
    *  more efficient thant quick selection. Returns <code>true</code> if
    *  deterministic merging was applied, <code>false</code> otherwise.
    */
-  default boolean quickSelectV1_detSelect_isSlower( int from, int mid, int until )
+  default long quickSelectV1_detSelect_performance( int from, int mid, int until )
   {
-    return 16 < until-from;
-//    int    s = min(mid-from, until-mid);
-//    return s > 8 && 3L*(until-from) < heapSelectV3_worstCasePerformance(from,mid,until);
+    return heapSelectMajor_performance(from,mid,until);
   }
 
   default void quickSelectV1_detSelect( int from, int mid, int until )
   {
-    heapSelectV1(from,mid,until);
+    heapSelectMajor(from,mid,until);
   }
 
   default void quickSelectV1( int from, int mid, int until )
   {
-    if( 0 > from || from > mid | mid > until ) throw new IllegalArgumentException();
+    if( from < 0 || from > mid | mid > until ) throw new IllegalArgumentException();
     if( from == mid || mid == until ) return;
 
     var choosePivot = quickSelectV1_newPivotChooser();
 
-    while( quickSelectV1_detSelect_isSlower(from,mid,until) )
+    while( quickSelectV1_detSelect_performance(from,mid,until) > 3L*(until - from) )
     {
       // SELECT RANDOM PIVOT
       // -------------------
