@@ -30,13 +30,22 @@ import static java.lang.Math.min;
  */
 public interface HeapSelectAccess extends CompareSwapAccess, ArgMaxAccess, ArgMinAccess
 {
+  /**
+   * Applies the heap selection algorithm to the given range,
+   * building the heap on whichever side promises the best
+   * average performance for randomly shuffled inputs.
+   *
+   * @param from  Start (inclusive) of the selection range.
+   * @param mid   Index of the selected element.
+   * @param until End (exclusive) fo the selection range.
+   */
   default void heapSelect( int from, int mid, int until )
   {
     if( from < 0 || from > mid || mid > until )
       throw new IllegalArgumentException();
     int m =   mid - from,
         n = until - mid;
-    if( 0 < n && performance_average(m+1,n-1) < performance_average(n,m) )
+    if( 1 < n && performance_average(m+1,n-1) < performance_average(n,m) )
       heapSelectL(from,mid,until);
     else
       heapSelectR(from,mid,until);
@@ -95,14 +104,27 @@ public interface HeapSelectAccess extends CompareSwapAccess, ArgMaxAccess, ArgMi
   }
 
 
+  default long heapSelectMinor_performance( int from, int mid, int until ) {
+    if( from < 0 || from > mid || mid > until )
+      throw new IllegalArgumentException();
+    if( mid == until )
+      return 0;
+    int m =   mid - from,
+        n = until - mid;
+    return m < n-2
+      ? performance_average(m+1,n-1)
+      : performance_average(n,m);
+  }
+
+
   default void heapSelectL( int from, int mid, int until )
   {
     if( from < 0 || from > mid || mid > until )
       throw new IllegalArgumentException();
 
     if( mid == until ) return;
-    if( mid == from    ) { swap(from, argMinL(from,until)); return; }
     if( mid == until-1 ) { swap(mid,  argMaxR(from,until)); return; }
+    if( mid == from    ) { swap(from, argMinL(from,until)); return; }
 
     //   1) Build max heap in the left range
     //   2) For each element in the right range that
@@ -162,8 +184,8 @@ public interface HeapSelectAccess extends CompareSwapAccess, ArgMaxAccess, ArgMi
       throw new IllegalArgumentException();
 
     if( mid == until ) return;
-    if( mid == from    ) { swap(from, argMinL(from,until)); return; }
     if( mid == until-1 ) { swap(mid,  argMaxR(from,until)); return; }
+    if( mid == from    ) { swap(from, argMinL(from,until)); return; }
 
     // 1) Build min heap in the right range
     // 2) For each element in the left range that

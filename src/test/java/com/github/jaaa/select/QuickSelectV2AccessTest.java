@@ -19,7 +19,7 @@ public class QuickSelectV2AccessTest
     @Override default boolean isStable() { return false; }
   }
 
-  @PropertyDefaults(tries =   100) @Group class HeapSelectTestLarge  implements TestTemplate { @Override public int maxArraySize() {return 1_000_000;} }
-  @PropertyDefaults(tries =  1000) @Group class HeapSelectTestMedium implements TestTemplate { @Override public int maxArraySize() {return    10_000;} }
-  @PropertyDefaults(tries = 10000) @Group class HeapSelectTestSmall  implements TestTemplate { @Override public int maxArraySize() {return       100;} }
+  @PropertyDefaults(tries =   100) @Group class Large  implements TestTemplate { @Override public int maxArraySize() {return 1_000_000;} }
+  @PropertyDefaults(tries =  1000) @Group class Medium implements TestTemplate { @Override public int maxArraySize() {return    10_000;} }
+  @PropertyDefaults(tries = 10000) @Group class Small  implements TestTemplate { @Override public int maxArraySize() {return       100;} }
 }

@@ -5,7 +5,7 @@ import static java.lang.Math.log;
 import static java.lang.Math.round;
 
 
-public class HeapSelect
+public final class HeapSelect
 {
   static long performance_worstCase( int heapSize, int restSize ) {
     if( restSize  < 0 || heapSize < 1 ) throw new IllegalArgumentException();
@@ -14,14 +14,12 @@ public class HeapSelect
     double m = heapSize,
            n = restSize,
         logM = log2(m+1),
-       result = 0;
+        cost = 0;
     // building the heap (see https://stackoverflow.com/questions/69620948/build-heap-in-on-max-number-of-comparisons)
-    result += 2 * (m - logM);
-    // comparing top of heap to every element on other side
-    result += n;
+    cost += 2 * (m - logM);
     // enqueueing every element from other side into heap
-    result += 2 * (logM - 1) * n;
-    return round(result);
+    cost += (2*logM - 1) * n;
+    return round(cost);
   }
 
   static long performance_average( int heapSize, int restSize ) {
@@ -31,11 +29,11 @@ public class HeapSelect
     double m = heapSize,
            n = restSize,
         logM = log2(m+1),
-      result = 0;
+        cost = 0;
     // Heap Construction, See: https://stackoverflow.com/questions/69620948/build-heap-in-on-max-number-of-comparisons)
-    result += 1.88 * (m - logM);
+    cost += 1.88 * (m - logM);
     // Comparing top of heap to every element on other side
-    result += n;
+    cost += n;
     // Enqueueing rest elements into heap. In the random
     // case this is somewhat tricky to estimate.
     //
@@ -72,7 +70,7 @@ public class HeapSelect
     // For enqueueing element i, the expected number of
     // sift-down steps e[i] should therefore be:
     //
-    // e[i] = sum[k=0...log2(m+1)]( m+1 - 2^k ) / (i+1) ~= log(m+1)*m - m
+    // e[i] = sum[k=0...log2(m+1)]( m+1 - 2^k ) / (i+1) ~= (log2(m+1)*(m+1) - m) / (i+1)
     //
     // The total number of sift-down steps should be:
     //
@@ -82,7 +80,11 @@ public class HeapSelect
     // Where H[i] is the i-th harmonic number, see: https://en.wikipedia.org/wiki/Harmonic_number
     // With the approximation H[i] ~= log(i), we can
     // approximate the number of comparisons to:
-    result += log((m+n)/m) * (logM*m - m) * 2;
-    return round(result);
+    cost += log((m+n)/m) * (logM*(m+1) - m) * 2;
+    return round(cost);
+  }
+
+  private HeapSelect() {
+    throw new UnsupportedOperationException("Cannot instantiate static class.");
   }
 }

@@ -24,6 +24,7 @@ import static java.util.Arrays.stream;
 import static java.util.Map.entry;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
+import static java.util.stream.IntStream.rangeClosed;
 
 
 /**
@@ -57,7 +58,7 @@ public class HeapSelectCheck
   }
 
   private static void runCheck( String caseName, Function<SelectAccess,PerformanceFn> perf, Function<RandomGenerator, IntFunction<int[]>> inputGenerator ) throws IOException, InterruptedException {
-    int N_SAMPLES = 8192;
+    int N_SAMPLES = 1 << 16;
     var rng = new SplittableRandom();
     var gen = inputGenerator.apply(rng);
 
@@ -133,7 +134,15 @@ public class HeapSelectCheck
             Arrays.toString(y)
           );
 
-          var estRange = new LinSpace(0,length, 1024).stream().mapToInt(Double::intValue).toArray();
+          int[] estRange; {
+            int l = min(1024, (length>>>1) - 2),
+                r = length - l;
+            estRange = Stream.of(
+              rangeClosed(0,l),
+              new LinSpace(l+1, r-1, min(1024, r-l-1)).stream().mapToInt(Double::intValue),
+              rangeClosed(r,length)
+            ).flatMapToInt( i -> i ).sorted().toArray();
+          }
 
           var estimate = format(
             """
@@ -270,6 +279,26 @@ public class HeapSelectCheck
         }
         return new Acc();
       }),
+      entry("HeapMinor", arr -> {
+        class Acc implements HeapSelectAccess, SelectAccess {
+          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
+          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
+          @Override public void select( int l, int m, int r ) { heapSelectMinor(l,m,r); }
+          @Override public long performance_average  ( int l, int m, int r ) { return heapSelectMinor_performance(l,m,r); }
+          @Override public long performance_worstCase( int from, int mid, int until ) {
+            if( from < 0 || from > mid || mid > until )
+              throw new IllegalArgumentException();
+            if( mid == until )
+              return 0;
+            int m =   mid - from,
+                n = until - mid;
+            return m < n-2
+              ? HeapSelect.performance_worstCase(m+1,n-1)
+              : HeapSelect.performance_worstCase(n,m);
+          }
+        }
+        return new Acc();
+      }),
       entry("HeapRandom", arr -> {
         class Acc implements HeapSelectRandomAccess, SelectAccess {
           @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
@@ -277,6 +306,18 @@ public class HeapSelectCheck
           @Override public void select( int l, int m, int r ) { heapSelectRandom(l,m,r); }
           @Override public long performance_average  ( int l, int m, int r ) { return heapSelect_performance(l,m,r); }
           @Override public long performance_worstCase( int l, int m, int r ) { return heapSelect_performance(l,m,r); }
+        }
+        return new Acc();
+      }),
+      entry("MergeSelect", arr -> {
+        class Acc implements MergeSelectAccessor<T>, SelectAccess {
+          @Override public T malloc( int len ) { return acc.malloc(len); }
+          @Override public void   copy( T a, int i, T b, int j ) {        acc.   copy(a,i, b,j); }
+          @Override public void   swap( T a, int i, T b, int j ) {        acc.   swap(a,i, b,j); }
+          @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
+          @Override public void select( int l, int m, int r ) { mergeSelect(arr,l,m,r, null,0,0); }
+          @Override public long performance_average  ( int l, int m, int r ) { return mergeSelect_performance(l,m,r); }
+          @Override public long performance_worstCase( int l, int m, int r ) { return mergeSelect_performance(l,m,r); }
         }
         return new Acc();
       })

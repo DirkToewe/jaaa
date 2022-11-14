@@ -6,7 +6,7 @@ import com.github.jaaa.CompareSwapAccess;
 public interface InsertionSelectAccess extends CompareSwapAccess
 {
   default void insertionSelect( int from, int mid, int until ) {
-    if( mid-from <= until-mid )
+    if( mid-from <= until-mid-2 )
       insertionSelectL(from,mid,until);
     else
       insertionSelectR(from,mid,until);

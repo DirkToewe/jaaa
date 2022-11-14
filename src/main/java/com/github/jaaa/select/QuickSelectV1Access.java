@@ -7,13 +7,21 @@ import com.github.jaaa.fn.Int3Op;
 
 import java.util.SplittableRandom;
 
+import static java.lang.Math.min;
+
 
 public interface QuickSelectV1Access extends ArgMaxAccess, ArgMinAccess, CompareSwapAccess, HeapSelectAccess
 {
   default Int3Op quickSelectV1_newPivotChooser() {
     var rng = new SplittableRandom();
     return (from,mid,until) -> {
-      int pivot = rng.nextInt(from,until);
+      int    N = min(3,until-from);
+      assert N <= until-from;
+      for( int i=0; i < N; i++ ) {
+        int j = rng.nextInt(from+i,until);
+        swap(from+i,j);
+      }
+      int pivot = from+(N>>>1); heapSelectMajor(from, pivot, from+N);
       swap( pivot, pivot=from+until>>>1 );
       return  pivot;
     };
@@ -23,24 +31,20 @@ public interface QuickSelectV1Access extends ArgMaxAccess, ArgMinAccess, Compare
    *  more efficient thant quick selection. Returns <code>true</code> if
    *  deterministic merging was applied, <code>false</code> otherwise.
    */
-  default long quickSelectV1_detSelect_performance( int from, int mid, int until )
-  {
+  default long quickSelectV1_detSelect_performance( int from, int mid, int until ) {
     return heapSelectMajor_performance(from,mid,until);
   }
 
-  default void quickSelectV1_detSelect( int from, int mid, int until )
-  {
-    heapSelectMajor(from,mid,until);
-  }
+  default void quickSelectV1_detSelect( int from, int mid, int until ) { heapSelectMajor(from,mid,until); }
 
   default void quickSelectV1( int from, int mid, int until )
   {
     if( from < 0 || from > mid | mid > until ) throw new IllegalArgumentException();
-    if( from == mid || mid == until ) return;
+    if( mid == until ) return;
 
     var choosePivot = quickSelectV1_newPivotChooser();
 
-    while( from < until-1 && quickSelectV1_detSelect_performance(from,mid,until) > 3L*(until - from) )
+    while( from < mid && mid < until-1 && until-from > 6 && quickSelectV1_detSelect_performance(from,mid,until) > 2.2*(until - from) )
     {
       // SELECT RANDOM PIVOT
       // -------------------
@@ -89,6 +93,8 @@ public interface QuickSelectV1Access extends ArgMaxAccess, ArgMinAccess, Compare
       else return;
     }
 
+    if( mid == from    ) { swap(from, argMinL(from,until)); return; }
+    if( mid == until-1 ) { swap(mid,  argMaxR(from,until)); return; }
     quickSelectV1_detSelect(from,mid,until);
   }
 

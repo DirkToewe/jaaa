@@ -7,6 +7,7 @@ import com.github.jaaa.merge.TimMergeAccessor;
 import com.github.jaaa.sort.InsertionSortAccessor;
 import com.github.jaaa.sort.TimSort;
 
+import static com.github.jaaa.select.MergeSelect.performance_worstCase;
 import static java.lang.Integer.highestOneBit;
 import static java.lang.Integer.numberOfTrailingZeros;
 import static java.lang.Math.min;
@@ -47,10 +48,20 @@ public interface MergeSelectAccessor<T> extends ArgMaxAccessor<T>,
   }
 
   default void mergeSelect( T arr, int from, int mid, int until, T buf, int buf0, int buf1 ) {
-    if( mid-from <= until-mid )
-      mergeSelectL(arr, from,mid,until, buf,buf0,buf1);
-    else
-      mergeSelectR(arr, from,mid,until, buf,buf0,buf1);
+    if( mid-from <= until-mid-2 ) mergeSelectL(arr, from,mid,until, buf,buf0,buf1);
+    else                          mergeSelectR(arr, from,mid,until, buf,buf0,buf1);
+  }
+
+  default long mergeSelect_performance( int from, int mid, int until ) {
+    if( from < 0 || from > mid || mid > until )
+      throw new IllegalArgumentException();
+    if( mid == until )
+      return 0;
+    int m =   mid - from,
+        n = until - mid;
+    return m < n-2
+      ? performance_worstCase(m+1,n-1)
+      : performance_worstCase(n,m);
   }
 
   default void mergeSelectL( T arr, int from, int mid, int until, T buff, int buff0, int buff1 )

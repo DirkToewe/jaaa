@@ -4,59 +4,57 @@ import com.github.jaaa.CompareRandomAccessor;
 import net.jqwik.api.Group;
 import net.jqwik.api.PropertyDefaults;
 
-
-@Group
-public class InsertionSelectAccessTest
+public class BubbleSelectAccessTest
 {
   @Group
-  public class InsertionSelect {
+  public class BubbleSelect {
     private abstract class TestTemplate implements SelectAccessorTestTemplate {
       @Override public boolean isStable() { return false; }
       @Override public boolean sortsLHS(int from, int mid, int until) { return mid-from <= until-mid-2; }
       @Override public boolean sortsRHS(int from, int mid, int until) { return mid-from >  until-mid-2; }
       @Override public <T> SelectAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) {
         return (arr, from, mid, until) ->
-          new InsertionSelectAccess() {
+          new BubbleSelectAccess() {
             @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
             @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-          }.insertionSelect(from,mid,until);
+          }.bubbleSelect(from,mid,until);
       }
     }
-    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return    10_000;} }
-    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return       100;} }
+    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return 1_000;} }
+    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return   100;} }
   }
   @Group
-  public class InsertionSelectL {
+  public class BubbleSelectL {
     private abstract class TestTemplate implements SelectAccessorTestTemplate {
       @Override public boolean isStable() { return false; }
       @Override public boolean sortsLHS(int from, int mid, int until) { return true; }
       @Override public boolean sortsRHS(int from, int mid, int until) { return false; }
       @Override public <T> SelectAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) {
         return (arr, from, mid, until) ->
-          new InsertionSelectAccess() {
+          new BubbleSelectAccess() {
             @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
             @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-          }.insertionSelectL(from,mid,until);
+          }.bubbleSelectL(from,mid,until);
       }
     }
-    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return    10_000;} }
-    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return       100;} }
+    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return 1_000;} }
+    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return   100;} }
   }
   @Group
-  public class InsertionSelectR {
+  public class BubbleSelectR {
     private abstract class TestTemplate implements SelectAccessorTestTemplate {
       @Override public boolean isStable() { return false; }
       @Override public boolean sortsLHS(int from, int mid, int until) { return false; }
       @Override public boolean sortsRHS(int from, int mid, int until) { return true; }
       @Override public <T> SelectAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) {
         return (arr, from, mid, until) ->
-          new InsertionSelectAccess() {
+          new BubbleSelectAccess() {
             @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
             @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-          }.insertionSelectR(from,mid,until);
+          }.bubbleSelectR(from,mid,until);
       }
     }
-    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return    10_000;} }
-    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return       100;} }
+    @PropertyDefaults(tries =  1000) @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return 1_000;} }
+    @PropertyDefaults(tries = 10000) @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return   100;} }
   }
 }
