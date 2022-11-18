@@ -1,8 +1,9 @@
 package com.github.jaaa.misc;
 
-import com.github.jaaa.RandomAccessor;
+import com.github.jaaa.SwapAccessor;
 
-public interface RevertAccessor<T> extends RandomAccessor<T>
+
+public interface RevertAccessor<T> extends SwapAccessor<T>
 {
   default void revert( T arr, int from, int until )
   {

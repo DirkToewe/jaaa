@@ -5,8 +5,7 @@ package com.github.jaaa;
  *
  *  @param <T>
  */
-public interface RandomAccessor<T> extends CopyAccessor<T>
+public interface RandomAccessor<T> extends CopyAccessor<T>, SwapAccessor<T>
 {
   T malloc( int len );
-  void swap( T a, int i, T b, int j );
 }

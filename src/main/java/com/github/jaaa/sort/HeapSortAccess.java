@@ -1,9 +1,9 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.heap.BinaryHeapAccess;
+import com.github.jaaa.CompareSwapAccess;
 
 
-public interface HeapSortAccess extends BinaryHeapAccess
+public interface HeapSortAccess extends CompareSwapAccess
 {
   default void heapSort( int from, int until )
   {
