@@ -1,10 +1,9 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.misc.BlockSwapAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
 
-import static java.lang.Math.min;
-import static java.lang.Math.subtractExact;
 import static com.github.jaaa.util.IMath.sqrtFloor;
+import static java.lang.Math.subtractExact;
 
 // COMPLEXITY
 // ----------
@@ -30,7 +29,7 @@ public interface MuRaSaBiPartitionV1Access extends BlockSwapAccess,
     return    n;
   }
 
-  public default int binarySearchCountA( int from, int until )
+  default int binarySearchCountA( int from, int until )
   {
     if( from > until ) throw new IllegalArgumentException();
     int off = from;
@@ -44,7 +43,7 @@ public interface MuRaSaBiPartitionV1Access extends BlockSwapAccess,
     return result;
   }
 
-  public default void muRaSaBiPartitionV1( int from, int until )
+  default void muRaSaBiPartitionV1( int from, int until )
   {
     if( from > until ) throw new IllegalArgumentException();
 

@@ -1,8 +1,8 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.ArgMinAccess;
+import com.github.jaaa.compare.ArgMinAccess;
 import com.github.jaaa.fn.Int4Consumer;
-import com.github.jaaa.misc.BlockSwapAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
 import com.github.jaaa.sort.HeapSortFastAccess;
 
 import static java.lang.Math.*;

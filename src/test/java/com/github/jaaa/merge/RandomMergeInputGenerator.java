@@ -7,11 +7,10 @@ import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.function.IntBinaryOperator;
 
-import static com.github.jaaa.misc.RandomShuffle.shuffle;
-import static java.util.Objects.requireNonNull;
-import static net.jqwik.api.Tuple.Tuple2;
-import static java.lang.Math.subtractExact;
+import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
 import static java.lang.Math.addExact;
+import static java.lang.Math.subtractExact;
+import static net.jqwik.api.Tuple.Tuple2;
 
 
 public class RandomMergeInputGenerator
@@ -34,7 +33,7 @@ public class RandomMergeInputGenerator
     int                   len = addExact(lenA,lenB);
     var isB = new boolean[len];
     Arrays.fill(isB,0,lenB, true);
-    shuffle(isB, rng::applyAsInt);
+    randomShuffle(isB, rng::applyAsInt);
 
     int val = 0;
 

@@ -1,6 +1,7 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.copy.*;
 import com.github.jaaa.merge.ExpMergeOffsetAccessor;
 import com.github.jaaa.merge.ExpMergePartV2Accessor;
 
@@ -66,13 +67,13 @@ public class ParallelSkipMergeSort
     }
 
     private static abstract class AccArrObj<T> implements Acc<         T[]>, TimSortAccessorArrObj<T>{}
-    private             interface AccArrByte   extends    Acc<      byte[]>,  RandomAccessorArrByte  {}
+    private             interface AccArrByte   extends    Acc<      byte[]>, RandomAccessorArrByte   {}
     private             interface AccArrShort  extends    Acc<     short[]>,  RandomAccessorArrShort {}
-    private             interface AccArrInt    extends    Acc<       int[]>,  RandomAccessorArrInt   {}
+    private             interface AccArrInt    extends    Acc<       int[]>, RandomAccessorArrInt    {}
     private             interface AccArrLong   extends    Acc<      long[]>,  RandomAccessorArrLong  {}
-    private             interface AccArrChar   extends    Acc<      char[]>,  RandomAccessorArrChar  {}
-    private             interface AccArrFloat  extends    Acc<     float[]>,  RandomAccessorArrFloat {}
-    private             interface AccArrDouble extends    Acc<    double[]>,  RandomAccessorArrDouble{}
+    private             interface AccArrChar   extends    Acc<      char[]>, RandomAccessorArrChar   {}
+    private             interface AccArrFloat  extends    Acc<     float[]>, RandomAccessorArrFloat  {}
+    private             interface AccArrDouble extends    Acc<    double[]>, RandomAccessorArrDouble {}
     private             interface AccBufInt    extends    Acc<   IntBuffer>,  RandomAccessorBufInt   {}
 
   // STATIC CONSTRUCTOR

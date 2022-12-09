@@ -1,7 +1,7 @@
 package com.github.jaaa.select;
 
-import com.github.jaaa.ArgMaxAccessor;
-import com.github.jaaa.ArgMinAccessor;
+import com.github.jaaa.compare.ArgMaxAccessor;
+import com.github.jaaa.compare.ArgMinAccessor;
 import com.github.jaaa.merge.ExpMergeOffsetAccessor;
 import com.github.jaaa.merge.TimMergeAccessor;
 import com.github.jaaa.sort.InsertionSortAccessor;

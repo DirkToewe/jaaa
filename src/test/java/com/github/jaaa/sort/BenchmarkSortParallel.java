@@ -16,7 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static com.github.jaaa.misc.Revert.revert;
+import static com.github.jaaa.permute.Revert.revert;
 import static java.awt.Desktop.getDesktop;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
@@ -25,7 +25,7 @@ import static java.util.stream.Collectors.joining;
 
 public class BenchmarkSortParallel extends BenchmarkSortTemplate
 {
-  private static String PLOT_TEMPLATE = """
+  private static final String PLOT_TEMPLATE = """
     <!DOCTYPE html>
     <html lang="en">
       <head>

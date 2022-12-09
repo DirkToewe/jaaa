@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.Group;
 
 public class RecMergeAccessorTest extends MergeAccessorTestTemplate
@@ -25,7 +25,7 @@ public class RecMergeAccessorTest extends MergeAccessorTestTemplate
     @Override public void  merge( T a, int i, int m, T b, int j, int n, T c, int k ) { recMerge(a,i,m, b,j,n, c,k); }
   }
 
-  @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<T>(srtAcc); }
+  @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<>(srtAcc); }
 
 
 
@@ -52,7 +52,7 @@ public class RecMergeAccessorTest extends MergeAccessorTestTemplate
       @Override public void  merge( T a, int i, int m, T b, int j, int n, T c, int k ) { recMergeL2R(a,i,m, b,j,n, c,k); }
     }
 
-    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<T>(srtAcc); }
+    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<>(srtAcc); }
   }
 
 
@@ -80,6 +80,6 @@ public class RecMergeAccessorTest extends MergeAccessorTestTemplate
       @Override public void  merge( T a, int i, int m, T b, int j, int n, T c, int k ) { recMergeR2L(a,i,m, b,j,n, c,k); }
     }
 
-    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<T>(srtAcc); }
+    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<>(srtAcc); }
   }
 }

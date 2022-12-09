@@ -1,7 +1,7 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
-import com.github.jaaa.Swap;
+import com.github.jaaa.compare.CompareRandomAccessor;
+import com.github.jaaa.permute.Swap;
 import com.github.jaaa.fn.EntryConsumer;
 import com.github.jaaa.fn.EntryFn;
 import com.github.jaaa.util.PlotlyUtils;
@@ -17,7 +17,7 @@ import java.util.SplittableRandom;
 import java.util.TreeMap;
 import java.util.function.DoubleSupplier;
 
-import static com.github.jaaa.misc.RandomShuffle.shuffle;
+import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
 import static java.awt.Desktop.getDesktop;
 import static java.lang.Math.round;
 import static java.lang.String.format;
@@ -293,8 +293,8 @@ public class MergeComparison
 
     var acc = new CountingAccessor();
 
-    var      order = range(0,N_SAMPLES).toArray();
-    shuffle(order,random::nextInt);
+    var order = range(0,N_SAMPLES).toArray();
+    randomShuffle(order,random::nextInt);
     Progress.print( stream(order) ).forEach( i -> {
       int lenA = x[i],
           lenB = length - lenA;
@@ -310,7 +310,7 @@ public class MergeComparison
       System.arraycopy(bRef,0, cRef,lenA, lenB);
       Arrays.sort(cRef);
 
-      shuffle(mergersArr, random::nextInt);
+      randomShuffle(mergersArr, random::nextInt);
       stream(mergersArr).forEach( EntryConsumer.of( (k, v) -> {
         acc.nComps = 0;
         acc.nWrite = 0;
@@ -370,8 +370,8 @@ public class MergeComparison
 
     var acc = new CountingAccessor();
 
-    var      order = range(0,N_SAMPLES).toArray();
-    shuffle(order,random::nextInt);
+    var order = range(0,N_SAMPLES).toArray();
+    randomShuffle(order,random::nextInt);
     Progress.print( stream(order) ).forEach( i -> {
       int length = x[i],
           lenA = (int) round(nextSplit.getAsDouble()*length),
@@ -388,7 +388,7 @@ public class MergeComparison
       System.arraycopy(bRef,0, cRef,lenA, lenB);
       Arrays.sort(cRef);
 
-      shuffle(mergersArr, random::nextInt);
+      randomShuffle(mergersArr, random::nextInt);
       stream(mergersArr).forEach( EntryConsumer.of( (k,v) -> {
         acc.nComps = 0;
         acc.nWrite = 0;

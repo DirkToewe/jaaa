@@ -1,7 +1,8 @@
 package com.github.jaaa.search;
 
 import com.github.jaaa.*;
-import com.github.jaaa.misc.Boxing;
+import com.github.jaaa.compare.CompareAccessor;
+import com.github.jaaa.Boxing;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Group;
 import net.jqwik.api.Property;
@@ -11,7 +12,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static com.github.jaaa.misc.Boxing.boxed;
+import static com.github.jaaa.Boxing.boxed;
 
 
 public abstract class SearchAccessorTestTemplate

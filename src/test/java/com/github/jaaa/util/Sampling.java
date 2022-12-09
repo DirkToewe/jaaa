@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.SplittableRandom;
 import java.util.function.IntUnaryOperator;
 
-import static com.github.jaaa.Swap.swap;
+import static com.github.jaaa.permute.Swap.swap;
 
 
 public class Sampling

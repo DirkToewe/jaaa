@@ -1,6 +1,6 @@
 package com.github.jaaa.search;
 
-import com.github.jaaa.CompareAccess;
+import com.github.jaaa.compare.CompareAccess;
 
 public interface ExpR2LSearchAccess extends CompareAccess
 {

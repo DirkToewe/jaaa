@@ -1,6 +1,8 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.permute.Swap;
 
 import java.nio.IntBuffer;
 import java.util.Comparator;

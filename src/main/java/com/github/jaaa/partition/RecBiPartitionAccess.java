@@ -1,7 +1,7 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.misc.BlockSwapAccess;
-import com.github.jaaa.misc.RotateAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
+import com.github.jaaa.permute.RotateAccess;
 
 import java.util.function.IntBinaryOperator;
 
@@ -22,9 +22,9 @@ import static java.lang.Math.subtractExact;
 
 public interface RecBiPartitionAccess extends RotateAccess, BlockSwapAccess
 {
-  public boolean predicate( int i );
+  boolean predicate( int i );
 
-  public default void recBiPartition( int from, int until )
+  default void recBiPartition( int from, int until )
   {
     if( from >  until ) throw new IllegalArgumentException();
     if( from == until ) return;

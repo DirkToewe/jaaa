@@ -1,7 +1,8 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
-import com.github.jaaa.misc.Boxing;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.Boxing;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.PropertyDefaults;
@@ -10,8 +11,8 @@ import net.jqwik.api.Tuple;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import static com.github.jaaa.misc.Boxing.boxed;
-import static com.github.jaaa.misc.Revert.revert;
+import static com.github.jaaa.Boxing.boxed;
+import static com.github.jaaa.permute.Revert.revert;
 import static java.util.Comparator.comparing;
 import static java.util.stream.IntStream.range;
 import static net.jqwik.api.Tuple.Tuple2;
@@ -46,7 +47,7 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
         ref = ref.clone();
     var tst = ref.clone();
     Arrays.sort(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrByte) (a,i, b,j) -> Byte.compare(a[i], b[j]) );
+    var acc = createAccessor( (CompareRandomAccessorArrByte) (a, i, b, j) -> Byte.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
@@ -82,7 +83,7 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
         ref = ref.clone();
     var tst = ref.clone();
     Arrays.sort(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrChar) (a,i, b,j) -> Character.compare(a[i], b[j]) );
+    var acc = createAccessor( (CompareRandomAccessorArrChar) (a, i, b, j) -> Character.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
@@ -91,7 +92,7 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
         ref = ref.clone();
     var tst = ref.clone();
     Arrays.sort(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrFloat) (a,i, b,j) -> Float.compare(a[i], b[j]) );
+    var acc = createAccessor( (CompareRandomAccessorArrFloat) (a, i, b, j) -> Float.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
@@ -100,7 +101,7 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
         ref = ref.clone();
     var tst = ref.clone();
     Arrays.sort(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrDouble) (a,i, b,j) -> Double.compare(a[i], b[j]) );
+    var acc = createAccessor( (CompareRandomAccessorArrDouble) (a, i, b, j) -> Double.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }

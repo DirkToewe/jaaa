@@ -71,6 +71,106 @@ public final class IMath
     return y << shift;
   }
 
+  public record       GcdxInt( int gcd, int bezoutL, int bezoutR ) {}
+  public static final GcdxInt GCDX_INT_ZERO = new GcdxInt(0,0,0);
+  public static       GcdxInt gcdx( int a, int b )
+  {
+    if( a == 0 && b == 0 ) return GCDX_INT_ZERO;
+    if( a <  0 || b <  0 ) throw new IllegalArgumentException();
+    // https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
+    // use negative a and b because -Int.MinValue == Int.MinValue
+    int r = a, rNew = b,
+        s = 1, sNew = 0;
+
+    while( rNew != 0 ) {
+      int q = r / rNew;
+      int rNext = r - q * rNew; r = rNew; rNew = rNext;
+      int sNext = s - q * sNew; s = sNew; sNew = sNext;
+    }
+
+    int t = b==0 ? 0 : (int) ((r - (long)s*a) / b);
+    return new GcdxInt(r,s,t);
+  }
+
+  public record       GcdxLong( long gcd, long bezoutL, long bezoutR ) {}
+  public static final GcdxLong GCDX_LONG_ZERO = new GcdxLong(0,0,0);
+  public static       GcdxLong gcdx( long a, long b )
+  {
+    if( a == 0 && b == 0 ) return GCDX_LONG_ZERO;
+    if( a <  0 || b <  0 ) throw new IllegalArgumentException();
+    // https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
+    // use negative a and b because -Int.MinValue == Int.MinValue
+    long r = a,  rNew = b,
+         s = 1L, sNew = 0L,
+         t = 0L, tNew = 1L;
+
+    while( rNew != 0 ) {
+      var             q = r / rNew;
+      var rNext = r - q*rNew; r = rNew; rNew = rNext;
+      var sNext = s - q*sNew; s = sNew; sNew = sNext;
+      var tNext = t - q*tNew; t = tNew; tNew = tNext;
+    }
+
+    return new GcdxLong(r,s,t);
+  }
+
+  public static int pow( int base, long exp )
+  {
+    if( exp < 0 )
+      throw new ArithmeticException();
+    if( exp == 0 || base == 1 ) return 1;
+    if( exp == 1 || base == 0 ) return base;
+    if( hasOneBitOrNone(base) ) {
+      int e = Integer.numberOfTrailingZeros(base) * (int) min(exp,32);
+      return e < 32 ? 1<<e : 0;
+    }
+    if( hasOneBitOrNone(-base) ) {
+      int e = Integer.numberOfTrailingZeros(-base) * (int) min(exp,32);
+      if( e >= 32 )
+        return 0;
+      int sgn = (int) exp & 1;
+      return (1<<e ^ -sgn) + sgn; // <- if isEven(exp) then pow else -pow
+    }
+    // https://en.wikipedia.org/wiki/Exponentiation_by_squaring
+    int pow = 1;
+    while(exp > 0) {
+      if((exp & 1) == 1)
+        pow *= base;
+      base *= base;
+      exp >>>= 1;
+    }
+    return pow;
+
+//    require( 0 <= exponent )
+//    if exponent == 0 || base == 1 then
+//      1
+//    else if exponent == 1 || base == 0 then
+//      base
+//    else if hasOneBitOrNone(base) then
+//      val exp = Integer.numberOfTrailingZeros(base) * min(exponent,32).toInt
+//      if  exp < 32 then 1<<exp else 0
+//    else if hasOneBitOrNone(-base) then
+//      val exp = Integer.numberOfTrailingZeros(-base) * min(exponent,32).toInt
+//      if  exp >= 32 then
+//        0
+//      else
+//        val sgn = exponent.toInt & 1
+//        (1<<exp ^ -sgn) + sgn // <- if isEven(exponent) then pow else -pow
+//    else
+//      // https://en.wikipedia.org/wiki/Exponentiation_by_squaring
+//      var   bas = base
+//      var   pow = 1
+//      var   exp = exponent
+//      while exp > 0 do
+//        if (exp & 1) == 1 then
+//          pow *= bas
+//        bas *= bas
+//        exp >>>= 1
+//      end while
+//      pow
+//    end if
+  }
+
   public static int sqrtCeil( int n )
   {
     if( n < 0 ) throw new ArithmeticException();
@@ -144,6 +244,56 @@ public final class IMath
   {
     if( n <= 0 ) throw new ArithmeticException();
     return 63 - Long.numberOfLeadingZeros(n);
+  }
+
+  public static int floorPow3( int num ) {
+    if( num < 1 )
+      throw new ArithmeticException();
+    var pow = 43046721L;
+    if( pow > num )
+        pow = 1;
+    long
+    p = pow * 6561; if( p <= num ) pow = p;
+    p = pow * 81;   if( p <= num ) pow = p;
+    p = pow * 9;    if( p <= num ) pow = p;
+    p = pow * 3;    if( p <= num ) pow = p;
+    return (int) pow;
+  }
+
+  public static boolean isPowerOf3( int num ) {
+    if( num <= 1 )
+      return num == 1;
+    return floorPow3(num) == num;
+  }
+
+  public static int floorPow( int base, int num ) {
+    if( base < 2 )
+      throw new ArithmeticException();
+    long bb = (long) base * base,
+     p = bb > num ? 1L : floorPow((int) bb, num),
+     q = p * base;
+    return (int) (q <= num ? q : p);
+  }
+
+  public static boolean isPowerOf( int base, int num ) {
+    return floorPow(base,num) == num;
+  }
+
+  public static boolean hasOneBit( int n ) { return (n & n-1) == 0 && n != 0; }
+  public static boolean hasOneBit(long n ) { return (n & n-1) == 0 && n != 0; }
+  public static boolean hasOneBitOrNone( int n ) { return (n & n-1) == 0; }
+  public static boolean hasOneBitOrNone(long n ) { return (n & n-1) == 0; }
+
+  public static int bitReverseIncrement( int reverseInt, int addedBit ) {
+    if( ! hasOneBitOrNone(addedBit) )
+      throw new IllegalArgumentException();
+    for(;;) {
+      int bit = reverseInt & addedBit;
+      reverseInt ^= addedBit;
+      if( bit == 0 )
+        return reverseInt;
+      addedBit >>>= 1;
+    }
   }
 
   public static  int maxUnsigned( int u, int v ) { return Integer.compareUnsigned(u,v) > 0 ? u : v; }

@@ -1,6 +1,6 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.Group;
 import net.jqwik.api.PropertyDefaults;
 
@@ -8,7 +8,7 @@ import net.jqwik.api.PropertyDefaults;
 @Group
 public class HeapSortFastAccessTest
 {
-  private static record Acc<T>( CompareRandomAccessor<T> acc ) implements SortAccessorTestTemplate.SortAccessor<T>
+  private record Acc<T>( CompareRandomAccessor<T> acc ) implements SortAccessorTestTemplate.SortAccessor<T>
   {
     @Override public void sort( T arr, int from, int until) {
       new HeapSortFastAccess() {
@@ -22,7 +22,7 @@ public class HeapSortFastAccessTest
     @Override default boolean isStable() { return false; }
   }
 
-  @PropertyDefaults( tries = 1_000 )
+  @PropertyDefaults( tries = 100 )
   @Group class SorterTestLarge       implements TestTemplate { @Override public int maxArraySize() {return 1_000_000;} }
   @Group class SorterTestMedium      implements TestTemplate { @Override public int maxArraySize() {return    10_000;} }
   @Group class SortAccessorTestSmall implements TestTemplate { @Override public int maxArraySize() {return       100;} }

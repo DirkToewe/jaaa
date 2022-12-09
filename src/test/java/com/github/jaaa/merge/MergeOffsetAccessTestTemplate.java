@@ -1,19 +1,18 @@
 package com.github.jaaa.merge;
 
 import com.github.jaaa.ArrayProviderTemplate;
-import com.github.jaaa.CompareAccess;
+import com.github.jaaa.compare.CompareAccess;
 import com.github.jaaa.WithRange;
 import com.github.jaaa.search.BinarySearch;
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.Tuple5;
-import net.jqwik.api.constraints.Size;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-import static com.github.jaaa.misc.Boxing.boxed;
-import static com.github.jaaa.misc.Concat.concat;
+import static com.github.jaaa.Boxing.boxed;
+import static com.github.jaaa.Concat.concat;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.util.Arrays.stream;
@@ -132,7 +131,7 @@ public abstract class MergeOffsetAccessTestTemplate implements ArrayProviderTemp
         else if( nB <= 0 ) assertThat(ref[nSkip-1]).isEqualTo(tst[a0+nA-1]);
         else               assertThat(ref[nSkip-1]).isIn( tst[a0+nA-1], tst[b0+nB-1] );
       }
-    };
+    }
 
     assertThat(tst).isEqualTo(input);
   }

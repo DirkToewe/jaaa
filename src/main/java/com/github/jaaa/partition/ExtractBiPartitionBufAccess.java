@@ -1,7 +1,7 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateSwapAccess;
-import com.github.jaaa.misc.RotateAccess;
+import com.github.jaaa.fn.PredicateSwapAccess;
+import com.github.jaaa.permute.RotateAccess;
 
 
 /** Used by in-place {A,B}-sort algorithms to create regions of A-elements

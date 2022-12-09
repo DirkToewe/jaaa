@@ -7,7 +7,7 @@ import net.jqwik.api.arbitraries.ArrayArbitrary;
 
 import java.lang.reflect.Array;
 
-import static com.github.jaaa.Swap.swap;
+import static com.github.jaaa.permute.Swap.swap;
 import static com.github.jaaa.util.Combinatorics.factorial;
 import static java.lang.Math.max;
 import static java.lang.Math.min;

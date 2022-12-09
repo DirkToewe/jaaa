@@ -1,10 +1,10 @@
 package com.github.jaaa.search;
 
 import com.github.jaaa.ArrayProviderTemplate;
-import com.github.jaaa.CompareAccess;
+import com.github.jaaa.compare.CompareAccess;
 import com.github.jaaa.WithIndex;
 import com.github.jaaa.WithRange;
-import com.github.jaaa.misc.Boxing;
+import com.github.jaaa.Boxing;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Group;
 import net.jqwik.api.Property;

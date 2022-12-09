@@ -1,6 +1,6 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.Example;
 import net.jqwik.api.Group;
 import net.jqwik.api.PropertyDefaults;
@@ -73,7 +73,7 @@ public class WikiSortV1AccessTest
     }
   }
   private interface TestTemplate extends SortAccessorTestTemplate {
-    @Override default <T> SortAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) { return new Acc(acc); }
+    @Override default <T> SortAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) { return new Acc<>(acc); }
     @Override default boolean isStable() { return false; }
   }
 

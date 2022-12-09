@@ -25,7 +25,7 @@ public class HeapSortFastTest
     @Override public int maxArraySize() { return 10_000; }
     @Override public SorterInPlace sorter() { return sorter; }
   }
-  @PropertyDefaults( tries = 1_000 )
+  @PropertyDefaults( tries = 100 )
   @Group class SortTestLarge implements SorterInPlaceTestTemplate {
     @Override public int maxArraySize() { return 1_000_000; }
     @Override public SorterInPlace sorter() { return sorter; }

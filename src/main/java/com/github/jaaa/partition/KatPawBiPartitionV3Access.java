@@ -1,7 +1,7 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.SwapAccess;
-import com.github.jaaa.misc.BlockSwapAccess;
+import com.github.jaaa.permute.SwapAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
 import com.github.jaaa.util.Hex16;
 
 import java.util.function.IntFunction;
@@ -360,7 +360,7 @@ public interface KatPawBiPartitionV3Access extends BlockSwapAccess,
           if( nA_prev + nA_curr < blockLen ) {
             // MERGE PREVIOUS BLOCKS A-ELEMENTS INTO CURRENT BLOCK
             rotate(off-BB,        off,                    -nA_prev*B);
-            rotate(off-B*nA_prev, off+B*(nA_prev+nA_curr),+nA_prev*B);
+            rotate(off-B*nA_prev, off+B*(nA_prev+nA_curr), nA_prev*B);
             nA_curr  +=  nA_prev;
           }
           else {

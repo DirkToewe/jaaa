@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.Group;
 
 public class ZenMergeAccessorTest extends MergeAccessorTestTemplate
@@ -25,7 +25,7 @@ public class ZenMergeAccessorTest extends MergeAccessorTestTemplate
     @Override public void  merge( T a, int i, int m, T b, int j, int n, T c, int k ) { zenMerge(a,i,m, b,j,n, c,k); }
   }
 
-  @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new Acc(srtAcc); }
+  @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new Acc<>(srtAcc); }
 
 
 
@@ -52,7 +52,7 @@ public class ZenMergeAccessorTest extends MergeAccessorTestTemplate
       @Override public void  merge( T a, int i, int m, T b, int j, int n, T c, int k ) { zenMergeL2R(a,i,m, b,j,n, c,k); }
     }
 
-    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new Acc<T>(srtAcc); }
+    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new Acc<>(srtAcc); }
   }
 
 
@@ -80,6 +80,6 @@ public class ZenMergeAccessorTest extends MergeAccessorTestTemplate
       @Override public void  merge( T a, int i, int m, T b, int j, int n, T c, int k ) { zenMergeR2L(a,i,m, b,j,n, c,k); }
     }
 
-    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new Acc<T>(srtAcc); }
+    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new Acc<>(srtAcc); }
   }
 }

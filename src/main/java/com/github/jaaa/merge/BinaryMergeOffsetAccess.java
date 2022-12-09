@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareAccess;
+import com.github.jaaa.compare.CompareAccess;
 
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeOffset;
 import static java.lang.Math.max;

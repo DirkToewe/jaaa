@@ -1,6 +1,6 @@
 package com.github.jaaa.search;
 
-import com.github.jaaa.CompareAccessor;
+import com.github.jaaa.compare.CompareAccessor;
 
 public interface ExpR2LSearchAccessor<T> extends CompareAccessor<T>
 {

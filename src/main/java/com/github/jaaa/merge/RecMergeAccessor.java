@@ -1,7 +1,7 @@
 package com.github.jaaa.merge;
 
 import com.github.jaaa.search.BinarySearchAccessor;
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeL2R;
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeR2L;
@@ -58,7 +58,7 @@ public interface RecMergeAccessor<T> extends CompareRandomAccessor<T>,
     );
 
     new RecMergeFn(c0) {
-      @Override public final void merge( int a0, final int a1, int b0, final int b1 )
+      @Override public void merge( int a0, final int a1, int b0, final int b1 )
       {
         int am = a1 - a0,
             bm = b1 - b0;
@@ -95,7 +95,7 @@ public interface RecMergeAccessor<T> extends CompareRandomAccessor<T>,
     );
 
     new RecMergeFn(c0+aLen+bLen) {
-      @Override public final void merge( final int a0, int a1, final int b0, int b1 )
+      @Override public void merge( final int a0, int a1, final int b0, int b1 )
       {
         int am = a1 - a0,
             bm = b1 - b0;

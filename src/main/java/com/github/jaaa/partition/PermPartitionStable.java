@@ -1,6 +1,6 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
 
 import java.util.function.ToIntFunction;
 

@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.Tuple2;
 import net.jqwik.api.constraints.Size;
@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.TreeSet;
 
-import static com.github.jaaa.misc.Boxing.boxed;
+import static com.github.jaaa.Boxing.boxed;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.String.format;
@@ -27,7 +27,7 @@ public class ExtractMergeBufOrdinalAccessTest
 {
   private static final int MAX_SIZE = 8192;
 
-  private static record ExtractMergeBufArgs<T>( T[] arr, int from, int until, int desiredLen, int destination )
+  private record ExtractMergeBufArgs<T>( T[] arr, int from, int until, int desiredLen, int destination )
   {
     @Override public String toString() {
       return format(

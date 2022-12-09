@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.github.jaaa.misc.RandomShuffle.shuffle;
+import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
 import static com.github.jaaa.select.SelectComparisonOverSplit.selectors;
 import static java.lang.Math.round;
 import static java.lang.Runtime.getRuntime;
@@ -74,7 +74,7 @@ public class SelectComparisonOverLength
     Entry<String,SelectFn<int[]>>[] selectorsArr = selectors.entrySet().toArray(Entry[]::new);
 
     var      order = range(0,N_SAMPLES).toArray();
-    shuffle(order,rng::nextInt);
+    randomShuffle(order,rng::nextInt);
     Progress.print( stream(order) ).forEach( i -> {
       final int length = (int) x[i],
                  split = (int) round(length*splitRatio);
@@ -82,7 +82,7 @@ public class SelectComparisonOverLength
       int[] ref = new int[length];
       for( int j=0; ++j < length; )
         ref[j] = ref[j-1] + rng.nextInt(2);
-      shuffle(ref, rng::nextInt);
+      randomShuffle(ref, rng::nextInt);
 
 //      int[] ref = new int[length];
 //      for( int j=0; ++j < length; )
@@ -92,7 +92,7 @@ public class SelectComparisonOverLength
 //      for( int j=0; ++j < length; )
 //        ref[j] = ref[j-1] - rng.nextInt(2);
 
-      shuffle(selectorsArr, rng::nextInt);
+      randomShuffle(selectorsArr, rng::nextInt);
       stream(selectorsArr).forEach( EntryConsumer.of( (k,v) -> {
         acc.nComps = 0;
         acc.nSwaps = 0;

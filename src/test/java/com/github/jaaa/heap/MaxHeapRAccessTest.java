@@ -1,8 +1,10 @@
 package com.github.jaaa.heap;
 
 import com.github.jaaa.*;
-import com.github.jaaa.misc.Boxing;
-import com.github.jaaa.misc.RevertAccess;
+import com.github.jaaa.compare.CompareRandomAccessor;
+import com.github.jaaa.Boxing;
+import com.github.jaaa.permute.RevertAccess;
+import com.github.jaaa.permute.Swap;
 import com.github.jaaa.sort.SortAccessorTestTemplate;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Group;
@@ -36,7 +38,7 @@ public class MaxHeapRAccessTest
       }
       @Override public boolean isStable() { return false; }
     }
-    @PropertyDefaults( tries = 1_000 )
+    @PropertyDefaults( tries = 100 )
     @Group class Large  extends TestTemplate { @Override public int maxArraySize() {return 1_000_000;} }
     @Group class Medium extends TestTemplate { @Override public int maxArraySize() {return    10_000;} }
     @Group class Small  extends TestTemplate { @Override public int maxArraySize() {return       100;} }
@@ -91,7 +93,7 @@ public class MaxHeapRAccessTest
     @Override public void   swap( int i, int j ) {
       assertThat(i).isGreaterThanOrEqualTo(from); assertThat(i).isLessThan(until);
       assertThat(j).isGreaterThanOrEqualTo(from); assertThat(j).isLessThan(until);
-      Swap.swap(arr,i, arr,j);
+      Swap.swap(arr,i,j);
     }
     @Override public int compare( int i, int j ) {
       assertThat(i).isGreaterThanOrEqualTo(from); assertThat(i).isLessThan(until);

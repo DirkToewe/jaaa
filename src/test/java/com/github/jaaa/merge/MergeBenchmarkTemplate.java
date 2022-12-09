@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
 import org.openjdk.jmh.annotations.*;
 
 import java.util.Arrays;
@@ -21,7 +21,7 @@ import static java.util.stream.IntStream.range;
 @State(Scope.Benchmark)
 public abstract class MergeBenchmarkTemplate
 {
-  ;{
+  {
     boolean ea = false;
     assert  ea = true;
       if( ! ea ) throw new IllegalStateException();

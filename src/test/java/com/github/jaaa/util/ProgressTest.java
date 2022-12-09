@@ -16,7 +16,7 @@ import java.util.function.LongConsumer;
 import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
-import static com.github.jaaa.misc.Boxing.boxed;
+import static com.github.jaaa.Boxing.boxed;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Spliterator.*;
@@ -29,7 +29,7 @@ public class ProgressTest implements ArrayProviderTemplate
 {
   @Override public int maxArraySize() { return 100_000; }
 
-  private static record SpliterComparator( Random rng )
+  private record SpliterComparator( Random rng )
   {
     private static final int[] chars = { SUBSIZED, SORTED, ORDERED, NONNULL, IMMUTABLE, DISTINCT, CONCURRENT, SIZED };
     private IntStream randomCharacteristics() {

@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.Group;
 
 
@@ -26,7 +26,7 @@ public class TimMergeAccessorTest extends MergeAccessorTestTemplate
     @Override public void merge( T a, int i, int m, T b, int j, int n, T c, int k ) { timMerge(a,i,m, b,j,n, c,k); }
   }
 
-  @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<T>(srtAcc); }
+  @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<>(srtAcc); }
 
 
 
@@ -53,7 +53,7 @@ public class TimMergeAccessorTest extends MergeAccessorTestTemplate
       @Override public void merge( T a, int i, int m, T b, int j, int n, T c, int k ) { timMergeL2R(a,i,m, b,j,n, c,k); }
     }
 
-    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<T>(srtAcc); }
+    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<>(srtAcc); }
   }
 
 
@@ -81,6 +81,6 @@ public class TimMergeAccessorTest extends MergeAccessorTestTemplate
       @Override public void merge( T a, int i, int m, T b, int j, int n, T c, int k ) { timMergeR2L(a,i,m, b,j,n, c,k); }
     }
 
-    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<T>(srtAcc); }
+    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<>(srtAcc); }
   }
 }

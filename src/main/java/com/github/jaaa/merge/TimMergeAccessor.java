@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import com.github.jaaa.search.ExpL2RSearchAccessor;
 import com.github.jaaa.search.ExpR2LSearchAccessor;
 

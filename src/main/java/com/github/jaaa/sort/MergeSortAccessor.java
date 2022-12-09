@@ -1,6 +1,6 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import com.github.jaaa.merge.TapeMergeAccessor;
 
 import static java.lang.Integer.numberOfTrailingZeros;

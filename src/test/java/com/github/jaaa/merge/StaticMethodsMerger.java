@@ -1,13 +1,12 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.nio.IntBuffer;
 import java.util.Comparator;
 
-import static java.lang.Math.addExact;
 import static java.lang.invoke.MethodType.methodType;
 
 
@@ -112,12 +111,12 @@ public abstract class StaticMethodsMerger implements Merger
   }
 
 // FIELDS
-  private final ArrayMergeMethod<   byte[], ComparatorByte  > arrayByte;
+  private final ArrayMergeMethod<   byte[], ComparatorByte> arrayByte;
   private final ArrayMergeMethod<  short[], ComparatorShort > arrayShort;
-  private final ArrayMergeMethod<    int[], ComparatorInt   > arrayInt;
+  private final ArrayMergeMethod<    int[], ComparatorInt> arrayInt;
   private final ArrayMergeMethod<   long[], ComparatorLong  > arrayLong;
-  private final ArrayMergeMethod<   char[], ComparatorChar  > arrayChar;
-  private final ArrayMergeMethod<  float[], ComparatorFloat > arrayFloat;
+  private final ArrayMergeMethod<   char[], ComparatorChar> arrayChar;
+  private final ArrayMergeMethod<  float[], ComparatorFloat> arrayFloat;
   private final ArrayMergeMethod< double[], ComparatorDouble> arrayDouble;
   private final ArrayMergeMethod<IntBuffer,ComparatorInt    > bufInt;
   private final MethodHandle accessor,
@@ -126,14 +125,14 @@ public abstract class StaticMethodsMerger implements Merger
 
   public StaticMethodsMerger( Class<?> mergeClass )
   {
-    arrayByte   = new ArrayMergeMethod(mergeClass,   byte[].class, ComparatorByte  .class);
-    arrayShort  = new ArrayMergeMethod(mergeClass,  short[].class, ComparatorShort .class);
-    arrayInt    = new ArrayMergeMethod(mergeClass,    int[].class, ComparatorInt   .class);
-    arrayLong   = new ArrayMergeMethod(mergeClass,   long[].class, ComparatorLong  .class);
-    arrayChar   = new ArrayMergeMethod(mergeClass,   char[].class, ComparatorChar  .class);
-    arrayFloat  = new ArrayMergeMethod(mergeClass,  float[].class, ComparatorFloat .class);
-    arrayDouble = new ArrayMergeMethod(mergeClass, double[].class, ComparatorDouble.class);
-    bufInt      = new ArrayMergeMethod(mergeClass,IntBuffer.class, ComparatorInt   .class);
+    arrayByte   = new ArrayMergeMethod<>(mergeClass,   byte[].class, ComparatorByte  .class);
+    arrayShort  = new ArrayMergeMethod<>(mergeClass,  short[].class, ComparatorShort .class);
+    arrayInt    = new ArrayMergeMethod<>(mergeClass,    int[].class, ComparatorInt   .class);
+    arrayLong   = new ArrayMergeMethod<>(mergeClass,   long[].class, ComparatorLong  .class);
+    arrayChar   = new ArrayMergeMethod<>(mergeClass,   char[].class, ComparatorChar  .class);
+    arrayFloat  = new ArrayMergeMethod<>(mergeClass,  float[].class, ComparatorFloat .class);
+    arrayDouble = new ArrayMergeMethod<>(mergeClass, double[].class, ComparatorDouble.class);
+    bufInt      = new ArrayMergeMethod<>(mergeClass,IntBuffer.class, ComparatorInt   .class);
 
     MethodHandles.Lookup lookup = MethodHandles.publicLookup();
     try {

@@ -1,12 +1,13 @@
 package com.github.jaaa.sort.datagen;
 
-import com.github.jaaa.misc.RandomShuffle;
+import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
 
 import java.util.SplittableRandom;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+
 
 public class RandomSortDataGenerator
 {
@@ -100,7 +101,7 @@ public class RandomSortDataGenerator
     int[] result = new int[len];
     for( int i=len; i-- > 0; )
       result[i] = i;
-    RandomShuffle.shuffle(result, rng::nextInt);
+    randomShuffle(result, rng::nextInt);
     return result;
   }
 

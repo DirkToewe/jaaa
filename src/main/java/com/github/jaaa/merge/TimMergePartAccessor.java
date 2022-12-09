@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import com.github.jaaa.search.ExpL2RSearchAccessor;
 import com.github.jaaa.search.ExpR2LSearchAccessor;
 
@@ -14,7 +14,7 @@ public interface TimMergePartAccessor<T> extends CompareRandomAccessor<T>,
                                                   ExpL2RSearchAccessor<T>,
                                                   ExpR2LSearchAccessor<T>
 {
-  public default void timMergePartL2R(
+  default void timMergePartL2R(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0, int cLen
@@ -92,7 +92,7 @@ public interface TimMergePartAccessor<T> extends CompareRandomAccessor<T>,
     else if( bLen!=0 ) copyRange(b,b0, c,c0, bLen);
   }
 
-  public default void timMergePartR2L(
+  default void timMergePartR2L(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0, int cLen

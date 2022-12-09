@@ -5,7 +5,7 @@ import com.github.jaaa.sort.datagen.RandomSortDataGenerator;
 import java.util.Arrays;
 import java.util.SplittableRandom;
 
-import static com.github.jaaa.misc.Boxing.boxed;
+import static com.github.jaaa.Boxing.boxed;
 import static java.lang.System.nanoTime;
 
 public class ParallelMergeSortComparison

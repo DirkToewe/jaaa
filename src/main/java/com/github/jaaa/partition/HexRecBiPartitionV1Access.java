@@ -1,8 +1,8 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateSwapAccess;
-import com.github.jaaa.misc.BlockSwapAccess;
-import com.github.jaaa.misc.RotateAccess;
+import com.github.jaaa.fn.PredicateSwapAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
+import com.github.jaaa.permute.RotateAccess;
 import com.github.jaaa.util.Hex16;
 
 import static java.lang.Math.subtractExact;
@@ -26,9 +26,9 @@ import static java.lang.Math.subtractExact;
 
 public interface HexRecBiPartitionV1Access extends PredicateSwapAccess, BlockSwapAccess, RotateAccess
 {
-  public boolean predicate( int i );
+  boolean predicate( int i );
 
-  public default void hexRecBiPartitionV1( int from, int until )
+  default void hexRecBiPartitionV1( int from, int until )
   {
     if( from >  until ) throw new IllegalArgumentException();
     if( from == until ) return;

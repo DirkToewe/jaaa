@@ -1,8 +1,8 @@
 package com.github.jaaa.sort.tiny;
 
-import com.github.jaaa.*;
 import com.github.jaaa.CompareSwapAccess;
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
+import com.github.jaaa.compare.*;
 import com.github.jaaa.sort.SorterInPlace;
 
 import java.nio.IntBuffer;
@@ -20,7 +20,7 @@ public final class NetSortV3
 
     @Override public void sort(      byte[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
     @Override public void sort(      byte[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
-    @Override public void sort(      byte[] seq,                      ComparatorByte   cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(      byte[] seq,                      ComparatorByte cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(      byte[] seq, int from, int until, ComparatorByte   cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
 
     @Override public void sort(     short[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
@@ -30,7 +30,7 @@ public final class NetSortV3
 
     @Override public void sort(       int[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
     @Override public void sort(       int[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
-    @Override public void sort(       int[] seq,                      ComparatorInt    cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(       int[] seq,                      ComparatorInt cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(       int[] seq, int from, int until, ComparatorInt    cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
 
     @Override public void sort(      long[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
@@ -40,12 +40,12 @@ public final class NetSortV3
 
     @Override public void sort(      char[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
     @Override public void sort(      char[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
-    @Override public void sort(      char[] seq,                      ComparatorChar   cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(      char[] seq,                      ComparatorChar cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(      char[] seq, int from, int until, ComparatorChar   cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
 
     @Override public void sort(     float[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }
     @Override public void sort(     float[] seq, int from, int until                       ) { NetSortV3.sort(seq, from,until          ); }
-    @Override public void sort(     float[] seq,                      ComparatorFloat  cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(     float[] seq,                      ComparatorFloat cmp ) { NetSortV3.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(     float[] seq, int from, int until, ComparatorFloat  cmp ) { NetSortV3.sort(seq, from,until,      cmp); }
 
     @Override public void sort(    double[] seq                                            ) { NetSortV3.sort(seq,    0,seq.length     ); }

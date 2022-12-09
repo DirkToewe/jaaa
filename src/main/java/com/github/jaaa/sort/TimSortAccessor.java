@@ -1,8 +1,8 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import com.github.jaaa.merge.TimMergeAccessor;
-import com.github.jaaa.misc.RevertAccessor;
+import com.github.jaaa.permute.RevertAccessor;
 import com.github.jaaa.search.ExpL2RSearch;
 
 import java.util.Spliterators.AbstractIntSpliterator;

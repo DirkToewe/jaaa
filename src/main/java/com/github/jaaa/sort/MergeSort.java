@@ -1,12 +1,11 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.copy.*;
 
 import java.lang.reflect.Array;
 import java.nio.IntBuffer;
 import java.util.Comparator;
-
-import static java.lang.System.arraycopy;
 
 
 public final class MergeSort
@@ -21,7 +20,7 @@ public final class MergeSort
 
     @Override public void sort(      byte[] seq                                            ) { MergeSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(      byte[] seq, int from, int until                       ) { MergeSort.sort(seq, from,until          ); }
-    @Override public void sort(      byte[] seq,                      ComparatorByte   cmp ) { MergeSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(      byte[] seq,                      ComparatorByte cmp ) { MergeSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(      byte[] seq, int from, int until, ComparatorByte   cmp ) { MergeSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(     short[] seq                                            ) { MergeSort.sort(seq,    0,seq.length     ); }
@@ -31,7 +30,7 @@ public final class MergeSort
 
     @Override public void sort(       int[] seq                                            ) { MergeSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(       int[] seq, int from, int until                       ) { MergeSort.sort(seq, from,until          ); }
-    @Override public void sort(       int[] seq,                      ComparatorInt    cmp ) { MergeSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(       int[] seq,                      ComparatorInt cmp ) { MergeSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(       int[] seq, int from, int until, ComparatorInt    cmp ) { MergeSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(      long[] seq                                            ) { MergeSort.sort(seq,    0,seq.length     ); }
@@ -41,12 +40,12 @@ public final class MergeSort
 
     @Override public void sort(      char[] seq                                            ) { MergeSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(      char[] seq, int from, int until                       ) { MergeSort.sort(seq, from,until          ); }
-    @Override public void sort(      char[] seq,                      ComparatorChar   cmp ) { MergeSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(      char[] seq,                      ComparatorChar cmp ) { MergeSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(      char[] seq, int from, int until, ComparatorChar   cmp ) { MergeSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(     float[] seq                                            ) { MergeSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(     float[] seq, int from, int until                       ) { MergeSort.sort(seq, from,until          ); }
-    @Override public void sort(     float[] seq,                      ComparatorFloat  cmp ) { MergeSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(     float[] seq,                      ComparatorFloat cmp ) { MergeSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(     float[] seq, int from, int until, ComparatorFloat  cmp ) { MergeSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(    double[] seq                                            ) { MergeSort.sort(seq,    0,seq.length     ); }
@@ -72,13 +71,13 @@ public final class MergeSort
     @SuppressWarnings("unchecked")
     @Override public T[] malloc( int len ) { return (T[]) Array.newInstance(elemType, len); }
   }
-  private interface AccArrByte   extends MergeSortAccessor<   byte[]>, RandomAccessorArrByte  {}
+  private interface AccArrByte   extends MergeSortAccessor<   byte[]>, RandomAccessorArrByte {}
   private interface AccArrShort  extends MergeSortAccessor<  short[]>, RandomAccessorArrShort {}
-  private interface AccArrInt    extends MergeSortAccessor<    int[]>, RandomAccessorArrInt   {}
+  private interface AccArrInt    extends MergeSortAccessor<    int[]>, RandomAccessorArrInt {}
   private interface AccArrLong   extends MergeSortAccessor<   long[]>, RandomAccessorArrLong  {}
-  private interface AccArrChar   extends MergeSortAccessor<   char[]>, RandomAccessorArrChar  {}
+  private interface AccArrChar   extends MergeSortAccessor<   char[]>, RandomAccessorArrChar {}
   private interface AccArrFloat  extends MergeSortAccessor<  float[]>, RandomAccessorArrFloat {}
-  private interface AccArrDouble extends MergeSortAccessor< double[]>, RandomAccessorArrDouble{}
+  private interface AccArrDouble extends MergeSortAccessor< double[]>, RandomAccessorArrDouble {}
   private interface AccBufInt    extends MergeSortAccessor<IntBuffer>, RandomAccessorBufInt   {}
 
 // STATIC CONSTRUCTOR

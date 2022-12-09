@@ -1,8 +1,8 @@
 package com.github.jaaa.sort.tiny;
 
-import com.github.jaaa.*;
 import com.github.jaaa.CompareSwapAccess;
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
+import com.github.jaaa.compare.*;
 import com.github.jaaa.sort.SorterInPlace;
 
 import java.nio.IntBuffer;
@@ -20,7 +20,7 @@ public final class HexInSortV2
 
     @Override public void sort(      byte[] seq                                            ) { HexInSortV2.sort(seq,    0,seq.length     ); }
     @Override public void sort(      byte[] seq, int from, int until                       ) { HexInSortV2.sort(seq, from,until          ); }
-    @Override public void sort(      byte[] seq,                      ComparatorByte   cmp ) { HexInSortV2.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(      byte[] seq,                      ComparatorByte cmp ) { HexInSortV2.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(      byte[] seq, int from, int until, ComparatorByte   cmp ) { HexInSortV2.sort(seq, from,until,      cmp); }
 
     @Override public void sort(     short[] seq                                            ) { HexInSortV2.sort(seq,    0,seq.length     ); }
@@ -30,7 +30,7 @@ public final class HexInSortV2
 
     @Override public void sort(       int[] seq                                            ) { HexInSortV2.sort(seq,    0,seq.length     ); }
     @Override public void sort(       int[] seq, int from, int until                       ) { HexInSortV2.sort(seq, from,until          ); }
-    @Override public void sort(       int[] seq,                      ComparatorInt    cmp ) { HexInSortV2.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(       int[] seq,                      ComparatorInt cmp ) { HexInSortV2.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(       int[] seq, int from, int until, ComparatorInt    cmp ) { HexInSortV2.sort(seq, from,until,      cmp); }
 
     @Override public void sort(      long[] seq                                            ) { HexInSortV2.sort(seq,    0,seq.length     ); }
@@ -40,12 +40,12 @@ public final class HexInSortV2
 
     @Override public void sort(      char[] seq                                            ) { HexInSortV2.sort(seq,    0,seq.length     ); }
     @Override public void sort(      char[] seq, int from, int until                       ) { HexInSortV2.sort(seq, from,until          ); }
-    @Override public void sort(      char[] seq,                      ComparatorChar   cmp ) { HexInSortV2.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(      char[] seq,                      ComparatorChar cmp ) { HexInSortV2.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(      char[] seq, int from, int until, ComparatorChar   cmp ) { HexInSortV2.sort(seq, from,until,      cmp); }
 
     @Override public void sort(     float[] seq                                            ) { HexInSortV2.sort(seq,    0,seq.length     ); }
     @Override public void sort(     float[] seq, int from, int until                       ) { HexInSortV2.sort(seq, from,until          ); }
-    @Override public void sort(     float[] seq,                      ComparatorFloat  cmp ) { HexInSortV2.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(     float[] seq,                      ComparatorFloat cmp ) { HexInSortV2.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(     float[] seq, int from, int until, ComparatorFloat  cmp ) { HexInSortV2.sort(seq, from,until,      cmp); }
 
     @Override public void sort(    double[] seq                                            ) { HexInSortV2.sort(seq,    0,seq.length     ); }

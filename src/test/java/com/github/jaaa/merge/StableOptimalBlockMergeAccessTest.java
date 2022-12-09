@@ -6,8 +6,8 @@ import net.jqwik.api.Property;
 import net.jqwik.api.constraints.Negative;
 import net.jqwik.api.constraints.Size;
 
-import static com.github.jaaa.ArgMin.argMinL;
-import static com.github.jaaa.misc.Rotate.rotate;
+import static com.github.jaaa.compare.ArgMin.argMinL;
+import static com.github.jaaa.permute.Rotate.rotate;
 import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
 

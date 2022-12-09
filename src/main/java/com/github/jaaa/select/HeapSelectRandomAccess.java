@@ -1,6 +1,6 @@
 package com.github.jaaa.select;
 
-import com.github.jaaa.misc.RandomShuffleAccess;
+import com.github.jaaa.permute.RandomShuffleAccess;
 
 import static com.github.jaaa.select.HeapSelect.performance_average;
 

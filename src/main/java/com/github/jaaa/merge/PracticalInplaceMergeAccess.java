@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.misc.BlockSwapAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
 import com.github.jaaa.sort.InsertionSortAccess;
 
 import static com.github.jaaa.util.IMath.sqrtFloor;

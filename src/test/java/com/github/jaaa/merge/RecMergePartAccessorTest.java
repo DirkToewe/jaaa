@@ -1,9 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
-import net.jqwik.api.Group;
-import net.jqwik.api.PropertyDefaults;
-import net.jqwik.api.ShrinkingMode;
+import com.github.jaaa.compare.CompareRandomAccessor;
 
 public class RecMergePartAccessorTest extends MergePartAccessorTestTemplate
 {

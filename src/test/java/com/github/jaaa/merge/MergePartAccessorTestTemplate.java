@@ -1,19 +1,19 @@
 package com.github.jaaa.merge;
 
 import com.github.jaaa.ArrayProviderTemplate;
-import com.github.jaaa.CompareRandomAccessor;
-import com.github.jaaa.Swap;
+import com.github.jaaa.compare.CompareRandomAccessor;
+import com.github.jaaa.permute.Swap;
 import com.github.jaaa.WithRange;
-import com.github.jaaa.misc.Boxing;
-import com.github.jaaa.misc.Revert;
+import com.github.jaaa.Boxing;
+import com.github.jaaa.permute.Revert;
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.Tuple2;
 
 import java.util.Arrays;
 import java.util.Comparator;
 
-import static com.github.jaaa.misc.Boxing.boxed;
-import static com.github.jaaa.misc.Concat.concat;
+import static com.github.jaaa.Boxing.boxed;
+import static com.github.jaaa.Concat.concat;
 import static java.util.Comparator.comparing;
 import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,15 +25,15 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
 // STATIC FIELDS
   abstract protected boolean isStable();
 
-  public static interface MergePartAccessor<T>
+  public interface MergePartAccessor<T>
   {
-    public void mergePartL2R(
+    void mergePartL2R(
       T a, int a0, int aLen,
       T b, int b0, int bLen,
       T c, int c0, int cLen
     );
 
-    public void mergePartR2L(
+    void mergePartR2L(
       T a, int a0, int aLen,
       T b, int b0, int bLen,
       T c, int c0, int cLen
@@ -202,7 +202,7 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
     Comparator<Tuple2<T,Integer>>  cmp; {
     Comparator<Tuple2<T,Integer>> _cmp = comparing(Tuple2::get1);
                  cmp = reversed ? _cmp.reversed() : _cmp;
-    };
+    }
 
     // make sure cRef is the shortest
     if( aRef.length < bRef.length )
@@ -585,7 +585,7 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
     Comparator<Tuple2<T,Integer>>  cmp; {
     Comparator<Tuple2<T,Integer>> _cmp = comparing(Tuple2::get1);
       cmp = reversed ? _cmp.reversed() : _cmp;
-    };
+    }
 
     // make sure cRef is the shortest
     if( aRef.length < bRef.length )

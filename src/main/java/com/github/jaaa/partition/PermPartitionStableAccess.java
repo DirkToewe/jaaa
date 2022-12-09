@@ -1,7 +1,7 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.misc.BlockSwapAccess;
-import com.github.jaaa.misc.RotateAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
+import com.github.jaaa.permute.RotateAccess;
 
 import static java.util.stream.IntStream.range;
 
@@ -41,7 +41,7 @@ import static com.github.jaaa.util.IMath.log2Ceil;
 
 public interface PermPartitionStableAccess extends PartitionAccess, RotateAccess, BlockSwapAccess
 {
-  public default void permPartitionStable( int from, int until )
+  default void permPartitionStable( int from, int until )
   {
     if( from >  until                   ) throw new IllegalArgumentException();
     if( from <  until-Integer.MAX_VALUE ) throw new IllegalArgumentException();

@@ -1,6 +1,8 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.permute.Swap;
 
 import java.nio.IntBuffer;
 import java.util.Comparator;
@@ -18,7 +20,7 @@ public final class InsertionAkimboSort
 
     @Override public void sort(   byte[] seq                                            ) { InsertionAkimboSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(   byte[] seq, int from, int until                       ) { InsertionAkimboSort.sort(seq, from,until          ); }
-    @Override public void sort(   byte[] seq,                      ComparatorByte   cmp ) { InsertionAkimboSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   byte[] seq,                      ComparatorByte cmp ) { InsertionAkimboSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   byte[] seq, int from, int until, ComparatorByte   cmp ) { InsertionAkimboSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  short[] seq                                            ) { InsertionAkimboSort.sort(seq,    0,seq.length     ); }
@@ -28,7 +30,7 @@ public final class InsertionAkimboSort
 
     @Override public void sort(    int[] seq                                            ) { InsertionAkimboSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(    int[] seq, int from, int until                       ) { InsertionAkimboSort.sort(seq, from,until          ); }
-    @Override public void sort(    int[] seq,                      ComparatorInt    cmp ) { InsertionAkimboSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(    int[] seq,                      ComparatorInt cmp ) { InsertionAkimboSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(    int[] seq, int from, int until, ComparatorInt    cmp ) { InsertionAkimboSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(   long[] seq                                            ) { InsertionAkimboSort.sort(seq,    0,seq.length     ); }
@@ -38,12 +40,12 @@ public final class InsertionAkimboSort
 
     @Override public void sort(   char[] seq                                            ) { InsertionAkimboSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(   char[] seq, int from, int until                       ) { InsertionAkimboSort.sort(seq, from,until          ); }
-    @Override public void sort(   char[] seq,                      ComparatorChar   cmp ) { InsertionAkimboSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   char[] seq,                      ComparatorChar cmp ) { InsertionAkimboSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   char[] seq, int from, int until, ComparatorChar   cmp ) { InsertionAkimboSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  float[] seq                                            ) { InsertionAkimboSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(  float[] seq, int from, int until                       ) { InsertionAkimboSort.sort(seq, from,until          ); }
-    @Override public void sort(  float[] seq,                      ComparatorFloat  cmp ) { InsertionAkimboSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(  float[] seq,                      ComparatorFloat cmp ) { InsertionAkimboSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(  float[] seq, int from, int until, ComparatorFloat  cmp ) { InsertionAkimboSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort( double[] seq                                            ) { InsertionAkimboSort.sort(seq,    0,seq.length     ); }

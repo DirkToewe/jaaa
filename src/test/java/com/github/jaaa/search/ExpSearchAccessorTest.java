@@ -1,6 +1,6 @@
 package com.github.jaaa.search;
 
-import com.github.jaaa.CompareAccessor;
+import com.github.jaaa.compare.CompareAccessor;
 import net.jqwik.api.Group;
 
 import java.util.Objects;
@@ -21,7 +21,7 @@ public class ExpSearchAccessorTest
     return 2 + 2L*log2Floor(i+1);
   }
 
-  private static record ExpSearchAcc<T>(
+  private record ExpSearchAcc<T>(
     CompareAccessor<? super T> compareAccessor,
     IntBinaryOperator startIndex
   ) implements SearchAccessor<T>,

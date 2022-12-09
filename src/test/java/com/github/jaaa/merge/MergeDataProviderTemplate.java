@@ -7,8 +7,8 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static com.github.jaaa.misc.Concat.concat;
-import static com.github.jaaa.misc.Revert.revert;
+import static com.github.jaaa.Concat.concat;
+import static com.github.jaaa.permute.Revert.revert;
 import static net.jqwik.api.Arbitraries.bytes;
 import static net.jqwik.api.Arbitraries.integers;
 import static net.jqwik.api.Combinators.combine;
@@ -110,7 +110,7 @@ public interface MergeDataProviderTemplate extends ArrayProviderTemplate
         @Override public ShrinkingDistance distance() {
           return ShrinkingDistance.of(r-l);
         }
-      };
+      }
 
       int lenA = rng.nextInt( maxArraySize() / 2 ),
           lenB = rng.nextInt( maxArraySize() / 2 );

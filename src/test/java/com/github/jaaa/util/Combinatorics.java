@@ -4,7 +4,7 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static com.github.jaaa.Swap.swap;
+import static com.github.jaaa.permute.Swap.swap;
 import static java.lang.Math.multiplyExact;
 import static java.util.stream.StreamSupport.stream;
 
@@ -94,7 +94,7 @@ public class Combinatorics
   // STATIC CONSTRUCTOR
   // STATIC METHODS
   // FIELDS
-    private int n;
+    private final int n;
     private long off, size;
 
   // CONSTRUCTORS

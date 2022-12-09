@@ -1,7 +1,7 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
-import com.github.jaaa.Swap;
+import com.github.jaaa.compare.CompareRandomAccessor;
+import com.github.jaaa.permute.Swap;
 import com.github.jaaa.fn.EntryFn;
 import com.github.jaaa.util.PlotlyUtils;
 import com.github.jaaa.util.Progress;
@@ -16,7 +16,7 @@ import java.util.*;
 import static com.github.jaaa.merge.ParallelRebelMerge.PARALLEL_REBEL_MERGER;
 import static com.github.jaaa.merge.ParallelSkipMerge.PARALLEL_SKIP_MERGER;
 import static com.github.jaaa.merge.ParallelZenMerge.PARALLEL_ZEN_MERGER;
-import static com.github.jaaa.misc.RandomShuffle.shuffled;
+import static com.github.jaaa.permute.RandomShuffle.shuffled;
 import static java.awt.Desktop.getDesktop;
 import static java.lang.String.format;
 import static java.lang.System.arraycopy;

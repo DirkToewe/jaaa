@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.misc.RotateAccess;
+import com.github.jaaa.permute.RotateAccess;
 import com.github.jaaa.search.ExpL2RSearchAccess;
 import com.github.jaaa.search.ExpR2LSearchAccess;
 

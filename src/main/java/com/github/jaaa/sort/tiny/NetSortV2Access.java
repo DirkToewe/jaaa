@@ -1,6 +1,6 @@
 package com.github.jaaa.sort.tiny;
 
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
 import com.github.jaaa.CompareSwapAccess;
 
 import static java.lang.Math.subtractExact;
@@ -14,7 +14,7 @@ import static java.lang.Math.subtractExact;
 
 public interface NetSortV2Access extends CompareSwapAccess
 {
-  static final byte[][] SORTING_NETWORKS = {
+  byte[][] SORTING_NETWORKS = {
     {},
     {},
     { 0, 1 },
@@ -34,7 +34,7 @@ public interface NetSortV2Access extends CompareSwapAccess
     { 0,13,   1,12,   2,15,   3,14,   4, 8,   5, 6,   7,11,   9,10,   0, 5,   1, 7,   2, 9,   3, 4,   6,13,   8,14,  10,15,  11,12,   0, 1,   2, 3,   4, 5,   6, 8,   7, 9,  10,11,  12,13,  14,15,   0, 2,   1, 3,   4,10,   5,11,   6, 7,   8, 9,  12,14,  13,15,   1, 2,   3,12,   4, 6,   5, 7,   8,10,   9,11,  13,14,   1, 4,   2, 6,   5, 8,   7,10,   9,13,  11,14,   2, 4,   3, 6,   9,12,  11,13,   3, 5,   6, 8,   7, 9,  10,12,   3, 4,   5, 6,   7, 8,   9,10,  11,12,   6, 7,   8, 9}
   };
 
-  public default void netSortV2( int from, int until )
+  default void netSortV2( int from, int until )
   {
     if( from > until ) throw new IllegalArgumentException();
     int len = subtractExact(until,from);

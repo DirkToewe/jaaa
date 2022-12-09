@@ -1,9 +1,10 @@
 package com.github.jaaa.select;
 
-import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
 
 import java.nio.IntBuffer;
 import java.util.Comparator;
+
 
 public interface Selector
 {

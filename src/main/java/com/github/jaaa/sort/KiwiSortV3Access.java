@@ -1,10 +1,10 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.ArgMinAccess;
+import com.github.jaaa.compare.ArgMinAccess;
 import com.github.jaaa.merge.BlockRotationMergeAccess;
 import com.github.jaaa.merge.ExpMergeV2Access;
 import com.github.jaaa.merge.TimMergeAccessor;
-import com.github.jaaa.misc.BlockSwapAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
 import com.github.jaaa.search.ExpL2RSearch;
 import com.github.jaaa.select.QuickSelectV1Access;
 

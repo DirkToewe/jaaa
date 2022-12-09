@@ -9,7 +9,7 @@ import net.jqwik.api.constraints.IntRange;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.github.jaaa.misc.Boxing.boxed;
+import static com.github.jaaa.Boxing.boxed;
 import static com.github.jaaa.util.Combinatorics.factorial;
 import static com.github.jaaa.util.Combinatorics.permutations;
 import static java.util.Arrays.asList;
@@ -48,8 +48,8 @@ public class CombinatoricsTest
   @Property void test_permutations_split( @ForAll @IntRange(min=0, max=7) int n, @ForAll Random rng ) {
     new Object()
     {
-      private List<byte[]> perms = new ArrayList<>( (int) factorial(n) );
-      private Consumer<byte[]> perms_add = perms::add;
+      private final List<byte[]> perms = new ArrayList<>( (int) factorial(n) );
+      private final Consumer<byte[]> perms_add = perms::add;
 
       private void collect( Spliterator<byte[]> rest )
       {

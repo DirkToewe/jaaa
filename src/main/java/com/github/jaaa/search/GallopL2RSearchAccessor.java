@@ -1,8 +1,7 @@
 package com.github.jaaa.search;
 
-import com.github.jaaa.CompareAccessor;
+import com.github.jaaa.compare.CompareAccessor;
 
-import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 

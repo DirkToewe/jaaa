@@ -1,6 +1,6 @@
 package com.github.jaaa.search;
 
-import com.github.jaaa.CompareAccessor;
+import com.github.jaaa.compare.CompareAccessor;
 import net.jqwik.api.Group;
 
 import static com.github.jaaa.util.IMath.log2Floor;
@@ -9,7 +9,7 @@ import static com.github.jaaa.util.IMath.log2Floor;
 @Group
 public class BinarySearchAccessorTest extends SearchAccessorTestTemplate
 {
-  private static record BinSearchAccessor<T>( CompareAccessor<? super T> compareAccessor ) implements SearchAccessor<T>,
+  private record BinSearchAccessor<T>( CompareAccessor<? super T> compareAccessor ) implements SearchAccessor<T>,
                                                                                                 BinarySearchAccessor<T>
   {
     @Override public int compare( T a, int i, T b, int j ) { return compareAccessor.compare(a,i, b,j); }

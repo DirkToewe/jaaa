@@ -1,7 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
-import net.jqwik.api.Group;
+import com.github.jaaa.compare.CompareRandomAccessor;
 
 public class BinaryMergePartAccessorTest extends MergePartAccessorTestTemplate
 {

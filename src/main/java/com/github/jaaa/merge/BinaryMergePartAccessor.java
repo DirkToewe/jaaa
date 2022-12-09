@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergePartR2L;
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergePartL2R;
@@ -39,7 +39,7 @@ public interface BinaryMergePartAccessor<T> extends CompareRandomAccessor<T>
           hi = bLen-1;
       while( lo <= hi ){ int mid = lo+hi >>> 1;
         if( compare(a,a0, b,b0+mid) < cmp ) hi = -1 + mid;
-        else                                lo = +1 + mid;
+        else                                lo =  1 + mid;
       }
 
       copyRange(b,b0, c,c0, lo);
@@ -94,7 +94,7 @@ public interface BinaryMergePartAccessor<T> extends CompareRandomAccessor<T>
           hi = bLen-1;
       while( lo <= hi ) {  int mid = lo+hi >>> 1;
         if( compare(a,a0, b,b0+mid) < cmp ) hi = -1 + mid;
-        else                                lo = +1 + mid;
+        else                                lo =  1 + mid;
       }
             b0 += lo;
                   lo = bLen-lo;

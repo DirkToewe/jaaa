@@ -1,9 +1,6 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.CompareRandomAccessor;
-import com.github.jaaa.merge.BlockRotationMergeAccess;
-import com.github.jaaa.merge.ExpMergeV2Access;
-import com.github.jaaa.merge.ExpMergeV2Accessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.Example;
 import net.jqwik.api.Group;
 import net.jqwik.api.PropertyDefaults;
@@ -27,7 +24,7 @@ public class KiwiSortV1AccessTest
     }
   }
 
-  private static record Acc<T>( CompareRandomAccessor<T> acc ) implements SortAccessorTestTemplate.SortAccessor<T>
+  private record Acc<T>( CompareRandomAccessor<T> acc ) implements SortAccessorTestTemplate.SortAccessor<T>
   {
     @Override public void sort( T arr, int from, int until) {
       class SortAcc implements KiwiSortV1Access

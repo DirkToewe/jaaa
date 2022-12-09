@@ -1,7 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
-import com.github.jaaa.Swap;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.*;
 
 public class ExpMergePartV2AccessorTest extends MergePartAccessorTestTemplate

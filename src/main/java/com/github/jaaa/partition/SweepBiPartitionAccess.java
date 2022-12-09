@@ -15,13 +15,13 @@ package com.github.jaaa.partition;
 //
 // Where `m` is the number of A-elements and `n` is number of B-elements.
 
-import com.github.jaaa.misc.RotateAccess;
+import com.github.jaaa.permute.RotateAccess;
 
 public interface SweepBiPartitionAccess extends RotateAccess
 {
-  public boolean predicate( int i );
+  boolean predicate( int i );
 
-  public default void sweepBiPartition( int from, int until )
+  default void sweepBiPartition( int from, int until )
   {
     if( from > until ) throw new IllegalArgumentException();
 

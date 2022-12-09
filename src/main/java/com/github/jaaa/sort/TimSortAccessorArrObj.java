@@ -1,7 +1,7 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.RandomAccessorArrObj;
-import com.github.jaaa.misc.Revert;
+import com.github.jaaa.copy.RandomAccessorArrObj;
+import com.github.jaaa.permute.Revert;
 
 import static java.lang.Math.min;
 import static java.lang.System.arraycopy;

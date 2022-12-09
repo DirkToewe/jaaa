@@ -1,7 +1,7 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateSwapAccess;
-import com.github.jaaa.buf.BufferBool;
+import com.github.jaaa.fn.PredicateSwapAccess;
+import com.github.jaaa.util.BufferBool;
 
 
 final class InPlacePartitionBufferBool implements BufferBool

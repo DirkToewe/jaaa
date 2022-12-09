@@ -8,8 +8,9 @@ import com.github.jaaa.util.Progress;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.LongAdder;
 
-import static com.github.jaaa.misc.RandomShuffle.shuffled;
+import static com.github.jaaa.permute.RandomShuffle.shuffled;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 import static java.lang.System.out;
@@ -36,7 +37,7 @@ public class BenchmarkSort
 
   private static abstract class CountingComparator implements Comparator<Integer>
   {
-    public long nComps = 0;
+    public final LongAdder nComps = new LongAdder();
   }
 
 // STATIC METHODS
@@ -50,8 +51,8 @@ public class BenchmarkSort
 //    System.out.println("GO");
 
     Map<String,SortFn> mergers = Map.ofEntries(
-      entry("HeapSort",                               HeapSort::sort),
-      entry("HeapSortFast",                       HeapSortFast::sort),
+//      entry("HeapSort",                               HeapSort::sort),
+//      entry("HeapSortFast",                       HeapSortFast::sort),
 //      entry("QuickSort",                             QuickSort::sort),
 //      entry("MergeSort",                             MergeSort::sort),
 //      entry("KiwiSortV1",                           KiwiSortV1::sort),
@@ -60,10 +61,16 @@ public class BenchmarkSort
 //      entry("KiwiSortV4",                           KiwiSortV4::sort),
 //      entry("KiwiSortV5",                           KiwiSortV5::sort),
 //      entry("KiwiSortV6",                           KiwiSortV6::sort),
+      entry("KiwiSortV7",                           KiwiSortV7::sort),
 //      entry("WikiSortV1",                           WikiSortV1::sort),
-      entry("ComparatorWikiSort", new ComparatorWikiSort(null)::sort),
+//      entry("ComparatorWikiSort", new ComparatorWikiSort(null)::sort),
 //      entry("TimSort",                                 TimSort::sort),
+//      entry("RebelSort",                ParallelRebelMergeSort::sort),
+//      entry(  "RecSort",                ParallelRecMergeSort  ::sort),
+//      entry( "SkipSort",                ParallelSkipMergeSort ::sort),
+//      entry(  "ZenSort",                ParallelZenMergeSort  ::sort),
       entry("JDK",                                      Arrays::sort)
+//      entry("JDK (parallel)",                            Arrays::parallelSort)
     );
 
     int     LEN = 1_000_000,
@@ -86,7 +93,7 @@ public class BenchmarkSort
 
     var mergersEntries  = new ArrayList<>( mergers.entrySet() );
 
-    Progress.print( stream( shuffled( range(0,N_SAMPLES).toArray() ) ) ).forEach( i -> {
+    Progress.print( stream( shuffled(range(0,N_SAMPLES).toArray(), rng::nextInt) ) ).forEach( i -> {
       int len = x[i];
 //      int[] data = gen.nextMixed(len);
       int[] data = gen.nextShuffled(len);
@@ -95,7 +102,7 @@ public class BenchmarkSort
       int sign = rng.nextBoolean() ? -1 : +1;
       var cmp = new CountingComparator() {
         @Override public int compare( Integer x, Integer y ) {
-          ++nComps;
+          nComps.increment();
           return sign*Integer.compare(x,y);
         }
       };
@@ -105,7 +112,7 @@ public class BenchmarkSort
       Collections.shuffle(mergersEntries);
 
       mergersEntries.forEach( EntryConsumer.of( (k, v) -> {
-        cmp.nComps = 0;
+        cmp.nComps.reset();
 
         var test = stream(data).boxed().toArray(Integer[]::new);
 
@@ -113,7 +120,7 @@ public class BenchmarkSort
         v.sort(test, cmp);
         long dt = nanoTime() - t0;
 
-        resultsComps.get(k)[i] = cmp.nComps;
+        resultsComps.get(k)[i] = cmp.nComps.doubleValue();
         resultsTimes.get(k)[i] = dt / 1e3;
 
         assert Arrays.equals(test,ref) : Arrays.toString(test) + "\n != \n" + Arrays.toString(ref);

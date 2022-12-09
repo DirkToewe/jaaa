@@ -4,7 +4,7 @@ import com.github.jaaa.CompareSwapAccess;
 import com.github.jaaa.fn.Int2Consumer;
 
 import static java.lang.Math.subtractExact;
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
 
 public interface NetSortV1Access extends CompareSwapAccess
 {

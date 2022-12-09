@@ -1,7 +1,8 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.*;
-import com.github.jaaa.misc.Revert;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.copy.*;
+import com.github.jaaa.permute.Revert;
 
 import java.lang.reflect.Array;
 import java.nio.IntBuffer;
@@ -23,7 +24,7 @@ public final class TimSort
 
     @Override public void sort(      byte[] seq                                            ) { TimSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(      byte[] seq, int from, int until                       ) { TimSort.sort(seq, from,until          ); }
-    @Override public void sort(      byte[] seq,                      ComparatorByte   cmp ) { TimSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(      byte[] seq,                      ComparatorByte cmp ) { TimSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(      byte[] seq, int from, int until, ComparatorByte   cmp ) { TimSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(     short[] seq                                            ) { TimSort.sort(seq,    0,seq.length     ); }
@@ -33,7 +34,7 @@ public final class TimSort
 
     @Override public void sort(       int[] seq                                            ) { TimSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(       int[] seq, int from, int until                       ) { TimSort.sort(seq, from,until          ); }
-    @Override public void sort(       int[] seq,                      ComparatorInt    cmp ) { TimSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(       int[] seq,                      ComparatorInt cmp ) { TimSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(       int[] seq, int from, int until, ComparatorInt    cmp ) { TimSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(      long[] seq                                            ) { TimSort.sort(seq,    0,seq.length     ); }
@@ -43,12 +44,12 @@ public final class TimSort
 
     @Override public void sort(      char[] seq                                            ) { TimSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(      char[] seq, int from, int until                       ) { TimSort.sort(seq, from,until          ); }
-    @Override public void sort(      char[] seq,                      ComparatorChar   cmp ) { TimSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(      char[] seq,                      ComparatorChar cmp ) { TimSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(      char[] seq, int from, int until, ComparatorChar   cmp ) { TimSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(     float[] seq                                            ) { TimSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(     float[] seq, int from, int until                       ) { TimSort.sort(seq, from,until          ); }
-    @Override public void sort(     float[] seq,                      ComparatorFloat  cmp ) { TimSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(     float[] seq,                      ComparatorFloat cmp ) { TimSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(     float[] seq, int from, int until, ComparatorFloat  cmp ) { TimSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(    double[] seq                                            ) { TimSort.sort(seq,    0,seq.length     ); }
@@ -74,13 +75,13 @@ public final class TimSort
     @SuppressWarnings("unchecked")
     @Override public T[] malloc( int len ) { return (T[]) Array.newInstance(elemType, len); }
   }
-  private interface AccArrByte   extends TimSortAccessor<   byte[]>, RandomAccessorArrByte  {}
+  private interface AccArrByte   extends TimSortAccessor<   byte[]>, RandomAccessorArrByte {}
   private interface AccArrShort  extends TimSortAccessor<  short[]>, RandomAccessorArrShort {}
-  private interface AccArrInt    extends TimSortAccessor<    int[]>, RandomAccessorArrInt   {}
+  private interface AccArrInt    extends TimSortAccessor<    int[]>, RandomAccessorArrInt {}
   private interface AccArrLong   extends TimSortAccessor<   long[]>, RandomAccessorArrLong  {}
-  private interface AccArrChar   extends TimSortAccessor<   char[]>, RandomAccessorArrChar  {}
+  private interface AccArrChar   extends TimSortAccessor<   char[]>, RandomAccessorArrChar {}
   private interface AccArrFloat  extends TimSortAccessor<  float[]>, RandomAccessorArrFloat {}
-  private interface AccArrDouble extends TimSortAccessor< double[]>, RandomAccessorArrDouble{}
+  private interface AccArrDouble extends TimSortAccessor< double[]>, RandomAccessorArrDouble {}
   private interface AccBufInt    extends TimSortAccessor<IntBuffer>, RandomAccessorBufInt   {}
 
 // STATIC CONSTRUCTOR

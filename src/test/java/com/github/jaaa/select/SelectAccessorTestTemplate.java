@@ -1,7 +1,9 @@
 package com.github.jaaa.select;
 
 import com.github.jaaa.*;
-import com.github.jaaa.misc.Boxing;
+import com.github.jaaa.compare.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessorArrObj;
+import com.github.jaaa.Boxing;
 import com.github.jaaa.util.ZipWithIndex;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
@@ -11,7 +13,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map.Entry;
 
-import static com.github.jaaa.misc.Boxing.boxed;
+import static com.github.jaaa.Boxing.boxed;
 import static com.github.jaaa.util.ZipWithIndex.zipWithIndex;
 import static java.lang.Math.min;
 import static java.util.Map.Entry.comparingByKey;

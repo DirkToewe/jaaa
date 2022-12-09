@@ -1,7 +1,7 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateByte;
-import com.github.jaaa.Swap;
+import com.github.jaaa.fn.PredicateByte;
+import com.github.jaaa.permute.Swap;
 
 import java.util.function.Predicate;
 

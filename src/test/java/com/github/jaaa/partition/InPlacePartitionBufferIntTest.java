@@ -1,7 +1,7 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateSwapAccess;
-import com.github.jaaa.Swap;
+import com.github.jaaa.fn.PredicateSwapAccess;
+import com.github.jaaa.permute.Swap;
 import net.jqwik.api.*;
 import net.jqwik.api.constraints.IntRange;
 import net.jqwik.api.constraints.Size;

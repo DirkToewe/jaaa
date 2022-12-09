@@ -1,6 +1,6 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.misc.BlockSwapAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
 
 import static com.github.jaaa.util.IMath.log2Ceil;
 import static com.github.jaaa.util.IMath.sqrtFloor;
@@ -42,9 +42,9 @@ public interface MuRaSaBiPartitionV2Access extends BlockSwapAccess,
     return 2*s + (2+m)*m <= len ? m : n;
   }
 
-  public boolean predicate( int i );
+  boolean predicate( int i );
 
-  public default void muRaSaBiPartitionV2( int from, int until )
+  default void muRaSaBiPartitionV2( int from, int until )
   {
     if( from >  until ) throw new IllegalArgumentException();
 

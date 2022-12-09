@@ -1,7 +1,7 @@
 package com.github.jaaa.merge;
 
 import com.github.jaaa.search.BinarySearchAccessor;
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 
 //
 //
@@ -49,7 +49,7 @@ public interface RebelMergeAccessor<T> extends CompareRandomAccessor<T>, BinaryS
     if( b==c && ! (j+n <= k || k+m <= j) ) throw new IllegalArgumentException();
 
     new RecMergeFn(k) {
-      @Override public final void merge( int a1, int a2, int b1, int b2 )
+      @Override public void merge( int a1, int a2, int b1, int b2 )
       {
         int aLen = a2-a1,
             bLen = b2-b1;
@@ -92,7 +92,7 @@ public interface RebelMergeAccessor<T> extends CompareRandomAccessor<T>, BinaryS
     if( b==c && ! (j <= k || k+m+n <= j) ) throw new IllegalArgumentException();
 
     new RecMergeFn(k+m+n) {
-      @Override public final void merge( int a1, int a2, int b1, int b2 )
+      @Override public void merge( int a1, int a2, int b1, int b2 )
       {
         int aLen = a2-a1,
             bLen = b2-b1;

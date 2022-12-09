@@ -1,6 +1,6 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.Group;
 
 @Group
@@ -21,7 +21,7 @@ public class MergeSortAccessorTest
     }
   }
   private interface TestTemplate extends SortAccessorTestTemplate {
-    @Override default <T> SortAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) { return new Acc(acc); }
+    @Override default <T> SortAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) { return new Acc<>(acc); }
     @Override default boolean isStable() { return true; }
   }
 

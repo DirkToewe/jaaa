@@ -1,8 +1,7 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.Group;
-import net.jqwik.api.Tuple;
 
 public class ExpMergePartV1AccessorTest extends MergePartAccessorTestTemplate
 {

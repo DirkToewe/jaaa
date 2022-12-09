@@ -5,19 +5,19 @@ import com.github.jaaa.CompareSwapAccess;
 
 public interface HeapSortAccess extends CompareSwapAccess
 {
-  default void heapSort( int from, int until )
+  default void heapSort( int mid, int until )
   {
-    if( from < 0 || from > until ) throw new IllegalArgumentException();
+    if( mid < 0 || mid > until ) throw new IllegalArgumentException();
 
-    final int     firstParent = from+until+1 >>> 1;
-    for( int root=firstParent; from < until-1; )
+    final int     firstParent = mid+until+1 >>> 1;
+    for( int root=firstParent; mid < until-1; )
     {
       // SIFT DOWN
       for( int parent=root;; )
       {
         int child = (parent<<1) - until;
-        if( child < from ) break;
-        if( child > from )
+        if( child < mid ) break;
+        if( child > mid )
             child -= compare(child-1,child)>>>31;
         if( compare(parent,child) > 0 )
           swap(parent,parent=child);
@@ -27,7 +27,7 @@ public interface HeapSortAccess extends CompareSwapAccess
       if( root < until-1 )
         ++root; // <- heap building phase
       else
-        swap(from++,root); // <- extract min. phase
+        swap(mid++,root); // <- extract min. phase
     }
   }
 

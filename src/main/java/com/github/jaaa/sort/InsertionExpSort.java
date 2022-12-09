@@ -1,6 +1,8 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.permute.Swap;
 
 import java.nio.IntBuffer;
 import java.util.Comparator;
@@ -19,7 +21,7 @@ public final class InsertionExpSort
 
     @Override public void sort(   byte[] seq                                            ) { InsertionExpSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(   byte[] seq, int from, int until                       ) { InsertionExpSort.sort(seq, from,until          ); }
-    @Override public void sort(   byte[] seq,                      ComparatorByte   cmp ) { InsertionExpSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   byte[] seq,                      ComparatorByte cmp ) { InsertionExpSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   byte[] seq, int from, int until, ComparatorByte   cmp ) { InsertionExpSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  short[] seq                                            ) { InsertionExpSort.sort(seq,    0,seq.length     ); }
@@ -29,7 +31,7 @@ public final class InsertionExpSort
 
     @Override public void sort(    int[] seq                                            ) { InsertionExpSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(    int[] seq, int from, int until                       ) { InsertionExpSort.sort(seq, from,until          ); }
-    @Override public void sort(    int[] seq,                      ComparatorInt    cmp ) { InsertionExpSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(    int[] seq,                      ComparatorInt cmp ) { InsertionExpSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(    int[] seq, int from, int until, ComparatorInt    cmp ) { InsertionExpSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(   long[] seq                                            ) { InsertionExpSort.sort(seq,    0,seq.length     ); }
@@ -39,12 +41,12 @@ public final class InsertionExpSort
 
     @Override public void sort(   char[] seq                                            ) { InsertionExpSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(   char[] seq, int from, int until                       ) { InsertionExpSort.sort(seq, from,until          ); }
-    @Override public void sort(   char[] seq,                      ComparatorChar   cmp ) { InsertionExpSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   char[] seq,                      ComparatorChar cmp ) { InsertionExpSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   char[] seq, int from, int until, ComparatorChar   cmp ) { InsertionExpSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  float[] seq                                            ) { InsertionExpSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(  float[] seq, int from, int until                       ) { InsertionExpSort.sort(seq, from,until          ); }
-    @Override public void sort(  float[] seq,                      ComparatorFloat  cmp ) { InsertionExpSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(  float[] seq,                      ComparatorFloat cmp ) { InsertionExpSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(  float[] seq, int from, int until, ComparatorFloat  cmp ) { InsertionExpSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort( double[] seq                                            ) { InsertionExpSort.sort(seq,    0,seq.length     ); }
@@ -227,7 +229,7 @@ public final class InsertionExpSort
         int k = hi-step;
         if( k < lo ) break;
         int c = piv.compareTo(seq[k]);
-        if( c >= 0 ) {  lo = +1 + k; break; }
+        if( c >= 0 ) {  lo =  1 + k; break; }
         else            hi = -1 + k;
       }
 
@@ -235,7 +237,7 @@ public final class InsertionExpSort
       while( lo <= hi ) {       int mid = lo+hi >>> 1,
               c = piv.compareTo(seq[mid]);
         if( c < 0 )       hi = -1 + mid;
-        else              lo = +1 + mid;
+        else              lo =  1 + mid;
       }
 
       arraycopy(seq,lo, seq,lo+1, i-lo);
@@ -260,7 +262,7 @@ public final class InsertionExpSort
         int k = hi-step;
         if( k < lo ) break;
         int c = cmp.compare(piv,seq[k]);
-        if( c >= 0 ) {    lo = +1 + k; break; }
+        if( c >= 0 ) {    lo =  1 + k; break; }
         else              hi = -1 + k;
       }
 
@@ -268,7 +270,7 @@ public final class InsertionExpSort
       while( lo <= hi ) {        int mid = lo+hi >>> 1,
             c = cmp.compare(piv, seq[mid]);
         if( c < 0 )        hi = -1 + mid;
-        else               lo = +1 + mid;
+        else               lo =  1 + mid;
       }
 
       arraycopy(seq,lo, seq,lo+1, i-lo);

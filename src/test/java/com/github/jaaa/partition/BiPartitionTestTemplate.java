@@ -1,6 +1,8 @@
 package com.github.jaaa.partition;
 
 import com.github.jaaa.*;
+import com.github.jaaa.fn.*;
+import com.github.jaaa.permute.Swap;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.ShrinkingMode;
@@ -20,8 +22,8 @@ import static java.util.Comparator.comparing;
 import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import static com.github.jaaa.misc.Boxing.boxed;
-import static com.github.jaaa.misc.Boxing.unboxed;
+import static com.github.jaaa.Boxing.boxed;
+import static com.github.jaaa.Boxing.unboxed;
 
 
 public class BiPartitionTestTemplate
@@ -70,12 +72,12 @@ public class BiPartitionTestTemplate
     };
 
     biPartitionArraysObject = fn.apply(Object[].class, Predicate      .class);
-    biPartitionArraysByte   = fn.apply(  byte[].class, PredicateByte  .class);
+    biPartitionArraysByte   = fn.apply(  byte[].class, PredicateByte.class);
     biPartitionArraysShort  = fn.apply( short[].class, PredicateShort .class);
-    biPartitionArraysInt    = fn.apply(   int[].class, PredicateInt   .class);
+    biPartitionArraysInt    = fn.apply(   int[].class, PredicateInt.class);
     biPartitionArraysLong   = fn.apply(  long[].class, PredicateLong  .class);
-    biPartitionArraysChar   = fn.apply(  char[].class, PredicateChar  .class);
-    biPartitionArraysFloat  = fn.apply( float[].class, PredicateFloat .class);
+    biPartitionArraysChar   = fn.apply(  char[].class, PredicateChar.class);
+    biPartitionArraysFloat  = fn.apply( float[].class, PredicateFloat.class);
     biPartitionArraysDouble = fn.apply(double[].class, PredicateDouble.class);
 
     biPartitionArraysWithRangeObject = rn.apply(Object[].class, Predicate      .class);

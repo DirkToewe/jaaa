@@ -1,13 +1,12 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateSwapAccess;
-import com.github.jaaa.SwapAccess;
-import com.github.jaaa.misc.BlockSwapAccess;
+import com.github.jaaa.fn.PredicateSwapAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
+import com.github.jaaa.permute.SwapAccess;
 import com.github.jaaa.util.Hex16;
 
 import java.util.function.IntFunction;
 
-import static java.lang.Math.min;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.subtractExact;
 

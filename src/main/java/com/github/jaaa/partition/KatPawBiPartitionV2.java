@@ -1,7 +1,7 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.*;
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
+import com.github.jaaa.fn.*;
 
 import java.util.function.Predicate;
 

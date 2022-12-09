@@ -1,6 +1,6 @@
 package com.github.jaaa.select;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import com.github.jaaa.fn.EntryConsumer;
 import com.github.jaaa.fn.EntryFn;
 import com.github.jaaa.util.LinSpace;
@@ -16,7 +16,7 @@ import java.util.function.IntFunction;
 import java.util.random.RandomGenerator;
 import java.util.stream.Stream;
 
-import static com.github.jaaa.misc.RandomShuffle.shuffle;
+import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
 import static java.lang.Math.min;
 import static java.lang.String.format;
 import static java.lang.System.arraycopy;
@@ -51,7 +51,7 @@ public class HeapSelectCheck
         int[] arr = new int[len];
         for( int j=0; ++j < len; )
           arr[j] = arr[j-1] + rng.nextInt(2);
-        shuffle(arr, rng::nextInt);
+        randomShuffle(arr, rng::nextInt);
         return arr;
       }
     );
@@ -74,21 +74,21 @@ public class HeapSelectCheck
       Arrays.sort(x);
 
       Map<String,double[]> resultsComps = new TreeMap<>();
-      selectors.forEach( (k,v) -> {
-        resultsComps.put(k, new double[N_SAMPLES]);
-      });
+      selectors.forEach( (k,v) ->
+        resultsComps.put(k, new double[N_SAMPLES])
+      );
 
       @SuppressWarnings("unchecked")
       Entry<String, Function<int[],SelectAccess>>[] selectorsArr = selectors.entrySet().toArray(Entry[]::new);
 
       var     order = range(0,N_SAMPLES).toArray();
-      shuffle(order,rng::nextInt);
+      randomShuffle(order,rng::nextInt);
       Progress.print( stream(order) ).forEach(i -> {
         int mid = (int) x[i];
 
         int[] ref = gen.apply(length);
 
-        shuffle(selectorsArr, rng::nextInt);
+        randomShuffle(selectorsArr, rng::nextInt);
         stream(selectorsArr).forEach( EntryConsumer.of( (k,v) -> {
           acc.nComps = 0;
           acc.nSwaps = 0;

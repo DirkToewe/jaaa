@@ -1,7 +1,7 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.*;
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.*;
+
 import static java.lang.Math.addExact;
 
 import java.nio.IntBuffer;

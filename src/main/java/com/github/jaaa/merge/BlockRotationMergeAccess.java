@@ -2,7 +2,7 @@ package com.github.jaaa.merge;
 
 
 import com.github.jaaa.CompareSwapAccess;
-import com.github.jaaa.misc.RotateAccess;
+import com.github.jaaa.permute.RotateAccess;
 
 import static com.github.jaaa.util.IMath.sqrtFloor;
 

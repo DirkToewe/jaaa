@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergePartR2L;
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergePartL2R;
@@ -43,12 +43,12 @@ public interface ExpMergePartV1Accessor<T> extends CompareRandomAccessor<T>
         int                    next = lo+step;
         if( compare(a,a0, b,b0+next) < cmp ) {
                      hi = -1 + next; break;
-        }            lo = +1 + next;
+        }            lo =  1 + next;
       }
       // binary search phase
       while( lo <= hi ){ int mid = lo+hi >>> 1;
         if( compare(a,a0, b,b0+mid) < cmp ) hi = -1 + mid;
-        else                                lo = +1 + mid;
+        else                                lo =  1 + mid;
       }
 
       copyRange(b,b0, c,c0, lo);
@@ -104,12 +104,12 @@ public interface ExpMergePartV1Accessor<T> extends CompareRandomAccessor<T>
       {
         int                    next = hi-step;
         if( compare(a,a0, b,b0+next) > cmp ) {
-                     lo = +1 + next; break;
+                     lo =  1 + next; break;
         }            hi = -1 + next;
       }
       // binary search phase
       while( lo <= hi ) {  int mid = lo+hi >>> 1;
-        if( compare(a,a0, b,b0+mid) > cmp ) lo = +1 + mid;
+        if( compare(a,a0, b,b0+mid) > cmp ) lo =  1 + mid;
         else                                hi = -1 + mid;
       }
             b0 += lo;

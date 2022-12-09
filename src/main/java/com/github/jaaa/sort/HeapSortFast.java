@@ -1,6 +1,8 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.permute.Swap;
 
 import java.nio.IntBuffer;
 import java.util.Comparator;
@@ -18,7 +20,7 @@ public final class HeapSortFast
 
     @Override public void sort(   byte[] seq                                            ) { HeapSortFast.sort(seq,    0,seq.length     ); }
     @Override public void sort(   byte[] seq, int from, int until                       ) { HeapSortFast.sort(seq, from,until          ); }
-    @Override public void sort(   byte[] seq,                      ComparatorByte   cmp ) { HeapSortFast.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   byte[] seq,                      ComparatorByte cmp ) { HeapSortFast.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   byte[] seq, int from, int until, ComparatorByte   cmp ) { HeapSortFast.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  short[] seq                                            ) { HeapSortFast.sort(seq,    0,seq.length     ); }
@@ -28,7 +30,7 @@ public final class HeapSortFast
 
     @Override public void sort(    int[] seq                                            ) { HeapSortFast.sort(seq,    0,seq.length     ); }
     @Override public void sort(    int[] seq, int from, int until                       ) { HeapSortFast.sort(seq, from,until          ); }
-    @Override public void sort(    int[] seq,                      ComparatorInt    cmp ) { HeapSortFast.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(    int[] seq,                      ComparatorInt cmp ) { HeapSortFast.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(    int[] seq, int from, int until, ComparatorInt    cmp ) { HeapSortFast.sort(seq, from,until,      cmp); }
 
     @Override public void sort(   long[] seq                                            ) { HeapSortFast.sort(seq,    0,seq.length     ); }
@@ -38,12 +40,12 @@ public final class HeapSortFast
 
     @Override public void sort(   char[] seq                                            ) { HeapSortFast.sort(seq,    0,seq.length     ); }
     @Override public void sort(   char[] seq, int from, int until                       ) { HeapSortFast.sort(seq, from,until          ); }
-    @Override public void sort(   char[] seq,                      ComparatorChar   cmp ) { HeapSortFast.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   char[] seq,                      ComparatorChar cmp ) { HeapSortFast.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   char[] seq, int from, int until, ComparatorChar   cmp ) { HeapSortFast.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  float[] seq                                            ) { HeapSortFast.sort(seq,    0,seq.length     ); }
     @Override public void sort(  float[] seq, int from, int until                       ) { HeapSortFast.sort(seq, from,until          ); }
-    @Override public void sort(  float[] seq,                      ComparatorFloat  cmp ) { HeapSortFast.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(  float[] seq,                      ComparatorFloat cmp ) { HeapSortFast.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(  float[] seq, int from, int until, ComparatorFloat  cmp ) { HeapSortFast.sort(seq, from,until,      cmp); }
 
     @Override public void sort( double[] seq                                            ) { HeapSortFast.sort(seq,    0,seq.length     ); }

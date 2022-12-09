@@ -1,6 +1,7 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.copy.*;
 import com.github.jaaa.search.ExpSearchAccessor;
 
 import java.nio.IntBuffer;
@@ -40,13 +41,13 @@ public class ParallelRecMerge
     }
 
     private interface AccArrObj<T> extends Acc<         T[]>, RandomAccessorArrObj<T>{ @Override default T[] malloc(int len ) { throw new UnsupportedOperationException(); } }
-    private interface AccArrByte   extends Acc<      byte[]>, RandomAccessorArrByte  {}
+    private interface AccArrByte   extends Acc<      byte[]>, RandomAccessorArrByte {}
     private interface AccArrShort  extends Acc<     short[]>, RandomAccessorArrShort {}
     private interface AccArrInt    extends Acc<       int[]>, RandomAccessorArrInt   {}
     private interface AccArrLong   extends Acc<      long[]>, RandomAccessorArrLong  {}
-    private interface AccArrChar   extends Acc<      char[]>, RandomAccessorArrChar  {}
+    private interface AccArrChar   extends Acc<      char[]>, RandomAccessorArrChar {}
     private interface AccArrFloat  extends Acc<     float[]>, RandomAccessorArrFloat {}
-    private interface AccArrDouble extends Acc<    double[]>, RandomAccessorArrDouble{}
+    private interface AccArrDouble extends Acc<    double[]>, RandomAccessorArrDouble {}
     private interface AccBufInt    extends Acc<   IntBuffer>, RandomAccessorBufInt   {}
 
   // STATIC CONSTRUCTOR
@@ -101,19 +102,19 @@ public class ParallelRecMerge
     @Override public                             <T> void merge(T[] a, int a0, int aLen, T[] b, int b0, int bLen, T[] c, int c0, Comparator<? super T> cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrObj<T>) (u,i, v,j) -> cmp.compare(u[i],v[j]) ); }
     @Override public<T extends Comparable<? super T>>void merge(T[] a, int a0, int aLen, T[] b, int b0, int bLen, T[] c, int c0                           ) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrObj<T>) (u,i, v,j) ->   u[i].compareTo(v[j]) ); }
 
-    @Override public void merge(  byte[] a, int a0, int aLen,  byte[] b, int b0, int bLen,  byte[] c, int c0, ComparatorByte   cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrByte  ) (u,i, v,j) ->      cmp.compare(u[i],v[j]) ); }
+    @Override public void merge(  byte[] a, int a0, int aLen,  byte[] b, int b0, int bLen,  byte[] c, int c0, ComparatorByte cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrByte  ) (u, i, v, j) ->      cmp.compare(u[i],v[j]) ); }
     @Override public void merge(  byte[] a, int a0, int aLen,  byte[] b, int b0, int bLen,  byte[] c, int c0                      ) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrByte  ) (u,i, v,j) ->     Byte.compare(u[i],v[j]) ); }
     @Override public void merge( short[] a, int a0, int aLen, short[] b, int b0, int bLen, short[] c, int c0, ComparatorShort  cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrShort ) (u,i, v,j) ->      cmp.compare(u[i],v[j]) ); }
     @Override public void merge( short[] a, int a0, int aLen, short[] b, int b0, int bLen, short[] c, int c0                      ) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrShort ) (u,i, v,j) ->    Short.compare(u[i],v[j]) ); }
-    @Override public void merge(   int[] a, int a0, int aLen,   int[] b, int b0, int bLen,   int[] c, int c0, ComparatorInt    cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrInt   ) (u,i, v,j) ->      cmp.compare(u[i],v[j]) ); }
+    @Override public void merge(   int[] a, int a0, int aLen,   int[] b, int b0, int bLen,   int[] c, int c0, ComparatorInt cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrInt   ) (u, i, v, j) ->      cmp.compare(u[i],v[j]) ); }
     @Override public void merge(   int[] a, int a0, int aLen,   int[] b, int b0, int bLen,   int[] c, int c0                      ) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrInt   ) (u,i, v,j) ->  Integer.compare(u[i],v[j]) ); }
     @Override public void merge(  long[] a, int a0, int aLen,  long[] b, int b0, int bLen,  long[] c, int c0, ComparatorLong   cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrLong  ) (u,i, v,j) ->      cmp.compare(u[i],v[j]) ); }
     @Override public void merge(  long[] a, int a0, int aLen,  long[] b, int b0, int bLen,  long[] c, int c0                      ) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrLong  ) (u,i, v,j) ->     Long.compare(u[i],v[j]) ); }
-    @Override public void merge(  char[] a, int a0, int aLen,  char[] b, int b0, int bLen,  char[] c, int c0, ComparatorChar   cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrChar  ) (u,i, v,j) ->      cmp.compare(u[i],v[j]) ); }
+    @Override public void merge(  char[] a, int a0, int aLen,  char[] b, int b0, int bLen,  char[] c, int c0, ComparatorChar cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrChar  ) (u, i, v, j) ->      cmp.compare(u[i],v[j]) ); }
     @Override public void merge(  char[] a, int a0, int aLen,  char[] b, int b0, int bLen,  char[] c, int c0                      ) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrChar  ) (u,i, v,j) ->Character.compare(u[i],v[j]) ); }
-    @Override public void merge( float[] a, int a0, int aLen, float[] b, int b0, int bLen, float[] c, int c0, ComparatorFloat  cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrFloat ) (u,i, v,j) ->      cmp.compare(u[i],v[j]) ); }
+    @Override public void merge( float[] a, int a0, int aLen, float[] b, int b0, int bLen, float[] c, int c0, ComparatorFloat cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrFloat ) (u, i, v, j) ->      cmp.compare(u[i],v[j]) ); }
     @Override public void merge( float[] a, int a0, int aLen, float[] b, int b0, int bLen, float[] c, int c0                      ) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrFloat ) (u,i, v,j) ->    Float.compare(u[i],v[j]) ); }
-    @Override public void merge(double[] a, int a0, int aLen,double[] b, int b0, int bLen,double[] c, int c0, ComparatorDouble cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrDouble) (u,i, v,j) ->      cmp.compare(u[i],v[j]) ); }
+    @Override public void merge(double[] a, int a0, int aLen,double[] b, int b0, int bLen,double[] c, int c0, ComparatorDouble cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrDouble) (u, i, v, j) ->      cmp.compare(u[i],v[j]) ); }
     @Override public void merge(double[] a, int a0, int aLen,double[] b, int b0, int bLen,double[] c, int c0                      ) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccArrDouble) (u,i, v,j) ->   Double.compare(u[i],v[j]) ); }
 
     @Override public void merge(   IntBuffer a, int a0, int aLen,   IntBuffer b, int b0, int bLen,   IntBuffer c, int c0, ComparatorInt        cmp) { merge(a,a0,aLen, b,b0,bLen, c,c0, (AccBufInt) (u,i, v,j) ->      cmp.compare(u.get(i),v.get(j)) ); }

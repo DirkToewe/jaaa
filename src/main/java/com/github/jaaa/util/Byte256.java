@@ -1,6 +1,6 @@
 package com.github.jaaa.util;
 
-import com.github.jaaa.SwapAccess;
+import com.github.jaaa.permute.SwapAccess;
 
 import static com.github.jaaa.util.IMath.sign;
 import static java.lang.Byte.toUnsignedInt;

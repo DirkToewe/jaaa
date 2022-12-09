@@ -1,9 +1,9 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.ComparatorByte;
+import com.github.jaaa.compare.ComparatorByte;
 import com.github.jaaa.CompareSwapAccess;
-import com.github.jaaa.Swap;
-import com.github.jaaa.misc.Boxing;
+import com.github.jaaa.permute.Swap;
+import com.github.jaaa.Boxing;
 import com.github.jaaa.util.ZipWithIndex;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
@@ -13,8 +13,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map.Entry;
 
-import static com.github.jaaa.misc.Boxing.boxed;
-import static com.github.jaaa.misc.Boxing.unboxed;
+import static com.github.jaaa.Boxing.boxed;
+import static com.github.jaaa.Boxing.unboxed;
 import static java.util.Map.Entry.comparingByKey;
 import static java.util.Map.Entry.comparingByValue;
 import static org.assertj.core.api.Assertions.assertThat;

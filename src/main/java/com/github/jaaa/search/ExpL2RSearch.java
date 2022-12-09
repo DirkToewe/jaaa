@@ -1,7 +1,7 @@
 package com.github.jaaa.search;
 
-import com.github.jaaa.ComparatorByte;
-import com.github.jaaa.ComparatorInt;
+import com.github.jaaa.compare.ComparatorByte;
+import com.github.jaaa.compare.ComparatorInt;
 
 import java.nio.IntBuffer;
 import java.util.Comparator;
@@ -114,7 +114,7 @@ public class ExpL2RSearch
     while( from <= until ) {      int mid = from+until >>> 1,
                c = compass.applyAsInt(mid);
            if( c < 0 )   until = -1 + mid;
-      else if( c > 0 )    from = +1 + mid;
+      else if( c > 0 )    from =  1 + mid;
       else                     return mid;
     }
 
@@ -143,7 +143,7 @@ public class ExpL2RSearch
     while( from <= until ) { int mid = from+until >>> 1,
           c = compass.applyAsInt(mid);
       if( c < 0 )   until = -1 + mid;
-      else           from = +1 + mid;
+      else           from =  1 + mid;
       found |= 0==c;
     }
 
@@ -171,7 +171,7 @@ public class ExpL2RSearch
     while( from <= until ) { int mid = from+until >>> 1,
           c = compass.applyAsInt(mid);
       if( c <= 0 )  until = -1 + mid;
-      else           from = +1 + mid;
+      else           from =  1 + mid;
       found |= 0==c;
     }
 

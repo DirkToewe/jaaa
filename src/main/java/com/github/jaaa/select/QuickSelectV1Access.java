@@ -1,7 +1,7 @@
 package com.github.jaaa.select;
 
-import com.github.jaaa.ArgMaxAccess;
-import com.github.jaaa.ArgMinAccess;
+import com.github.jaaa.compare.ArgMaxAccess;
+import com.github.jaaa.compare.ArgMinAccess;
 import com.github.jaaa.CompareSwapAccess;
 import com.github.jaaa.fn.Int3Op;
 

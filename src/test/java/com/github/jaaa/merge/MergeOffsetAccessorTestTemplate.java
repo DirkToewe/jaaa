@@ -1,8 +1,11 @@
 package com.github.jaaa.merge;
 
 import com.github.jaaa.*;
-import com.github.jaaa.misc.Boxing;
-import com.github.jaaa.misc.Revert;
+import com.github.jaaa.compare.ComparatorByte;
+import com.github.jaaa.compare.ComparatorInt;
+import com.github.jaaa.compare.CompareAccessor;
+import com.github.jaaa.Boxing;
+import com.github.jaaa.permute.Revert;
 import com.github.jaaa.search.BinarySearch;
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.Tuple2;
@@ -11,7 +14,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-import static com.github.jaaa.misc.Boxing.boxed;
+import static com.github.jaaa.Boxing.boxed;
 import static java.lang.Long.bitCount;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
@@ -49,7 +52,7 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
       if( 1 > len || len >= 32 )
         throw new AssertionError();
 
-      return Arbitraries.longs().between(0,(1 << 2*len-1)-1).map( bits -> {
+      return Arbitraries.longs().between(0,(1L << 2*len-1)-1).map( bits -> {
         int nA = bitCount(bits & (1L<<len)-1),
             nB = len - nA;
 
@@ -133,7 +136,7 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
         else if( nB <= 0 ) assertThat(cRef[nSkip-1]).isEqualTo(aTest[nA-1]);
         else               assertThat(cRef[nSkip-1]).isIn(aTest[nA-1], bTest[nB-1]);
       }
-    };
+    }
 
     assertThat(aTest).isEqualTo(aRef);
     assertThat(bTest).isEqualTo(bRef);
@@ -197,7 +200,7 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
         else if( nB <= 0 ) assertThat(cRef[nSkip-1]).isEqualTo(aTest[nA-1]);
         else               assertThat(cRef[nSkip-1]).isIn(aTest[nA-1], bTest[nB-1]);
       }
-    };
+    }
 
     assertThat(aTest).isEqualTo(aRef);
     assertThat(bTest).isEqualTo(bRef);
@@ -334,7 +337,7 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
         else if( nB <= 0 ) assertThat(cRef[nSkip-1]).isEqualTo(aTest[a0+nA-1]);
         else               assertThat(cRef[nSkip-1]).isIn(aTest[a0+nA-1], bTest[b0+nB-1]);
       }
-    };
+    }
 
     assertThat(aTest).isEqualTo(aRef);
     assertThat(bTest).isEqualTo(bRef);
@@ -403,7 +406,7 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
         else if( nB <= 0 ) assertThat(cRef[nSkip-1]).isEqualTo(aTest[a0+nA-1]);
         else               assertThat(cRef[nSkip-1]).isIn(aTest[a0+nA-1], bTest[b0+nB-1]);
       }
-    };
+    }
 
     assertThat(aTest).isEqualTo(aRef);
     assertThat(bTest).isEqualTo(bRef);

@@ -1,6 +1,6 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.Group;
 
 
@@ -19,7 +19,7 @@ public class InsertionSortAccessorTest
     @Override public void sort( T arr, int from, int until ) { insertionSort(arr,from,until); }
   }
   private interface TestTemplate extends SortAccessorTestTemplate {
-    @Override default <T> SortAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) { return new Acc(acc); }
+    @Override default <T> SortAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) { return new Acc<>(acc); }
     @Override default boolean isStable() { return true; }
   }
 

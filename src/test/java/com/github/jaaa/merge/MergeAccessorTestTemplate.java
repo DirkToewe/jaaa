@@ -1,8 +1,10 @@
 package com.github.jaaa.merge;
 
 import com.github.jaaa.*;
-import com.github.jaaa.misc.Boxing;
-import com.github.jaaa.misc.Revert;
+import com.github.jaaa.compare.CompareRandomAccessor;
+import com.github.jaaa.Boxing;
+import com.github.jaaa.permute.Revert;
+import com.github.jaaa.permute.Swap;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.PropertyDefaults;
@@ -13,7 +15,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-import static com.github.jaaa.misc.Boxing.boxed;
+import static com.github.jaaa.Boxing.boxed;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.stream;

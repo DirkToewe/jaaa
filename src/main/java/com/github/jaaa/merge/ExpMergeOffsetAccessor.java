@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareAccessor;
+import com.github.jaaa.compare.CompareAccessor;
 import com.github.jaaa.search.ExpSearch;
 
 import static java.lang.Math.max;

@@ -1,9 +1,9 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.CompareSwapAccess;
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
 import com.github.jaaa.WithRange;
-import com.github.jaaa.misc.Boxing;
+import com.github.jaaa.Boxing;
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.Tuple2;
 

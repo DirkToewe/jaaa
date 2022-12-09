@@ -1,8 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
-import net.jqwik.api.Group;
-import net.jqwik.api.Tuple;
+import com.github.jaaa.compare.CompareRandomAccessor;
 
 public class HwangLinMergePartAccessorTest extends MergePartAccessorTestTemplate
 {

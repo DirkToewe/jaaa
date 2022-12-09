@@ -1,6 +1,6 @@
 package com.github.jaaa.select;
 
-import com.github.jaaa.misc.BlockSwapAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;

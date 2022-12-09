@@ -6,7 +6,7 @@ import net.jqwik.api.Property;
 
 import java.util.Map.Entry;
 
-import static com.github.jaaa.misc.Boxing.boxed;
+import static com.github.jaaa.Boxing.boxed;
 import static com.github.jaaa.util.ZipWithIndex.zipWithIndex;
 import static org.assertj.core.api.Assertions.assertThat;
 

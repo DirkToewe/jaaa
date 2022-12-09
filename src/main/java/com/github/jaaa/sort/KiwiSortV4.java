@@ -1,6 +1,8 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.permute.Swap;
 
 import java.nio.IntBuffer;
 import java.util.Comparator;
@@ -20,7 +22,7 @@ public final class KiwiSortV4
 
     @Override public void sort(   byte[] seq                                            ) { KiwiSortV4.sort(seq,    0,seq.length     ); }
     @Override public void sort(   byte[] seq, int from, int until                       ) { KiwiSortV4.sort(seq, from,until          ); }
-    @Override public void sort(   byte[] seq,                      ComparatorByte   cmp ) { KiwiSortV4.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   byte[] seq,                      ComparatorByte cmp ) { KiwiSortV4.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   byte[] seq, int from, int until, ComparatorByte   cmp ) { KiwiSortV4.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  short[] seq                                            ) { KiwiSortV4.sort(seq,    0,seq.length     ); }
@@ -30,7 +32,7 @@ public final class KiwiSortV4
 
     @Override public void sort(    int[] seq                                            ) { KiwiSortV4.sort(seq,    0,seq.length     ); }
     @Override public void sort(    int[] seq, int from, int until                       ) { KiwiSortV4.sort(seq, from,until          ); }
-    @Override public void sort(    int[] seq,                      ComparatorInt    cmp ) { KiwiSortV4.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(    int[] seq,                      ComparatorInt cmp ) { KiwiSortV4.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(    int[] seq, int from, int until, ComparatorInt    cmp ) { KiwiSortV4.sort(seq, from,until,      cmp); }
 
     @Override public void sort(   long[] seq                                            ) { KiwiSortV4.sort(seq,    0,seq.length     ); }
@@ -40,12 +42,12 @@ public final class KiwiSortV4
 
     @Override public void sort(   char[] seq                                            ) { KiwiSortV4.sort(seq,    0,seq.length     ); }
     @Override public void sort(   char[] seq, int from, int until                       ) { KiwiSortV4.sort(seq, from,until          ); }
-    @Override public void sort(   char[] seq,                      ComparatorChar   cmp ) { KiwiSortV4.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   char[] seq,                      ComparatorChar cmp ) { KiwiSortV4.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   char[] seq, int from, int until, ComparatorChar   cmp ) { KiwiSortV4.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  float[] seq                                            ) { KiwiSortV4.sort(seq,    0,seq.length     ); }
     @Override public void sort(  float[] seq, int from, int until                       ) { KiwiSortV4.sort(seq, from,until          ); }
-    @Override public void sort(  float[] seq,                      ComparatorFloat  cmp ) { KiwiSortV4.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(  float[] seq,                      ComparatorFloat cmp ) { KiwiSortV4.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(  float[] seq, int from, int until, ComparatorFloat  cmp ) { KiwiSortV4.sort(seq, from,until,      cmp); }
 
     @Override public void sort( double[] seq                                            ) { KiwiSortV4.sort(seq,    0,seq.length     ); }

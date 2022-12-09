@@ -1,8 +1,7 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.Group;
-import net.jqwik.api.Tuple;
 
 public class TapeMergeAccessorTest extends MergeAccessorTestTemplate
 {
@@ -26,7 +25,7 @@ public class TapeMergeAccessorTest extends MergeAccessorTestTemplate
     @Override public void merge( T a, int i, int m, T b, int j, int n, T c, int k ) { tapeMerge(a,i,m, b,j,n, c,k); }
   }
 
-  @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<T>(srtAcc); }
+  @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<>(srtAcc); }
 
 
 
@@ -53,7 +52,7 @@ public class TapeMergeAccessorTest extends MergeAccessorTestTemplate
       @Override public void merge( T a, int i, int m, T b, int j, int n, T c, int k ) { tapeMergeL2R(a,i,m, b,j,n, c,k); }
     }
 
-    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<T>(srtAcc); }
+    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<>(srtAcc); }
   }
 
 
@@ -81,6 +80,6 @@ public class TapeMergeAccessorTest extends MergeAccessorTestTemplate
       @Override public void merge( T a, int i, int m, T b, int j, int n, T c, int k ) { tapeMergeR2L(a,i,m, b,j,n, c,k); }
     }
 
-    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<T>(srtAcc); }
+    @Override protected <T> MergeAccessor<T> createAccessor(CompareRandomAccessor<T> srtAcc) { return new HLAccessor<>(srtAcc); }
   }
 }

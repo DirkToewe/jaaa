@@ -1,7 +1,7 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateSwapAccess;
-import com.github.jaaa.Swap;
+import com.github.jaaa.fn.PredicateSwapAccess;
+import com.github.jaaa.permute.Swap;
 import net.jqwik.api.Tuple;
 import net.jqwik.api.Tuple.Tuple2;
 
@@ -15,7 +15,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.function.IntFunction;
 
-import static com.github.jaaa.misc.Revert.revert;
+import static com.github.jaaa.permute.Revert.revert;
 import static java.awt.Desktop.getDesktop;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
@@ -26,7 +26,7 @@ import static java.util.stream.IntStream.range;
 public class BiPartitionComparison
 {
 // STATIC FIELDS
-  private static String PLOT_TEMPLATE
+  private static final String PLOT_TEMPLATE
      =        "<!DOCTYPE html>"
      + "\n" + "<html lang=\"en\">"
      + "\n" + "  <head>"

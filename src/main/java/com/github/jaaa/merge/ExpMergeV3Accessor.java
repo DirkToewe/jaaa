@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeL2R;
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeR2L;
@@ -12,7 +12,7 @@ import static java.lang.Math.min;
 //   * requires 2 + 2*log2floor(i) comparisons to find index i
 public interface ExpMergeV3Accessor<T> extends CompareRandomAccessor<T>
 {
-  public default void expMergeV3(
+  default void expMergeV3(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
@@ -26,7 +26,7 @@ public interface ExpMergeV3Accessor<T> extends CompareRandomAccessor<T>
   }
 
 
-  public default void expMergeV3_L2R(
+  default void expMergeV3_L2R(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
@@ -75,7 +75,7 @@ public interface ExpMergeV3Accessor<T> extends CompareRandomAccessor<T>
   }
 
 
-  public default void expMergeV3_R2L(
+  default void expMergeV3_R2L(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0

@@ -1,6 +1,8 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.permute.Swap;
 
 import java.nio.IntBuffer;
 import java.util.Comparator;
@@ -20,7 +22,7 @@ public final class InsertionSort
 
     @Override public void sort(   byte[] seq                                            ) { InsertionSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(   byte[] seq, int from, int until                       ) { InsertionSort.sort(seq, from,until          ); }
-    @Override public void sort(   byte[] seq,                      ComparatorByte   cmp ) { InsertionSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   byte[] seq,                      ComparatorByte cmp ) { InsertionSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   byte[] seq, int from, int until, ComparatorByte   cmp ) { InsertionSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  short[] seq                                            ) { InsertionSort.sort(seq,    0,seq.length     ); }
@@ -30,7 +32,7 @@ public final class InsertionSort
 
     @Override public void sort(    int[] seq                                            ) { InsertionSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(    int[] seq, int from, int until                       ) { InsertionSort.sort(seq, from,until          ); }
-    @Override public void sort(    int[] seq,                      ComparatorInt    cmp ) { InsertionSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(    int[] seq,                      ComparatorInt cmp ) { InsertionSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(    int[] seq, int from, int until, ComparatorInt    cmp ) { InsertionSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(   long[] seq                                            ) { InsertionSort.sort(seq,    0,seq.length     ); }
@@ -40,12 +42,12 @@ public final class InsertionSort
 
     @Override public void sort(   char[] seq                                            ) { InsertionSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(   char[] seq, int from, int until                       ) { InsertionSort.sort(seq, from,until          ); }
-    @Override public void sort(   char[] seq,                      ComparatorChar   cmp ) { InsertionSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   char[] seq,                      ComparatorChar cmp ) { InsertionSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   char[] seq, int from, int until, ComparatorChar   cmp ) { InsertionSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  float[] seq                                            ) { InsertionSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(  float[] seq, int from, int until                       ) { InsertionSort.sort(seq, from,until          ); }
-    @Override public void sort(  float[] seq,                      ComparatorFloat  cmp ) { InsertionSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(  float[] seq,                      ComparatorFloat cmp ) { InsertionSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(  float[] seq, int from, int until, ComparatorFloat  cmp ) { InsertionSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort( double[] seq                                            ) { InsertionSort.sort(seq,    0,seq.length     ); }

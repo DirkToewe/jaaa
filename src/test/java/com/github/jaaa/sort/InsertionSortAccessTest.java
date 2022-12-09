@@ -1,13 +1,13 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import net.jqwik.api.Group;
 
 
 @Group
 public class InsertionSortAccessTest
 {
-  private static record Acc<T>( CompareRandomAccessor<T> acc ) implements SortAccessorTestTemplate.SortAccessor<T>, InsertionSortAccessor<T>
+  private record Acc<T>( CompareRandomAccessor<T> acc ) implements SortAccessorTestTemplate.SortAccessor<T>, InsertionSortAccessor<T>
   {
     @Override public T malloc( int len ) { return acc.malloc(len); }
     @Override public int    compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }

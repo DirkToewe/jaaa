@@ -1,6 +1,6 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.*;
+import com.github.jaaa.compare.*;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -74,15 +74,15 @@ public abstract class StaticMethodsSorter implements Sorter
     }
   }
 
-  private final ArraySortMethod<   byte[],ComparatorByte  > arrayByte;
-  private final ArraySortMethod<  short[],ComparatorShort > arrayShort;
-  private final ArraySortMethod<    int[],ComparatorInt   > arrayInt;
-  private final ArraySortMethod<   long[],ComparatorLong  > arrayLong;
-  private final ArraySortMethod<   char[],ComparatorChar  > arrayChar;
-  private final ArraySortMethod<  float[],ComparatorFloat > arrayFloat;
-  private final ArraySortMethod< double[],ComparatorDouble> arrayDouble;
-  private final ArraySortMethod< Object[],Comparator      > arrayObject;
-  private final ArraySortMethod<IntBuffer,ComparatorInt   > bufInt;
+  private final ArraySortMethod<   byte[], ComparatorByte  > arrayByte;
+  private final ArraySortMethod<  short[], ComparatorShort > arrayShort;
+  private final ArraySortMethod<    int[], ComparatorInt   > arrayInt;
+  private final ArraySortMethod<   long[], ComparatorLong  > arrayLong;
+  private final ArraySortMethod<   char[], ComparatorChar  > arrayChar;
+  private final ArraySortMethod<  float[], ComparatorFloat > arrayFloat;
+  private final ArraySortMethod< double[], ComparatorDouble> arrayDouble;
+  private final ArraySortMethod< Object[], Comparator      > arrayObject;
+  private final ArraySortMethod<IntBuffer, ComparatorInt   > bufInt;
   private final MethodHandle                               accessor;
 
   public StaticMethodsSorter( Class<?> sortClass )

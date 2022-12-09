@@ -2,7 +2,7 @@ package com.github.jaaa.merge;
 
 import java.util.AbstractList;
 
-import static com.github.jaaa.misc.Revert.revert;
+import static com.github.jaaa.permute.Revert.revert;
 import static java.lang.Math.addExact;
 import static java.lang.Math.multiplyExact;
 

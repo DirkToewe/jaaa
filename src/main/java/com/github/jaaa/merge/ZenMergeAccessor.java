@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeL2R;
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeR2L;
@@ -27,14 +27,14 @@ import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeR2L;
 public interface ZenMergeAccessor<T> extends CompareRandomAccessor<T>,
                                                  BinaryMergeOffsetAccessor<T>
 {
-  static abstract class RecMergeFn
+  abstract class RecMergeFn
   {
     public int k;
     public RecMergeFn( int _k ) { k =_k; }
     public abstract void merge( int a0, int a1, int b0, int b1 );
   }
 
-  public default void zenMerge(
+  default void zenMerge(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
@@ -46,7 +46,7 @@ public interface ZenMergeAccessor<T> extends CompareRandomAccessor<T>,
       zenMergeL2R(a,a0,aLen, b,b0,bLen, c,c0);
   }
 
-  public default void zenMergeL2R(
+  default void zenMergeL2R(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
@@ -58,7 +58,7 @@ public interface ZenMergeAccessor<T> extends CompareRandomAccessor<T>,
     );
 
     new RecMergeFn(c0) {
-      @Override public final void merge( int a0, int aLen, int b0, int bLen )
+      @Override public void merge( int a0, int aLen, int b0, int bLen )
       {
              if( 0==aLen ) { copyRange(b,b0, c,k, bLen); k+=bLen; }
         else if( 0==bLen ) { copyRange(a,a0, c,k, aLen); k+=aLen; }
@@ -72,7 +72,7 @@ public interface ZenMergeAccessor<T> extends CompareRandomAccessor<T>,
     }.merge(a0,aLen, b0,bLen);
   }
 
-  public default void zenMergeR2L(
+  default void zenMergeR2L(
     T a, int a0, int aLen,
     T b, int b0, int bLen,
     T c, int c0
@@ -86,7 +86,7 @@ public interface ZenMergeAccessor<T> extends CompareRandomAccessor<T>,
     c0 += aLen+bLen;
 
     new RecMergeFn(c0) {
-      @Override public final void merge( int a0, int aLen, int b0, int bLen )
+      @Override public void merge( int a0, int aLen, int b0, int bLen )
       {
              if( 0==aLen ) copyRange(b,b0, c,k-=bLen, bLen);
         else if( 0==bLen ) copyRange(a,a0, c,k-=aLen, aLen);

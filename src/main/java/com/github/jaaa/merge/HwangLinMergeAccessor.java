@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 
 import static java.lang.Integer.highestOneBit;
 
@@ -73,7 +73,7 @@ public interface HwangLinMergeAccessor<T> extends CompareRandomAccessor<T>
             hi = step-1;
         while( lo <= hi ){ int mid = lo+hi >>> 1;
           if( compare(a,a0, b,b0+mid) < cmp ) hi = -1 + mid;
-          else                                lo = +1 + mid;
+          else                                lo =  1 + mid;
         }
 
         // copy [...b[:lo], a[0]] -> c[:lo+1]
@@ -134,7 +134,7 @@ public interface HwangLinMergeAccessor<T> extends CompareRandomAccessor<T>
         int lo = bLen + 1,
             hi = bLen + step-1;
         while( lo <= hi ){   int mid = lo+hi >>> 1;
-          if( compare(a,a0+aLen, b,b0+mid) > cmp ) lo = +1 + mid;
+          if( compare(a,a0+aLen, b,b0+mid) > cmp ) lo =  1 + mid;
           else                                     hi = -1 + mid;
         }
         bLen += lo -= bLen;

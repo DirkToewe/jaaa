@@ -1,6 +1,6 @@
 package com.github.jaaa.search;
 
-import com.github.jaaa.CompareAccess;
+import com.github.jaaa.compare.CompareAccess;
 import net.jqwik.api.Group;
 
 import static com.github.jaaa.util.IMath.log2Floor;

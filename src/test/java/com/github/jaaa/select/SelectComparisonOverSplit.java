@@ -1,6 +1,6 @@
 package com.github.jaaa.select;
 
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 import com.github.jaaa.fn.EntryConsumer;
 import com.github.jaaa.fn.EntryFn;
 import com.github.jaaa.util.Progress;
@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.github.jaaa.misc.RandomShuffle.shuffle;
+import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.lang.System.*;
@@ -178,15 +178,15 @@ public class SelectComparisonOverSplit
     @SuppressWarnings("unchecked")
     Entry<String,SelectFn<int[]>>[] selectorsArr = selectors.entrySet().toArray(Entry[]::new);
 
-    var     order = range(0,N_SAMPLES).toArray();
-    shuffle(order,rng::nextInt);
+    var order = range(0,N_SAMPLES).toArray();
+    randomShuffle(order,rng::nextInt);
     Progress.print( stream(order) ).forEach(i -> {
       int split = (int) x[i];
 
       int[] ref = new int[length];
       for( int j=0; ++j < length; )
         ref[j] = ref[j-1] + rng.nextInt(2);
-      shuffle(ref, rng::nextInt);
+      randomShuffle(ref, rng::nextInt);
 //      Revert.revert(ref);
 
 //      int[] ref = new int[length];
@@ -197,7 +197,7 @@ public class SelectComparisonOverSplit
 //      for( int j=0; ++j < length; )
 //        ref[j] = ref[j-1] - 1;//rng.nextInt(2);
 
-      shuffle(selectorsArr, rng::nextInt);
+      randomShuffle(selectorsArr, rng::nextInt);
       stream(selectorsArr).forEach( EntryConsumer.of( (k,v) -> {
         acc.nComps = 0;
         acc.nSwaps = 0;

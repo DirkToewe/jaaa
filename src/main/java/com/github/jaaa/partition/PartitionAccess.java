@@ -1,9 +1,9 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.SwapAccess;
+import com.github.jaaa.permute.SwapAccess;
 
 public interface PartitionAccess extends SwapAccess
 {
-  public int  key( int i );
-  public int nKeys();
+  int  key( int i );
+  int nKeys();
 }

@@ -1,8 +1,10 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.*;
-import com.github.jaaa.merge.*;
-import com.github.jaaa.search.BinarySearchAccessor;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.copy.*;
+import com.github.jaaa.merge.ExpMergePartV2Accessor;
+import com.github.jaaa.merge.ParallelRebelMerge;
+import com.github.jaaa.merge.ParallelRebelMergeTask;
 import com.github.jaaa.search.ExpSearchAccessor;
 
 import java.lang.reflect.Array;
@@ -13,8 +15,6 @@ import java.util.concurrent.ForkJoinPool;
 
 import static com.github.jaaa.util.IMath.log2Ceil;
 import static java.lang.Math.max;
-import static java.lang.Math.subtractExact;
-import static java.util.Comparator.naturalOrder;
 import static java.util.Objects.requireNonNull;
 
 
@@ -47,15 +47,15 @@ public class ParallelRebelMergeSort
       }
     }
 
-    private static abstract class AccArrObj<T> implements Acc<         T[]>, TimSortAccessorArrObj<T>{ @Override  public void copy(          T[] a, int i,          T[] b, int j ) { b[j] = a[i]; } }
-    private             interface AccArrByte      extends Acc<      byte[]>, RandomAccessorArrByte   { @Override default void copy(       byte[] a, int i,       byte[] b, int j ) { b[j] = a[i]; } }
-    private             interface AccArrShort     extends Acc<     short[]>, RandomAccessorArrShort  { @Override default void copy(      short[] a, int i,      short[] b, int j ) { b[j] = a[i]; } }
-    private             interface AccArrInt       extends Acc<       int[]>, RandomAccessorArrInt    { @Override default void copy(        int[] a, int i,        int[] b, int j ) { b[j] = a[i]; } }
-    private             interface AccArrLong      extends Acc<      long[]>, RandomAccessorArrLong   { @Override default void copy(       long[] a, int i,       long[] b, int j ) { b[j] = a[i]; } }
-    private             interface AccArrChar      extends Acc<      char[]>, RandomAccessorArrChar   { @Override default void copy(       char[] a, int i,       char[] b, int j ) { b[j] = a[i]; } }
-    private             interface AccArrFloat     extends Acc<     float[]>, RandomAccessorArrFloat  { @Override default void copy(      float[] a, int i,      float[] b, int j ) { b[j] = a[i]; } }
-    private             interface AccArrDouble    extends Acc<    double[]>, RandomAccessorArrDouble { @Override default void copy(     double[] a, int i,     double[] b, int j ) { b[j] = a[i]; } }
-    private             interface AccBufInt       extends Acc<   IntBuffer>, RandomAccessorBufInt    { @Override default void copy(    IntBuffer a, int i,    IntBuffer b, int j ) { b.put(j, a.get(i)); } }
+    private static abstract class AccArrObj<T> implements Acc<         T[]>, TimSortAccessorArrObj<T>{}
+    private             interface AccArrByte      extends Acc<      byte[]>, RandomAccessorArrByte   {}
+    private             interface AccArrShort     extends Acc<     short[]>, RandomAccessorArrShort  {}
+    private             interface AccArrInt       extends Acc<       int[]>, RandomAccessorArrInt    {}
+    private             interface AccArrLong      extends Acc<      long[]>, RandomAccessorArrLong   {}
+    private             interface AccArrChar      extends Acc<      char[]>, RandomAccessorArrChar   {}
+    private             interface AccArrFloat     extends Acc<     float[]>, RandomAccessorArrFloat  {}
+    private             interface AccArrDouble    extends Acc<    double[]>, RandomAccessorArrDouble {}
+    private             interface AccBufInt       extends Acc<   IntBuffer>, RandomAccessorBufInt    {}
 
   // STATIC CONSTRUCTOR
 

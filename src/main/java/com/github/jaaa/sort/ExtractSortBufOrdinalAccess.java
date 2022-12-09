@@ -1,10 +1,7 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.misc.RevertAccess;
-import com.github.jaaa.misc.RotateAccess;
+import com.github.jaaa.permute.RotateAccess;
 import com.github.jaaa.search.AkimboSearchAccess;
-import com.github.jaaa.search.BinarySearchAccess;
-import static java.lang.Math.min;
 
 
 public interface ExtractSortBufOrdinalAccess extends AkimboSearchAccess, RotateAccess

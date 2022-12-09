@@ -1,7 +1,6 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateSwapAccess;
-import com.github.jaaa.SwapAccess;
+import com.github.jaaa.fn.PredicateSwapAccess;
 import com.github.jaaa.util.Hex16;
 
 // An in-place {A,B}-sort method for list that contain at most 16 B-elements.
@@ -27,7 +26,7 @@ import com.github.jaaa.util.Hex16;
 
 public interface HexBiPartitionAccess extends PredicateSwapAccess
 {
-  public default void hexBiPartition( int from, int until )
+  default void hexBiPartition( int from, int until )
   {
     if( from > until   ) throw new IllegalArgumentException();
     if( from < until-16) throw new IllegalArgumentException();

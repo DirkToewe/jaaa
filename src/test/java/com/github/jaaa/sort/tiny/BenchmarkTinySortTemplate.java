@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.SplittableRandom;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.jaaa.misc.RandomShuffle.shuffle;
+import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
 import static java.lang.System.arraycopy;
 
 
@@ -51,7 +51,7 @@ public abstract class BenchmarkTinySortTemplate
     for( int i=1; i < len; i++ )
       input[i] = input[i-1] + rng.nextInt(2);
 
-    shuffle(input, rng::nextInt);
+    randomShuffle(input, rng::nextInt);
 
     arraycopy(input,0,    output,0, len);
     arraycopy(input,0, reference,0, len);

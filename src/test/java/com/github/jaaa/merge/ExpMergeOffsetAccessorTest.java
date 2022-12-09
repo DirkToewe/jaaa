@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareAccessor;
+import com.github.jaaa.compare.CompareAccessor;
 import static java.util.Objects.requireNonNull;
 
 public class ExpMergeOffsetAccessorTest extends MergeOffsetAccessorTestTemplate

@@ -1,9 +1,9 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateSwapAccess;
-import com.github.jaaa.SwapAccess;
-import com.github.jaaa.misc.BlockSwapAccess;
-import com.github.jaaa.misc.RotateAccess;
+import com.github.jaaa.fn.PredicateSwapAccess;
+import com.github.jaaa.permute.SwapAccess;
+import com.github.jaaa.permute.BlockSwapAccess;
+import com.github.jaaa.permute.RotateAccess;
 import com.github.jaaa.util.Hex16;
 import com.github.jaaa.fn.Int3Op;
 
@@ -343,7 +343,7 @@ public interface KatPawBiPartitionV4Access extends PredicateSwapAccess, BlockSwa
         if( nA_prev + nA_curr < blockLen ) {
           // MERGE PREVIOUS BLOCKS A-ELEMENTS INTO CURRENT BLOCK
           rotate(off-BB,        off,                    -nA_prev*B);
-          rotate(off-B*nA_prev, off+B*(nA_prev+nA_curr),+nA_prev*B);
+          rotate(off-B*nA_prev, off+B*(nA_prev+nA_curr), nA_prev*B);
           nA_curr  +=  nA_prev;
         }
         else {

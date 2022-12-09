@@ -1,7 +1,9 @@
 package com.github.jaaa.merge;
 
 import com.github.jaaa.*;
-import com.github.jaaa.misc.Revert;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.permute.Revert;
+import com.github.jaaa.permute.Swap;
 import com.github.jaaa.sort.TimSort;
 import com.github.jaaa.fn.Int2Fn;
 import net.jqwik.api.*;
@@ -13,7 +15,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
-import static com.github.jaaa.misc.Concat.concat;
+import static com.github.jaaa.Concat.concat;
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
@@ -21,7 +23,7 @@ import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 import static com.github.jaaa.ArrayProviderTemplate.withRange;
 import static java.util.Arrays.copyOfRange;
-import static com.github.jaaa.misc.Revert.revert;
+import static com.github.jaaa.permute.Revert.revert;
 
 
 @PropertyDefaults( tries = 10_000, shrinking = ShrinkingMode.OFF )
@@ -285,7 +287,7 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysDouble") double[] bRef,
     @ForAll boolean reversed
   ) {
-    ComparatorDouble   cmp = Double::compare;
+    ComparatorDouble cmp = Double::compare;
     if(reversed) cmp = cmp.reversed();
     TimSort.sort(aRef, cmp);
     TimSort.sort(bRef, cmp); var cRef = concat(aRef,bRef);

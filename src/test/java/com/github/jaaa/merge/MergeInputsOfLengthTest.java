@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.constraints.IntRange;
@@ -9,10 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.SplittableRandom;
 
-import static com.github.jaaa.misc.Boxing.boxed;
-import static com.github.jaaa.misc.Revert.revert;
+import static com.github.jaaa.Boxing.boxed;
+import static com.github.jaaa.permute.Revert.revert;
 import static org.assertj.core.api.Assertions.assertThat;
-import static com.github.jaaa.misc.Concat.concat;
 
 
 public class MergeInputsOfLengthTest

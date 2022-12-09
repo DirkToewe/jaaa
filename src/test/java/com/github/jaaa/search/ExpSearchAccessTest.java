@@ -1,7 +1,6 @@
 package com.github.jaaa.search;
 
-import com.github.jaaa.CompareAccess;
-import com.github.jaaa.CompareAccessor;
+import com.github.jaaa.compare.CompareAccess;
 import net.jqwik.api.Group;
 import net.jqwik.api.PropertyDefaults;
 
@@ -47,7 +46,7 @@ public class ExpSearchAccessTest
 
   private static class ExpSearchAccTestTemplate extends SearchAccessTestTemplate
   {
-    private IntBinaryOperator startIndex;
+    private final IntBinaryOperator startIndex;
     public ExpSearchAccTestTemplate( IntBinaryOperator _startIndex ) { startIndex = requireNonNull(_startIndex); }
     @Override public SearchAccess createAccess( CompareAccess acc ) { return new ExpSearchAcc(acc,startIndex); }
     @Override public long comparisonLimit( int from, int until, int i ) { return compLim(startIndex, from,until, i); }

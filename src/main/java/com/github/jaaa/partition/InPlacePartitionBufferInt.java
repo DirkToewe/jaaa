@@ -1,6 +1,6 @@
 package com.github.jaaa.partition;
 
-import com.github.jaaa.PredicateSwapAccess;
+import com.github.jaaa.fn.PredicateSwapAccess;
 
 
 final class InPlacePartitionBufferInt

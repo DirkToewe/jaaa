@@ -1,7 +1,7 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
-import com.github.jaaa.Swap;
+import com.github.jaaa.compare.CompareRandomAccessor;
+import com.github.jaaa.permute.Swap;
 
 import java.util.Comparator;
 

@@ -1,7 +1,9 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.*;
-import com.github.jaaa.misc.Boxing;
+import com.github.jaaa.compare.*;
+import com.github.jaaa.Boxing;
+import com.github.jaaa.permute.Swap;
 import com.github.jaaa.util.ZipWithIndex;
 import net.jqwik.api.*;
 
@@ -10,9 +12,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map.Entry;
 
-import static com.github.jaaa.misc.Boxing.boxed;
-import static com.github.jaaa.misc.Boxing.unboxed;
-import static com.github.jaaa.misc.Revert.revert;
+import static com.github.jaaa.Boxing.boxed;
+import static com.github.jaaa.Boxing.unboxed;
+import static com.github.jaaa.permute.Revert.revert;
 import static java.lang.String.format;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Map.Entry.comparingByKey;
@@ -80,7 +82,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
       };
     else
       return new CmpIdx<>(val,idx) {
-        @Override public int compareTo(CmpIdx<T> cmp ) {
+        @Override public int compareTo( CmpIdx<T> cmp ) {
           assert getClass().isInstance(cmp);
           int result = comparator.compare(val, cmp.val);
           if( result==0 )

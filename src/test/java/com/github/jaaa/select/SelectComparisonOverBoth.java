@@ -14,7 +14,7 @@ import java.util.Map.Entry;
 import java.util.SplittableRandom;
 import java.util.TreeMap;
 
-import static com.github.jaaa.misc.RandomShuffle.shuffle;
+import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
 import static com.github.jaaa.select.SelectComparisonOverSplit.selectors;
 import static com.github.jaaa.util.Sampling.lhs;
 import static java.lang.Math.round;
@@ -75,8 +75,8 @@ public class SelectComparisonOverBoth
     @SuppressWarnings("unchecked")
     Entry<String,SelectFn<int[]>>[] selectorsArr = selectors.entrySet().toArray(Entry[]::new);
 
-    var      order = range(0,N_SAMPLES).toArray();
-    shuffle(order,rng::nextInt);
+    var order = range(0,N_SAMPLES).toArray();
+    randomShuffle(order,rng::nextInt);
     Progress.print( stream(order) ).forEach( i -> {
       final int split = (int) x[i],
                length = (int)(x[i] + y[i]);
@@ -84,7 +84,7 @@ public class SelectComparisonOverBoth
       int[] ref = new int[length];
       for( int j=0; ++j < length; )
         ref[j] = ref[j-1] + rng.nextInt(2);
-      shuffle(ref, rng::nextInt);
+      randomShuffle(ref, rng::nextInt);
 
 //      int[] ref = new int[length];
 //      for( int j=0; ++j < length; )
@@ -94,7 +94,7 @@ public class SelectComparisonOverBoth
 //      for( int j=0; ++j < length; )
 //        ref[j] = ref[j-1] - 1;//rng.nextInt(2);
 
-      shuffle(selectorsArr, rng::nextInt);
+      randomShuffle(selectorsArr, rng::nextInt);
       stream(selectorsArr).forEach( EntryConsumer.of( (k,v) -> {
         acc.nComps = 0;
         acc.nSwaps = 0;

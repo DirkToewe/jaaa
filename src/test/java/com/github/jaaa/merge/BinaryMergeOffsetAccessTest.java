@@ -1,6 +1,6 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareAccess;
+import com.github.jaaa.compare.CompareAccess;
 import static java.util.Objects.requireNonNull;
 
 public class BinaryMergeOffsetAccessTest extends MergeOffsetAccessTestTemplate

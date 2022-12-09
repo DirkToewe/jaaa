@@ -1,8 +1,8 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.*;
 import com.github.jaaa.CompareSwapAccess;
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
+import com.github.jaaa.compare.*;
 
 import java.nio.IntBuffer;
 import java.util.Comparator;
@@ -21,7 +21,7 @@ public final class PermStableSort
 
     @Override public void sort(   byte[] seq                                            ) { PermStableSort.sort(seq,    0,seq.length     ); }
     @Override public void sort(   byte[] seq, int from, int until                       ) { PermStableSort.sort(seq, from,until          ); }
-    @Override public void sort(   byte[] seq,                      ComparatorByte   cmp ) { PermStableSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   byte[] seq,                      ComparatorByte cmp ) { PermStableSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   byte[] seq, int from, int until, ComparatorByte   cmp ) { PermStableSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  short[] seq                                            ) { PermStableSort.sort(seq,    0,seq.length, Short::compare); }
@@ -31,7 +31,7 @@ public final class PermStableSort
 
     @Override public void sort(    int[] seq                                            ) { PermStableSort.sort(seq,    0,seq.length, Integer::compare); }
     @Override public void sort(    int[] seq, int from, int until                       ) { PermStableSort.sort(seq, from,until,      Integer::compare); }
-    @Override public void sort(    int[] seq,                      ComparatorInt    cmp ) { PermStableSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(    int[] seq,                      ComparatorInt cmp ) { PermStableSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(    int[] seq, int from, int until, ComparatorInt    cmp ) { PermStableSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(   long[] seq                                            ) { PermStableSort.sort(seq,    0,seq.length, Long::compare); }
@@ -41,12 +41,12 @@ public final class PermStableSort
 
     @Override public void sort(   char[] seq                                            ) { PermStableSort.sort(seq,    0,seq.length, Character::compare); }
     @Override public void sort(   char[] seq, int from, int until                       ) { PermStableSort.sort(seq, from,until,      Character::compare); }
-    @Override public void sort(   char[] seq,                      ComparatorChar   cmp ) { PermStableSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(   char[] seq,                      ComparatorChar cmp ) { PermStableSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(   char[] seq, int from, int until, ComparatorChar   cmp ) { PermStableSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort(  float[] seq                                            ) { PermStableSort.sort(seq,    0,seq.length, Float::compare); }
     @Override public void sort(  float[] seq, int from, int until                       ) { PermStableSort.sort(seq, from,until,      Float::compare); }
-    @Override public void sort(  float[] seq,                      ComparatorFloat  cmp ) { PermStableSort.sort(seq,    0,seq.length, cmp); }
+    @Override public void sort(  float[] seq,                      ComparatorFloat cmp ) { PermStableSort.sort(seq,    0,seq.length, cmp); }
     @Override public void sort(  float[] seq, int from, int until, ComparatorFloat  cmp ) { PermStableSort.sort(seq, from,until,      cmp); }
 
     @Override public void sort( double[] seq                                            ) { PermStableSort.sort(seq,    0,seq.length, Double::compare); }

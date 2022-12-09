@@ -1,19 +1,18 @@
 package com.github.jaaa.sort;
 
+import com.github.jaaa.Boxing;
 import com.github.jaaa.CompareSwapAccess;
-import com.github.jaaa.Swap;
 import com.github.jaaa.WithRange;
-import com.github.jaaa.misc.Boxing;
-import net.jqwik.api.*;
-import net.jqwik.api.Tuple.Tuple2;
+import com.github.jaaa.permute.Swap;
+import net.jqwik.api.ForAll;
+import net.jqwik.api.Group;
+import net.jqwik.api.Property;
 
 import java.util.Arrays;
-import java.util.Comparator;
 
 import static com.github.jaaa.sort.InsertionAdaptiveSort.INSERTION_ADAPTIVE_SORTER;
 import static com.github.jaaa.util.IMath.log2Ceil;
 import static java.lang.Math.max;
-import static java.util.Comparator.comparing;
 import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 

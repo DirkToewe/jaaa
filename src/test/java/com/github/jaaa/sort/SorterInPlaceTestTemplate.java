@@ -1,7 +1,7 @@
 package com.github.jaaa.sort;
 
 import com.github.jaaa.CompareSwapAccess;
-import com.github.jaaa.Swap;
+import com.github.jaaa.permute.Swap;
 import com.github.jaaa.WithRange;
 import com.github.jaaa.util.ZipWithIndex;
 import net.jqwik.api.Example;

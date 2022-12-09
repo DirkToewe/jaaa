@@ -1,8 +1,5 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.CompareRandomAccessor;
-import com.github.jaaa.Swap;
-import net.jqwik.api.Example;
 import net.jqwik.api.Group;
 import net.jqwik.api.PropertyDefaults;
 

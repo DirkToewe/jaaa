@@ -1,7 +1,7 @@
 package com.github.jaaa.merge;
 
 import com.github.jaaa.search.ExpSearchAccessor;
-import com.github.jaaa.CompareRandomAccessor;
+import com.github.jaaa.compare.CompareRandomAccessor;
 
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeL2R;
 import static com.github.jaaa.merge.CheckArgsMerge.checkArgs_mergeR2L;
@@ -57,7 +57,7 @@ public interface RexMergeAccessor<T> extends CompareRandomAccessor<T>,
     );
 
     new RexMergeFn(c0) {
-      @Override public final void merge( int a0, int a1, int b0, int b1 )
+      @Override public void merge( int a0, int a1, int b0, int b1 )
       {
         int aLen = a1-a0, am = a0 + (aLen>>>1),
             bLen = b1-b0, bm = b0 + (bLen>>>1);
@@ -90,7 +90,7 @@ public interface RexMergeAccessor<T> extends CompareRandomAccessor<T>,
     );
 
     new RexMergeFn(c0+aLen+bLen) {
-      @Override public final void merge( int a0, int a1, int b0, int b1 )
+      @Override public void merge( int a0, int a1, int b0, int b1 )
       {
         int aLen = a1-a0, am = a0 + (aLen>>>1),
             bLen = b1-b0, bm = b0 + (bLen>>>1);

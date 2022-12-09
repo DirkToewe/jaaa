@@ -1,7 +1,7 @@
 package com.github.jaaa.search;
 
-import com.github.jaaa.ComparatorByte;
-import com.github.jaaa.ComparatorInt;
+import com.github.jaaa.compare.ComparatorByte;
+import com.github.jaaa.compare.ComparatorInt;
 
 import java.util.Comparator;
 import java.util.function.IntUnaryOperator;
