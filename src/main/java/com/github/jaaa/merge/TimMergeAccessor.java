@@ -52,7 +52,7 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
     T b, int b0, int bLen,
     T c, int c0
   ) {
-    _timMergeL2R(
+    timMergeBiasedL2R(
       MIN_GALLOP,a,a0,aLen,
                  b,b0,bLen,
                  c,c0
@@ -64,14 +64,14 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
     T b, int b0, int bLen,
     T c, int c0
   ) {
-    _timMergeR2L(
+    timMergeBiasedR2L(
       MIN_GALLOP,a,a0,aLen,
                  b,b0,bLen,
                  c,c0
     );
   }
 
-  default int _timMergeL2R(
+  default int timMergeBiasedL2R(
     int minGallop,
     T a, int a0, int aLen,
     T b, int b0, int bLen,
@@ -147,7 +147,7 @@ public interface TimMergeAccessor<T> extends CompareRandomAccessor<T>,
     return minGallop;
   }
 
-  default int _timMergeR2L(
+  default int timMergeBiasedR2L(
     int minGallop,
     T a, int a0, int aLen,
     T b, int b0, int bLen,

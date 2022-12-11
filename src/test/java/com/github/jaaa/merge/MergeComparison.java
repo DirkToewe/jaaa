@@ -75,6 +75,23 @@ public class MergeComparison
       entry("HwangLinV1",HwangLinMerge      ::merge),
       entry("HwangLinV2",HwangLinStaticMerge::merge),
       entry("BlockRot",   BlockRotationMerge::merge),
+      entry("BlockRotBias", new MergeFn() {
+        @Override public <T> void merge(
+          T a, int i, int m,
+          T b, int j, int n,
+          T c, int k, CompareRandomAccessor<T> acc ) {
+          acc.copyRange(a,i, c,k,   m);
+          acc.copyRange(b,j, c,k+m, n);
+          class Acc implements BlockRotationMergeBiasedAccess, TimMergeAccess {
+            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
+            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
+            @Override public int blockRotationMergeBiased_localMerge(int bias, int from, int mid, int until) {
+              return timMergeBiased(bias, from, mid, until);
+            }
+          }
+          new Acc().blockRotationMergeBiased(TimMergeAccess.MIN_GALLOP, k, k+m, k+m+n);
+        }
+      }),
       entry("ExpV1Acc", new MergeFn() {
         @Override public <T> void merge(
           T a, int i, int m,
@@ -254,12 +271,8 @@ public class MergeComparison
       new DoubleSupplier() { @Override public double getAsDouble() { return 0.75;             } @Override public String toString() { return format("%.2f", getAsDouble()); } }
     };
 
-
-    for( var len: new int[]{ /*1_000,*/ 10_000, 100_000 } )
-    {
-      compare_over_length(mergers, len, splits[0]);
-      compare_over_split(mergers, len);
-    }
+    for( var len: new int[]{ 1_000, 10_000, 100_000, 1_000_000 } ) compare_over_split (mergers, len);
+    for( var len: new int[]{ 1_000, 10_000, 100_000, 1_000_000 } ) compare_over_length(mergers, len, splits[0]);
   }
 
   /** Compares merging algorithms using merge sequences of constant combined length but

@@ -23,7 +23,7 @@ import static java.util.stream.IntStream.rangeClosed;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-@PropertyDefaults( tries = 100_000 )
+@PropertyDefaults( tries = 10_000 )
 public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTemplate
 {
 // STATIC FIELDS

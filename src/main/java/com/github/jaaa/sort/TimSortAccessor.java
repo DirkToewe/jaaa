@@ -147,7 +147,7 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
           ensureCapacity(aLen);
           copyRange(arr,from, buf,buf0, aLen);
           copy(arr,mid, arr,from);
-          minGallop = _timMergeL2R(
+          minGallop = timMergeBiasedL2R(
             minGallop, buf,  buf0, --aLen,
                        arr, mid+1, --bLen,
                        arr,from+1
@@ -158,7 +158,7 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
           ensureCapacity(bLen);
           copyRange(arr,mid, buf,buf0, bLen);
           copy(arr,mid-1, arr,until-1);
-          minGallop = _timMergeR2L(
+          minGallop = timMergeBiasedR2L(
             minGallop, arr,from,  --aLen,
                        buf,buf0+1,--bLen,
                        arr,from+1

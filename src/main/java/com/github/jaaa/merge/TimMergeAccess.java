@@ -15,10 +15,10 @@ public interface TimMergeAccess extends RotateAccess,
 
   default void timMerge( int from, int mid, int until )
   {
-    _timMerge(MIN_GALLOP, from,mid,until);
+    timMergeBiased(MIN_GALLOP, from,mid,until);
   }
 
-  default int _timMerge( int minGallop, int from, int mid, int until )
+  default int timMergeBiased(int minGallop, int from, int mid, int until )
   {
     if( from < 0 || from > mid || mid > until )
       throw new IllegalArgumentException();

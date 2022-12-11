@@ -36,7 +36,7 @@ public interface KiwiSortV2Access extends ArgMinAccess, BlockRotationMergeAccess
       @Override public int compare( Void a, int i, Void b, int j ) { return KiwiSortV2Access.this.compare(i,j); }
       @Override public void   swap( Void a, int i, Void b, int j ) {        KiwiSortV2Access.this.   swap(i,j); }
       @Override public void   copy( Void a, int i, Void b, int j ) {        KiwiSortV2Access.this.   swap(i,j); }
-    }._timMergeL2R(TimMergeAccessor.MIN_GALLOP, null,a0,aLen, null,b0,bLen, null,c0);
+    }.timMergeBiasedL2R(TimMergeAccessor.MIN_GALLOP, null,a0,aLen, null,b0,bLen, null,c0);
   }
 
   default void kiwiSortV2( int from, int until )

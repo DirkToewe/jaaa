@@ -26,12 +26,30 @@ val v_jqwik = "1.7.0"
 val v_assertj = "3.23.1"//"3.21.0"
 val v_jmh = "1.35"
 
+tasks.compileJava {
+  options.compilerArgs.addAll(
+    listOf(
+      "-parameters",
+      "--add-modules=jdk.incubator.vector"
+    )
+  )
+}
+
 tasks.compileTestJava {
-  options.compilerArgs.addAll( listOf("-parameters") )
+  options.compilerArgs.addAll(
+    listOf(
+      "-parameters",
+//      "--add-exports=java.base/sun.net.util=ALL-UNNAMED",
+//      "--add-exports=java.management/sun.management=ALL-UNNAMED",
+//      "--add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED",
+//      "--add-exports=java.security.jgss/sun.security.krb5=ALL-UNNAMED",
+      "--add-modules=jdk.incubator.vector"
+    )
+  )
 }
 
 var memTotal   = Integer.MAX_VALUE
-val memPerFork = 8
+val memPerFork = 6
 
 if( System.getProperty("os.name").decapitalize() == "linux" )
 {
@@ -57,12 +75,13 @@ tasks.test {
   }
   enableAssertions = true
   maxHeapSize = "${memPerFork}g"
-  maxParallelForks = max( 1, min(memTotal/memPerFork, getRuntime().availableProcessors()) )
+  maxParallelForks = max( 1, min(2*memTotal/memPerFork, getRuntime().availableProcessors()) )
   jvmArgs = listOf(
     "-ea",
     "--illegal-access=permit",
     "-XX:MaxInlineLevel=15",
-    "-XX:AutoBoxCacheMax=1000000"
+    "-XX:AutoBoxCacheMax=1000000",
+    "--add-modules=jdk.incubator.vector"
 //    "-Xdisablejavadump",
 //    "-Xdump:none"
   )
@@ -131,6 +150,7 @@ tasks.register<JavaExec>("compareBiPartition") {
 }
 
 dependencies {
+  implementation("org.apache.commons:commons-math3:3.6.1")
   testImplementation("com.github.haifengl:smile-core:3.0.0")
   testImplementation("org.bytedeco:openblas:0.3.19-1.5.7:linux-x86_64")
   testImplementation("org.bytedeco:arpack-ng:3.8.0-1.5.7:linux-x86_64")

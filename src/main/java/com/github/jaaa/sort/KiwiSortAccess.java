@@ -1,7 +1,9 @@
 package com.github.jaaa.sort;
 
+import com.github.jaaa.compare.ArgMaxAccess;
 import com.github.jaaa.compare.ArgMinAccess;
 import com.github.jaaa.fn.Int4Consumer;
+import com.github.jaaa.heap.MinHeapRAccess;
 import com.github.jaaa.merge.BlockRotationMergeAccess;
 import com.github.jaaa.merge.TimMergeAccessor;
 import com.github.jaaa.permute.BlockSwapAccess;
@@ -11,71 +13,75 @@ import com.github.jaaa.select.QuickSelectV1Access;
 import static java.lang.Math.*;
 
 
-// Like KiwiSortV3 but without `merger0` removed. Instead, always the larger of the two sequences
-// is block rolled into the smaller one.
-public interface KiwiSortV5Access extends ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExtractSortBufOrdinalAccess, HeapSortFastAccess, InsertionAdaptiveSortAccess, QuickSelectV1Access
+// Like KiwiSortV5 but with a power of 2 buffer size and run length. In most situation this should avoid
+// oddly-sized single blocks that have to be merged separately.
+public interface KiwiSortAccess extends ArgMaxAccess, ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExtractSortBufOrdinalAccess, HeapSortFastAccess, InsertionAdaptiveSortAccess, QuickSelectV1Access, MinHeapRAccess
 {
-  int RUN_LEN = 16;
+  int MIN_RUN_LEN = 16;
 
-  TimMergeAccessor<KiwiSortV5Access> _TIM_MERGE_ACCESSOR = new TimMergeAccessor<>()
+  TimMergeAccessor<KiwiSortAccess> TIM_MERGE_ACCESSOR = new TimMergeAccessor<>()
   {
-    @Override public KiwiSortV5Access malloc( int len ) { throw new AssertionError(); }
-    @Override public int compare( KiwiSortV5Access a, int i, KiwiSortV5Access b, int j ) { return a.compare(i,j); }
-    @Override public void   swap( KiwiSortV5Access a, int i, KiwiSortV5Access b, int j ) {        a.   swap(i,j); }
-    @Override public void   copy( KiwiSortV5Access a, int i, KiwiSortV5Access b, int j ) {        a.   swap(i,j); }
+    @Override public KiwiSortAccess malloc( int len ) { throw new UnsupportedOperationException(); }
+    @Override public int compare( KiwiSortAccess a, int i, KiwiSortAccess b, int j ) { return a.compare(i,j); }
+    @Override public void   swap( KiwiSortAccess a, int i, KiwiSortAccess b, int j ) {        a.   swap(i,j); }
+    @Override public void   copy( KiwiSortAccess a, int i, KiwiSortAccess b, int j ) {        a.   swap(i,j); }
   };
 
-  static int minBufLen( int len )
+  static int bufLen( int len )
   {
     // bufLen == (len-bufLen) / bufLen;
-    if( len < 0 ) throw new IllegalArgumentException();
-    int         bufLen = (int) ceil( ( sqrt(len*8d + 1) - 5 ) / 4 );
-    int l = len-bufLen;
+    if( len <  0 ) throw new IllegalArgumentException();
+    if( len == 0 ) return 0;
+    var bufLenMin = nextDown( ceil( (sqrt(len*8d + 1) - 5) / 4 ) );
+    int                   exp = getExponent( max(0.5, bufLenMin) ),
+            bufLen = 1 << exp+1,
+    l = len-bufLen;
     l-= l+1>>>1;
     if(1 > bufLen || l/bufLen > bufLen)
-         ++bufLen;
+           bufLen <<= 1;
     return bufLen;
   }
 
-  default void kiwiSortV5_sortRun      ( int from,          int until ) { insertionAdaptiveSort(from,until); }
-  default void kiwiSortV5_mergeInPlace ( int from, int mid, int until ) { blockRotationMerge(from,mid,until); }
-  default void kiwiSortV5_mergeBuffered( int a0, int aLen,
+  default  int kiwiSort_runLen( int n ) { return TimSort.optimalRunLength(MIN_RUN_LEN,n); }
+  default void kiwiSort_sortRun      ( int from,          int until ) { insertionAdaptiveSort(from,until); }
+  default void kiwiSort_mergeInPlace ( int from, int mid, int until ) { blockRotationMerge(from,mid,until); }
+  default void kiwiSort_mergeBuffered( int a0, int aLen,
                                          int b0, int bLen,
                                          int c0 )
   {
 //    new TimMergeAccessor<Void>() {
 //      @Override public Void malloc( int len ) { throw new AssertionError(); }
-//      @Override public int compare( Void a, int i, Void b, int j ) { return KiwiSortV5Access.this.compare(i,j); }
-//      @Override public void   swap( Void a, int i, Void b, int j ) {        KiwiSortV5Access.this.   swap(i,j); }
-//      @Override public void   copy( Void a, int i, Void b, int j ) {        KiwiSortV5Access.this.   swap(i,j); }
+//      @Override public int compare( Void a, int i, Void b, int j ) { return KiwiSortV7Access.this.compare(i,j); }
+//      @Override public void   swap( Void a, int i, Void b, int j ) {        KiwiSortV7Access.this.   swap(i,j); }
+//      @Override public void   copy( Void a, int i, Void b, int j ) {        KiwiSortV7Access.this.   swap(i,j); }
 //    }._timMergeL2R(TimMergeAccessor.MIN_GALLOP, null,a0,aLen, null,b0,bLen, null,c0);
-    _TIM_MERGE_ACCESSOR.timMergeBiasedL2R(TimMergeAccessor.MIN_GALLOP, this,a0,aLen, this,b0,bLen, this,c0);
+    TIM_MERGE_ACCESSOR.timMergeBiasedL2R(TimMergeAccessor.MIN_GALLOP, this,a0,aLen, this,b0,bLen, this,c0);
   }
 
-  default void kiwiSortV5( int from, int until )
+  default void kiwiSort( int from, int until )
   {
     if( from < 0 || from > until ) throw new IllegalArgumentException();
-    if( from > until - RUN_LEN*3 ) {
-      kiwiSortV5_sortRun(from,until);
+    if( from > until - MIN_RUN_LEN*3 ) {
+      kiwiSort_sortRun(from,until);
       return;
     }
 
     // STEP 1: Buffer Extraction
     // -------------------------
     int        len = until-from,
-     desiredBufLen = minBufLen(len),
+     desiredBufLen = bufLen(len),
             bufLen = extractSortBuf_ordinal_l_sorted(from,until, desiredBufLen, from),
             buf    = from;
     from += bufLen;
     len  -= bufLen;
 
-    int run = RUN_LEN;
+    int run = kiwiSort_runLen(len);
 
     // STEP 2: Sort Runs
     // -----------------
     for( int r = until, l = r - len%run;; )
     {
-      kiwiSortV5_sortRun(l,r);
+      kiwiSort_sortRun(l,r);
       if( l <= from ) break;
       r = l;
       l-= run;
@@ -97,7 +103,7 @@ public interface KiwiSortV5Access extends ArgMinAccess, BlockRotationMergeAccess
       if( nBlocksL > 2 ) {
         int nUnsortedMax = bufLen - nBlocksL;
         if( nUnsortedMax < nUnsorted ) {
-          kiwiSortV5_selectAndSortR(buf, buf+nUnsortedMax, buf+nUnsorted);
+          kiwiSort_selectAndSortR(buf, buf+nUnsortedMax, buf+nUnsorted);
           nUnsorted = nUnsortedMax;
         }
       }
@@ -169,12 +175,12 @@ public interface KiwiSortV5Access extends ArgMinAccess, BlockRotationMergeAccess
             swap(k,k+n);
 
           swap(buf,k); // <- insert 1st elem.
-          kiwiSortV5_mergeBuffered(buf+1,n-1,  pos,mergeEnd-pos, k+1);
+          kiwiSort_mergeBuffered(buf+1,n-1,  pos,mergeEnd-pos, k+1);
         }
         : (k,mergeEnd, n, pos) -> {
           // IN-PLACE MERGE
           rotate(k,pos, -n);
-          kiwiSortV5_mergeInPlace(pos-n+1, pos, mergeEnd);
+          kiwiSort_mergeInPlace(pos-n+1, pos, mergeEnd);
         };
 
       for( int m = lastM, r = lastM <= until-run ? lastM+run : until;  m > from;  r = m-run, m = r-run )
@@ -207,7 +213,7 @@ public interface KiwiSortV5Access extends ArgMinAccess, BlockRotationMergeAccess
     // -----------------------
     if( nUnsorted > 0 )
       heapSortFast(buf, buf+nUnsorted);
-    kiwiSortV5_mergeInPlace(buf,from,until);
+    kiwiSort_mergeInPlace(buf,from,until);
   }
 
   /** Partially (unstably) sorts a range <code>[from,until)</code>
@@ -215,43 +221,84 @@ public interface KiwiSortV5Access extends ArgMinAccess, BlockRotationMergeAccess
    *  contains the largest <code>until-mid</code> elements from
    *  range <code>[from,until)</code> in sorted order.
    */
-  private void kiwiSortV5_selectAndSortR( int from, int mid, int until )
+  private void kiwiSort_selectAndSortR( int from, int mid, int until )
   {
-    quickSelectV1(from,mid,until);
-    heapSortFast(mid,until);
+    if( from < 0 || from > mid | mid > until ) throw new IllegalArgumentException();
+    if( mid == until ) return;
+    if( mid == until-1 ) { swap(mid,  argMaxR(from,until)); return; }
+
+    // PHASE 1: HEAP SELECTION
+    // =======================
+
+    // Build Min-Heap with Right-Hand-Side Root
+    // ----------------------------------------
+    final int      firstParent = mid + until +1 >>> 1;
+    for(int root = firstParent; root < until; root++ )
+    {
+      int parent=root;
+
+      // TRICKLE DOWN
+      for(;;) {
+        int child = (parent<<1) - until;
+        if( child < mid) break;
+        if( child > mid)
+            child -= compare(child-1,child)>>>31;
+        swap(parent,parent=child);
+      }
+
+      // BUBBLE UP
+      for( int child=parent; root != child; )
+      {
+        parent = child+ until +1 >>> 1;
+        if( compare(child,parent) < 0 )
+          swap(child,child=parent);
+        else break;
+      }
+    }
+
+    // Perform selection
+    // -----------------
+    int root = until-1;
+    for( int i=from; i < mid; i++ )
+    {
+      if( compare(i,root) <= 0 )
+        continue;
+      swap(i,root);
+      for( int parent = root;; ) {
+        // SIFT DOWN
+        int child = (parent<<1) - until;
+        if( child < mid) break;
+        if( child > mid)
+            child -= compare(child-1,child)>>>31;
+        if( compare(parent,child) > 0 )
+          swap(parent,parent=child);
+        else break;
+      }
+    }
+
+    // PHASE 2: HEAP SORT
+    // ==================
+    // We already have a heap, so all we have to do is extract minima from it.
+    for( int i=mid; i < root; )
+    {
+      swap(i++,root);
+      int p = root;
+      // TRICKLE DOWN
+      for(;;) {
+        int child = (p<<1) - until;
+        if( child < i ) break;
+        if( child > i )
+            child -= compare(child-1,child)>>>31;
+        swap(p,p=child);
+      }
+      // BUBBLE UP
+      for( int child=p; root != child; )
+      {
+        p = child+until+1 >>> 1;
+        if( compare(child,p) < 0 )
+          swap(child,child=p);
+        else break;
+      }
+    }
   }
-//  private void partialSort( int from, int mid, int until )
-//  {
-//    if( from < 0 || from > mid || mid >= until ) throw new IllegalArgumentException();
-//
-//    // uses a partial variant of HeapSortFast
-//    final int     lastParent = -1 + (from+until-- >>> 1);
-//    for( int root=lastParent; mid <= until; )
-//    {
-//      int parent=root;
-//
-//      // TRICKLE DOWN
-//      for(;;) {
-//        int child = (parent<<1) + 1 - from;
-//        if( child > until ) break;
-//        if( child < until )
-//            child += compare(child,child+1)>>>31;
-//        swap(parent,parent=child);
-//      }
-//
-//      // BUBBLE UP
-//      for( int child=parent; root != child; )
-//      {
-//        parent = child+from-1 >>> 1;
-//        if( compare(child,parent) > 0 )
-//          swap(child,child=parent);
-//        else break;
-//      }
-//
-//      if( root > from )
-//        --root; // <- HEAP BUILDING PHASE
-//      else
-//        swap(until--,root); // <- MAX. EXTRACTION PHASE
-//    }
-//  }
 }
