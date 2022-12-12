@@ -3,15 +3,15 @@ package com.github.jaaa.sort;
 import net.jqwik.api.Group;
 import net.jqwik.api.PropertyDefaults;
 
-import static com.github.jaaa.sort.KiwiSortV3.KIWI_V3_SORTER;
+import static com.github.jaaa.sort.QuickSortV3.QUICK_V3_SORTER;
 
 
 @Group
-public class KiwiSortV3Test
+public class QuickSortV3Test
 {
-  private final SorterInPlace sorter = new StaticMethodsSorterInPlace(KiwiSortV3.class) {
-    @Override public boolean isStable    () { return KIWI_V3_SORTER.isStable    (); }
-    @Override public boolean isThreadSafe() { return KIWI_V3_SORTER.isThreadSafe(); }
+  private final SorterInPlace sorter = new StaticMethodsSorterInPlace(QuickSortV3.class) {
+    @Override public boolean isStable    () { return QUICK_V3_SORTER.isStable    (); }
+    @Override public boolean isThreadSafe() { return QUICK_V3_SORTER.isThreadSafe(); }
   };
 
   @Group class SortTestSmall implements SorterInPlaceTestTemplate {
@@ -22,7 +22,7 @@ public class KiwiSortV3Test
     @Override public int maxArraySize() { return 10_000; }
     @Override public SorterInPlace sorter() { return sorter; }
   }
-  @PropertyDefaults( tries = 100 )
+  @PropertyDefaults( tries = 1_000 )
   @Group class SortTestLarge implements SorterInPlaceTestTemplate {
     @Override public int maxArraySize() { return 1_000_000; }
     @Override public SorterInPlace sorter() { return sorter; }
@@ -30,15 +30,15 @@ public class KiwiSortV3Test
 
   @Group class SorterTestSmall implements SorterInPlaceTestTemplate {
     @Override public int maxArraySize() { return 100; }
-    @Override public SorterInPlace sorter() { return KIWI_V3_SORTER; }
+    @Override public SorterInPlace sorter() { return QUICK_V3_SORTER; }
   }
   @Group class SorterTestMedium implements SorterInPlaceTestTemplate {
     @Override public int maxArraySize() { return 10_000; }
-    @Override public SorterInPlace sorter() { return KIWI_V3_SORTER; }
+    @Override public SorterInPlace sorter() { return QUICK_V3_SORTER; }
   }
-  @PropertyDefaults( tries = 100 )
+  @PropertyDefaults( tries = 1_000 )
   @Group class SorterTestLarge implements SorterInPlaceTestTemplate {
     @Override public int maxArraySize() { return 1_000_000; }
-    @Override public SorterInPlace sorter() { return KIWI_V3_SORTER; }
+    @Override public SorterInPlace sorter() { return QUICK_V3_SORTER; }
   }
 }

@@ -5,8 +5,10 @@ import com.github.jaaa.fn.Int2Consumer;
 import java.util.SplittableRandom;
 import java.util.function.IntBinaryOperator;
 
+
 public interface QuickSortV1Access extends InsertionAdaptiveSortAccess
 {
+  default              void quickSortV1_sortRun( int from, int until ) { insertionAdaptiveSort(from,until); }
   default IntBinaryOperator quickSortV1_newRNG() {
     return new SplittableRandom()::nextInt;
   }
@@ -18,8 +20,8 @@ public interface QuickSortV1Access extends InsertionAdaptiveSortAccess
       private final IntBinaryOperator rng = quickSortV1_newRNG();
       @Override public void accept( int from, int until )
       {
-        if( until-from <= 32 )
-          insertionAdaptiveSort(from,until);
+        if( until-from <= 16 )
+          quickSortV1_sortRun(from,until);
         else {
           // move random element up front as pivot
           swap( from, rng.applyAsInt(from,until) );

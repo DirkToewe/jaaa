@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Group
 public class Mom3SelectV2AccessTest
 {
-  private void momSelect_select3_test( int a, int b, int c ) {
+  private void momSelect_select3_test_impl( int a, int b, int c ) {
     permutations(3).forEach( ref -> {
       var tst = ref.clone();
       new Mom3SelectV2Access() {
@@ -28,12 +28,14 @@ public class Mom3SelectV2AccessTest
       assertThat(tst[c]).isEqualTo(ref[2]);
     });
   }
-  @Example public void momSelect_select3_test1() { momSelect_select3_test(0,1,2); }
-  @Example public void momSelect_select3_test2() { momSelect_select3_test(0,2,1); }
-  @Example public void momSelect_select3_test3() { momSelect_select3_test(1,0,2); }
-  @Example public void momSelect_select3_test4() { momSelect_select3_test(1,2,0); }
-  @Example public void momSelect_select3_test5() { momSelect_select3_test(2,0,1); }
-  @Example public void momSelect_select3_test6() { momSelect_select3_test(2,1,0); }
+  @Example public void momSelect_select3_test() {
+    momSelect_select3_test_impl(0,1,2);
+    momSelect_select3_test_impl(0,2,1);
+    momSelect_select3_test_impl(1,0,2);
+    momSelect_select3_test_impl(1,2,0);
+    momSelect_select3_test_impl(2,0,1);
+    momSelect_select3_test_impl(2,1,0);
+  }
 
   private interface TestTemplate extends SelectAccessorTestTemplate {
     @Override default <T> SelectAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) {

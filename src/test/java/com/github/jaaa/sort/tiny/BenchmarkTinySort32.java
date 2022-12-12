@@ -1,8 +1,6 @@
 package com.github.jaaa.sort.tiny;
 
-import com.github.jaaa.sort.InsertionSort;
 import com.github.jaaa.sort.InsertionAdaptiveSort;
-import com.github.jaaa.sort.InsertionExpSort;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.infra.Blackhole;

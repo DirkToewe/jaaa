@@ -55,16 +55,13 @@ public class BenchmarkSort
     Map<String,SortFn> mergers = Map.ofEntries(
 //      entry("HeapSort",                               HeapSort::sort),
 //      entry("HeapSortFast",                       HeapSortFast::sort),
-//      entry("QuickSort",                             QuickSort::sort),
+      entry("QuickSortV1",                         QuickSortV1::sort),
+      entry("QuickSortV2",                         QuickSortV2::sort),
+      entry("QuickSortV3",                         QuickSortV3::sort),
 //      entry("MergeSort",                             MergeSort::sort),
 //      entry("KiwiSortV1",                           KiwiSortV1::sort),
-      entry("KiwiSortV2",                           KiwiSortV2::sort),
-      entry("KiwiSortV3",                           KiwiSortV3::sort),
-      entry("KiwiSortV4",                           KiwiSortV4::sort),
-      entry("KiwiSortV5",                           KiwiSortV5::sort),
-      entry("KiwiSortV6",                           KiwiSortV6::sort),
-      entry("KiwiSort",                             KiwiSort::sort),
-      entry("KiwiSortBiased",                       KiwiSortBiased::sort),
+//      entry("KiwiSort",                             KiwiSort::sort),
+//      entry("KiwiSortBiased",                       KiwiSortBiased::sort),
 //      entry("WikiSortV1",                           WikiSortV1::sort),
 //      entry("ComparatorWikiSort", new ComparatorWikiSort(null)::sort),
 //      entry("TimSort",                                 TimSort::sort),
@@ -76,8 +73,8 @@ public class BenchmarkSort
 //      entry("JDK (parallel)",                            Arrays::parallelSort)
     );
 
-    int     LEN = 1_000_000,
-      N_SAMPLES =    10_000;
+    int     LEN = 100_000,
+      N_SAMPLES =  10_000;
 
     var rng = new SplittableRandom();
     var gen = new RandomSortDataGenerator(rng);
@@ -98,8 +95,8 @@ public class BenchmarkSort
 
     Progress.print( stream( shuffled(range(0,N_SAMPLES).toArray(), rng::nextInt) ) ).forEach( i -> {
       int len = x[i];
-      int[] data = gen.nextMixed(len);
-//      int[] data = gen.nextShuffled(len);
+//      int[] data = gen.nextMixed(len);
+      int[] data = gen.nextShuffled(len);
       assert len == data.length;
 
       int sign = rng.nextBoolean() ? -1 : +1;

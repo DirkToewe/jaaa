@@ -10,6 +10,9 @@ import java.util.SplittableRandom;
 import java.util.function.IntBinaryOperator;
 import java.util.function.Supplier;
 
+import static java.lang.System.arraycopy;
+
+
 public class QuickSortV1
 {
 // STATIC FIELDS
@@ -188,6 +191,24 @@ public class QuickSortV1
       new QuickSortAcc(this) {
         @Override public int compare( int i, int j ) { return cmp.compare( seq[i], seq[j] ); }
         @Override public void   swap( int i, int j ) { Swap.swap(seq,i,j); }
+        @Override public void quickSortV1_sortRun( int from, int until ) {
+          for( int i=from; ++i < until; )
+          {
+            var piv = seq[i];
+            int lo = from;
+            for( int hi = i-1,
+               mid = hi;;
+               mid = hi+lo >>> 1
+            ){
+              int c = cmp.compare(piv, seq[mid]);
+              if( c < 0 )             hi = mid;
+              else                    lo = mid+1;
+              if( lo >= hi ) break;
+            }
+            arraycopy(seq,lo, seq,lo+1, i-lo);
+            seq[lo] = piv;
+          }
+        }
       }.quickSortV1(from,until);
     }
   }
