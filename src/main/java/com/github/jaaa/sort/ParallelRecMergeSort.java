@@ -2,7 +2,7 @@ package com.github.jaaa.sort;
 
 import com.github.jaaa.compare.*;
 import com.github.jaaa.copy.*;
-import com.github.jaaa.merge.ExpMergePartV2Accessor;
+import com.github.jaaa.merge.ExpMergePartAccessor;
 import com.github.jaaa.merge.ParallelRecMerge;
 import com.github.jaaa.merge.ParallelRecMergeTask;
 import com.github.jaaa.search.ExpSearchAccessor;
@@ -23,9 +23,9 @@ public class ParallelRecMergeSort
 // STATIC FIELDS
   public interface Accessor<T>
   {
-    void sort( T arr, int arr0, int arr1,
-               T buf, int buf0, int buf1 );
-    CountedCompleter<?> newMergeTask(
+    void parallelRecMergeSort_sort( T arr, int arr0, int arr1,
+                                    T buf, int buf0, int buf1 );
+    CountedCompleter<?> parallelRecMergeSort_newMergeTask(
        int _height, CountedCompleter<?> completer,
        T ab, int a0, int aLen,
              int b0, int bLen,
@@ -38,16 +38,16 @@ public class ParallelRecMergeSort
   // STATIC FIELDS
     private interface Acc<T> extends ParallelRecMergeSort.Accessor<T>,
                                          ParallelRecMerge.Accessor<T>,
-                                            ExpMergePartV2Accessor<T>,
+                                              ExpMergePartAccessor<T>,
                                                  ExpSearchAccessor<T>,
                                                    TimSortAccessor<T>
     {
-      @Override default  int recMerge_mergeOverhead() { return 8; }
-      @Override default  int recMerge_searchGap(T a, int a0, int a1, T b, int key, boolean rightBias ) { return expSearchGap(a,a0,a1, a0+a1>>>1, b,key, rightBias); }
-      @Override default void      sort( T arr, int arr0, int arr1,
-                                        T buf, int buf0, int buf1 ) { timSort(arr,arr0,arr1, buf,buf0,buf1); }
-      @Override default void recMerge_mergePart(T a, int a0, int aLen, T b, int b0, int bLen, T c, int c0, int cLen ) { expMergePartV2_L2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
-      @Override default CountedCompleter<?> newMergeTask( int height, CountedCompleter<?> completer, T ab, int a0, int aLen, int b0, int bLen, T c, int c0 )
+      @Override default  int parallelRecMerge_mergeOverhead() { return 8; }
+      @Override default  int parallelRecMerge_searchGap( T a, int a0, int a1, T b, int key, boolean rightBias ) { return expSearchGap(a,a0,a1, a0+a1>>>1, b,key, rightBias); }
+      @Override default void parallelRecMerge_mergePart( T a, int a0, int aLen, T b, int b0, int bLen, T c, int c0, int cLen ) { expMergePart_L2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
+      @Override default void parallelRecMergeSort_sort( T arr, int arr0, int arr1,
+                                                        T buf, int buf0, int buf1 ) { timSort(arr,arr0,arr1, buf,buf0,buf1); }
+      @Override default CountedCompleter<?> parallelRecMergeSort_newMergeTask(int height, CountedCompleter<?> completer, T ab, int a0, int aLen, int b0, int bLen, T c, int c0 )
       {
         assert 0 <= height;
         int granularity = aLen+bLen >>> height;
@@ -102,7 +102,7 @@ public class ParallelRecMergeSort
       }
 
       if( 1==nPar || h <= h0 )
-        ctx.sort(arr,from,until, null,0,0);
+        ctx.parallelRecMergeSort_sort(arr,from,until, null,0,0);
       else {
         var buf = ctx.malloc(len);
         pool.invoke(

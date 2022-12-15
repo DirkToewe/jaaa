@@ -8,6 +8,7 @@ import java.nio.IntBuffer;
 import java.util.Comparator;
 import java.util.concurrent.ForkJoinPool;
 
+import static java.lang.Math.multiplyExact;
 import static java.util.Objects.requireNonNull;
 
 
@@ -16,8 +17,8 @@ public class ParallelRebelMerge
 // STATIC FIELDS
   public interface Accessor<T> extends CopyAccessor<T>
   {
-    int  rebelMerge_searchGap(T a, int a0, int a1, T b, int key, boolean rightBias );
-    void rebelMerge_mergePart(
+    int parallelRebelMerge_searchGap(T a, int a0, int a1, T b, int key, boolean rightBias );
+    void parallelRebelMerge_mergePart(
       T a, int a0, int aLen,
       T b, int b0, int bLen,
       T c, int c0, int cLen
@@ -28,23 +29,23 @@ public class ParallelRebelMerge
   {
   // STATIC FIELDS
     private interface Acc<T> extends ParallelRebelMerge.Accessor<T>,
-                                          ExpMergePartV2Accessor<T>,
+                                            ExpMergePartAccessor<T>,
                                                ExpSearchAccessor<T>
     {
-      @Override default  int rebelMerge_searchGap( T a, int a0, int a1, T b, int key, boolean rightBias ) { return expSearchGap(a,a0,a1, a0+a1>>>1, b,key, rightBias); }
-      @Override default void rebelMerge_mergePart( T a, int a0, int aLen,
-                                                   T b, int b0, int bLen,
-                                                   T c, int c0, int cLen ) { expMergePartV2_L2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
+      @Override default  int parallelRebelMerge_searchGap(T a, int a0, int a1, T b, int key, boolean rightBias ) { return expSearchGap(a,a0,a1, a0+a1>>>1, b,key, rightBias); }
+      @Override default void parallelRebelMerge_mergePart(T a, int a0, int aLen,
+                                                          T b, int b0, int bLen,
+                                                          T c, int c0, int cLen ) { expMergePart_L2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
     }
 
     private interface AccArrObj<T> extends Acc<         T[]>, RandomAccessorArrObj<T>{ @Override default T[] malloc( int len ) { throw new UnsupportedOperationException(); } }
-    private interface AccArrByte   extends Acc<      byte[]>, RandomAccessorArrByte {}
+    private interface AccArrByte   extends Acc<      byte[]>, RandomAccessorArrByte  {}
     private interface AccArrShort  extends Acc<     short[]>, RandomAccessorArrShort {}
     private interface AccArrInt    extends Acc<       int[]>, RandomAccessorArrInt   {}
     private interface AccArrLong   extends Acc<      long[]>, RandomAccessorArrLong  {}
-    private interface AccArrChar   extends Acc<      char[]>, RandomAccessorArrChar {}
+    private interface AccArrChar   extends Acc<      char[]>, RandomAccessorArrChar  {}
     private interface AccArrFloat  extends Acc<     float[]>, RandomAccessorArrFloat {}
-    private interface AccArrDouble extends Acc<    double[]>, RandomAccessorArrDouble {}
+    private interface AccArrDouble extends Acc<    double[]>, RandomAccessorArrDouble{}
     private interface AccBufInt    extends Acc<   IntBuffer>, RandomAccessorBufInt   {}
 
   // STATIC CONSTRUCTOR
@@ -66,13 +67,12 @@ public class ParallelRebelMerge
       T a, int a0, int aLen,
       T b, int b0, int bLen,
       T c, int c0, Acc<T> acc
-    )
-    {
-      int           nPar = pool.getParallelism(),
-                    cLen = aLen + bLen,
-      granularity = cLen / (16*nPar);
+    ) {
+      int    nPar = pool.getParallelism(),
+             cLen = aLen + bLen,
+      granularity = cLen / multiplyExact(16,nPar);
 
-      if( nPar <= 1 || granularity <= 8192 ) acc.rebelMerge_mergePart(a,a0,aLen, b,b0,bLen, c,c0,cLen);
+      if( nPar <= 1 || granularity <= 8192 ) acc.parallelRebelMerge_mergePart(a,a0,aLen, b,b0,bLen, c,c0,cLen);
       else pool.invoke(
         new ParallelRebelMergeTask<>(granularity, null, a,a0,a0+aLen, b,b0,b0+bLen, c,c0, acc)
       );

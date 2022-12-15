@@ -76,7 +76,7 @@ public class ParallelZenMergeTask<T> extends CountedCompleter<Void>
       int aLen = a1-a0,
           bLen = b1-b0,
             cm = aLen+bLen >>> 1,
-            am = acc.zenMerge_mergeOffset(a,a0,aLen, b,b0,bLen, cm),
+            am = acc.parallelZenMerge_mergeOffset(a,a0,aLen, b,b0,bLen, cm),
             bm = cm - am;
       am += a0;
       bm += b0;
@@ -94,7 +94,7 @@ public class ParallelZenMergeTask<T> extends CountedCompleter<Void>
     int aLen = a1 - a0,
         bLen = b1 - b0,
         cLen = aLen + bLen;
-    acc.zenMerge_mergePart(
+    acc.parallelZenMerge_mergePart(
       a,a0,aLen,
       b,b0,bLen,
       c,c0,cLen

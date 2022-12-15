@@ -7,7 +7,7 @@ public class HwangLinMergePartAccessorTest extends MergePartAccessorTestTemplate
   @Override public int maxArraySize() { return 32*1024; }
 
   private static final class BMPAccessor<T> implements MergePartAccessor<T>,
-                                               HwangLinMergePartAccessor<T>
+          HwangLinMergePartAccessor<T>
   {
     private final CompareRandomAccessor<T> acc;
 

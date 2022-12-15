@@ -34,16 +34,16 @@ public class HeapSelectCheck
 {
   public static void main( String... args ) throws IOException, InterruptedException
   {
-//    runCheck(
-//      "Worst Case",
-//      x -> x::performance_worstCase,
-//      rng -> len -> {
-//        int[] arr = new int[len];
-//        for( int j=len; --j > 0; )
-//          arr[j-1] = arr[j] + rng.nextInt(2);
-//        return arr;
-//      }
-//    );
+//   runCheck(
+//     "Worst Case",
+//     x -> x::performance_worstCase,
+//     rng -> len -> {
+//       int[] arr = new int[len];
+//       for( int j=len; --j > 0; )
+//         arr[j-1] = arr[j] + rng.nextInt(2);
+//       return arr;
+//     }
+//   );
     runCheck(
       "Average Case",
       x -> x::performance_average,
@@ -251,48 +251,7 @@ public class HeapSelectCheck
               return 0;
             int m =   mid - from,
                 n = until - mid;
-            if( HeapSelect.performance_average(m+1,n-1) < HeapSelect.performance_average(n,m) )
-              return HeapSelect.performance_worstCase(m+1,n-1);
-            else
-              return HeapSelect.performance_worstCase(n,m);
-          }
-        }
-        return new Acc();
-      }),
-      entry("HeapMajor", arr -> {
-        class Acc implements HeapSelectAccess, SelectAccess {
-          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-          @Override public void select( int l, int m, int r ) { heapSelectMajor(l,m,r); }
-          @Override public long performance_average  ( int l, int m, int r ) { return heapSelectMajor_performance(l,m,r); }
-          @Override public long performance_worstCase( int from, int mid, int until ) {
-            if( from < 0 || from > mid || mid > until )
-              throw new IllegalArgumentException();
-            if( mid == until )
-              return 0;
-            int m =   mid - from,
-                n = until - mid;
             return m > n-2
-              ? HeapSelect.performance_worstCase(m+1,n-1)
-              : HeapSelect.performance_worstCase(n,m);
-          }
-        }
-        return new Acc();
-      }),
-      entry("HeapMinor", arr -> {
-        class Acc implements HeapSelectAccess, SelectAccess {
-          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-          @Override public void select( int l, int m, int r ) { heapSelectMinor(l,m,r); }
-          @Override public long performance_average  ( int l, int m, int r ) { return heapSelectMinor_performance(l,m,r); }
-          @Override public long performance_worstCase( int from, int mid, int until ) {
-            if( from < 0 || from > mid || mid > until )
-              throw new IllegalArgumentException();
-            if( mid == until )
-              return 0;
-            int m =   mid - from,
-                n = until - mid;
-            return m < n-2
               ? HeapSelect.performance_worstCase(m+1,n-1)
               : HeapSelect.performance_worstCase(n,m);
           }
@@ -304,8 +263,8 @@ public class HeapSelectCheck
           @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
           @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
           @Override public void select( int l, int m, int r ) { heapSelectRandom(l,m,r); }
-          @Override public long performance_average  ( int l, int m, int r ) { return heapSelect_performance(l,m,r); }
-          @Override public long performance_worstCase( int l, int m, int r ) { return heapSelect_performance(l,m,r); }
+          @Override public long performance_average  ( int l, int m, int r ) { return heapSelectRandom_performance(l,m,r); }
+          @Override public long performance_worstCase( int l, int m, int r ) { return heapSelectRandom_performance(l,m,r); }
         }
         return new Acc();
       }),

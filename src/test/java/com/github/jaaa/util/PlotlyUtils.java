@@ -48,7 +48,8 @@ public final class PlotlyUtils
   {
     var  tmp = Files.createTempFile("plot_",".html");
     plot(tmp, layout, data);
-    var cmd = format("xdg-open %s", tmp);
+//    var cmd = format("xdg-open %s", tmp);
+    String[] cmd = { "xdg-open", tmp.toString() };
     getRuntime().exec(cmd);
     return tmp;
   }

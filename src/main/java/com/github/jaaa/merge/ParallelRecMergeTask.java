@@ -76,7 +76,7 @@ public class ParallelRecMergeTask<T> extends CountedCompleter<Void>
             b = this.b,
             c = this.c;
     final int granMerge = this.granularity;
-          int granCopy  = ctx.recMerge_mergeOverhead(),
+          int granCopy  = ctx.parallelRecMerge_mergeOverhead(),
       b0 = this.b0,
       a0 = this.a0,
       c0 = this.c0,
@@ -107,7 +107,7 @@ public class ParallelRecMergeTask<T> extends CountedCompleter<Void>
       if( 0==bLen || 0 < aLen && aLen <= bLen ) // <- always split the smaller side, unless the smaller side is empty
       {
         am  = a0 + (cm = aLen>>>1);
-        bm  = ctx.recMerge_searchGap(b,b0,b1, a,am, false);
+        bm  = ctx.parallelRecMerge_searchGap(b,b0,b1, a,am, false);
         cm += c0 + bm-b0;
         ctx.copy(a,am, c,cm);
         a2 = am++;
@@ -116,7 +116,7 @@ public class ParallelRecMergeTask<T> extends CountedCompleter<Void>
       else
       {
         bm  = b0 + (cm = bLen>>>1);
-        am  = ctx.recMerge_searchGap(a,a0,a1, b,bm, true);
+        am  = ctx.parallelRecMerge_searchGap(a,a0,a1, b,bm, true);
         cm += c0 + am-a0;
         ctx.copy(b,bm, c,cm);
         a2 = am;
@@ -138,7 +138,7 @@ public class ParallelRecMergeTask<T> extends CountedCompleter<Void>
          if( 0 == aLen ) ctx.copyRange(b,b0, c,c0, bLen);
     else if( 0 == bLen ) ctx.copyRange(a,a0, c,c0, aLen);
     else
-      ctx.recMerge_mergePart(
+      ctx.parallelRecMerge_mergePart(
         a,a0,aLen,
         b,b0,bLen,
         c,c0,cLen

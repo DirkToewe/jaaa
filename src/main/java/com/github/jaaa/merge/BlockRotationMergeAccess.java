@@ -13,9 +13,9 @@ import static com.github.jaaa.util.IMath.sqrtFloor;
 //         POK-SON KIM and ARNE KUTZNER
 
 
-public interface BlockRotationMergeAccess extends CompareSwapAccess, RotateAccess, ExpMergeV2Access
+public interface BlockRotationMergeAccess extends CompareSwapAccess, RotateAccess, ExpMergeAccess
 {
-  default void blockRotationMerge_localMerge( int from, int mid, int until ) { expMergeV2(from,mid,until); }
+  default void blockRotationMerge_localMerge( int from, int mid, int until ) { expMerge(from,mid,until); }
 
   default void blockRotationMerge( int from, int mid, int until )
   {

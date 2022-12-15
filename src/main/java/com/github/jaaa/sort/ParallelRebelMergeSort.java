@@ -2,9 +2,9 @@ package com.github.jaaa.sort;
 
 import com.github.jaaa.compare.*;
 import com.github.jaaa.copy.*;
-import com.github.jaaa.merge.ExpMergePartV2Accessor;
 import com.github.jaaa.merge.ParallelRebelMerge;
 import com.github.jaaa.merge.ParallelRebelMergeTask;
+import com.github.jaaa.merge.TimMergePartAccessor;
 import com.github.jaaa.search.ExpSearchAccessor;
 
 import java.lang.reflect.Array;
@@ -26,15 +26,15 @@ public class ParallelRebelMergeSort
   // STATIC FIELDS
     private interface Acc<T> extends ParallelRecMergeSort.Accessor<T>,
                                        ParallelRebelMerge.Accessor<T>,
-                                            ExpMergePartV2Accessor<T>,
+                                              TimMergePartAccessor<T>,
                                                  ExpSearchAccessor<T>,
                                                    TimSortAccessor<T>
     {
-      @Override default  int rebelMerge_searchGap(T a, int a0, int a1, T b, int key, boolean rightBias ) { return expSearchGap(a,a0,a1, a0+a1>>>1, b,key, rightBias); }
-      @Override default void      sort( T arr, int arr0, int arr1,
-                                        T buf, int buf0, int buf1 ) { timSort(arr,arr0,arr1, buf,buf0,buf1); }
-      @Override default void rebelMerge_mergePart(T a, int a0, int aLen, T b, int b0, int bLen, T c, int c0, int cLen ) { expMergePartV2_L2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
-      @Override default CountedCompleter<?> newMergeTask( int height, CountedCompleter<?> completer, T ab, int a0, int aLen, int b0, int bLen, T c, int c0 )
+      @Override default  int parallelRebelMerge_searchGap( T a, int a0, int a1, T b, int key, boolean rightBias ) { return expSearchGap(a,a0,a1, a0+a1>>>1, b,key, rightBias); }
+      @Override default void parallelRebelMerge_mergePart(T a, int a0, int aLen, T b, int b0, int bLen, T c, int c0, int cLen ) { timMergePartL2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
+      @Override default void parallelRecMergeSort_sort( T arr, int arr0, int arr1,
+                                                        T buf, int buf0, int buf1 ) { timSort(arr,arr0,arr1, buf,buf0,buf1); }
+      @Override default CountedCompleter<?> parallelRecMergeSort_newMergeTask( int height, CountedCompleter<?> completer, T ab, int a0, int aLen, int b0, int bLen, T c, int c0 )
       {
         assert 0 <= height;
         int granularity = aLen+bLen >>> height;
@@ -89,7 +89,7 @@ public class ParallelRebelMergeSort
     }
 
       if( 1==nPar || h <= h0 )
-        ctx.sort(arr,from,until, null,0,0);
+        ctx.parallelRecMergeSort_sort(arr,from,until, null,0,0);
       else {
         var buf = ctx.malloc(len);
         pool.invoke(

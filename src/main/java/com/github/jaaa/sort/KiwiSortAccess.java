@@ -8,14 +8,14 @@ import com.github.jaaa.merge.BlockRotationMergeAccess;
 import com.github.jaaa.merge.TimMergeAccessor;
 import com.github.jaaa.permute.BlockSwapAccess;
 import com.github.jaaa.search.ExpL2RSearch;
-import com.github.jaaa.select.QuickSelectV1Access;
+import com.github.jaaa.select.QuickSelectAccess;
 
 import static java.lang.Math.*;
 
 
 // Like KiwiSortV5 but with a power of 2 buffer size and run length. In most situation this should avoid
 // oddly-sized single blocks that have to be merged separately.
-public interface KiwiSortAccess extends ArgMaxAccess, ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExtractSortBufOrdinalAccess, HeapSortFastAccess, InsertionAdaptiveSortAccess, QuickSelectV1Access, MinHeapRAccess
+public interface KiwiSortAccess extends ArgMaxAccess, ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExtractSortBufOrdinalAccess, HeapSortFastAccess, InsertionAdaptiveSortAccess
 {
   int MIN_RUN_LEN = 16;
 
@@ -46,15 +46,9 @@ public interface KiwiSortAccess extends ArgMaxAccess, ArgMinAccess, BlockRotatio
   default void kiwiSort_sortRun      ( int from,          int until ) { insertionAdaptiveSort(from,until); }
   default void kiwiSort_mergeInPlace ( int from, int mid, int until ) { blockRotationMerge(from,mid,until); }
   default void kiwiSort_mergeBuffered( int a0, int aLen,
-                                         int b0, int bLen,
-                                         int c0 )
+                                       int b0, int bLen,
+                                       int c0 )
   {
-//    new TimMergeAccessor<Void>() {
-//      @Override public Void malloc( int len ) { throw new AssertionError(); }
-//      @Override public int compare( Void a, int i, Void b, int j ) { return KiwiSortV7Access.this.compare(i,j); }
-//      @Override public void   swap( Void a, int i, Void b, int j ) {        KiwiSortV7Access.this.   swap(i,j); }
-//      @Override public void   copy( Void a, int i, Void b, int j ) {        KiwiSortV7Access.this.   swap(i,j); }
-//    }._timMergeL2R(TimMergeAccessor.MIN_GALLOP, null,a0,aLen, null,b0,bLen, null,c0);
     TIM_MERGE_ACCESSOR.timMergeBiasedL2R(TimMergeAccessor.MIN_GALLOP, this,a0,aLen, this,b0,bLen, this,c0);
   }
 

@@ -30,7 +30,7 @@ tasks.compileJava {
   options.compilerArgs.addAll(
     listOf(
       "-parameters",
-      "--add-modules=jdk.incubator.vector"
+//      "--add-modules=jdk.incubator.vector"
     )
   )
 }
@@ -43,7 +43,7 @@ tasks.compileTestJava {
 //      "--add-exports=java.management/sun.management=ALL-UNNAMED",
 //      "--add-exports=java.rmi/sun.rmi.registry=ALL-UNNAMED",
 //      "--add-exports=java.security.jgss/sun.security.krb5=ALL-UNNAMED",
-      "--add-modules=jdk.incubator.vector"
+//      "--add-modules=jdk.incubator.vector"
     )
   )
 }
@@ -81,7 +81,7 @@ tasks.test {
     "--illegal-access=permit",
     "-XX:MaxInlineLevel=15",
     "-XX:AutoBoxCacheMax=1000000",
-    "--add-modules=jdk.incubator.vector"
+//    "--add-modules=jdk.incubator.vector"
 //    "-Xdisablejavadump",
 //    "-Xdump:none"
   )

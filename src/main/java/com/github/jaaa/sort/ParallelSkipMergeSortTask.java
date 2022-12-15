@@ -51,7 +51,7 @@ public class ParallelSkipMergeSortTask<T> extends CountedCompleter<Void>
           assert srcPos == dstPos;
           int s0 = src0+srcPos,
               d0 = dst0+srcPos;
-          ctx.skipMergeSort_sort(
+          ctx.parallelSkipMergeSort_sort(
             src,s0,s0+srcLen,
             dst,d0,d0+srcLen
           );
@@ -62,10 +62,10 @@ public class ParallelSkipMergeSortTask<T> extends CountedCompleter<Void>
                lenL = srcLen >>> 1,  l0 = src0 + srcPos,
                lenR = srcLen - lenL, r0 = l0 + lenL;
 
-          int l = ctx.skipMergeSort_mergeOffset(src,l0,lenL, r0,lenR, nSkip),
+          int l = ctx.parallelSkipMergeSort_mergeOffset(src,l0,lenL, r0,lenR, nSkip),
               r = nSkip - l;
 
-          ctx.skipMergeSort_mergePart(
+          ctx.parallelSkipMergeSort_mergePart(
             src, l0+l, lenL-l,
                  r0+r, lenR-r,
             dst, dst0+dstPos, dstLen

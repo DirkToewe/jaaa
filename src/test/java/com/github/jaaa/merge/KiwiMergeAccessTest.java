@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class KiwiMergeAccessTest implements MergeAccessTestTemplate
 {
   // STATIC FIELDS
-  private static class KiwiMergeAcc implements KiwiMergeAccess, MergeAccess, ExpMergeV2Access
+  private static class KiwiMergeAcc implements KiwiMergeAccess, MergeAccess, ExpMergeAccess
   {
     private final CompareSwapAccess access;
     public KiwiMergeAcc( CompareSwapAccess acc ) { access = acc; }

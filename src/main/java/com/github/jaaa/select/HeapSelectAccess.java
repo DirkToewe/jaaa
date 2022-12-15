@@ -30,54 +30,13 @@ import static java.lang.Math.min;
  */
 public interface HeapSelectAccess extends CompareSwapAccess, ArgMaxAccess, ArgMinAccess
 {
-  /**
-   * Applies the heap selection algorithm to the given range,
-   * building the heap on whichever side promises the best
-   * average performance for randomly shuffled inputs.
-   *
-   * @param from  Start (inclusive) of the selection range.
-   * @param mid   Index of the selected element.
-   * @param until End (exclusive) fo the selection range.
-   */
   default void heapSelect( int from, int mid, int until )
-  {
-    if( from < 0 || from > mid || mid > until )
-      throw new IllegalArgumentException();
-    int m =   mid - from,
-        n = until - mid;
-    if( 1 < n && performance_average(m+1,n-1) < performance_average(n,m) )
-      heapSelectL(from,mid,until);
-    else
-      heapSelectR(from,mid,until);
-  }
-
-
-  default void heapSelectMajor( int from, int mid, int until )
   {
     if( mid-from > until-mid-2 ) heapSelectL(from,mid,until);
     else                         heapSelectR(from,mid,until);
   }
 
 
-  default void heapSelectMinor( int from, int mid, int until )
-  {
-    if( mid-from < until-mid-2 ) heapSelectL(from,mid,until);
-    else                         heapSelectR(from,mid,until);
-  }
-
-
-  /**
-   * Returns the estimated number of comparisons required by
-   * `heapSelect` in order to select from a randomly shuffled
-   * input of the given dimensions.
-   *
-   * @param from  Start (inclusive) of the selection range.
-   * @param mid   Index of the selected element.
-   * @param until End (exclusive) fo the selection range.
-   * @return Expected number of comparisons required by
-   *         `heapSelect(from,mid,until` given a randomly
-   *         shuffled input.
-   */
   default long heapSelect_performance( int from, int mid, int until ) {
     if( from < 0 || from > mid || mid > until )
       throw new IllegalArgumentException();
@@ -85,33 +44,7 @@ public interface HeapSelectAccess extends CompareSwapAccess, ArgMaxAccess, ArgMi
       return 0;
     int m =   mid - from,
         n = until - mid;
-    var p = performance_average(m+1,n-1);
-    var q = performance_average(n,m);
-    return min(p,q);
-  }
-
-
-  default long heapSelectMajor_performance( int from, int mid, int until ) {
-    if( from < 0 || from > mid || mid > until )
-      throw new IllegalArgumentException();
-    if( mid == until )
-      return 0;
-    int m =   mid - from,
-        n = until - mid;
     return m > n-2
-      ? performance_average(m+1,n-1)
-      : performance_average(n,m);
-  }
-
-
-  default long heapSelectMinor_performance( int from, int mid, int until ) {
-    if( from < 0 || from > mid || mid > until )
-      throw new IllegalArgumentException();
-    if( mid == until )
-      return 0;
-    int m =   mid - from,
-        n = until - mid;
-    return m < n-2
       ? performance_average(m+1,n-1)
       : performance_average(n,m);
   }

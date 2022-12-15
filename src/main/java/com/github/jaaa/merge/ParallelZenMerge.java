@@ -17,11 +17,11 @@ public class ParallelZenMerge
 // STATIC FIELDS
   public interface Accessor<T>
   {
-    int  zenMerge_mergeOffset(
+    int parallelZenMerge_mergeOffset(
       T a, int a0, int aLen,
       T b, int b0, int bLen, int nSkip
     );
-    void zenMerge_mergePart(
+    void parallelZenMerge_mergePart(
       T a, int a0, int aLen,
       T b, int b0, int bLen,
       T c, int c0, int cLen
@@ -35,8 +35,8 @@ public class ParallelZenMerge
                                         ExpMergeOffsetAccessor<T>,
                                           TimMergePartAccessor<T>
     {
-      @Override default int zenMerge_mergeOffset(T a, int a0, int aLen, T b, int b0, int bLen, int nSkip ) { return expMergeOffset(a,a0,aLen, b,b0,bLen, nSkip); }
-      @Override default void zenMerge_mergePart(T a, int a0, int aLen, T b, int b0, int bLen, T c, int c0, int cLen ) { timMergePartL2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
+      @Override default int parallelZenMerge_mergeOffset(T a, int a0, int aLen, T b, int b0, int bLen, int nSkip ) { return expMergeOffset(a,a0,aLen, b,b0,bLen, nSkip); }
+      @Override default void parallelZenMerge_mergePart(T a, int a0, int aLen, T b, int b0, int bLen, T c, int c0, int cLen ) { timMergePartL2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
     }
 
     private interface AccArrObj<T> extends Acc<         T[]>, RandomAccessorArrObj<T>{ @Override default T[] malloc(int len ) { throw new UnsupportedOperationException(); } }
@@ -73,7 +73,7 @@ public class ParallelZenMerge
             h  =              log2Ceil( max(1,aLen+bLen) ),
             h0 = max( 13, h-4-log2Ceil(nPar) ); // <- spwan roughly 4 tasks per cpu thread, but only if copied chunks size don't fall below 2^16
 
-      if( nPar <= 1 || h0 >= h ) acc.zenMerge_mergePart(a,a0,aLen, b,b0,bLen, c,c0,aLen+bLen);
+      if( nPar <= 1 || h0 >= h ) acc.parallelZenMerge_mergePart(a,a0,aLen, b,b0,bLen, c,c0,aLen+bLen);
       else pool.invoke(
         new ParallelZenMergeTask<>(h-h0, null, a,a0,a0+aLen, b,b0,b0+bLen, c,c0, acc)
       );

@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SplittableRandom;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.DoubleSupplier;
 
 import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
@@ -51,13 +52,14 @@ public class MergeComparison
 
   private static final class CountingAccessor implements CompareRandomAccessor<int[]>
   {
-    long nComps = 0,
-         nWrite = 0;
+    final LongAdder
+      nComps = new LongAdder(),
+      nWrite = new LongAdder();
     @Override public int[] malloc(int len ) { return new int[len]; }
-    @Override public int     compare( int[] a, int i, int[] b, int j ) { int c = Integer.compare(a[i],b[j]);    nComps+=1; return c; }
-    @Override public void       swap( int[] a, int i, int[] b, int j ) {               Swap.swap(a,i, b,j);     nWrite+=2; }
-    @Override public void  copy     ( int[] a, int i, int[] b, int j ) {                         b[j]=a[i];     nWrite+=1; }
-    @Override public void  copyRange( int[] a, int i, int[] b, int j, int len ){       arraycopy(a,i, b,j, len);nWrite+=len; }
+    @Override public int     compare( int[] a, int i, int[] b, int j ) { int c = Integer.compare(a[i],b[j]);    nComps.add(1); return c; }
+    @Override public void       swap( int[] a, int i, int[] b, int j ) {               Swap.swap(a,i, b,j);     nWrite.add(2); }
+    @Override public void  copy     ( int[] a, int i, int[] b, int j ) {                         b[j]=a[i];     nWrite.add(1); }
+    @Override public void  copyRange( int[] a, int i, int[] b, int j, int len ){       arraycopy(a,i, b,j, len);nWrite.add(len); }
   }
 
 // STATIC METHODS
@@ -67,199 +69,102 @@ public class MergeComparison
     out.println( "Java " + System.getProperty("java.version") );
 
     Map<String,MergeFn> mergers = Map.ofEntries(
-      entry("ExpV1",              ExpMergeV1::merge),
-      entry("ExpV2",              ExpMergeV2::merge),
-      entry("ExpV4",              ExpMergeV4::merge),
-      entry("TapeMerge",           TapeMerge::merge),
-      entry("TimMerge",             TimMerge::merge),
-      entry("HwangLinV1",HwangLinMerge      ::merge),
-      entry("HwangLinV2",HwangLinStaticMerge::merge),
-      entry("BlockRot",   BlockRotationMerge::merge),
-      entry("BlockRotBias", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          class Acc implements BlockRotationMergeBiasedAccess, TimMergeAccess {
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-            @Override public int blockRotationMergeBiased_localMerge(int bias, int from, int mid, int until) {
-              return timMergeBiased(bias, from, mid, until);
-            }
-          }
-          new Acc().blockRotationMergeBiased(TimMergeAccess.MIN_GALLOP, k, k+m, k+m+n);
-        }
-      }),
-      entry("ExpV1Acc", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new ExpMergeV1Access() {
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-          }.expMergeV1(k, k+m, k+m+n);
-        }
-      }),
-      entry("ExpV2Acc", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new ExpMergeV2Access() {
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-          }.expMergeV2(k, k+m, k+m+n);
-        }
-      }),
-      entry("ExpV4Acc", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new ExpMergeV4Access() {
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-          }.expMergeV4(k, k+m, k+m+n);
-        }
-      }),
-      entry("TapeAcc", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new TapeMergeAccess() {
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-          }.tapeMerge(k, k+m, k+m+n);
-        }
-      }),
-      entry("TimAcc", new MergeFn() {
-        @Override public <T> void merge(
-                T a, int i, int m,
-                T b, int j, int n,
-                T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new TimMergeAccess() {
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-          }.timMerge(k, k+m, k+m+n);
-        }
-      }),
-      entry("StableOptBlockAcc", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new StableOptimalBlockMergeAccess() {
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-          }.stableOptimalBlockMerge(k, k+m, k+m+n);
-        }
-      }),
-      entry("WikiV1Acc", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new WikiMergeV1Access() {
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-          }.wikiMergeV1(k, k+m, k+m+n);
-        }
-      }),
-      entry("WikiV2Acc", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new WikiMergeV2Access() {
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-          }.wikiMergeV2(k, k+m, k+m+n);
-        }
-      }),
-      entry("WikiV3Acc", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new WikiMergeV3Access() {
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-          }.wikiMergeV3(k, k+m, k+m+n);
-        }
-      }),
-      entry("WikiV4Acc", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new WikiMergeV4Access() {
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-          }.wikiMergeV4(k, k+m, k+m+n);
-        }
-      }),
-      entry("WikiV5Acc", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new WikiMergeV5Access() {
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
-          }.wikiMergeV5(k, k+m, k+m+n);
-        }
-      }),
-      entry("KiwiAcc", new MergeFn() {
-        @Override public <T> void merge(
-          T a, int i, int m,
-          T b, int j, int n,
-          T c, int k, CompareRandomAccessor<T> acc
-        ) {
-          acc.copyRange(a,i, c,k,   m);
-          acc.copyRange(b,j, c,k+m, n);
-          new KiwiMergeAccess() {
-            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
-            @Override public void   swap( int i, int j ) { acc.swap(c,i, c,j); }
-          }.kiwiMerge(k, k+m, k+m+n);
-        }
-      })
+      entry("ParRebel", ParallelRebelMerge::merge),
+      entry("ParRec",   ParallelRecMerge  ::merge),
+      entry("ParSkip",  ParallelSkipMerge ::merge),
+      entry("ParZen",   ParallelZenMerge  ::merge)
+//      entry("ExpV2",                 ExpMerge::merge),
+//      entry("TapeMerge",            TapeMerge::merge),
+//      entry("TimMerge",              TimMerge::merge),
+//      entry("HwangLin",         HwangLinMerge::merge),
+//      entry("HwangLinPart", new MergeFn() {
+//        @Override public <T> void merge(
+//          T a, int i, int m,
+//          T b, int j, int n,
+//          T c, int k, CompareRandomAccessor<T> acc
+//        ) {
+//          new HwangLinMergePartAccessor<T>() {
+//            @Override public T malloc( int len ) { return acc.malloc(len); }
+//            @Override public void   copy( T a, int i, T b, int j ) {        acc.   copy(a,i, b,j); }
+//            @Override public void   swap( T a, int i, T b, int j ) {        acc.   swap(a,i, b,j); }
+//            @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
+//          }.hwangLinMergePartV1_L2R(a,i,m, b,j,n, c,k,m+n);
+//        }
+//      }),
+//      entry("BlockRot",   BlockRotationMerge::merge),
+//      entry("BlockRotBias", new MergeFn() {
+//        @Override public <T> void merge(
+//          T a, int i, int m,
+//          T b, int j, int n,
+//          T c, int k, CompareRandomAccessor<T> acc ) {
+//          acc.copyRange(a,i, c,k,   m);
+//          acc.copyRange(b,j, c,k+m, n);
+//          class Acc implements BlockRotationMergeBiasedAccess, TimMergeAccess {
+//            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
+//            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
+//            @Override public int blockRotationMergeBiased_localMerge(int bias, int from, int mid, int until) {
+//              return timMergeBiased(bias, from, mid, until);
+//            }
+//          }
+//          new Acc().blockRotationMergeBiased(TimMergeAccess.MIN_GALLOP, k, k+m, k+m+n);
+//        }
+//      }),
+//      entry("ExpV2Acc", new MergeFn() {
+//        @Override public <T> void merge(
+//          T a, int i, int m,
+//          T b, int j, int n,
+//          T c, int k, CompareRandomAccessor<T> acc
+//        ) {
+//          acc.copyRange(a,i, c,k,   m);
+//          acc.copyRange(b,j, c,k+m, n);
+//          new ExpMergeAccess() {
+//            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
+//            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
+//          }.expMerge(k, k+m, k+m+n);
+//        }
+//      }),
+//      entry("TapeAcc", new MergeFn() {
+//        @Override public <T> void merge(
+//          T a, int i, int m,
+//          T b, int j, int n,
+//          T c, int k, CompareRandomAccessor<T> acc
+//        ) {
+//          acc.copyRange(a,i, c,k,   m);
+//          acc.copyRange(b,j, c,k+m, n);
+//          new TapeMergeAccess() {
+//            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
+//            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
+//          }.tapeMerge(k, k+m, k+m+n);
+//        }
+//      }),
+//      entry("TimAcc", new MergeFn() {
+//        @Override public <T> void merge(
+//                T a, int i, int m,
+//                T b, int j, int n,
+//                T c, int k, CompareRandomAccessor<T> acc
+//        ) {
+//          acc.copyRange(a,i, c,k,   m);
+//          acc.copyRange(b,j, c,k+m, n);
+//          new TimMergeAccess() {
+//            @Override public void   swap( int i, int j ) {        acc.   swap(c,i, c,j); }
+//            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
+//          }.timMerge(k, k+m, k+m+n);
+//        }
+//      }),
+//      entry("KiwiAcc", new MergeFn() {
+//        @Override public <T> void merge(
+//          T a, int i, int m,
+//          T b, int j, int n,
+//          T c, int k, CompareRandomAccessor<T> acc
+//        ) {
+//          acc.copyRange(a,i, c,k,   m);
+//          acc.copyRange(b,j, c,k+m, n);
+//          new KiwiMergeAccess() {
+//            @Override public int compare( int i, int j ) { return acc.compare(c,i, c,j); }
+//            @Override public void   swap( int i, int j ) { acc.swap(c,i, c,j); }
+//          }.kiwiMerge(k, k+m, k+m+n);
+//        }
+//      })
     );
 
     var rng = new SplittableRandom();
@@ -271,8 +176,10 @@ public class MergeComparison
       new DoubleSupplier() { @Override public double getAsDouble() { return 0.75;             } @Override public String toString() { return format("%.2f", getAsDouble()); } }
     };
 
-    for( var len: new int[]{ 1_000, 10_000, 100_000, 1_000_000 } ) compare_over_split (mergers, len);
-    for( var len: new int[]{ 1_000, 10_000, 100_000, 1_000_000 } ) compare_over_length(mergers, len, splits[0]);
+    for( int len = 100_000_000; len > 100; len /= 10 )
+      compare_over_split(mergers, len);
+//    for( var len: new int[]{ 1_000, 10_000, 100_000, 1_000_000 } ) compare_over_split (mergers, len);
+//    for( var len: new int[]{ 1_000, 10_000, 100_000, 1_000_000 } ) compare_over_length(mergers, len, splits[0]);
   }
 
   /** Compares merging algorithms using merge sequences of constant combined length but
@@ -324,9 +231,10 @@ public class MergeComparison
       Arrays.sort(cRef);
 
       randomShuffle(mergersArr, random::nextInt);
-      stream(mergersArr).forEach( EntryConsumer.of( (k, v) -> {
-        acc.nComps = 0;
-        acc.nWrite = 0;
+      stream(mergersArr).forEach( EntryConsumer.of( (k,v) -> {
+        System.gc();
+        acc.nComps.reset();
+        acc.nWrite.reset();
 
         int[] aTest = aRef.clone(),
               bTest = bRef.clone(),
@@ -340,8 +248,8 @@ public class MergeComparison
         );
         long dt = nanoTime() - t0;
 
-        resultsComps.get(k)[i] = acc.nComps;
-        resultsWrite.get(k)[i] = acc.nWrite;
+        resultsComps.get(k)[i] = acc.nComps.sum();
+        resultsWrite.get(k)[i] = acc.nWrite.sum();
         resultsTimes.get(k)[i] = dt / 1e3;
 
         assert Arrays.equals(aRef,aTest);
@@ -403,8 +311,8 @@ public class MergeComparison
 
       randomShuffle(mergersArr, random::nextInt);
       stream(mergersArr).forEach( EntryConsumer.of( (k,v) -> {
-        acc.nComps = 0;
-        acc.nWrite = 0;
+        acc.nComps.reset();
+        acc.nWrite.reset();
 
         int[] aTest = aRef.clone(),
               bTest = bRef.clone(),
@@ -418,8 +326,8 @@ public class MergeComparison
         );
         long dt = nanoTime() - t0;
 
-        resultsComps.get(k)[i] = acc.nComps;
-        resultsWrite.get(k)[i] = acc.nWrite;
+        resultsComps.get(k)[i] = acc.nComps.sum();
+        resultsWrite.get(k)[i] = acc.nWrite.sum();
         resultsTimes.get(k)[i] = dt / 1e3;
 
         assert Arrays.equals(aRef,aTest);

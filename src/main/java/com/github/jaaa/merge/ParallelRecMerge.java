@@ -17,9 +17,9 @@ public class ParallelRecMerge
   // STATIC FIELDS
   public interface Accessor<T> extends CopyAccessor<T>
   {
-    int  recMerge_mergeOverhead(); // <- how many times
-    int  recMerge_searchGap(T a, int a0, int a1, T b, int key, boolean rightBias );
-    void recMerge_mergePart(
+    int  parallelRecMerge_mergeOverhead(); // <- how many times
+    int  parallelRecMerge_searchGap(T a, int a0, int a1, T b, int key, boolean rightBias );
+    void parallelRecMerge_mergePart(
       T a, int a0, int aLen,
       T b, int b0, int bLen,
       T c, int c0, int cLen
@@ -30,24 +30,24 @@ public class ParallelRecMerge
   {
   // STATIC FIELDS
     private interface Acc<T> extends ParallelRecMerge.Accessor<T>,
-                                        ExpMergePartV2Accessor<T>,
+                                          ExpMergePartAccessor<T>,
                                              ExpSearchAccessor<T>
     {
-      @Override default int  recMerge_mergeOverhead() { return 8; }
-      @Override default int  recMerge_searchGap( T a, int a0, int a1, T b, int key, boolean rightBias ) { return expSearchGap(a,a0,a1, a0+a1>>>1, b,key, rightBias); }
-      @Override default void recMerge_mergePart( T a, int a0, int aLen,
-                                                 T b, int b0, int bLen,
-                                                 T c, int c0, int cLen ) { expMergePartV2_L2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
+      @Override default int  parallelRecMerge_mergeOverhead() { return 8; }
+      @Override default int  parallelRecMerge_searchGap(T a, int a0, int a1, T b, int key, boolean rightBias ) { return expSearchGap(a,a0,a1, a0+a1>>>1, b,key, rightBias); }
+      @Override default void parallelRecMerge_mergePart(T a, int a0, int aLen,
+                                                        T b, int b0, int bLen,
+                                                        T c, int c0, int cLen ) { expMergePart_L2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
     }
 
     private interface AccArrObj<T> extends Acc<         T[]>, RandomAccessorArrObj<T>{ @Override default T[] malloc(int len ) { throw new UnsupportedOperationException(); } }
-    private interface AccArrByte   extends Acc<      byte[]>, RandomAccessorArrByte {}
+    private interface AccArrByte   extends Acc<      byte[]>, RandomAccessorArrByte  {}
     private interface AccArrShort  extends Acc<     short[]>, RandomAccessorArrShort {}
     private interface AccArrInt    extends Acc<       int[]>, RandomAccessorArrInt   {}
     private interface AccArrLong   extends Acc<      long[]>, RandomAccessorArrLong  {}
-    private interface AccArrChar   extends Acc<      char[]>, RandomAccessorArrChar {}
+    private interface AccArrChar   extends Acc<      char[]>, RandomAccessorArrChar  {}
     private interface AccArrFloat  extends Acc<     float[]>, RandomAccessorArrFloat {}
-    private interface AccArrDouble extends Acc<    double[]>, RandomAccessorArrDouble {}
+    private interface AccArrDouble extends Acc<    double[]>, RandomAccessorArrDouble{}
     private interface AccBufInt    extends Acc<   IntBuffer>, RandomAccessorBufInt   {}
 
   // STATIC CONSTRUCTOR
@@ -74,7 +74,7 @@ public class ParallelRecMerge
              cLen = aLen + bLen,
       granularity = cLen / multiplyExact(16,nPar);
 
-      if( nPar <= 1 || granularity <= 8192 ) acc.recMerge_mergePart(a,a0,aLen, b,b0,bLen, c,c0,cLen);
+      if( nPar <= 1 || granularity <= 8192 ) acc.parallelRecMerge_mergePart(a,a0,aLen, b,b0,bLen, c,c0,cLen);
       else pool.invoke(
         new ParallelRecMergeTask<>(granularity, null, a,a0,a0+aLen, b,b0,b0+bLen, c,c0, acc)
       );

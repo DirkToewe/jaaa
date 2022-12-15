@@ -2,6 +2,7 @@ package com.github.jaaa.partition;
 
 import com.github.jaaa.fn.PredicateSwapAccess;
 import com.github.jaaa.permute.Swap;
+import com.github.jaaa.util.Progress;
 import net.jqwik.api.Tuple;
 import net.jqwik.api.Tuple.Tuple2;
 
@@ -19,9 +20,13 @@ import static com.github.jaaa.permute.Revert.revert;
 import static java.awt.Desktop.getDesktop;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
+import static java.lang.System.out;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.range;
+import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
+import static java.util.Arrays.stream;
+
 
 public class BiPartitionComparison
 {
@@ -69,24 +74,17 @@ public class BiPartitionComparison
 // STATIC METHODS
   public static void main( String... args )
   {
+    out.println( System.getProperty("java.vm.name") + " " + System.getProperty("java.vm.version") );
+    out.println( "Java " + System.getProperty("java.version") );
+
     Map<String,BiPartitioner> algorithms = Map.of(
-//              "Sweep",   SweepBiPartition  ::biPartition,
-//            "Railway", RailwayBiPartition  ::biPartition,
-//         "MuRaSaBiV1",  MuRaSaBiPartitionV1::biPartition,
-//         "MuRaSaBiV2",  MuRaSaBiPartitionV2::biPartition,
-                "Rec",     RecBiPartition  ::biPartition,
-           "HexRecV1",  HexRecBiPartitionV1::biPartition,
-           "HexRecV2",  HexRecBiPartitionV2::biPartition,
-           "KatPawV1",  KatPawBiPartitionV1::biPartition,
-           "KatPawV2",  KatPawBiPartitionV2::biPartition,
-           "KatPawV3",  KatPawBiPartitionV3::biPartition,
-           "KatPawV4",  KatPawBiPartitionV4::biPartition,
-           "KatPawV5",  KatPawBiPartitionV5::biPartition
-//      "PermPartition", (from,until,access) -> PermPartitionStable.partition(from, until, new PartitionAccess() {
-//        @Override public int  key(int i) { return access.predicate(i) ? 1 : 0; }
-//        @Override public int nKeys() { return 2; }
-//        @Override public void swap(int i, int j) { access.swap(i,j); }
-//      })
+            "Railway", RailwayBiPartition  ::biPartition,
+           "KatPawV5",  KatPawBiPartition::biPartition,
+      "PermPartition", (from,until,access) -> PermPartitionStable.partition(from, until, new PartitionAccess() {
+        @Override public int  key(int i) { return access.predicate(i) ? 1 : 0; }
+        @Override public int nKeys() { return 2; }
+        @Override public void swap(int i, int j) { access.swap(i,j); }
+      })
     );
 
     boolean ea = false;
@@ -105,16 +103,17 @@ public class BiPartitionComparison
     };
 
 //    int[] lens = IntStream.iterate(1, l -> l < 10_000_000, l -> max( l+1, (int) (l*1.05) ) ).toArray();
-    int[] lens = rng.ints(1_000, 0, 100_000_000).sorted().toArray();
+    int[] lens = rng.ints(1_000, 0, 1_000_000).sorted().toArray();
     revert(lens);
     Map<String,double[]>
       times = algorithms.entrySet().stream().collect( toMap(Entry::getKey, e -> new double[lens.length]) ),
       reads = algorithms.entrySet().stream().collect( toMap(Entry::getKey, e -> new double[lens.length]) ),
       swaps = algorithms.entrySet().stream().collect( toMap(Entry::getKey, e -> new double[lens.length]) );
 
-    range(0,lens.length).forEach( i -> {
+    var order = range(0,lens.length).toArray();
+    randomShuffle(order, rng::nextInt);
+    Progress.print( stream(order) ).forEach(i -> {
       int len = lens[i];
-      System.out.printf("len:%8d\n", len);
 
       boolean[]   bits = randBits.apply(len);
       assert len==bits.length;

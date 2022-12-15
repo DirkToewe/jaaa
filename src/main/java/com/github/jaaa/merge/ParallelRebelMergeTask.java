@@ -92,7 +92,7 @@ public class ParallelRebelMergeTask<T> extends CountedCompleter<Void>
       if( aLen > bLen )
       {
         am = a0 + (cm = aLen>>>1);
-        bm  = ctx.rebelMerge_searchGap(b,b0,b1, a,am, false);
+        bm  = ctx.parallelRebelMerge_searchGap(b,b0,b1, a,am, false);
         cm += c0 + bm-b0;
         ctx.copy(a,am, c,cm);
         a2 = am++;
@@ -101,7 +101,7 @@ public class ParallelRebelMergeTask<T> extends CountedCompleter<Void>
       else
       {
         bm  = b0 + (cm = bLen>>>1);
-        am  = ctx.rebelMerge_searchGap(a,a0,a1, b,bm, true);
+        am  = ctx.parallelRebelMerge_searchGap(a,a0,a1, b,bm, true);
         cm += c0 + am-a0;
         ctx.copy(b,bm, c,cm);
         a2 = am;
@@ -120,7 +120,7 @@ public class ParallelRebelMergeTask<T> extends CountedCompleter<Void>
       b1 = b2;
     }
 
-    ctx.rebelMerge_mergePart(
+    ctx.parallelRebelMerge_mergePart(
       a,a0,aLen,
       b,b0,bLen,
       c,c0,cLen

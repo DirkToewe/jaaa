@@ -33,20 +33,20 @@ public class ParallelSkipMerge
   // STATIC FIELDS
     private interface Acc<T> extends ParallelSkipMerge.Accessor<T>,
                                          ExpMergeOffsetAccessor<T>,
-                                         ExpMergePartV2Accessor<T>
+                                           ExpMergePartAccessor<T>
     {
-      @Override default int skipMerge_mergeOffset(T a, int a0, int aLen, T b, int b0, int bLen, int nSkip ) { return expMergeOffset(a,a0,aLen, b,b0,bLen, nSkip); }
-      @Override default void skipMerge_mergePart(T a, int a0, int aLen, T b, int b0, int bLen, T c, int c0, int cLen ) { expMergePartV2_L2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
+      @Override default int  skipMerge_mergeOffset( T a, int a0, int aLen, T b, int b0, int bLen, int nSkip ) { return expMergeOffset(a,a0,aLen, b,b0,bLen, nSkip); }
+      @Override default void skipMerge_mergePart  ( T a, int a0, int aLen, T b, int b0, int bLen, T c, int c0, int cLen ) { expMergePart_L2R(a,a0,aLen, b,b0,bLen, c,c0,cLen); }
     }
 
     private interface AccArrObj<T> extends Acc<         T[]>, RandomAccessorArrObj<T>{ @Override default T[] malloc(int len ) { throw new UnsupportedOperationException(); } }
-    private interface AccArrByte   extends Acc<      byte[]>, RandomAccessorArrByte {}
+    private interface AccArrByte   extends Acc<      byte[]>, RandomAccessorArrByte  {}
     private interface AccArrShort  extends Acc<     short[]>, RandomAccessorArrShort {}
-    private interface AccArrInt    extends Acc<       int[]>, RandomAccessorArrInt {}
+    private interface AccArrInt    extends Acc<       int[]>, RandomAccessorArrInt   {}
     private interface AccArrLong   extends Acc<      long[]>, RandomAccessorArrLong  {}
-    private interface AccArrChar   extends Acc<      char[]>, RandomAccessorArrChar {}
+    private interface AccArrChar   extends Acc<      char[]>, RandomAccessorArrChar  {}
     private interface AccArrFloat  extends Acc<     float[]>, RandomAccessorArrFloat {}
-    private interface AccArrDouble extends Acc<    double[]>, RandomAccessorArrDouble {}
+    private interface AccArrDouble extends Acc<    double[]>, RandomAccessorArrDouble{}
     private interface AccBufInt    extends Acc<   IntBuffer>, RandomAccessorBufInt   {}
 
   // STATIC CONSTRUCTOR
@@ -64,11 +64,11 @@ public class ParallelSkipMerge
   // METHODS
     @Override public boolean isStable() { return true; }
 
-    private  <T> void merge(
+    private <T> void merge(
       T a, int a0, int aLen,
       T b, int b0, int bLen,
       T c, int c0, Acc<T> acc
-    ){
+    ) {
       int nPar = pool.getParallelism(),
             h  =              log2Ceil( max(1,aLen+bLen) ),
             h0 = max( 13, h-4-log2Ceil(nPar) ); // <- spwan roughly 4 tasks per cpu thread, but only if copied chunks size don't fall below 2^16

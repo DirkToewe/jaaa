@@ -2,7 +2,10 @@ package com.github.jaaa.sort;
 
 import com.github.jaaa.compare.*;
 import com.github.jaaa.copy.*;
-import com.github.jaaa.merge.*;
+import com.github.jaaa.merge.ExpMergeOffsetAccessor;
+import com.github.jaaa.merge.ParallelZenMerge;
+import com.github.jaaa.merge.ParallelZenMergeTask;
+import com.github.jaaa.merge.TimMergePartAccessor;
 
 import java.lang.reflect.Array;
 import java.nio.IntBuffer;
@@ -12,7 +15,6 @@ import java.util.concurrent.ForkJoinPool;
 
 import static com.github.jaaa.util.IMath.log2Ceil;
 import static java.lang.Math.max;
-import static java.lang.Math.subtractExact;
 import static java.util.Objects.requireNonNull;
 
 
@@ -25,31 +27,31 @@ public class ParallelZenMergeSort
     private interface Acc<T> extends ParallelRecMergeSort.Accessor<T>,
                                          ParallelZenMerge.Accessor<T>,
                                             ExpMergeOffsetAccessor<T>,
-                                            ExpMergePartV2Accessor<T>,
+                                              TimMergePartAccessor<T>,
                                                    TimSortAccessor<T>
     {
-      @Override default void sort( T arr, int arr0, int arr1,
-                                   T buf, int buf0, int buf1 ) { timSort(arr,arr0,arr1, buf,buf0,buf1); }
-      @Override default int zenMerge_mergeOffset(T a, int a0, int aLen,
-                                                 T b, int b0, int bLen, int nSkip ) {
+      @Override default int parallelZenMerge_mergeOffset( T a, int a0, int aLen,
+                                                          T b, int b0, int bLen, int nSkip ) {
         return expMergeOffset(
           a,a0,aLen,
           b,b0,bLen, nSkip
         );
       }
-      @Override default void zenMerge_mergePart(
+      @Override default void parallelZenMerge_mergePart(
         T a, int a0, int aLen,
         T b, int b0, int bLen,
         T c, int c0, int cLen
       )
       {
-        expMergePartV2_L2R(
+        timMergePartL2R(
           a,a0,aLen,
           b,b0,bLen,
           c,c0,cLen
         );
       }
-      @Override default CountedCompleter<?> newMergeTask( int height, CountedCompleter<?> completer, T ab, int a0, int aLen, int b0, int bLen, T c, int c0 )
+      @Override default void parallelRecMergeSort_sort( T arr, int arr0, int arr1,
+                                                        T buf, int buf0, int buf1 ) { timSort(arr,arr0,arr1, buf,buf0,buf1); }
+      @Override default CountedCompleter<?> parallelRecMergeSort_newMergeTask( int height, CountedCompleter<?> completer, T ab, int a0, int aLen, int b0, int bLen, T c, int c0 )
       {
         assert height >= 0;
         return new ParallelZenMergeTask<>(
@@ -103,7 +105,7 @@ public class ParallelZenMergeSort
     }
 
       if( 1==nPar || h <= h0 )
-        ctx.sort(arr,from,until, null,0,0);
+        ctx.parallelRecMergeSort_sort(arr,from,until, null,0,0);
       else {
         var buf = ctx.malloc(len);
         pool.invoke(

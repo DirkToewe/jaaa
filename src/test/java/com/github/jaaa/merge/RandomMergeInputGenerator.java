@@ -30,10 +30,16 @@ public class RandomMergeInputGenerator
 // METHODS
   public Tuple2<int[],int[]> next( int lenA, int lenB )
   {
+    if( lenA < 0 || lenB < 0 )
+      throw new IllegalArgumentException();
     int                   len = addExact(lenA,lenB);
     var isB = new boolean[len];
+
+//    Arrays.fill(isB,        true);
+//    Arrays.fill(isB,0,lenA,false);
+
     Arrays.fill(isB,0,lenB, true);
-    randomShuffle(isB, rng::applyAsInt);
+    randomShuffle(isB, rng);
 
     int val = 0;
 

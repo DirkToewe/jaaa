@@ -53,11 +53,13 @@ public class BenchmarkSort
 //    System.out.println("GO");
 
     Map<String,SortFn> mergers = Map.ofEntries(
+      entry("ParRebel", ParallelRebelMergeSort::sort),
+//      entry("ParRec",   ParallelRecMergeSort  ::sort),
+//      entry("ParSkip",  ParallelSkipMergeSort ::sort),
+//      entry("ParZen",   ParallelZenMergeSort  ::sort),
 //      entry("HeapSort",                               HeapSort::sort),
 //      entry("HeapSortFast",                       HeapSortFast::sort),
-      entry("QuickSortV1",                         QuickSortV1::sort),
-      entry("QuickSortV2",                         QuickSortV2::sort),
-      entry("QuickSortV3",                         QuickSortV3::sort),
+//      entry("QuickSort",                             QuickSort::sort),
 //      entry("MergeSort",                             MergeSort::sort),
 //      entry("KiwiSortV1",                           KiwiSortV1::sort),
 //      entry("KiwiSort",                             KiwiSort::sort),
@@ -69,12 +71,12 @@ public class BenchmarkSort
 //      entry(  "RecSort",                ParallelRecMergeSort  ::sort),
 //      entry( "SkipSort",                ParallelSkipMergeSort ::sort),
 //      entry(  "ZenSort",                ParallelZenMergeSort  ::sort),
-      entry("JDK",                                      Arrays::sort)
-//      entry("JDK (parallel)",                            Arrays::parallelSort)
+//      entry("JDK",                                      Arrays::sort)
+      entry("JDK (parallel)",                            Arrays::parallelSort)
     );
 
-    int     LEN = 100_000,
-      N_SAMPLES =  10_000;
+    int     LEN = 10_000_000,
+      N_SAMPLES =      1_000;
 
     var rng = new SplittableRandom();
     var gen = new RandomSortDataGenerator(rng);
@@ -112,6 +114,7 @@ public class BenchmarkSort
       Collections.shuffle(mergersEntries);
 
       mergersEntries.forEach( EntryConsumer.of( (k, v) -> {
+        System.gc();
         cmp.nComps.reset();
 
         var test = stream(data).boxed().toArray(Integer[]::new);
@@ -166,12 +169,12 @@ public class BenchmarkSort
     String layout = format(
       """
       {
-        title: 'Sort %s Benchmark (L = %d)<br>%s<br>%s',
+        title: 'Sort %s Benchmark (L_max = %d)<br>%s<br>%s',
         xaxis: {title: 'Split Position'},
         yaxis: {title: 'Time [msec.]'  }
       }
       """,
-      type, x.length, vm, jv
+      type, stream(x).max().getAsInt(), vm, jv
     );
 
     final String PLOT_TEMPLATE = """
@@ -241,7 +244,7 @@ public class BenchmarkSort
     var tmp = Files.createTempFile("plot_",".html");
     var dat = stream(data).collect( joining(",\n", "[", "]") );
     Files.writeString( tmp, format(PLOT_TEMPLATE, layout, dat) );
-    var cmd = format("xdg-open %s", tmp);
+    String[] cmd = {"xdg-open", tmp.toString()};
     getRuntime().exec(cmd);
   }
 }

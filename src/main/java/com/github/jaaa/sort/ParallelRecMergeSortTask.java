@@ -67,7 +67,7 @@ public class ParallelRecMergeSortTask<T> extends CountedCompleter<Void>
 
       int lenL = len >>> 1,
           lenR = len - lenL;
-      parentTask = acc.newMergeTask(
+      parentTask = acc.parallelRecMergeSort_newMergeTask(
         height, parentTask,
         src,src0,     lenL,
             src0+lenL,lenR,
@@ -86,7 +86,7 @@ public class ParallelRecMergeSortTask<T> extends CountedCompleter<Void>
       len = lenL;
     }
 
-    acc.sort(
+    acc.parallelRecMergeSort_sort(
       src,src0,src0+len,
       dst,dst0,dst0+len
     );

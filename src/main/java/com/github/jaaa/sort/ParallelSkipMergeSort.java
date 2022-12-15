@@ -3,7 +3,7 @@ package com.github.jaaa.sort;
 import com.github.jaaa.compare.*;
 import com.github.jaaa.copy.*;
 import com.github.jaaa.merge.ExpMergeOffsetAccessor;
-import com.github.jaaa.merge.ExpMergePartV2Accessor;
+import com.github.jaaa.merge.TimMergePartAccessor;
 
 import java.lang.reflect.Array;
 import java.nio.IntBuffer;
@@ -30,10 +30,10 @@ public class ParallelSkipMergeSort
 // STATIC FIELDS
   public interface Accessor<T>
   {
-    void skipMergeSort_sort( T arr, int arr0, int arr1, T buf, int buf0, int buf1 );
-    int  skipMergeSort_mergeOffset( T ab, int a0, int aLen,
-                                          int b0, int bLen, int nSkip );
-    void skipMergeSort_mergePart(
+    void parallelSkipMergeSort_sort( T arr, int arr0, int arr1, T buf, int buf0, int buf1 );
+    int  parallelSkipMergeSort_mergeOffset( T ab, int a0, int aLen,
+                                                  int b0, int bLen, int nSkip );
+    void parallelSkipMergeSort_mergePart(
       T ab, int a0, int aLen,
             int b0, int bLen,
       T c,  int c0, int cLen
@@ -45,20 +45,20 @@ public class ParallelSkipMergeSort
   // STATIC FIELDS
     private interface Acc<T> extends ParallelSkipMergeSort.Accessor<T>,
                                              ExpMergeOffsetAccessor<T>,
-                                             ExpMergePartV2Accessor<T>,
+                                               TimMergePartAccessor<T>,
                                                     TimSortAccessor<T>
     {
-      @Override default void skipMergeSort_sort(T arr, int arr0, int arr1,
-                                                T buf, int buf0, int buf1 ) { timSort(arr,arr0,arr1, buf,buf0,buf1); }
-      @Override default int skipMergeSort_mergeOffset(T ab, int a0, int aLen, int b0, int bLen, int nSkip ) {
+      @Override default void parallelSkipMergeSort_sort( T arr, int arr0, int arr1,
+                                                         T buf, int buf0, int buf1 ) { timSort(arr,arr0,arr1, buf,buf0,buf1); }
+      @Override default int parallelSkipMergeSort_mergeOffset( T ab, int a0, int aLen, int b0, int bLen, int nSkip ) {
         return expMergeOffset(
           ab,a0,aLen,
           ab,b0,bLen, nSkip
         );
       }
-      @Override default void skipMergeSort_mergePart(T ab, int a0, int aLen, int b0, int bLen, T c, int c0, int cLen )
+      @Override default void parallelSkipMergeSort_mergePart( T ab, int a0, int aLen, int b0, int bLen, T c, int c0, int cLen )
       {
-        expMergePartV2_L2R(
+        timMergePartL2R(
           ab,a0,aLen,
           ab,b0,bLen,
           c, c0,cLen
@@ -108,7 +108,7 @@ public class ParallelSkipMergeSort
     }
 
       if( 1==nPar || h <= h0 )
-        ctx.skipMergeSort_sort(arr,from,until, null,0,0);
+        ctx.parallelSkipMergeSort_sort(arr,from,until, null,0,0);
       else {
         var buf = ctx.malloc(len);
         pool.invoke(

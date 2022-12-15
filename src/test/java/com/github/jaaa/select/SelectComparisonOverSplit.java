@@ -76,73 +76,43 @@ public class SelectComparisonOverSplit
 
   static <T> Map<String, SelectFn<T>> selectors( CompareRandomAccessor<T> acc ) {
     return Map.ofEntries(
-//      entry("HeapMajor", (arr,l,m,r) ->
-//        new HeapSelectAccess() {
-//          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-//          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-//        }.heapSelectMajor(l,m,r)
-//      ),
-//      entry("HeapMinor", (arr,l,m,r) ->
-//        new HeapSelectAccess() {
-//          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-//          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-//        }.heapSelectMinor(l,m,r)
-//      ),
-//      entry("HeapRandom", (arr,l,m,r) ->
-//        new HeapSelectRandomAccess() {
-//          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-//          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-//        }.heapSelectRandom(l,m,r)
-//      ),
-//      entry("MergeSelect", (arr,l,m,r) ->
-//        new MergeSelectAccessor<T>() {
-//          @Override public T malloc( int len ) { return acc.malloc(len); }
-//          @Override public void   copy( T a, int i, T b, int j ) {        acc.   copy(a,i, b,j); }
-//          @Override public void   swap( T a, int i, T b, int j ) {        acc.   swap(a,i, b,j); }
-//          @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
-//        }.mergeSelect(arr,l,m,r, null,0,0)
-//      ),
-//      entry("Heap", (arr,l,m,r) ->
-//        new HeapSelectAccess() {
-//          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-//          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-//        }.heapSelect(l,m,r)
-//      ),
-      entry("QuickV1", (arr,l,m,r) ->
-        new QuickSelectV1Access() {
+      entry("Heap", (arr,l,m,r) ->
+        new HeapSelectAccess() {
           @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
           @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.quickSelectV1(l,m,r)
+        }.heapSelect(l,m,r)
       ),
-      entry("QuickV2", (arr,l,m,r) ->
-        new QuickSelectV2Access() {
+      entry("HeapRandom", (arr,l,m,r) ->
+        new HeapSelectRandomAccess() {
           @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
           @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.quickSelectV2(l,m,r)
+        }.heapSelectRandom(l,m,r)
       ),
-      entry("MoM5 V1", (arr,l,m,r) ->
-        new Mom5SelectV1Access() {
-          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.mom5SelectV1(l,m,r)
+      entry("MergeSelect", (arr,l,m,r) ->
+        new MergeSelectAccessor<T>() {
+          @Override public T malloc( int len ) { return acc.malloc(len); }
+          @Override public void   copy( T a, int i, T b, int j ) {        acc.   copy(a,i, b,j); }
+          @Override public void   swap( T a, int i, T b, int j ) {        acc.   swap(a,i, b,j); }
+          @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
+        }.mergeSelect(arr,l,m,r, null,0,0)
       ),
-      entry("MoM5 V2", (arr,l,m,r) ->
-        new Mom5SelectV2Access() {
+      entry("Quick", (arr,l,m,r) ->
+        new QuickSelectAccess() {
           @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
           @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.mom5SelectV2(l,m,r)
+        }.quickSelect(l,m,r)
       ),
-      entry("MoM3 V1", (arr,l,m,r) ->
-        new Mom3SelectV1Access() {
+      entry("MoM5", (arr,l,m,r) ->
+        new Mom5SelectAccess() {
           @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
           @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.mom3SelectV1(l,m,r)
+        }.mom5Select(l,m,r)
       ),
-      entry("MoM3 V2", (arr,l,m,r) ->
-        new Mom3SelectV2Access() {
+      entry("MoM3", (arr,l,m,r) ->
+        new Mom3SelectAccess() {
           @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
           @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.mom3SelectV2(l,m,r)
+        }.mom3Select(l,m,r)
       )
     );
   }
@@ -314,13 +284,10 @@ public class SelectComparisonOverSplit
               switch(data.name) {
                 default:
                   throw new Error(data.name);
-                case 'MoM5 V1':
-                case 'MoM5 V2':
-                case 'MoM3 V1':
-                case 'MoM3 V2':
+                case 'MoM5':
+                case 'MoM3':
                 case 'MergeSelect':
-                case 'QuickV1':
-                case 'QuickV2':
+                case 'Quick':
                   return [(m,n) => m+n];
                 case 'Heap':
                 case 'HeapRandom':
