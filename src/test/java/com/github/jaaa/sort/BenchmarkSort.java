@@ -53,26 +53,16 @@ public class BenchmarkSort
 //    System.out.println("GO");
 
     Map<String,SortFn> mergers = Map.ofEntries(
-      entry("ParRebel", ParallelRebelMergeSort::sort),
-//      entry("ParRec",   ParallelRecMergeSort  ::sort),
-//      entry("ParSkip",  ParallelSkipMergeSort ::sort),
-//      entry("ParZen",   ParallelZenMergeSort  ::sort),
-//      entry("HeapSort",                               HeapSort::sort),
-//      entry("HeapSortFast",                       HeapSortFast::sort),
-//      entry("QuickSort",                             QuickSort::sort),
-//      entry("MergeSort",                             MergeSort::sort),
-//      entry("KiwiSortV1",                           KiwiSortV1::sort),
-//      entry("KiwiSort",                             KiwiSort::sort),
-//      entry("KiwiSortBiased",                       KiwiSortBiased::sort),
-//      entry("WikiSortV1",                           WikiSortV1::sort),
-//      entry("ComparatorWikiSort", new ComparatorWikiSort(null)::sort),
-//      entry("TimSort",                                 TimSort::sort),
-//      entry("RebelSort",                ParallelRebelMergeSort::sort),
-//      entry(  "RecSort",                ParallelRecMergeSort  ::sort),
-//      entry( "SkipSort",                ParallelSkipMergeSort ::sort),
-//      entry(  "ZenSort",                ParallelZenMergeSort  ::sort),
-//      entry("JDK",                                      Arrays::sort)
-      entry("JDK (parallel)",                            Arrays::parallelSort)
+//      entry("ParSkip", ParallelSkipMergeSort::sort),
+      entry("ParZen",  ParallelZenMergeSort ::sort),
+//      entry("HeapSort",             HeapSort::sort),
+//      entry("QuickSort",           QuickSort::sort),
+//      entry("MergeSort",           MergeSort::sort),
+//      entry("KiwiSort",             KiwiSort::sort),
+//      entry("KiwiSortBiased", KiwiSortBiased::sort),
+//      entry("TimSort",               TimSort::sort),
+//      entry("JDK",                    Arrays::sort)
+      entry("JDK (parallel)", Arrays::parallelSort)
     );
 
     int     LEN = 10_000_000,

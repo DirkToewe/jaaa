@@ -14,7 +14,7 @@ import static java.lang.Math.*;
 
 // Like KiwiSortV5 but with a power of 2 buffer size and run length. In most situation this should avoid
 // oddly-sized single blocks that have to be merged separately.
-public interface KiwiSortBiasedAccess extends ArgMaxAccess, ArgMinAccess, BlockRotationMergeBiasedAccess, BlockSwapAccess, ExtractSortBufOrdinalAccess, HeapSortFastAccess, InsertionAdaptiveSortAccess, TimMergeAccess
+public interface KiwiSortBiasedAccess extends ArgMaxAccess, ArgMinAccess, BlockRotationMergeBiasedAccess, BlockSwapAccess, ExtractSortBufOrdinalAccess, HeapSortAccess, InsertionAdaptiveSortAccess, TimMergeAccess
 {
   int MIN_RUN_LEN = 16;
 
@@ -219,7 +219,7 @@ public interface KiwiSortBiasedAccess extends ArgMaxAccess, ArgMinAccess, BlockR
     // STEP 4: Merge Up Buffer
     // -----------------------
     if( nUnsorted > 0 )
-      heapSortFast(buf, buf+nUnsorted);
+      heapSort(buf, buf+nUnsorted);
     return kiwiSortBiased_mergeInPlace(currentBias, buf,from,until);
   }
 

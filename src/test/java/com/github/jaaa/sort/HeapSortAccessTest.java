@@ -8,10 +8,8 @@ import net.jqwik.api.PropertyDefaults;
 @Group
 public class HeapSortAccessTest
 {
-  private static class Acc<T> implements SortAccessorTestTemplate.SortAccessor<T>
+  private record Acc<T>( CompareRandomAccessor<T> acc ) implements SortAccessorTestTemplate.SortAccessor<T>
   {
-    private final CompareRandomAccessor<T>  acc;
-    public Acc(   CompareRandomAccessor<T> _acc ) { acc=_acc; }
     @Override public void sort( T arr, int from, int until) {
       new HeapSortAccess() {
         @Override public void   swap( int i, int j ) { acc.swap(arr,i, arr,j); }

@@ -254,7 +254,7 @@ public final class HeapSort
   public static <T extends Comparable<? super T>> void sort( T[] seq                            )  { sort(seq,    0,seq.length     ); }
   public static <T>                               void sort( T[] seq, Comparator<? super T> cmp )  { sort(seq,    0,seq.length, cmp); }
 
-// FIELDS
+  // FIELDS
 // CONSTRUCTORS
   private HeapSort() { throw new UnsupportedOperationException("Static class cannot be instantiated."); }
 // METHODS

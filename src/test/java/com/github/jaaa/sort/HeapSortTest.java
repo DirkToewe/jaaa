@@ -6,6 +6,9 @@ import net.jqwik.api.PropertyDefaults;
 import static com.github.jaaa.sort.HeapSort.HEAP_SORTER;
 
 
+/** Tests for HeapSortFast. Not to be confused with HeapSortFastest, which is a name reserved
+ *  for the world performance record holder of heaps sorts... of sorts.
+ */
 @Group
 public class HeapSortTest
 {

@@ -2,6 +2,8 @@ package com.github.jaaa.merge;
 
 import com.github.jaaa.compare.ComparatorByte;
 import com.github.jaaa.CompareSwapAccess;
+import com.github.jaaa.merge.datagen.MergeDataProviderTemplate;
+import com.github.jaaa.merge.datagen.MergeInput;
 import com.github.jaaa.permute.Swap;
 import com.github.jaaa.Boxing;
 import com.github.jaaa.util.ZipWithIndex;

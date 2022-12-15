@@ -4,13 +4,11 @@ import com.github.jaaa.compare.*;
 import com.github.jaaa.copy.*;
 import com.github.jaaa.merge.ExpMergeOffsetAccessor;
 import com.github.jaaa.merge.ParallelZenMerge;
-import com.github.jaaa.merge.ParallelZenMergeTask;
 import com.github.jaaa.merge.TimMergePartAccessor;
 
 import java.lang.reflect.Array;
 import java.nio.IntBuffer;
 import java.util.Comparator;
-import java.util.concurrent.CountedCompleter;
 import java.util.concurrent.ForkJoinPool;
 
 import static com.github.jaaa.util.IMath.log2Ceil;
@@ -21,11 +19,16 @@ import static java.util.Objects.requireNonNull;
 public class ParallelZenMergeSort
 {
 // STATIC FIELDS
+  public interface Accessor<T> extends ParallelZenMerge.Accessor<T>
+  {
+    void parallelZenMergeSort_sort( T arr, int arr0, int arr1,
+                                    T buf, int buf0, int buf1 );
+  }
+
   public static class ParallelZenMergeSorter implements Sorter
   {
   // STATIC FIELDS
-    private interface Acc<T> extends ParallelRecMergeSort.Accessor<T>,
-                                         ParallelZenMerge.Accessor<T>,
+    private interface Acc<T> extends ParallelZenMergeSort.Accessor<T>,
                                             ExpMergeOffsetAccessor<T>,
                                               TimMergePartAccessor<T>,
                                                    TimSortAccessor<T>
@@ -49,17 +52,11 @@ public class ParallelZenMergeSort
           c,c0,cLen
         );
       }
-      @Override default void parallelRecMergeSort_sort( T arr, int arr0, int arr1,
-                                                        T buf, int buf0, int buf1 ) { timSort(arr,arr0,arr1, buf,buf0,buf1); }
-      @Override default CountedCompleter<?> parallelRecMergeSort_newMergeTask( int height, CountedCompleter<?> completer, T ab, int a0, int aLen, int b0, int bLen, T c, int c0 )
-      {
-        assert height >= 0;
-        return new ParallelZenMergeTask<>(
-          height, completer,
-          ab, a0, a0+aLen,
-          ab, b0, b0+bLen,
-          c,  c0, this
-        );
+      @Override default void parallelZenMergeSort_sort(
+        T arr, int arr0, int arr1,
+        T buf, int buf0, int buf1
+      ) {
+        timSort(arr,arr0,arr1, buf,buf0,buf1);
       }
     }
 
@@ -105,11 +102,11 @@ public class ParallelZenMergeSort
     }
 
       if( 1==nPar || h <= h0 )
-        ctx.parallelRecMergeSort_sort(arr,from,until, null,0,0);
+        ctx.parallelZenMergeSort_sort(arr,from,until, null,0,0);
       else {
         var buf = ctx.malloc(len);
         pool.invoke(
-          new ParallelRecMergeSortTask<>(h-h0, null, arr,from, buf,0, len, ctx)
+          new ParallelZenMergeSortTask<>(h-h0, null, arr,from, buf,0, len, ctx)
         );
       }
     }

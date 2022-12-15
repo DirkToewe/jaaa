@@ -14,8 +14,8 @@ public class ParallelCopyTask<T> extends CountedCompleter<T>
   public ParallelCopyTask( int _height, CountedCompleter<?> parent, T _a, int _a0, T _b, int _b0, int _length, CopyAccessor<? super T> _acc )
   {
     super(parent);
-    if(_height < 0 ) throw new IllegalArgumentException();
-    if(_length < 0 ) throw new IllegalArgumentException();
+    if( _height < 0 || _length < 0 )
+      throw new IllegalArgumentException();
     acc = requireNonNull(_acc);
     a =_a; a0 =_a0; height = _height;
     b =_b; b0 =_b0; length = _length;

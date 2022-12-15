@@ -3,19 +3,17 @@ package com.github.jaaa.sort;
 import com.github.jaaa.compare.ArgMaxAccess;
 import com.github.jaaa.compare.ArgMinAccess;
 import com.github.jaaa.fn.Int4Consumer;
-import com.github.jaaa.heap.MinHeapRAccess;
 import com.github.jaaa.merge.BlockRotationMergeAccess;
 import com.github.jaaa.merge.TimMergeAccessor;
 import com.github.jaaa.permute.BlockSwapAccess;
 import com.github.jaaa.search.ExpL2RSearch;
-import com.github.jaaa.select.QuickSelectAccess;
 
 import static java.lang.Math.*;
 
 
 // Like KiwiSortV5 but with a power of 2 buffer size and run length. In most situation this should avoid
 // oddly-sized single blocks that have to be merged separately.
-public interface KiwiSortAccess extends ArgMaxAccess, ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExtractSortBufOrdinalAccess, HeapSortFastAccess, InsertionAdaptiveSortAccess
+public interface KiwiSortAccess extends ArgMaxAccess, ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExtractSortBufOrdinalAccess, HeapSortAccess, InsertionAdaptiveSortAccess
 {
   int MIN_RUN_LEN = 16;
 
@@ -206,7 +204,7 @@ public interface KiwiSortAccess extends ArgMaxAccess, ArgMinAccess, BlockRotatio
     // STEP 4: Merge Up Buffer
     // -----------------------
     if( nUnsorted > 0 )
-      heapSortFast(buf, buf+nUnsorted);
+      heapSort(buf, buf+nUnsorted);
     kiwiSort_mergeInPlace(buf,from,until);
   }
 

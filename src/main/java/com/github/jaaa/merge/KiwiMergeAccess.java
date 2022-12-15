@@ -4,7 +4,7 @@ import com.github.jaaa.compare.ArgMinAccess;
 import com.github.jaaa.fn.Int4Consumer;
 import com.github.jaaa.permute.BlockSwapAccess;
 import com.github.jaaa.search.ExpL2RSearch;
-import com.github.jaaa.sort.HeapSortFastAccess;
+import com.github.jaaa.sort.HeapSortAccess;
 
 import static java.lang.Math.*;
 
@@ -25,7 +25,7 @@ import static java.lang.Math.*;
 // .. [1] "Ratio Based Stable In-Place Merging"
 //         Pok-Son Kim & Arne Kutzner
 //         Theory and Applications of Models of Computation, pp. 246-257, 2008
-public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExtractMergeBufOrdinalAccess, HeapSortFastAccess
+public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess, BlockSwapAccess, ExtractMergeBufOrdinalAccess, HeapSortAccess
 {
   /** Returns the minimum buffer size required for buffered merging.
     *
@@ -206,7 +206,7 @@ public interface KiwiMergeAccess extends ArgMinAccess, BlockRotationMergeAccess,
 
     // if we used MIB as merge buffer, it might be out of order
     if( useBufferedMerge )
-      heapSortFast(buf, buf+B);
+      heapSort(buf, buf+B);
   }
 
   default void kiwiMergeR2L(int from, int mid, int until )
