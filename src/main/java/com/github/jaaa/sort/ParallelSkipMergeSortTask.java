@@ -13,7 +13,7 @@ public class ParallelSkipMergeSortTask<T> extends CountedCompleter<Void>
     private final int          dstPos, dstLen;
     private int    src0, dst0, srcPos, srcLen, height;
     private Object src,  dst;
-    private ParallelSkipMergeSort.Accessor<? super T> ctx;
+    private final ParallelSkipMergeSort.Accessor<? super T> ctx;
 
     public SubTask(
       CountedCompleter<?> parent, int _height,
@@ -39,7 +39,7 @@ public class ParallelSkipMergeSortTask<T> extends CountedCompleter<Void>
     @Override
     public void compute()
     {
-      var ctx = this.ctx;
+      ParallelSkipMergeSort.Accessor<? super T> ctx = this.ctx;
       if( 0 == height )
       {
         T   src  = (T) this.src,
@@ -96,8 +96,8 @@ public class ParallelSkipMergeSortTask<T> extends CountedCompleter<Void>
           long stack = dstLen&1L | this.stack<<2;
           int    len = dstLen >>> 1;
 
-          this.src = new SubTask<T>(this, height-1, ctx, src,src0, dst,dst0, stack,    dstPos,            len);
-          this.dst = new SubTask<T>(this, height-1, ctx, src,src0, dst,dst0, stack|2L, dstPos+len, dstLen-len);
+          this.src = new SubTask<>(this, height-1, ctx, src,src0, dst,dst0, stack,    dstPos,            len);
+          this.dst = new SubTask<>(this, height-1, ctx, src,src0, dst,dst0, stack|2L, dstPos+len, dstLen-len);
           // first time around, we need child nodes to finish twice, once for sorting and once for merging
           if( 1 < height ) pend = 4;
         }
@@ -136,6 +136,7 @@ public class ParallelSkipMergeSortTask<T> extends CountedCompleter<Void>
     ParallelSkipMergeSort.Accessor<? super T> _ctx
   )
   {
+    super(completer);
     if( _height%2 != 0 ) throw new IllegalArgumentException("Task tree height must be multiple of 2.");
     if( _height  <   2 ) throw new IllegalArgumentException("Task tree height cannot (yet) be less than 2.");
     if( _height  >  32 ) throw new IllegalArgumentException("Task tree height must not be greater than 32.");

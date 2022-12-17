@@ -14,7 +14,7 @@ public interface RandomShuffleAccess extends SwapAccess
   {
     if( from < 0 || from > until ) throw new IllegalArgumentException();
 
-    var rng = randomShuffle_newRNG();
+    IntBinaryOperator rng = randomShuffle_newRNG();
     while( from < until-1 ) {
       int  i = rng.applyAsInt(from,until);
       swap(i,--until);

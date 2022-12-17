@@ -49,7 +49,7 @@ public class ParallelZenMergeSortTask<T> extends CountedCompleter<Void>
   @Override
   public void compute()
   {
-    var acc = this.acc;
+    ParallelZenMergeSort.Accessor<? super T> acc = this.acc;
     T src = this.src,
       dst = this.dst;
     int len = this.len,
@@ -83,7 +83,7 @@ public class ParallelZenMergeSortTask<T> extends CountedCompleter<Void>
       --height;
 
       int dst1 = dst0 + lenL;
-      new ParallelZenMergeSortTask<T>(
+      new ParallelZenMergeSortTask<>(
         height, parentTask,
         src, src1,
         dst, dst1, lenR, acc

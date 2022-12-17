@@ -1,20 +1,11 @@
 package com.github.jaaa.permute;
 
+import static com.github.jaaa.permute.TritReversalPermute.tritReverseIncrement;
 import static com.github.jaaa.util.IMath.isPowerOf3;
 
 
 public interface TritReversalPermuteAccessor<A> extends SwapAccessor<A>
 {
-  private static int tritReverseIncrement( int reverseInt, int addedTrit ) {
-    while( addedTrit != 0 ) {
-      int x = reverseInt / addedTrit;
-      if( x % 3 != 2 ) break;
-      reverseInt -= addedTrit<<1;
-      addedTrit /= 3;
-    }
-    return reverseInt + addedTrit;
-  }
-
   default void tritReversalPermute( A arr, int from, int until ) {
     int len = until - from;
     if( from < 0 || from > until || ! isPowerOf3(len) )

@@ -110,7 +110,7 @@ public class ParallelSkipMergeSort
       if( 1==nPar || h <= h0 )
         ctx.parallelSkipMergeSort_sort(arr,from,until, null,0,0);
       else {
-        var buf = ctx.malloc(len);
+        T buf = ctx.malloc(len);
         pool.invoke(
           new ParallelSkipMergeSortTask<>(h-h0, null, arr,from, buf,0, len, ctx)
         );
@@ -120,7 +120,7 @@ public class ParallelSkipMergeSort
 
     @Override public <T> void sort( T seq, int from, int until, CompareRandomAccessor<T> acc )
     {
-      var ctx = new Acc<T>() {
+      Acc<T> ctx = new Acc<T>() {
         @Override public T malloc(int len) { return acc.malloc(len); }
         @Override public int    compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
         @Override public void      swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }
@@ -135,8 +135,8 @@ public class ParallelSkipMergeSort
     {
       if( arr.length < until ) throw new IndexOutOfBoundsException();
 
-      var elemType = arr.getClass().getComponentType();
-      var ctx = new AccArrObj<T>() {
+      Class<?> elemType = arr.getClass().getComponentType();
+      AccArrObj<T> ctx = new AccArrObj<T>() {
         @Override public T[] malloc( int len ) { return (T[]) Array.newInstance(elemType,len); }
         @Override public int compare( T[] a, int i, T[] b, int j ) { return cmp.compare(a[i], b[j]); }
       };
@@ -147,8 +147,8 @@ public class ParallelSkipMergeSort
     {
       if( arr.length < until ) throw new IndexOutOfBoundsException();
 
-      var elemType = arr.getClass().getComponentType();
-      var ctx = new AccArrObj<T>() {
+      Class<?> elemType = arr.getClass().getComponentType();
+      AccArrObj<T> ctx = new AccArrObj<T>() {
         @Override public T[] malloc( int len ) { return (T[]) Array.newInstance(elemType,len); }
         @Override public int compare( T[] a, int i, T[] b, int j ) { return a[i].compareTo(b[j]); }
       };

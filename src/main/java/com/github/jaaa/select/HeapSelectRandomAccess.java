@@ -45,9 +45,9 @@ public interface HeapSelectRandomAccess extends HeapSelectAccess, RandomShuffleA
     if( mid == until )
       return 0;
     int m =   mid - from,
-            n = until - mid;
-    var p = performance_average(m+1,n-1);
-    var q = performance_average(n,m);
+        n = until - mid;
+    long p = performance_average(m+1,n-1);
+    long q = performance_average(n,m);
     return min(p,q);
   }
 }

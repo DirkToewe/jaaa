@@ -229,7 +229,7 @@ public final class KiwiSortBiased
       @Override public void kiwiSortBiased_sortRun( int from, int until ) {
         for( int i=from; ++i < until; )
         {
-          var piv = seq[i];
+          T piv = seq[i];
                int lo = from;
           for( int hi = i-1,
              mid = hi;;

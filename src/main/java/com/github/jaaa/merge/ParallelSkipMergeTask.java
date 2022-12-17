@@ -79,7 +79,7 @@ public class ParallelSkipMergeTask<T> extends CountedCompleter<Void>
 // METHODS
   @Override public void compute()
   {
-    final var ctx = this.acc;
+    final ParallelSkipMerge.Accessor<? super T> ctx = this.acc;
     final T a = this.a,
             b = this.b,
             c = this.c;

@@ -1,20 +1,18 @@
 package com.github.jaaa.select;
 
+import com.github.jaaa.CompareSwapAccess;
 import com.github.jaaa.compare.ArgMaxAccess;
 import com.github.jaaa.compare.ArgMinAccess;
-import com.github.jaaa.CompareSwapAccess;
 import com.github.jaaa.fn.Int3Op;
 import com.github.jaaa.permute.BlockSwapAccess;
 
 import java.util.SplittableRandom;
 
-import static java.lang.Math.min;
-
 
 public interface QuickSelectAccess extends ArgMaxAccess, ArgMinAccess, CompareSwapAccess, HeapSelectAccess, BlockSwapAccess
 {
   default Int3Op quickSelect_newPivotChooser() {
-    var rng = new SplittableRandom();
+    SplittableRandom rng = new SplittableRandom();
     return (from,mid,until) -> {
       if( from > until-5 )
         throw new AssertionError();
@@ -57,7 +55,7 @@ public interface QuickSelectAccess extends ArgMaxAccess, ArgMinAccess, CompareSw
     if( 0 > from || from > mid | mid > until ) throw new IllegalArgumentException();
     if( mid == until ) return;
 
-    var choosePivot = quickSelect_newPivotChooser();
+    Int3Op choosePivot = quickSelect_newPivotChooser();
 
     while( from < mid && mid < until-1 && until-from > 10 && quickSelect_detSelect_performance(from,mid,until) > 2.1*(until - from) )
     {

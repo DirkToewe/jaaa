@@ -1,6 +1,6 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.*;
+import com.github.jaaa.CompareSwapAccess;
 import com.github.jaaa.compare.*;
 import com.github.jaaa.permute.Swap;
 
@@ -8,6 +8,7 @@ import java.nio.IntBuffer;
 import java.util.Comparator;
 
 import static java.lang.System.arraycopy;
+
 
 public final class InsertionAdaptiveSort
 {
@@ -220,7 +221,7 @@ public final class InsertionAdaptiveSort
 
     for( int i=from; ++i < until; )
     {
-      var piv = seq[i];
+      T piv = seq[i];
            int lo = from;
       for( int hi = i-1,
          mid = hi;;
@@ -246,7 +247,7 @@ public final class InsertionAdaptiveSort
 
     for( int i=from; ++i < until; )
     {
-      var piv = seq[i];
+      T piv = seq[i];
            int lo = from;
       for( int hi = i-1,
          mid = hi;;

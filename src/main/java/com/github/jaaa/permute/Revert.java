@@ -21,65 +21,65 @@ public class Revert
 
   public static <T> void revert( T[] arr ) {
     for( int i=0, j=arr.length; --j > i; i++ ) {
-      var tmp = arr[i];
-                arr[i] = arr[j];
-                         arr[j] = tmp;
+      T tmp = arr[i];
+              arr[i] = arr[j];
+                       arr[j] = tmp;
     }
   }
   public static void revert( byte[] arr ) {
     for( int i=0, j=arr.length; --j > i; i++ ) {
-      var tmp = arr[i];
-                arr[i] = arr[j];
-                         arr[j] = tmp;
+      byte tmp = arr[i];
+                 arr[i] = arr[j];
+                          arr[j] = tmp;
     }
   }
   public static void revert( short[] arr ) {
     for( int i=0, j=arr.length; --j > i; i++ ) {
-      var tmp = arr[i];
-                arr[i] = arr[j];
-                         arr[j] = tmp;
+      short tmp = arr[i];
+                  arr[i] = arr[j];
+                           arr[j] = tmp;
     }
   }
   public static void revert( int[] arr ) {
     for( int i=0, j=arr.length; --j > i; i++ ) {
-      var tmp = arr[i];
+      int tmp = arr[i];
                 arr[i] = arr[j];
                          arr[j] = tmp;
     }
   }
   public static void revert( long[] arr ) {
     for( int i=0, j=arr.length; --j > i; i++ ) {
-      var tmp = arr[i];
-                arr[i] = arr[j];
-                         arr[j] = tmp;
+      long tmp = arr[i];
+                 arr[i] = arr[j];
+                          arr[j] = tmp;
     }
   }
   public static void revert( char[] arr ) {
     for( int i=0, j=arr.length; --j > i; i++ ) {
-      var tmp = arr[i];
-                arr[i] = arr[j];
-                         arr[j] = tmp;
+      char tmp = arr[i];
+                 arr[i] = arr[j];
+                          arr[j] = tmp;
     }
   }
   public static void revert( float[] arr ) {
     for( int i=0, j=arr.length; --j > i; i++ ) {
-      var tmp = arr[i];
-                arr[i] = arr[j];
-                         arr[j] = tmp;
+      float tmp = arr[i];
+                  arr[i] = arr[j];
+                           arr[j] = tmp;
     }
   }
   public static void revert( double[] arr ) {
     for( int i=0, j=arr.length; --j > i; i++ ) {
-      var tmp = arr[i];
-                arr[i] = arr[j];
-                         arr[j] = tmp;
+      double tmp = arr[i];
+                   arr[i] = arr[j];
+                            arr[j] = tmp;
     }
   }
   public static void revert( boolean[] arr ) {
     for( int i=0, j=arr.length; --j > i; i++ ) {
-      var tmp = arr[i];
-                arr[i] = arr[j];
-                         arr[j] = tmp;
+      boolean tmp = arr[i];
+                    arr[i] = arr[j];
+                             arr[j] = tmp;
     }
   }
 
@@ -89,9 +89,9 @@ public class Revert
       throw new IllegalArgumentException();
 
     for( ; --until > from; from++ ) {
-      var tmp = arr[from];
-                arr[from] = arr[until];
-                            arr[until] = tmp;
+      T tmp = arr[from];
+              arr[from] = arr[until];
+                          arr[until] = tmp;
     }
   }
   public static void revert( byte[] arr, int from, int until )
@@ -100,7 +100,7 @@ public class Revert
       throw new IllegalArgumentException();
 
     for( ; --until > from; from++ ) {
-      var tmp = arr[from];
+      byte tmp = arr[from];
                 arr[from] = arr[until];
                             arr[until] = tmp;
     }
@@ -111,9 +111,9 @@ public class Revert
       throw new IllegalArgumentException();
 
     for( ; --until > from; from++ ) {
-      var tmp = arr[from];
-                arr[from] = arr[until];
-                            arr[until] = tmp;
+      short tmp = arr[from];
+                  arr[from] = arr[until];
+                              arr[until] = tmp;
     }
   }
   public static void revert( int[] arr, int from, int until )
@@ -122,7 +122,7 @@ public class Revert
       throw new IllegalArgumentException();
 
     for( ; --until > from; from++ ) {
-      var tmp = arr[from];
+      int tmp = arr[from];
                 arr[from] = arr[until];
                             arr[until] = tmp;
     }
@@ -133,9 +133,9 @@ public class Revert
       throw new IllegalArgumentException();
 
     for( ; --until > from; from++ ) {
-      var tmp = arr[from];
-                arr[from] = arr[until];
-                            arr[until] = tmp;
+      long tmp = arr[from];
+                 arr[from] = arr[until];
+                             arr[until] = tmp;
     }
   }
   public static void revert( char[] arr, int from, int until )
@@ -144,9 +144,9 @@ public class Revert
       throw new IllegalArgumentException();
 
     for( ; --until > from; from++ ) {
-      var tmp = arr[from];
-                arr[from] = arr[until];
-                            arr[until] = tmp;
+      char tmp = arr[from];
+                 arr[from] = arr[until];
+                             arr[until] = tmp;
     }
   }
   public static void revert( float[] arr, int from, int until )
@@ -155,9 +155,9 @@ public class Revert
       throw new IllegalArgumentException();
 
     for( ; --until > from; from++ ) {
-      var tmp = arr[from];
-                arr[from] = arr[until];
-                            arr[until] = tmp;
+      float tmp = arr[from];
+                  arr[from] = arr[until];
+                              arr[until] = tmp;
     }
   }
   public static void revert( double[] arr, int from, int until )
@@ -166,9 +166,9 @@ public class Revert
       throw new IllegalArgumentException();
 
     for( ; --until > from; from++ ) {
-      var tmp = arr[from];
-                arr[from] = arr[until];
-                            arr[until] = tmp;
+      double tmp = arr[from];
+                   arr[from] = arr[until];
+                               arr[until] = tmp;
     }
   }
   public static void revert( boolean[] arr, int from, int until )
@@ -177,9 +177,9 @@ public class Revert
       throw new IllegalArgumentException();
 
     for( ; --until > from; from++ ) {
-      var tmp = arr[from];
-                arr[from] = arr[until];
-                            arr[until] = tmp;
+      boolean tmp = arr[from];
+                    arr[from] = arr[until];
+                                arr[until] = tmp;
     }
   }
 

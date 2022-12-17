@@ -17,7 +17,7 @@ public interface KiwiSortAccess extends ArgMaxAccess, ArgMinAccess, BlockRotatio
 {
   int MIN_RUN_LEN = 16;
 
-  TimMergeAccessor<KiwiSortAccess> TIM_MERGE_ACCESSOR = new TimMergeAccessor<>()
+  TimMergeAccessor<KiwiSortAccess> TIM_MERGE_ACCESSOR = new TimMergeAccessor<KiwiSortAccess>()
   {
     @Override public KiwiSortAccess malloc( int len ) { throw new UnsupportedOperationException(); }
     @Override public int compare( KiwiSortAccess a, int i, KiwiSortAccess b, int j ) { return a.compare(i,j); }
@@ -30,7 +30,7 @@ public interface KiwiSortAccess extends ArgMaxAccess, ArgMinAccess, BlockRotatio
     // bufLen == (len-bufLen) / bufLen;
     if( len <  0 ) throw new IllegalArgumentException();
     if( len == 0 ) return 0;
-    var bufLenMin = nextDown( ceil( (sqrt(len*8d + 1) - 5) / 4 ) );
+    double bufLenMin = nextDown( ceil( (sqrt(len*8d + 1) - 5) / 4 ) );
     int                   exp = getExponent( max(0.5, bufLenMin) ),
             bufLen = 1 << exp+1,
     l = len-bufLen;
@@ -213,7 +213,7 @@ public interface KiwiSortAccess extends ArgMaxAccess, ArgMinAccess, BlockRotatio
    *  contains the largest <code>until-mid</code> elements from
    *  range <code>[from,until)</code> in sorted order.
    */
-  private void kiwiSort_selectAndSortR( int from, int mid, int until )
+  default void kiwiSort_selectAndSortR( int from, int mid, int until )
   {
     if( from < 0 || from > mid | mid > until ) throw new IllegalArgumentException();
     if( mid == until ) return;

@@ -74,7 +74,7 @@ public interface KatPawBiPartitionAccess extends PredicateSwapAccess, BlockSwapA
     // CHUNKIFY & EXTRACT BUFFERS
     // ==========================
     // Group up elements into chunks of size B while maintaining the order.
-    var ord = new Byte256();
+    Byte256 ord = new Byte256();
     int nA = 0, pos = from,
         nB = 0, p1  = from,
                 p256= -1; // <- position of last B-sized chunk to be collected as left buffer
@@ -219,8 +219,8 @@ public interface KatPawBiPartitionAccess extends PredicateSwapAccess, BlockSwapA
     int lg2 =  blockNum<2 ? 1 : log2Ceil(blockNum),
       nInts = (blockNum-1) / lg2;
 
-    var finishedEntries = new InPlacePartitionBufferBool(this, from-blockNum,           until,blockNum);
-    var         offsets = new InPlacePartitionBufferInt (this, from-blockNum-nInts*lg2, until+blockNum, lg2, nInts);
+    InPlacePartitionBufferBool finishedEntries = new InPlacePartitionBufferBool(this, from-blockNum,           until,blockNum);
+    InPlacePartitionBufferInt          offsets = new InPlacePartitionBufferInt (this, from-blockNum-nInts*lg2, until+blockNum, lg2, nInts);
 
     Int3Op permPartitionStableBlocks = (off, nBlocks, blockSize) ->
     {

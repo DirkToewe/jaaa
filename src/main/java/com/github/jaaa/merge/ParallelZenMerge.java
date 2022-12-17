@@ -84,7 +84,7 @@ public class ParallelZenMerge
       T b, int b0, int bLen,
       T c, int c0, CompareRandomAccessor<T> acc
     ) {
-      var ctx = new Acc<T>() {
+      Acc<T> ctx = new Acc<T>() {
         @Override public T malloc( int len ) { return acc.malloc(len); }
         @Override public  int   compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
         @Override public void      swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }

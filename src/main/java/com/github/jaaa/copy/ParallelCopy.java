@@ -42,7 +42,7 @@ public class ParallelCopy
       throw new IllegalArgumentException("Overlap not yet supported.");
     }
     else
-      copyRange(src,srcPos, dst,dstPos, length, new RandomAccessor<>() {
+      copyRange(src,srcPos, dst,dstPos, length, new RandomAccessor<T[]>() {
         @Override public T[] malloc( int len ) { throw new UnsupportedOperationException(); }
         @Override public void      swap( T[] a, int i, T[] b, int j ) { Swap.swap(a,i, b,j); }
         @Override public void copyRange( T[] a, int i, T[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }

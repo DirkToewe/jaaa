@@ -9,7 +9,7 @@ public final class Boxing
 // STATIC METHODS
   public static Boolean[] boxed( boolean[] input ) {
     int len = input.length;
-    var boxed = new Boolean[len];
+    Boolean[] boxed = new Boolean[len];
     for( int i=len; i-- > 0; )
       boxed[i] = input[i];
     return boxed;
@@ -17,7 +17,7 @@ public final class Boxing
 
   public static Byte[] boxed( byte[] input ) {
     int len = input.length;
-    var boxed = new Byte[len];
+    Byte[] boxed = new Byte[len];
     for( int i=len; i-- > 0; )
       boxed[i] = input[i];
     return boxed;
@@ -25,7 +25,7 @@ public final class Boxing
 
   public static Short[] boxed( short[] input ) {
     int len = input.length;
-    var boxed = new Short[len];
+    Short[] boxed = new Short[len];
     for( int i=len; i-- > 0; )
       boxed[i] = input[i];
     return boxed;
@@ -33,7 +33,7 @@ public final class Boxing
 
   public static Integer[] boxed( int[] input ) {
     int len = input.length;
-    var boxed = new Integer[len];
+    Integer[] boxed = new Integer[len];
     for( int i=len; i-- > 0; )
       boxed[i] = input[i];
     return boxed;
@@ -41,7 +41,7 @@ public final class Boxing
 
   public static Long[] boxed( long[] input ) {
     int len = input.length;
-    var boxed = new Long[len];
+    Long[] boxed = new Long[len];
     for( int i=len; i-- > 0; )
       boxed[i] = input[i];
     return boxed;
@@ -49,7 +49,7 @@ public final class Boxing
 
   public static Character[] boxed( char[] input ) {
     int len = input.length;
-    var boxed = new Character[len];
+    Character[] boxed = new Character[len];
     for( int i=len; i-- > 0; )
       boxed[i] = input[i];
     return boxed;
@@ -57,7 +57,7 @@ public final class Boxing
 
   public static Float[] boxed( float[] input ) {
     int len = input.length;
-    var boxed = new Float[len];
+    Float[] boxed = new Float[len];
     for( int i=len; i-- > 0; )
       boxed[i] = input[i];
     return boxed;
@@ -65,7 +65,7 @@ public final class Boxing
 
   public static Double[] boxed( double[] input ) {
     int len = input.length;
-    var boxed = new Double[len];
+    Double[] boxed = new Double[len];
     for( int i=len; i-- > 0; )
       boxed[i] = input[i];
     return boxed;
@@ -75,7 +75,7 @@ public final class Boxing
 
   public static boolean[] unboxed( Boolean[] input ) {
     int len = input.length;
-    var unboxed = new boolean[len];
+    boolean[] unboxed = new boolean[len];
     for( int i=len; i-- > 0; )
       unboxed[i] = input[i];
     return unboxed;
@@ -83,7 +83,7 @@ public final class Boxing
 
   public static byte[] unboxed( Byte[] input ) {
     int len = input.length;
-    var unboxed = new byte[len];
+    byte[] unboxed = new byte[len];
     for( int i=len; i-- > 0; )
       unboxed[i] = input[i];
     return unboxed;
@@ -91,7 +91,7 @@ public final class Boxing
 
   public static short[] unboxed( Short[] input ) {
     int len = input.length;
-    var unboxed = new short[len];
+    short[] unboxed = new short[len];
     for( int i=len; i-- > 0; )
       unboxed[i] = input[i];
     return unboxed;
@@ -99,7 +99,7 @@ public final class Boxing
 
   public static int[] unboxed( Integer[] input ) {
     int len = input.length;
-    var unboxed = new int[len];
+    int[] unboxed = new int[len];
     for( int i=len; i-- > 0; )
       unboxed[i] = input[i];
     return unboxed;
@@ -107,7 +107,7 @@ public final class Boxing
 
   public static long[] unboxed( Long[] input ) {
     int len = input.length;
-    var unboxed = new long[len];
+    long[] unboxed = new long[len];
     for( int i=len; i-- > 0; )
       unboxed[i] = input[i];
     return unboxed;
@@ -115,7 +115,7 @@ public final class Boxing
 
   public static char[] unboxed( Character[] input ) {
     int len = input.length;
-    var unboxed = new char[len];
+    char[] unboxed = new char[len];
     for( int i=len; i-- > 0; )
       unboxed[i] = input[i];
     return unboxed;
@@ -123,7 +123,7 @@ public final class Boxing
 
   public static float[] unboxed( Float[] input ) {
     int len = input.length;
-    var unboxed = new float[len];
+    float[] unboxed = new float[len];
     for( int i=len; i-- > 0; )
       unboxed[i] = input[i];
     return unboxed;
@@ -131,7 +131,7 @@ public final class Boxing
 
   public static double[] unboxed( Double[] input ) {
     int len = input.length;
-    var unboxed = new double[len];
+    double[] unboxed = new double[len];
     for( int i=len; i-- > 0; )
       unboxed[i] = input[i];
     return unboxed;

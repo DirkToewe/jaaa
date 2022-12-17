@@ -1,5 +1,7 @@
 package com.github.jaaa.util;
 
+import java.util.Objects;
+
 import static java.lang.Math.*;
 
 
@@ -71,11 +73,33 @@ public final class IMath
     return y << shift;
   }
 
-  public record       GcdxInt( int gcd, int bezoutL, int bezoutR ) {}
-  public static final GcdxInt GCDX_INT_ZERO = new GcdxInt(0,0,0);
-  public static       GcdxInt gcdx( int a, int b )
+
+  public static final class GcdxInt {
+    public final int gcd, bezoutL, bezoutR;
+    public static final GcdxInt ZERO = new GcdxInt(0,0,0);
+    public GcdxInt of( int gcd, int bezoutL, int bezoutR ) {
+      return new GcdxInt(gcd,bezoutL,bezoutR);
+    }
+    private GcdxInt( int _gcd, int _bezoutL, int _bezoutR ) {
+      gcd = _gcd;
+      bezoutL = _bezoutL;
+      bezoutR = _bezoutR;
+    }
+    @Override public boolean equals( Object obj ) {
+      if( obj == this ) return true;
+      if( !(obj instanceof GcdxInt) ) return false;
+      GcdxInt gcdx = (GcdxInt) obj;
+      return gcdx.    gcd == gcd
+          && gcdx.bezoutL == bezoutL
+          && gcdx.bezoutR == bezoutR;
+    }
+    @Override public int hashCode() {
+      return Objects.hash(gcd, bezoutL, bezoutR);
+    }
+  }
+  public static GcdxInt gcdx( int a, int b )
   {
-    if( a == 0 && b == 0 ) return GCDX_INT_ZERO;
+    if( a == 0 && b == 0 ) return GcdxInt.ZERO;
     if( a <  0 || b <  0 ) throw new IllegalArgumentException();
     // https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
     // use negative a and b because -Int.MinValue == Int.MinValue
@@ -92,11 +116,33 @@ public final class IMath
     return new GcdxInt(r,s,t);
   }
 
-  public record       GcdxLong( long gcd, long bezoutL, long bezoutR ) {}
-  public static final GcdxLong GCDX_LONG_ZERO = new GcdxLong(0,0,0);
-  public static       GcdxLong gcdx( long a, long b )
+
+  public static final class GcdxLong {
+    public final long gcd, bezoutL, bezoutR;
+    public static final GcdxLong ZERO = new GcdxLong(0,0,0);
+    public  GcdxLong of( long gcd, long bezoutL, long bezoutR ) {
+      return new GcdxLong(gcd,bezoutL,bezoutR);
+    }
+    private GcdxLong( long _gcd, long _bezoutL, long _bezoutR ) {
+      gcd = _gcd;
+      bezoutL = _bezoutL;
+      bezoutR = _bezoutR;
+    }
+    @Override public boolean equals( Object obj ) {
+      if( obj == this ) return true;
+      if( !(obj instanceof GcdxLong) ) return false;
+      GcdxLong gcdx = (GcdxLong) obj;
+      return gcdx.    gcd == gcd
+          && gcdx.bezoutL == bezoutL
+          && gcdx.bezoutR == bezoutR;
+    }
+    @Override public int hashCode() {
+      return Objects.hash(gcd, bezoutL, bezoutR);
+    }
+  }
+  public static GcdxLong gcdx( long a, long b )
   {
-    if( a == 0 && b == 0 ) return GCDX_LONG_ZERO;
+    if( a == 0 && b == 0 ) return GcdxLong.ZERO;
     if( a <  0 || b <  0 ) throw new IllegalArgumentException();
     // https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
     // use negative a and b because -Int.MinValue == Int.MinValue
@@ -105,10 +151,10 @@ public final class IMath
          t = 0L, tNew = 1L;
 
     while( rNew != 0 ) {
-      var             q = r / rNew;
-      var rNext = r - q*rNew; r = rNew; rNew = rNext;
-      var sNext = s - q*sNew; s = sNew; sNew = sNext;
-      var tNext = t - q*tNew; t = tNew; tNew = tNext;
+      long             q = r / rNew;
+      long rNext = r - q*rNew; r = rNew; rNew = rNext;
+      long sNext = s - q*sNew; s = sNew; sNew = sNext;
+      long tNext = t - q*tNew; t = tNew; tNew = tNext;
     }
 
     return new GcdxLong(r,s,t);
@@ -249,9 +295,9 @@ public final class IMath
   public static int floorPow3( int num ) {
     if( num < 1 )
       throw new ArithmeticException();
-    var pow = 43046721L;
-    if( pow > num )
-        pow = 1;
+    long pow = 43046721L;
+    if(  pow > num )
+         pow = 1;
     long
     p = pow * 6561; if( p <= num ) pow = p;
     p = pow * 81;   if( p <= num ) pow = p;

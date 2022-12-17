@@ -150,7 +150,7 @@ public final class TimSort
                       until = min(from+minRunLen, until);
         for(; start < until; start++)
         {
-          var piv = arr[start];
+          T piv = arr[start];
           int lo = from,
               hi = start;
           while( lo < hi ) {  int mid = lo+hi >>> 1;
@@ -187,7 +187,7 @@ public final class TimSort
                       until = min(from+minRunLen, until);
         for(; start < until; start++)
         {
-          var piv = arr[start];
+          T piv = arr[start];
           int lo = from,
               hi = start;
           while( lo < hi ) {     int mid = lo+hi >>> 1;

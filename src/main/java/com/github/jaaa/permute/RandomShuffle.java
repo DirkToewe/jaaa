@@ -51,12 +51,12 @@ public class RandomShuffle
   }
 
   public static int[] shuffled( int[] arr ) {
-    var           result = arr.clone();
+    int[]         result = arr.clone();
     randomShuffle(result);
     return        result;
   }
   public static int[] shuffled( int[] arr, IntBinaryOperator randInt ) {
-    var           result = arr.clone();
+    int[]         result = arr.clone();
     randomShuffle(result, randInt);
     return        result;
   }

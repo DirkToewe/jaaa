@@ -11,7 +11,7 @@ public interface QuickSortAccess extends InsertionAdaptiveSortAccess, HeapSelect
 {
   default              void quickSort_sortRun(int from, int until ) { insertionAdaptiveSort(from,until); }
   default IntBinaryOperator quickSort_newPivotChooser() {
-    var rng = new SplittableRandom();
+    SplittableRandom rng = new SplittableRandom();
     return (from,until) -> {
       if( from > until-5 )
         throw new AssertionError();

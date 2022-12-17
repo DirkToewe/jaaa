@@ -59,7 +59,7 @@ public class ParallelZenMergeTask<T> extends CountedCompleter<Void>
   // METHODS
   @Override public void compute()
   {
-    final var acc = this.acc;
+    final ParallelZenMerge.Accessor<? super T> acc = this.acc;
     final T a = this.a,
             b = this.b,
             c = this.c;

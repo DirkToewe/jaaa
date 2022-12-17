@@ -221,7 +221,7 @@ public final class InsertionSort
 
     for( int i=from; ++i < until; )
     {
-      var piv = seq[i];
+      T piv = seq[i];
            int lo = from;
       for( int hi = i;; )
       {
@@ -246,7 +246,7 @@ public final class InsertionSort
 
     for( int i=from; ++i < until; )
     {
-      var piv = seq[i];
+      T piv = seq[i];
            int lo = from;
       for( int hi = i;; )
       {

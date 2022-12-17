@@ -18,7 +18,7 @@ public interface KiwiSortBiasedAccess extends ArgMaxAccess, ArgMinAccess, BlockR
 {
   int MIN_RUN_LEN = 16;
 
-  TimMergeAccessor<KiwiSortBiasedAccess> TIM_MERGE_ACCESSOR = new TimMergeAccessor<>()
+  TimMergeAccessor<KiwiSortBiasedAccess> TIM_MERGE_ACCESSOR = new TimMergeAccessor<KiwiSortBiasedAccess>()
   {
     @Override public KiwiSortBiasedAccess malloc( int len ) { throw new UnsupportedOperationException(); }
     @Override public int compare( KiwiSortBiasedAccess a, int i, KiwiSortBiasedAccess b, int j ) { return a.compare(i,j); }
@@ -31,7 +31,7 @@ public interface KiwiSortBiasedAccess extends ArgMaxAccess, ArgMinAccess, BlockR
     // bufLen == (len-bufLen) / bufLen;
     if( len <  0 ) throw new IllegalArgumentException();
     if( len == 0 ) return 0;
-    var bufLenMin = nextDown( ceil( (sqrt(len*8d + 1) - 5) / 4 ) );
+    double bufLenMin = nextDown( ceil( (sqrt(len*8d + 1) - 5) / 4 ) );
     int                   exp = getExponent( max(0.5, bufLenMin) ),
             bufLen = 1 << exp+1,
     l = len-bufLen;
@@ -228,7 +228,7 @@ public interface KiwiSortBiasedAccess extends ArgMaxAccess, ArgMinAccess, BlockR
    *  contains the largest <code>until-mid</code> elements from
    *  range <code>[from,until)</code> in sorted order.
    */
-  private void kiwiSortBiased_selectAndSortR( int from, int mid, int until )
+  default void kiwiSortBiased_selectAndSortR( int from, int mid, int until )
   {
     if( from < 0 || from > mid | mid > until ) throw new IllegalArgumentException();
     if( mid == until ) return;

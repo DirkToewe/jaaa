@@ -14,13 +14,13 @@ public class Concat
   public static byte[] concat( byte[]... arrays )
   {
     int len=0;
-    for( var arr: arrays )
+    for( byte[] arr: arrays )
       len = addExact(len, arr.length);
 
-    var result = new byte[len];
+    byte[] result = new byte[len];
 
     int off=0;
-    for( var arr: arrays ) {
+    for( byte[] arr: arrays ) {
       arraycopy(arr,0, result,off, arr.length);
       off += arr.length;
     }
@@ -31,13 +31,13 @@ public class Concat
   public static short[] concat( short[]... arrays )
   {
     int len=0;
-    for( var arr: arrays )
+    for( short[] arr: arrays )
       len = addExact(len, arr.length);
 
-    var result = new short[len];
+    short[] result = new short[len];
 
     int off=0;
-    for( var arr: arrays ) {
+    for( short[] arr: arrays ) {
       arraycopy(arr,0, result,off, arr.length);
       off += arr.length;
     }
@@ -48,13 +48,13 @@ public class Concat
   public static int[] concat( int[]... arrays )
   {
     int len=0;
-    for( var arr: arrays )
+    for( int[] arr: arrays )
       len = addExact(len, arr.length);
 
-    var result = new int[len];
+    int[] result = new int[len];
 
     int off=0;
-    for( var arr: arrays ) {
+    for( int[] arr: arrays ) {
       arraycopy(arr,0, result,off, arr.length);
       off += arr.length;
     }
@@ -65,13 +65,13 @@ public class Concat
   public static long[] concat( long[]... arrays )
   {
     int len=0;
-    for( var arr: arrays )
+    for( long[] arr: arrays )
       len = addExact(len, arr.length);
 
-    var result = new long[len];
+    long[] result = new long[len];
 
     int off=0;
-    for( var arr: arrays ) {
+    for( long[] arr: arrays ) {
       arraycopy(arr,0, result,off, arr.length);
       off += arr.length;
     }
@@ -82,13 +82,13 @@ public class Concat
   public static char[] concat( char[]... arrays )
   {
     int len=0;
-    for( var arr: arrays )
+    for( char[] arr: arrays )
       len = addExact(len, arr.length);
 
-    var result = new char[len];
+    char[] result = new char[len];
 
     int off=0;
-    for( var arr: arrays ) {
+    for( char[] arr: arrays ) {
       arraycopy(arr,0, result,off, arr.length);
       off += arr.length;
     }
@@ -99,13 +99,13 @@ public class Concat
   public static float[] concat( float[]... arrays )
   {
     int len=0;
-    for( var arr: arrays )
+    for( float[] arr: arrays )
       len = addExact(len, arr.length);
 
-    var result = new float[len];
+    float[] result = new float[len];
 
     int off=0;
-    for( var arr: arrays ) {
+    for( float[] arr: arrays ) {
       arraycopy(arr,0, result,off, arr.length);
       off += arr.length;
     }
@@ -116,13 +116,13 @@ public class Concat
   public static double[] concat( double[]... arrays )
   {
     int len=0;
-    for( var arr: arrays )
+    for( double[] arr: arrays )
       len = addExact(len, arr.length);
 
-    var result = new double[len];
+    double[] result = new double[len];
 
     int off=0;
-    for( var arr: arrays ) {
+    for( double[] arr: arrays ) {
       arraycopy(arr,0, result,off, arr.length);
       off += arr.length;
     }

@@ -25,9 +25,9 @@ public class ParallelCopyTask<T> extends CountedCompleter<T>
   {
     int height = this.height,
         length = this.length;
-    final var acc = this.acc;
-    final int a0 = this.a0, b0 = this.b0;
-    final  T  a  = this.a,  b  = this.b;
+    CopyAccessor<? super T> acc = this.acc;
+    int a0 = this.a0, b0 = this.b0;
+    T   a  = this.a,  b  = this.b;
     setPendingCount(height);
     while( 0 < height ) {                     int len = length>>>1;
       new ParallelCopyTask<>(--height, this, a,a0+len, b,b0+len, length-len, acc).fork();
