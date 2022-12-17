@@ -5,9 +5,7 @@ import net.jqwik.api.*;
 import net.jqwik.api.Tuple.Tuple2;
 import net.jqwik.api.constraints.Size;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.TreeSet;
+import java.util.*;
 
 import static com.github.jaaa.Boxing.boxed;
 import static java.lang.Math.max;
@@ -27,13 +25,37 @@ public class ExtractSortBufOrdinalAccessTest
 {
   private static final int MAX_SIZE = 8192;
 
-  private record ExtractSortBufArgs<T>( T[] arr, int from, int until, int desiredLen, int destination )
+  private static final class ExtractSortBufArgs<T>
   {
+    public final T[] arr;
+    public final int from, until, desiredLen, destination;
+    private ExtractSortBufArgs( T[] _arr, int _from, int _until, int _desiredLen, int _destination ) {
+      arr = _arr;
+      from = _from;
+      until = _until;
+      desiredLen = _desiredLen;
+      destination = _destination;
+    }
     @Override public String toString() {
       return format(
         "{\n  arr: %s,\n  from: %d, until: %d, desiredLen: %d, destination: %d\n}",
         Arrays.toString(arr), from,until, desiredLen, destination
       );
+    }
+    @Override public boolean equals( Object obj ) {
+      if( this == obj ) return true;
+      if( !(obj instanceof ExtractSortBufArgs) ) return false;
+      ExtractSortBufArgs<?> that = (ExtractSortBufArgs<?>) obj;
+      return from == that.from
+         && until == that.until
+         && desiredLen == that.desiredLen
+         && destination == that.destination
+         && Arrays.equals(arr, that.arr);
+    }
+    @Override public int hashCode() {
+      int result = Objects.hash(from, until, desiredLen, destination);
+      result = 31 * result + Arrays.hashCode(arr);
+      return result;
     }
   }
 
@@ -54,7 +76,7 @@ public class ExtractSortBufOrdinalAccessTest
       return integers().between(1, 16).flatMap(
          len -> integers().between(0, (1<<len-1)-1).flatMap(
            bits -> {
-             var arr = new byte[len];
+             byte[] arr = new byte[len];
              for( int i=1; i < len; i++ ) {
                arr[i] = arr[i-1];
                arr[i]+= 1 & bits>>>i-1;
@@ -94,8 +116,8 @@ public class ExtractSortBufOrdinalAccessTest
         desLen = args.desiredLen,
            dst = args.destination;
 
-      var ref = args.arr.clone();
-      var tst = ref.clone();
+      T[] ref = args.arr.clone(),
+          tst = ref.clone();
 
       class Acc implements ExtractSortBufOrdinalAccess {
         long nSwaps = 0,
@@ -104,15 +126,15 @@ public class ExtractSortBufOrdinalAccessTest
         @Override public int compare( int i, int j ) { ++nComps; return cmp.compare(tst[i], tst[j]); }
       }
 
-      var set = new TreeSet<>(cmp);
+      Set<T> set = new TreeSet<>(cmp);
       stream(ref, from,until).forEach(set::add);
 
-      var           acc = new Acc();
+      Acc           acc = new Acc();
       int nUnique = acc.extractSortBuf_ordinal_l_sorted(from,until, desLen, dst);
 
       assertThat(nUnique).isEqualTo( min(desLen, set.size()) );
 
-      var buf = copyOfRange(tst, dst,dst+nUnique);
+      T[] buf = copyOfRange(tst, dst,dst+nUnique);
 
       assertThat(buf).isSortedAccordingTo(cmp);
       assertThat(set).containsAll( asList(buf) );
@@ -145,7 +167,7 @@ public class ExtractSortBufOrdinalAccessTest
     //    @Property                         void extractsStably_withRange_String    ( @ForAll("extractMergeBufArgs_withRange_String"    ) ExtractMergeBufArgs<String   > sample, @ForAll Comparator<String   > cmp ) { extractsStably(sample,cmp); }
     <T extends Comparable<? super T>> void extractsStably                     (ExtractSortBufArgs<T> args, Comparator<? super T> _cmp )
     {
-      var raw = args.arr;
+      T[] raw = args.arr;
       int from = args.from,
          until = args.until,
         desLen = args.desiredLen,
@@ -155,7 +177,7 @@ public class ExtractSortBufOrdinalAccessTest
       @SuppressWarnings("unchecked")
       Tuple2<T,Integer>[] ref = range(0,raw.length).mapToObj( i -> Tuple.of(raw[i],i) ).toArray(Tuple2[]::new);
       Arrays.sort(ref, from,until, cmp);
-      var tst = ref.clone();
+      Tuple2<T,Integer>[] tst = ref.clone();
 
       class Acc implements ExtractSortBufOrdinalAccess {
         long nSwaps = 0,
@@ -164,15 +186,15 @@ public class ExtractSortBufOrdinalAccessTest
         @Override public int compare( int i, int j ) { ++nComps; return cmp.compare(tst[i], tst[j]); }
       }
 
-      var set = new TreeSet<>(cmp);
+      Set<Tuple2<T,Integer>> set = new TreeSet<>(cmp);
       stream(ref, from,until).forEach(set::add);
 
-      var           acc = new Acc();
+      Acc           acc = new Acc();
       int nUnique = acc.extractSortBuf_ordinal_l_sorted(from,until, desLen, dst);
 
       assertThat(nUnique).isEqualTo( min(desLen, set.size()) );
 
-      var buf = copyOfRange(tst, dst,dst+nUnique);
+      Tuple2<T,Integer>[] buf = copyOfRange(tst, dst,dst+nUnique);
 
       assertThat(buf).isSortedAccordingTo(cmp);
       assertThat(set).containsAll( asList(buf) );

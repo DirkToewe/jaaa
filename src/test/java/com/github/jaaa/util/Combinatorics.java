@@ -110,7 +110,7 @@ public class Combinatorics
       if( size <= 0 ) return false;
       --size;
 
-      var next = new byte[n];
+      byte[] next = new byte[n];
       long rem = off++;
       for( byte i=0; i < next.length; ) {
              next[i] = i;
@@ -127,7 +127,7 @@ public class Combinatorics
       assert size >= 0;
       if( size <= 0 ) return;
 
-      var perm = new byte[n];
+      byte[] perm = new byte[n];
       long rem = off++;
       for( byte i=0; rem > 0; ) {
         byte j = i++;
@@ -141,7 +141,7 @@ public class Combinatorics
 
       for(;;)
       {
-        var next = new byte[n];
+        byte[] next = new byte[n];
         for( byte i=0; i < perm.length; i++ ) {
           next[i] = i;
           swap(next, i,perm[i]);
@@ -161,7 +161,7 @@ public class Combinatorics
         return null;
 
       long half = size>>>1;
-      var result = new PermutationSpliterator(n,off,half);
+      PermutationSpliterator result = new PermutationSpliterator(n,off,half);
       off  += half;
       size -= half;
       return result;

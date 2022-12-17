@@ -7,6 +7,7 @@ import net.jqwik.api.constraints.Size;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.TreeSet;
 
 import static com.github.jaaa.Boxing.boxed;
@@ -27,13 +28,37 @@ public class ExtractMergeBufOrdinalAccessTest
 {
   private static final int MAX_SIZE = 8192;
 
-  private record ExtractMergeBufArgs<T>( T[] arr, int from, int until, int desiredLen, int destination )
+  private static final class ExtractMergeBufArgs<T>
   {
+    public final T[] arr;
+    public final int from, until, desiredLen, destination;
+    private ExtractMergeBufArgs( T[] _arr, int _from, int _until, int _desiredLen, int _destination ) {
+      arr = _arr;
+      from = _from;
+      until = _until;
+      desiredLen = _desiredLen;
+      destination = _destination;
+    }
     @Override public String toString() {
       return format(
         "{\n  arr: %s,\n  from: %d, until: %d, desiredLen: %d, destination: %d\n}",
         Arrays.toString(arr), from,until, desiredLen, destination
       );
+    }
+    @Override public boolean equals( Object obj ) {
+      if( this == obj ) return true;
+      if( !(obj instanceof ExtractMergeBufArgs) ) return false;
+      ExtractMergeBufArgs<?> that = (ExtractMergeBufArgs<?>) obj;
+      return        from == that.from
+          &&       until == that.until
+          &&  desiredLen == that.desiredLen
+          && destination == that.destination
+          && Arrays.equals(arr, that.arr);
+    }
+    @Override public int hashCode() {
+      int result = Objects.hash(from, until, desiredLen, destination);
+      result = 31 * result + Arrays.hashCode(arr);
+      return result;
     }
   }
 
@@ -54,7 +79,7 @@ public class ExtractMergeBufOrdinalAccessTest
       return   Arbitraries.integers().between(1, 16).flatMap(
         len -> Arbitraries.integers().between(0, (1<<len-1)-1).flatMap(
           bits -> {
-            var arr = new byte[len];
+            byte[] arr = new byte[len];
             for( int i=1; i < len; i++ ) {
               arr[i] = arr[i-1];
               arr[i]+= 1 & bits>>>i-1;
@@ -95,9 +120,9 @@ public class ExtractMergeBufOrdinalAccessTest
         desLen = args.desiredLen,
            dst = args.destination;
 
-      var ref = args.arr.clone();
+      T[] ref = args.arr.clone();
       Arrays.sort(ref, from,until, cmp);
-      var tst = ref.clone();
+      T[] tst = ref.clone();
 
       class Acc implements ExtractMergeBufOrdinalAccess {
         long nSwaps = 0;
@@ -105,7 +130,7 @@ public class ExtractMergeBufOrdinalAccessTest
         @Override public int compare( int i, int j ) { return cmp.compare(tst[i], tst[j]); }
       }
 
-      var           acc = new Acc();
+      Acc           acc = new Acc();
       int nUnique = acc.extractMergeBuf_ordinal_l_min_sorted(from,until, desLen, dst);
 
       assertThat(acc.nSwaps).isLessThanOrEqualTo(
@@ -116,7 +141,7 @@ public class ExtractMergeBufOrdinalAccessTest
 
       assertThat(nUnique).isBetween(0 < desLen && from < until ? 1 : 0, desLen);
 
-      var buf = copyOfRange(tst, dst,dst+nUnique);
+      T[] buf = copyOfRange(tst, dst,dst+nUnique);
 
       assertThat(buf).isEqualTo(
         stream(ref, from,until).filter(new TreeSet<>(cmp)::add).limit(desLen).toArray(Object[]::new)
@@ -143,7 +168,7 @@ public class ExtractMergeBufOrdinalAccessTest
 //    @Property                         void extractsStably_withRange_String    ( @ForAll("extractMergeBufArgs_withRange_String"    ) ExtractMergeBufArgs<String   > sample, @ForAll Comparator<String   > cmp ) { extractsStably(sample,cmp); }
     <T extends Comparable<? super T>> void extractsStably                     ( ExtractMergeBufArgs<T> args, Comparator<? super T> _cmp )
     {
-      var raw = args.arr;
+      T[] raw = args.arr;
       int from = args.from,
          until = args.until,
         desLen = args.desiredLen,
@@ -153,7 +178,7 @@ public class ExtractMergeBufOrdinalAccessTest
       @SuppressWarnings("unchecked")
       Tuple2<T,Integer>[] ref = range(0,raw.length).mapToObj( i -> Tuple.of(raw[i],i) ).toArray(Tuple2[]::new);
       Arrays.sort(ref, from,until, cmp);
-      var tst = ref.clone();
+      Tuple2<T,Integer>[] tst = ref.clone();
 
       class Acc implements ExtractMergeBufOrdinalAccess {
         long nSwaps = 0;
@@ -161,7 +186,7 @@ public class ExtractMergeBufOrdinalAccessTest
         @Override public int compare( int i, int j ) { return cmp.compare(tst[i], tst[j]); }
       }
 
-      var           acc = new Acc();
+      Acc           acc = new Acc();
       int nUnique = acc.extractMergeBuf_ordinal_l_min_sorted(from,until, desLen, dst);
 
       assertThat(acc.nSwaps).isLessThanOrEqualTo(
@@ -172,7 +197,7 @@ public class ExtractMergeBufOrdinalAccessTest
 
       assertThat(nUnique).isBetween(0 < desLen && from < until ? 1 : 0, desLen);
 
-      var buf = copyOfRange(tst, dst,dst+nUnique);
+      Tuple2<T,Integer>[] buf = copyOfRange(tst, dst,dst+nUnique);
 
       assertThat(buf).isEqualTo(
         stream(ref, from,until).filter(new TreeSet<>(cmp)::add).limit(desLen).toArray(Tuple2[]::new)
@@ -194,7 +219,7 @@ public class ExtractMergeBufOrdinalAccessTest
       return   Arbitraries.integers().between(1, 16).flatMap(
         len -> Arbitraries.integers().between(0, (1<<len-1)-1).flatMap(
           bits -> {
-            var arr = new byte[len];
+            byte[] arr = new byte[len];
             for( int i=1; i < len; i++ ) {
               arr[i] = arr[i-1];
               arr[i]+= 1 & bits>>>i-1;
@@ -235,9 +260,8 @@ public class ExtractMergeBufOrdinalAccessTest
         desLen = args.desiredLen,
            dst = args.destination;
 
-      var ref = args.arr.clone();
-      Arrays.sort(ref, from,until, cmp);
-      var tst = ref.clone();
+      T[] ref = args.arr.clone(); Arrays.sort(ref, from,until, cmp);
+      T[] tst = ref.clone();
 
       class Acc implements ExtractMergeBufOrdinalAccess {
         long nSwaps = 0;
@@ -245,7 +269,7 @@ public class ExtractMergeBufOrdinalAccessTest
         @Override public int compare( int i, int j ) { return cmp.compare(tst[i], tst[j]); }
       }
 
-      var           acc = new Acc();
+      Acc           acc = new Acc();
       int nUnique = acc.extractMergeBuf_ordinal_l_min_unsorted(from,until, desLen, dst);
 
       assertThat(acc.nSwaps).isLessThanOrEqualTo(
@@ -255,7 +279,7 @@ public class ExtractMergeBufOrdinalAccessTest
 
       assertThat(nUnique).isBetween(0 < desLen && from < until ? 1 : 0, desLen);
 
-      var buf = copyOfRange(tst, dst,dst+nUnique);
+      T[] buf = copyOfRange(tst, dst,dst+nUnique);
       Arrays.sort(buf, cmp);
 
       assertThat(buf).isEqualTo(
@@ -283,17 +307,17 @@ public class ExtractMergeBufOrdinalAccessTest
     //    @Property                         void extractsStably_withRange_String    ( @ForAll("extractMergeBufArgs_withRange_String"    ) ExtractMergeBufArgs<String   > sample, @ForAll Comparator<String   > cmp ) { extractsStably(sample,cmp); }
     <T extends Comparable<? super T>> void extractsStably                     ( ExtractMergeBufArgs<T> args, Comparator<? super T> _cmp )
     {
-      var raw = args.arr;
+      T[] raw = args.arr;
       int from = args.from,
-              until = args.until,
-              desLen = args.desiredLen,
-              dst = args.destination;
+         until = args.until,
+        desLen = args.desiredLen,
+           dst = args.destination;
       Comparator<Tuple2<T,Integer>> cmp = comparing(Tuple2::get1, _cmp);
 
       @SuppressWarnings("unchecked")
       Tuple2<T,Integer>[] ref = range(0,raw.length).mapToObj( i -> Tuple.of(raw[i],i) ).toArray(Tuple2[]::new);
       Arrays.sort(ref, from,until, cmp);
-      var tst = ref.clone();
+      Tuple2<T,Integer>[] tst = ref.clone();
 
       class Acc implements ExtractMergeBufOrdinalAccess {
         long nSwaps = 0;
@@ -301,7 +325,7 @@ public class ExtractMergeBufOrdinalAccessTest
         @Override public int compare( int i, int j ) { return cmp.compare(tst[i], tst[j]); }
       }
 
-      var           acc = new Acc();
+      Acc           acc = new Acc();
       int nUnique = acc.extractMergeBuf_ordinal_l_min_unsorted(from,until, desLen, dst);
 
       assertThat(acc.nSwaps).isLessThanOrEqualTo(
@@ -311,7 +335,7 @@ public class ExtractMergeBufOrdinalAccessTest
 
       assertThat(nUnique).isBetween(0 < desLen && from < until ? 1 : 0, desLen);
 
-      var buf = copyOfRange(tst, dst,dst+nUnique);
+      Tuple2<T,Integer>[] buf = copyOfRange(tst, dst,dst+nUnique);
       Arrays.sort(buf, cmp);
 
       assertThat(buf).isEqualTo(

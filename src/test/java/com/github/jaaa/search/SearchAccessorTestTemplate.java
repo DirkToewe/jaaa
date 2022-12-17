@@ -100,15 +100,15 @@ public abstract class SearchAccessorTestTemplate
     @Override public int maxArraySize() { return SearchAccessorTestTemplate.this.maxArraySize(); }
     @Override public <T extends Comparable<? super T>> void twoWithRange( WithRange<T[]> valSample, WithIndex<T[]> keySample, Comparator<? super T> cmp )
     {
-      var acc = new Acc<>(valSample, keySample, cmp);
+      Acc<T> acc = new Acc<>(valSample, keySample, cmp);
 
       assertThat(acc.from ).isBetween(       0,acc.vals.length);
       assertThat(acc.until).isBetween(acc.from,acc.vals.length);
       assertThat(acc.iKey ).isBetween(       0,acc.keys.length);
 
       Arrays.sort(acc.vals, acc.from,acc.until, cmp);
-      var valCpy = acc.vals.clone();
-      var keyCpy = acc.keys.clone();
+      T[] valCpy = acc.vals.clone();
+      T[] keyCpy = acc.keys.clone();
 
       int i = testImpl(createAccessor(acc), cmp, acc.vals, acc.from, acc.until, acc.keys, acc.iKey);
       assertThat(i).isNotNegative();
@@ -136,7 +136,7 @@ public abstract class SearchAccessorTestTemplate
     {
       int i = acc.search(vals,from,until, keys,iKey);
 
-      var key = keys[iKey];
+      T key = keys[iKey];
       if( i < 0 ) {
           i = ~i;       assertThat(i).isBetween(from,until);
         if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
@@ -158,7 +158,7 @@ public abstract class SearchAccessorTestTemplate
     {
       int i = acc.searchL(vals,from,until, keys,iKey);
 
-      var key = keys[iKey];
+      T key = keys[iKey];
       if( i < 0 ) {
           i = ~i;       assertThat(i).isBetween(from,until);
         if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
@@ -181,7 +181,7 @@ public abstract class SearchAccessorTestTemplate
     {
       int i = acc.searchR(vals,from,until, keys,iKey);
 
-      var key = keys[iKey];
+      T key = keys[iKey];
       if( i < 0 ) {
           i = ~i;       assertThat(i).isBetween(from,until);
         if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan(key);
@@ -205,7 +205,7 @@ public abstract class SearchAccessorTestTemplate
       int i = acc.searchGap(vals,from,until, keys,iKey);
       assertThat(i).isBetween(from,until);
 
-      var key = keys[iKey];
+      T key = keys[iKey];
       if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
       if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).   isLessThanOrEqualTo(key);
 
@@ -221,7 +221,7 @@ public abstract class SearchAccessorTestTemplate
       int i = acc.searchGapL(vals,from,until, keys,iKey);
       assertThat(i).isBetween(from,until);
 
-      var key = keys[iKey];
+      T key = keys[iKey];
       if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThanOrEqualTo(key);
       if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).isLessThan            (key);
 
@@ -237,7 +237,7 @@ public abstract class SearchAccessorTestTemplate
       int i = acc.searchGapR(vals,from,until, keys,iKey);
       assertThat(i).isBetween(from,until);
 
-      var key = keys[iKey];
+      T key = keys[iKey];
       if( i < until ) assertThat(vals[i  ]).usingComparator(cmp).isGreaterThan      (key);
       if( i > from  ) assertThat(vals[i-1]).usingComparator(cmp).isLessThanOrEqualTo(key);
 

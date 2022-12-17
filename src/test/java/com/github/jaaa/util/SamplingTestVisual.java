@@ -19,30 +19,26 @@ public class SamplingTestVisual
 
   private static void plot2d() throws IOException
   {
-    var xy = lhs(8192, new double[]{-1,3}, new double[]{2,7});
+    double[][] xy = lhs(8192, new double[]{-1,3}, new double[]{2,7});
     IntFunction<String> getCoord = i -> stream(xy).map( row -> Double.toString(row[i]) ).collect( joining(", ","[","]"));
 
     PlotlyUtils.plot(
-      """
-      {
-        title: 'Latin Hypercube Sampling 2D',
-        yaxis: { scaleanchor: 'x' },
-        matches: 'x',
-      }
-      """,
+      "{\n" +
+      "  title: 'Latin Hypercube Sampling 2D',\n" +
+      "  yaxis: { scaleanchor: 'x' },\n" +
+      "  matches: 'x',\n" +
+      "}\n",
       format(
-        """
-        {
-          type: 'scattergl',
-          mode: 'markers',
-          marker: {
-            size: 6,
-            opacity: 0.6
-          },
-          x: %s,
-          y: %s
-        }
-        """,
+        "{\n" +
+        "  type: 'scattergl',\n" +
+        "  mode: 'markers',\n" +
+        "  marker: {\n" +
+        "    size: 6,\n" +
+        "    opacity: 0.6\n" +
+        "  },\n" +
+        "  x: %s,\n" +
+        "  y: %s\n" +
+        "}\n",
         getCoord.apply(0),
         getCoord.apply(1)
       )
@@ -51,31 +47,27 @@ public class SamplingTestVisual
 
   private static void plot3d() throws IOException
   {
-    var xyz = lhs(8192, 3);
+    double[][] xyz = lhs(8192, 3);
     IntFunction<String> getCoord = i -> stream(xyz).map( row -> Double.toString(row[i]) ).collect( joining(", ","[","]"));
 
     PlotlyUtils.plot(
-      """
-      {
-        title: 'Latin Hypercube Sampling 2D',
-        yaxis: { scaleanchor: 'x' },
-        matches: 'x',
-      }
-      """,
+      "{\n" +
+      "  title: 'Latin Hypercube Sampling 2D',\n" +
+      "  yaxis: { scaleanchor: 'x' },\n" +
+      "  matches: 'x',\n" +
+      "}\n",
       format(
-        """
-        {
-          type: 'scatter3d',
-          mode: 'markers',
-          marker: {
-            size: 2,
-            opacity: 0.4
-          },
-          x: %s,
-          y: %s,
-          z: %s
-        }
-        """,
+        "{\n" +
+        "  type: 'scatter3d',\n" +
+        "  mode: 'markers',\n" +
+        "  marker: {\n" +
+        "    size: 2,\n" +
+        "    opacity: 0.4\n" +
+        "  },\n" +
+        "  x: %s,\n" +
+        "  y: %s,\n" +
+        "  z: %s\n" +
+        "}\n",
         getCoord.apply(0),
         getCoord.apply(1),
         getCoord.apply(2)

@@ -1,5 +1,8 @@
 package experiments;
 
+import com.github.jaaa.util.IMath;
+
+import java.util.Objects;
 import java.util.function.IntUnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -14,21 +17,41 @@ import static java.util.stream.IntStream.rangeClosed;
 
 public class DivisionViaMultiplication
 {
-  public record GCDX( long gcd, long bezoutL, long bezoutR ) {}
+  public static final class GCDX {
+    public final long gcd, bezoutL, bezoutR;
+    public static final GCDX ZERO = new GCDX(0,0,0);
+    public GCDX of( long  gcd, long  bezoutL, long  bezoutR ) { return new GCDX(gcd,bezoutL,bezoutR); }
+    private   GCDX( long _gcd, long _bezoutL, long _bezoutR ) {
+      gcd = _gcd;
+      bezoutL = _bezoutL;
+      bezoutR = _bezoutR;
+    }
+    @Override public boolean equals( Object obj ) {
+      if( obj == this ) return true;
+      if( !(obj instanceof IMath.GcdxLong) ) return false;
+      IMath.GcdxLong gcdx = (IMath.GcdxLong) obj;
+      return gcdx.    gcd == gcd
+              && gcdx.bezoutL == bezoutL
+              && gcdx.bezoutR == bezoutR;
+    }
+    @Override public int hashCode() {
+      return Objects.hash(gcd, bezoutL, bezoutR);
+    }
+  }
 
   public static GCDX gcdx( long a, long b )
   {
-    if( a == 0 && b == 0 ) return new GCDX(0,0,0);
+    if( a == 0 && b == 0 ) return GCDX.ZERO;
     if( a <  0 || b <  0 ) throw new IllegalArgumentException();
     // https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
     long r = a,  rNew = b,
          s = 1L, sNew = 0L,
          t = 0L, tNew = 1L;
     while( rNew != 0 ) {
-      var             q = r / rNew;
-      var rNext = r - q*rNew; r = rNew; rNew = rNext;
-      var sNext = s - q*sNew; s = sNew; sNew = sNext;
-      var tNext = t - q*tNew; t = tNew; tNew = tNext;
+      long             q = r / rNew;
+      long rNext = r - q*rNew; r = rNew; rNew = rNext;
+      long sNext = s - q*sNew; s = sNew; sNew = sNext;
+      long tNext = t - q*tNew; t = tNew; tNew = tNext;
     }
     return new GCDX(r,s,t);
   }
@@ -36,7 +59,7 @@ public class DivisionViaMultiplication
   public static int modInv(int x ) {
     if( x%2 == 0 )
       throw new ArithmeticException();
-    var gcdx = gcdx(x, 1L<<32);
+    GCDX gcdx = gcdx(x, 1L<<32);
     assert gcdx.gcd == 1;
     return (int) gcdx.bezoutL;
   }
@@ -94,7 +117,7 @@ public class DivisionViaMultiplication
 
   private static void testDivI32() {
     IntStream.rangeClosed(1, Integer.MAX_VALUE).flatMap( d -> IntStream.of(-d,+d) ).forEach( d -> {
-      var divByD = i32_divBy(d);
+      IntUnaryOperator divByD = i32_divBy(d);
 
       rangeClosed(Integer.MIN_VALUE, Integer.MAX_VALUE).parallel().forEach( n -> {
         int tst = divByD.applyAsInt(n),
@@ -109,7 +132,7 @@ public class DivisionViaMultiplication
 
   private static void testDivU32() {
     IntStream.rangeClosed(1, Integer.MAX_VALUE).flatMap( d -> IntStream.of(-d,+d) ).forEach( d -> {
-      var divByD = u32_divBy(d);
+      IntUnaryOperator divByD = u32_divBy(d);
 
       rangeClosed(Integer.MIN_VALUE, Integer.MAX_VALUE).parallel().forEach( n -> {
         int tst = divByD.applyAsInt(n),

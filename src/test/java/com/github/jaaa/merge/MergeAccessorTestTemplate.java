@@ -67,7 +67,7 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
            bTest = bRef.clone(),
            cTest = new byte[aTest.length+bTest.length];
 
-    var acc = createAccessor(new CompareRandomAccessor<byte[]>() {
+    MergeAccessor<byte[]> acc = createAccessor(new CompareRandomAccessor<byte[]>() {
       @Override public byte[] malloc( int len ) { return new byte[len]; }
       @Override public void copy( byte[] a, int i, byte[] b, int j ) { b[j] = a[i]; }
       @Override public void swap( byte[] a, int i, byte[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -97,7 +97,7 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
           bTest = bRef.clone(),
           cTest = new int[aTest.length+bTest.length];
 
-    var acc = createAccessor(new CompareRandomAccessor<int[]>() {
+    MergeAccessor<int[]> acc = createAccessor(new CompareRandomAccessor<int[]>() {
       @Override public int[] malloc( int len ) { return new int[len]; }
       @Override public void   copy( int[] a, int i, int[] b, int j ) { b[j] = a[i]; }
       @Override public void   swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -140,7 +140,7 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
            bTest = bRef.clone(),
            cTest = new byte[aLen + bLen];
 
-    var acc = createAccessor(new CompareRandomAccessor<byte[]>() {
+    MergeAccessor<byte[]> acc = createAccessor(new CompareRandomAccessor<byte[]>() {
       @Override public byte[] malloc( int len ) { return new byte[len]; }
       @Override public void   copy( byte[] a, int i, byte[] b, int j ) { b[j] = a[i]; }
       @Override public void   swap( byte[] a, int i, byte[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -181,7 +181,7 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
           bTest = bRef.clone(),
           cTest = new int[aLen + bLen];
 
-    var acc = createAccessor(new CompareRandomAccessor<int[]>() {
+    MergeAccessor<int[]> acc = createAccessor(new CompareRandomAccessor<int[]>() {
       @Override public int[] malloc( int len ) { return new int[len]; }
       @Override public void   copy( int[] a, int i, int[] b, int j ) { b[j] = a[i]; }
       @Override public void   swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -228,7 +228,7 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
       bTest = bRef.clone(),
       cTest = new Tuple2[aTest.length + bTest.length];
 
-    var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+    MergeAccessor<Tuple2<T,Integer>[]> acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
       @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public void   copy( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { b[j] = a[i]; }
@@ -277,7 +277,7 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
     Arrays.sort(cTest, split,cTest.length, cmp);
     Arrays.sort(cRef,cmp);
 
-    var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+    MergeAccessor<Tuple2<T,Integer>[]> acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
       @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public void   copy( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { b[j] = a[i]; }
@@ -287,9 +287,9 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
 
     Runnable test = () -> {
       acc.merge(
-              aTest,    0,aTest.length,
-              cTest,split,cTest.length-split,
-              cTest,0
+        aTest,    0,aTest.length,
+        cTest,split,cTest.length-split,
+        cTest,0
       );
 
       assertThat(aTest).isEqualTo(aRef);
@@ -337,7 +337,7 @@ public abstract class MergeAccessorTestTemplate implements ArrayProviderTemplate
     Arrays.sort(cTest, 0,split, cmp);
     Arrays.sort(cRef,cmp);
 
-    var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+    MergeAccessor<Tuple2<T,Integer>[]> acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
       @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public void   copy( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { b[j] = a[i]; }

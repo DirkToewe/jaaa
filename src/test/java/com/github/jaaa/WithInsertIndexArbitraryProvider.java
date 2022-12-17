@@ -7,6 +7,7 @@ import net.jqwik.api.providers.TypeUsage;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 import static net.jqwik.api.Arbitraries.integers;
@@ -28,7 +29,7 @@ public class WithInsertIndexArbitraryProvider implements ArbitraryProvider
   @Override public Set<Arbitrary<?>> provideFor(TypeUsage targetType, ArbitraryProvider.SubtypeProvider subtypeProvider ) {
     TypeUsage contentType = targetType.getTypeArgument(0);
 
-    var samples = subtypeProvider.apply(contentType).stream();
+    Stream<Arbitrary<?>> samples = subtypeProvider.apply(contentType).stream();
 
     if( contentType.isArray() )
       return samples.map(

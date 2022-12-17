@@ -26,10 +26,10 @@ public class ZipWithIndexTest implements ArrayProviderTemplate
   @Property                         void boxed_double ( @ForAll("arraysDouble" )  double[] arr ) { boxed_impl(boxed(arr)); }
   <T extends Comparable<? super T>> void boxed_impl( T[] arr )
   {
-    var        zip = zipWithIndex(arr);
+    Entry<T,Integer>[] zip = zipWithIndex(arr);
     for( int i=zip.length; i-- > 0; )
     {
-      var k = zip[i].getKey();
+      T   k = zip[i].getKey();
       int v = zip[i].getValue();
       assertThat(v).isEqualTo(i);
       assertThat(k).isSameAs(arr[i]);

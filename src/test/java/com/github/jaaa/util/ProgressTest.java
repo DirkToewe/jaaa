@@ -6,6 +6,7 @@ import net.jqwik.api.Property;
 import net.jqwik.api.PropertyDefaults;
 import net.jqwik.api.ShrinkingMode;
 
+import java.util.List;
 import java.util.Random;
 import java.util.Spliterator;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,6 +21,7 @@ import static com.github.jaaa.Boxing.boxed;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Spliterator.*;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,13 +31,19 @@ public class ProgressTest implements ArrayProviderTemplate
 {
   @Override public int maxArraySize() { return 100_000; }
 
-  private record SpliterComparator( Random rng )
+  private static final class SpliterComparator
   {
     private static final int[] chars = { SUBSIZED, SORTED, ORDERED, NONNULL, IMMUTABLE, DISTINCT, CONCURRENT, SIZED };
+
+    private final Random rng;
+    public SpliterComparator( Random _rng ) {
+      rng = _rng;
+    }
+
     private IntStream randomCharacteristics() {
       return IntStream.generate( () -> {
         int result = 0;
-        for( var c: chars )
+        for( int c: chars )
           if( rng.nextDouble() < 0.25 )
             result |= c;
         return result;
@@ -54,8 +62,9 @@ public class ProgressTest implements ArrayProviderTemplate
 
       if( rng.nextDouble() < 1/3d )
       {
-        var leftTst =      test.trySplit();
-        var leftRef = reference.trySplit();
+        Spliterator.OfInt
+          leftTst =      test.trySplit(),
+          leftRef = reference.trySplit();
 
         assertThat( null==leftTst ).isEqualTo( null==leftRef );
 
@@ -72,9 +81,9 @@ public class ProgressTest implements ArrayProviderTemplate
         }
       }
 
-      var ref = intStream(reference, false).toArray();
+      int[] ref = intStream(reference, false).toArray();
 
-      var i = new AtomicInteger();
+      AtomicInteger i = new AtomicInteger();
 
       IntConsumer       actionUnboxed = x -> assertThat(x).isEqualTo( ref[i.getAndIncrement()] );
       Consumer<Integer> actionBoxed   = x -> assertThat(x).isEqualTo( ref[i.getAndIncrement()] );
@@ -106,8 +115,9 @@ public class ProgressTest implements ArrayProviderTemplate
 
       if( rng.nextDouble() < 1/3d )
       {
-        var leftTst =      test.trySplit();
-        var leftRef = reference.trySplit();
+        Spliterator.OfLong
+          leftTst =      test.trySplit(),
+          leftRef = reference.trySplit();
 
         assertThat( null==leftTst ).isEqualTo( null==leftRef );
 
@@ -124,9 +134,9 @@ public class ProgressTest implements ArrayProviderTemplate
         }
       }
 
-      var ref = longStream(reference, false).toArray();
+      long[] ref = longStream(reference, false).toArray();
 
-      var i = new AtomicInteger();
+      AtomicInteger i = new AtomicInteger();
 
       LongConsumer   actionUnboxed = x -> assertThat(x).isEqualTo( ref[i.getAndIncrement()] );
       Consumer<Long> actionBoxed   = x -> assertThat(x).isEqualTo( ref[i.getAndIncrement()] );
@@ -158,8 +168,9 @@ public class ProgressTest implements ArrayProviderTemplate
 
       if( rng.nextDouble() < 1/3d )
       {
-        var leftTst =      test.trySplit();
-        var leftRef = reference.trySplit();
+        Spliterator.OfDouble
+          leftTst =      test.trySplit(),
+          leftRef = reference.trySplit();
 
         assertThat( null==leftTst ).isEqualTo( null==leftRef );
 
@@ -176,9 +187,9 @@ public class ProgressTest implements ArrayProviderTemplate
         }
       }
 
-      var ref = doubleStream(reference, false).toArray();
+      double[] ref = doubleStream(reference, false).toArray();
 
-      var i = new AtomicInteger();
+      AtomicInteger i = new AtomicInteger();
 
       DoubleConsumer   actionUnboxed = x -> assertThat(x).isEqualTo( ref[i.getAndIncrement()] );
       Consumer<Double> actionBoxed   = x -> assertThat(x).isEqualTo( ref[i.getAndIncrement()] );
@@ -210,8 +221,9 @@ public class ProgressTest implements ArrayProviderTemplate
 
       if( rng.nextDouble() < 1/3d )
       {
-        var leftTst =      test.trySplit();
-        var leftRef = reference.trySplit();
+        Spliterator<T>
+          leftTst =      test.trySplit(),
+          leftRef = reference.trySplit();
 
         assertThat( null==leftTst ).isEqualTo( null==leftRef );
 
@@ -228,9 +240,9 @@ public class ProgressTest implements ArrayProviderTemplate
         }
       }
 
-      var ref = StreamSupport.stream(reference, false).toList();
+      List<T> ref = StreamSupport.stream(reference, false).collect(toList());
 
-      var i = new AtomicInteger();
+      AtomicInteger i = new AtomicInteger();
 
       Consumer<? super T> actionBoxed = x -> assertThat(x).isSameAs( ref.get( i.getAndIncrement() ) );
 
@@ -272,7 +284,7 @@ public class ProgressTest implements ArrayProviderTemplate
 
   @Property void print_stream( @ForAll("arraysByte") byte[] unboxed, @ForAll Random rng )
   {
-    var arr = boxed(unboxed);
+    Byte[] arr = boxed(unboxed);
     new SpliterComparator(rng).compare(
       Progress.print(stream(arr)).spliterator(),
                      stream(arr) .spliterator()
@@ -304,7 +316,7 @@ public class ProgressTest implements ArrayProviderTemplate
 
   @Property void print_spliterator( @ForAll("arraysInt") int[] unboxed, @ForAll Random rng )
   {
-    var arr = boxed(unboxed);
+    Integer[] arr = boxed(unboxed);
     new SpliterComparator(rng).compare(
       Progress.print(stream(arr).spliterator()),
                      stream(arr).spliterator()
@@ -314,16 +326,16 @@ public class ProgressTest implements ArrayProviderTemplate
 
 
   @Property void print_iterable_iterator( @ForAll("arraysInt") int[] unboxed ) {
-    var arr = boxed(unboxed);
+    Integer[] arr = boxed(unboxed);
     int i = 0;
-    for( var x: Progress.print( asList(arr) ) )
+    for( int x: Progress.print( asList(arr) ) )
       assertThat(x).isSameAs(arr[i++]);
     assertThat(i).isEqualTo(unboxed.length);
   }
 
   @Property void print_iterable_forEach( @ForAll("arraysInt") int[] unboxed ) {
-    var arr = boxed(unboxed);
-    var i = new AtomicInteger();
+    Integer[] arr = boxed(unboxed);
+    AtomicInteger i = new AtomicInteger();
     Progress.print( asList(arr) ).forEach(
       x -> assertThat(x).isSameAs( arr[i.getAndIncrement()] )
     );
@@ -331,7 +343,7 @@ public class ProgressTest implements ArrayProviderTemplate
   }
 
   @Property void print_iterable_spliterator( @ForAll("arraysInt") int[] unboxed, @ForAll Random rng ) {
-    var arr = asList( boxed(unboxed) );
+    List<Integer> arr = asList( boxed(unboxed) );
     new SpliterComparator(rng).compare( Progress.print( arr.spliterator() ), arr.spliterator() );
   }
 }

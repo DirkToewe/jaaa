@@ -6,17 +6,23 @@ import com.github.jaaa.sort.datagen.RandomSortDataGenerator;
 import com.github.jaaa.util.Progress;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.Writer;
+import java.nio.file.Path;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.LongAdder;
 
+import static com.github.jaaa.Boxing.boxed;
 import static com.github.jaaa.permute.RandomShuffle.shuffled;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 import static java.lang.System.out;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.createTempFile;
+import static java.nio.file.Files.newBufferedWriter;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
-import static java.util.Map.entry;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
 
@@ -52,24 +58,23 @@ public class BenchmarkSort
 //    new java.util.Scanner(System.in).next();
 //    System.out.println("GO");
 
-    Map<String,SortFn> mergers = Map.ofEntries(
-//      entry("ParSkip", ParallelSkipMergeSort::sort),
-      entry("ParZen",  ParallelZenMergeSort ::sort),
-//      entry("HeapSort",             HeapSort::sort),
-//      entry("QuickSort",           QuickSort::sort),
-//      entry("MergeSort",           MergeSort::sort),
-//      entry("KiwiSort",             KiwiSort::sort),
-//      entry("KiwiSortBiased", KiwiSortBiased::sort),
-//      entry("TimSort",               TimSort::sort),
-//      entry("JDK",                    Arrays::sort)
-      entry("JDK (parallel)", Arrays::parallelSort)
-    );
+    Map<String,SortFn> sorters = new LinkedHashMap<>();
+//    sorters.put("ParSkip", ParallelSkipMergeSort::sort);
+    sorters.put("ParZen",  ParallelZenMergeSort ::sort);
+    sorters.put("JDK (parallel)", Arrays::parallelSort);
+//    sorters.put("HeapSort",             HeapSort::sort);
+//    sorters.put("QuickSort",           QuickSort::sort);
+//    sorters.put("MergeSort",           MergeSort::sort);
+//    sorters.put("KiwiSort",             KiwiSort::sort);
+//    sorters.put("KiwiSortBiased", KiwiSortBiased::sort);
+//    sorters.put("TimSort",               TimSort::sort);
+//    sorters.put("JDK",                    Arrays::sort);
 
-    int     LEN = 10_000_000,
-      N_SAMPLES =      1_000;
+    int     LEN = 1_000_000,
+      N_SAMPLES =     1_000;
 
-    var rng = new SplittableRandom();
-    var gen = new RandomSortDataGenerator(rng);
+    SplittableRandom        rng = new SplittableRandom();
+    RandomSortDataGenerator gen = new RandomSortDataGenerator(rng);
 
 //    int[] x = rng.doubles(N_SAMPLES, 0,Math.log(LEN+1)).mapToInt( y -> (int) Math.round(Math.exp(y)) ).toArray();
     int[] x = rng.ints(N_SAMPLES, 0,LEN+1).sorted().toArray();
@@ -78,12 +83,12 @@ public class BenchmarkSort
     Map<String,double[]>
       resultsComps = new TreeMap<>(),
       resultsTimes = new TreeMap<>();
-    mergers.forEach( (k,v) -> {
+    sorters.forEach( (k,v) -> {
       resultsComps.put(k, new double[N_SAMPLES]);
       resultsTimes.put(k, new double[N_SAMPLES]);
     });
 
-    var mergersEntries  = new ArrayList<>( mergers.entrySet() );
+    List<Entry<String,SortFn>> mergersEntries  = new ArrayList<>( sorters.entrySet() );
 
     Progress.print( stream( shuffled(range(0,N_SAMPLES).toArray(), rng::nextInt) ) ).forEach( i -> {
       int len = x[i];
@@ -92,14 +97,14 @@ public class BenchmarkSort
       assert len == data.length;
 
       int sign = rng.nextBoolean() ? -1 : +1;
-      var cmp = new CountingComparator() {
+      CountingComparator cmp = new CountingComparator() {
         @Override public int compare( Integer x, Integer y ) {
           nComps.increment();
           return sign*Integer.compare(x,y);
         }
       };
 
-      var ref = stream(data).boxed().sorted(cmp).toArray(Integer[]::new);
+      Integer[] ref = stream(data).boxed().sorted(cmp).toArray(Integer[]::new);
 
       Collections.shuffle(mergersEntries);
 
@@ -107,7 +112,7 @@ public class BenchmarkSort
         System.gc();
         cmp.nComps.reset();
 
-        var test = stream(data).boxed().toArray(Integer[]::new);
+        Integer[] test = boxed(data);
 
         long t0 = nanoTime();
         v.sort(test, cmp);
@@ -126,29 +131,27 @@ public class BenchmarkSort
 
   private static void plot_results( String type, int[] x, Map<String,double[]> results ) throws IOException
   {
-    var vm = System.getProperty("java.vm.name") + " " + System.getProperty("java.vm.version");
-    var jv = "Java " + System.getProperty("java.version");
+    String vm = System.getProperty("java.vm.name") + " " + System.getProperty("java.vm.version"),
+           jv = "Java " + System.getProperty("java.version");
 
-    var colors = List.of(
+    Iterator<String> colors = asList(
       "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#999999"
     ).iterator();
 
-    var data = results.entrySet().stream().map( EntryFn.of(
+    String[] data = results.entrySet().stream().map( EntryFn.of(
       (method,y) -> format(
-        """
-        {
-          type: 'scattergl',
-          mode: 'markers',
-          marker: {
-            size: 4,
-            opacity: 0.5,
-            color: '%s'
-          },
-          name: '%s',
-          x: %s,
-          y: %s
-        }
-        """,
+        "{\n" +
+        "  type: 'scattergl',\n" +
+        "  mode: 'markers',\n" +
+        "  marker: {\n" +
+        "    size: 4,\n" +
+        "    opacity: 0.5,\n" +
+        "    color: '%s'\n" +
+        "  },\n" +
+        "  name: '%s',\n" +
+        "  x: %s,\n" +
+        "  y: %s\n" +
+        "}\n",
         colors.next(),
         method,
         Arrays.toString(x),
@@ -157,83 +160,82 @@ public class BenchmarkSort
     )).toArray(String[]::new);
 
     String layout = format(
-      """
-      {
-        title: 'Sort %s Benchmark (L_max = %d)<br>%s<br>%s',
-        xaxis: {title: 'Split Position'},
-        yaxis: {title: 'Time [msec.]'  }
-      }
-      """,
+      "{\n" +
+      "  title: 'Sort %s Benchmark (L_max = %d)<br>%s<br>%s',\n" +
+      "  xaxis: {title: 'Split Position'},\n" +
+      "  yaxis: {title: 'Time [msec.]'  }\n" +
+      "}\n",
       type, stream(x).max().getAsInt(), vm, jv
     );
 
-    final String PLOT_TEMPLATE = """
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8">
-        <script src="https://cdn.plot.ly/plotly-latest.js"></script>
-        <script src="./nd.min.js"></script>
-      </head>
-      <body>
-        <script>
-          'use strict';
+    final String PLOT_TEMPLATE =
+      "<!DOCTYPE html>\n" +
+      "<html lang=\"en\">\n" +
+      "  <head>\n" +
+      "    <meta charset=\"utf-8\">\n" +
+      "    <script src=\"https://cdn.plot.ly/plotly-latest.js\"></script>\n" +
+      "    <script src=\"./nd.min.js\"></script>\n" +
+      "  </head>\n" +
+      "  <body>\n" +
+      "    <script>\n" +
+      "      'use strict';\n" +
+      "\n" +
+      "      const plot = document.createElement('div');\n" +
+      "      plot.style = 'width: 100%%; height: 95vh;';\n" +
+      "      document.body.appendChild(plot);\n" +
+      "\n" +
+      "      const layout = %1$s;\n" +
+      "      if( 'title' in layout )\n" +
+      "        document.title = layout.title;\n" +
+      "\n" +
+      "      if( 'paper_bgcolor' in layout )\n" +
+      "        document.body.style.background = 'black';\n" +
+      "\n" +
+      "      let data = %2$s;\n" +
+      "\n" +
+      "      const worstCase   = (m,n) => Math.log2(m+1) * n;\n" +
+      "      const averageCase = (m,n) => Math.log((m+n)/m) * Math.log2(m+1)*m;\n" +
+      "\n" +
+      "      data = data.flatMap( data => {\n" +
+      "        const fitFns = [\n" +
+      "          x => 1,\n" +
+      "          x => x,\n" +
+      "          x => Math.log(x)*x,\n" +
+      "          x => x*x\n" +
+      "        ];\n" +
+      "\n" +
+      "        const xMax = data.x.reduce((x,y) => Math.max(x,y)),\n" +
+      "              yMax = data.y.reduce((x,y) => Math.max(x,y))\n" +
+      "\n" +
+      "        const fit = nd.opt.fit_lin(data.x, data.y, fitFns);\n" +
+      "\n" +
+      "        console.log({[data.name]: fit.coeffs})\n" +
+      "\n" +
+      "        const x = [...nd.iter.linspace(1, xMax, 1000)]\n" +
+      "        const y = x.map(fit);\n" +
+      "\n" +
+      "        const fitData = {\n" +
+      "          x,y,\n" +
+      "          name: data.name + ' (fit)',\n" +
+      "          mode: 'lines',\n" +
+      "          type: 'scattergl',\n" +
+      "          line: {\n" +
+      "            color: data.marker.color\n" +
+      "          }\n" +
+      "        };\n" +
+      "        return [data, fitData];\n" +
+      "      });\n" +
+      "\n" +
+      "      Plotly.plot(plot, {layout, data});\n" +
+      "    </script>\n" +
+      "  </body>\n" +
+      "</html>\n";
 
-          const plot = document.createElement('div');
-          plot.style = 'width: 100%%; height: 95vh;';
-          document.body.appendChild(plot);
-
-          const layout = %1$s;
-          if( 'title' in layout )
-            document.title = layout.title;
-
-          if( 'paper_bgcolor' in layout )
-            document.body.style.background = 'black';
-
-          let data = %2$s;
-
-          const worstCase   = (m,n) => Math.log2(m+1) * n;
-          const averageCase = (m,n) => Math.log((m+n)/m) * Math.log2(m+1)*m;
-
-          data = data.flatMap( data => {
-            const fitFns = [
-              x => 1,
-              x => x,
-              x => Math.log(x)*x,
-              x => x*x
-            ];
-
-            const xMax = data.x.reduce((x,y) => Math.max(x,y)),
-                  yMax = data.y.reduce((x,y) => Math.max(x,y))
-
-            const fit = nd.opt.fit_lin(data.x, data.y, fitFns);
-
-            console.log({[data.name]: fit.coeffs})
-
-            const x = [...nd.iter.linspace(1, xMax, 1000)]
-            const y = x.map(fit);
-
-            const fitData = {
-              x,y,
-              name: data.name + " (fit)",
-              mode: 'lines',
-              type: 'scattergl',
-              line: {
-                color: data.marker.color
-              }
-            };
-            return [data, fitData];
-          });
-
-          Plotly.plot(plot, {layout, data});
-        </script>
-      </body>
-    </html>
-    """;
-
-    var tmp = Files.createTempFile("plot_",".html");
-    var dat = stream(data).collect( joining(",\n", "[", "]") );
-    Files.writeString( tmp, format(PLOT_TEMPLATE, layout, dat) );
+    Path tmp = createTempFile("plot_",".html");
+    String dat = stream(data).collect( joining(",\n", "[", "]") );
+    try( Writer out = newBufferedWriter(tmp,UTF_8) ) {
+      out.write( format(PLOT_TEMPLATE, layout, dat) );
+    }
     String[] cmd = {"xdg-open", tmp.toString()};
     getRuntime().exec(cmd);
   }

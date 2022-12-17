@@ -16,11 +16,11 @@ public class DigitReversalPermuteAccessTest
   @Property void test_digitReversal( @ForAll @IntRange(min=2,max=8) int radix, @ForAll @IntRange(min=0,max=8) int exp ) {
     int len = (int) Math.pow(radix,exp);
 
-    var tst = range(0,len).toArray();
+    int[] tst = range(0,len).toArray();
     DigitReversalPermuteAccess acc = (i, j) -> swap(tst,i,j);
     acc.digitReversalPermute(radix, 0, len);
 
-    var ref = range(0,len).map( x -> {
+    int[] ref = range(0,len).map(x -> {
       int y = 0;
       for( int i=0; i++ < exp; ) {
         y *= radix;
@@ -36,7 +36,7 @@ public class DigitReversalPermuteAccessTest
   @Property void test_digitReversal( @ForAll @IntRange(min=2,max=6) int radix, @ForAll @IntRange(min=0,max=6) int exp, @ForAll @IntRange(min=0, max=1_000) int from ) {
     int len = (int) Math.pow(radix,exp);
 
-    var tst = range(0, from+len).toArray();
+    int[] tst = range(0, from+len).toArray();
     DigitReversalPermuteAccess acc = (i,j) -> {
       assertThat(i).isGreaterThanOrEqualTo(from);
       assertThat(j).isGreaterThanOrEqualTo(from);
@@ -44,7 +44,7 @@ public class DigitReversalPermuteAccessTest
     };
     acc.digitReversalPermute(radix, from, from+len);
 
-    var ref = range(0, from+len).map( x -> {
+    int[] ref = range(0, from+len).map(x -> {
       if( x < from )
         return x;
       x -= from;

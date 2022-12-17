@@ -4,6 +4,7 @@ import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.Collection;
@@ -22,7 +23,7 @@ public class IMathBenchmark_sign
 {
   public static void main( String... args ) throws RunnerException
   {
-    var opt = new OptionsBuilder()
+    Options opt = new OptionsBuilder()
       .include( IMathBenchmark_sign.class.getCanonicalName() )
       .build();
 

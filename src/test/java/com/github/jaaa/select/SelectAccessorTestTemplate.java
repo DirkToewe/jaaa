@@ -67,9 +67,9 @@ public interface SelectAccessorTestTemplate extends ArrayProviderTemplate
     int mid = sample.getIndex(),
        from = sample.getData().getFrom(),
       until = sample.getData().getUntil();
-    var tst = sample.getData().getData().clone();
+    T[] tst = sample.getData().getData().clone();
 
-    var acc = createAccessor( new CompareRandomAccessorArrObj<T>() {
+    SelectAccessor<T[]> acc = createAccessor(new CompareRandomAccessorArrObj<T>() {
       @Override public T[] malloc( int len ) {
         return (T[]) new Comparable[len];
       }
@@ -85,7 +85,7 @@ public interface SelectAccessorTestTemplate extends ArrayProviderTemplate
     if( ! sortsLHS(from,mid,until) ) Arrays.sort(tst, from, mid);
     if( ! sortsRHS(from,mid,until) ) Arrays.sort(tst, min(1+mid,until), until);
 
-    var ref = sample.getData().getData().clone();
+    T[] ref = sample.getData().getData().clone();
     Arrays.sort(ref, from,until);
 
     assertThat(tst).isEqualTo(ref);
@@ -114,13 +114,14 @@ public interface SelectAccessorTestTemplate extends ArrayProviderTemplate
     int mid = sample.getIndex(),
        from = sample.getData().getFrom(),
       until = sample.getData().getUntil();
-    var tst = sample.getData().getData().clone();
+    Entry<T,Integer>[] tst = sample.getData().getData().clone();
 
     Comparator<Entry<T,Integer>> cmp = comparingByKey();
     if( ! isStable() )     cmp = cmp.thenComparing(comparingByValue());
 
-    var CMP = cmp;
-    var acc = createAccessor( new CompareRandomAccessorArrObj<Entry<T,Integer>>() {
+    Comparator<Entry<T,Integer>> CMP = cmp;
+    SelectAccessor<Entry<T,Integer>[]> acc = createAccessor(new CompareRandomAccessorArrObj<Entry<T,Integer>>() {
+      @SuppressWarnings("unchecked")
       @Override public Entry<T,Integer>[] malloc( int len ) {
         return (Entry<T,Integer>[]) new Entry[len];
       }
@@ -136,7 +137,7 @@ public interface SelectAccessorTestTemplate extends ArrayProviderTemplate
     if( ! sortsLHS(from,mid,until) ) Arrays.sort(tst, from, mid, CMP);
     if( ! sortsRHS(from,mid,until) ) Arrays.sort(tst, min(1+mid,until), until, CMP);
 
-    var ref = sample.getData().getData().clone();
+    Entry<T,Integer>[] ref = sample.getData().getData().clone();
     Arrays.sort(ref, from,until, cmp);
 
     assertThat(tst).isEqualTo(ref);

@@ -44,64 +44,64 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
   @Property default void sortsArraysByte_limitedRange     ( @ForAll("arraysByte_limitedRange"     ) byte[] ref ) { sortsArraysByte(ref); }
   @Property default void sortsArraysByte                  ( @ForAll("arraysByte"                  ) byte[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+           ref = ref.clone();
+    byte[] tst = ref.clone();
     Arrays.sort(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrByte) (a, i, b, j) -> Byte.compare(a[i], b[j]) );
+    SortAccessor<byte[]> acc = createAccessor( (CompareRandomAccessorArrByte) (a, i, b, j) -> Byte.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysShort( @ForAll("arraysShort") short[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+            ref = ref.clone();
+    short[] tst = ref.clone();
     Arrays.sort(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrShort) (a,i, b,j) -> Short.compare(a[i], b[j]) );
+    SortAccessor<short[]> acc = createAccessor( (CompareRandomAccessorArrShort) (a,i, b,j) -> Short.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysInt( @ForAll("arraysInt") int[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+          ref = ref.clone();
+    int[] tst = ref.clone();
     Arrays.sort(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrInt) (a,i, b,j) -> Integer.compare(a[i], b[j]) );
+    SortAccessor<int[]> acc = createAccessor( (CompareRandomAccessorArrInt) (a,i, b,j) -> Integer.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysLong( @ForAll("arraysLong") long[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+           ref = ref.clone();
+    long[] tst = ref.clone();
     Arrays.sort(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrLong) (a,i, b,j) -> Long.compare(a[i], b[j]) );
+    SortAccessor<long[]> acc = createAccessor( (CompareRandomAccessorArrLong) (a,i, b,j) -> Long.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysChar( @ForAll("arraysChar") char[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+           ref = ref.clone();
+    char[] tst = ref.clone();
     Arrays.sort(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrChar) (a, i, b, j) -> Character.compare(a[i], b[j]) );
+    SortAccessor<char[]> acc = createAccessor( (CompareRandomAccessorArrChar) (a, i, b, j) -> Character.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysFloat( @ForAll("arraysFloat") float[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+            ref = ref.clone();
+    float[] tst = ref.clone();
     Arrays.sort(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrFloat) (a, i, b, j) -> Float.compare(a[i], b[j]) );
+    SortAccessor<float[]> acc = createAccessor( (CompareRandomAccessorArrFloat) (a, i, b, j) -> Float.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysDouble( @ForAll("arraysDouble") double[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+             ref = ref.clone();
+    double[] tst = ref.clone();
     Arrays.sort(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrDouble) (a, i, b, j) -> Double.compare(a[i], b[j]) );
+    SortAccessor<double[]> acc = createAccessor( (CompareRandomAccessorArrDouble) (a, i, b, j) -> Double.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
@@ -110,57 +110,57 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
 
   @Property default void sortsArraysWithRangeByte( @ForAll("arraysWithRangeByte") WithRange<byte[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrByte) (a,i, b,j) -> Byte.compare(a[i], b[j]) );
+    byte[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    byte[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<byte[]> acc = createAccessor( (CompareRandomAccessorArrByte) (a,i, b,j) -> Byte.compare(a[i], b[j]) );
     acc   .sort(tst,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeShort( @ForAll("arraysWithRangeShort") WithRange<short[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrShort) (a,i, b,j) -> Short.compare(a[i], b[j]) );
+    short[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    short[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<short[]> acc = createAccessor( (CompareRandomAccessorArrShort) (a,i, b,j) -> Short.compare(a[i], b[j]) );
     acc   .sort(tst,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeInt( @ForAll("arraysWithRangeInt") WithRange<int[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrInt) (a,i, b,j) -> Integer.compare(a[i], b[j]) );
+    int[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    int[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<int[]> acc = createAccessor( (CompareRandomAccessorArrInt) (a,i, b,j) -> Integer.compare(a[i], b[j]) );
     acc   .sort(tst,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeLong( @ForAll("arraysWithRangeLong") WithRange<long[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrLong) (a,i, b,j) -> Long.compare(a[i], b[j]) );
+    long[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    long[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<long[]> acc = createAccessor( (CompareRandomAccessorArrLong) (a,i, b,j) -> Long.compare(a[i], b[j]) );
     acc   .sort(tst,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeChar( @ForAll("arraysWithRangeChar") WithRange<char[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrChar) (a,i, b,j) -> Character.compare(a[i], b[j]) );
+    char[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    char[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<char[]> acc = createAccessor( (CompareRandomAccessorArrChar) (a,i, b,j) -> Character.compare(a[i], b[j]) );
     acc   .sort(tst,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeFloat( @ForAll("arraysWithRangeFloat") WithRange<float[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrFloat) (a,i, b,j) -> Float.compare(a[i], b[j]) );
+    float[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    float[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<float[]> acc = createAccessor( (CompareRandomAccessorArrFloat) (a,i, b,j) -> Float.compare(a[i], b[j]) );
     acc   .sort(tst,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeDouble( @ForAll("arraysWithRangeDouble") WithRange<double[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrDouble) (a,i, b,j) -> Double.compare(a[i], b[j]) );
+    double[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    double[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<double[]> acc = createAccessor( (CompareRandomAccessorArrDouble) (a,i, b,j) -> Double.compare(a[i], b[j]) );
     acc   .sort(tst,from,until);
     assertThat(tst).isEqualTo(ref);
   }
@@ -169,64 +169,64 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
 
   @Property default void sortsArraysByteReversed( @ForAll("arraysByte") byte[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+           ref = ref.clone();
+    byte[] tst = ref.clone();
     Arrays.sort(ref); revert(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrByte) (a,i, b,j) -> -Byte.compare(a[i], b[j]) );
+    SortAccessor<byte[]> acc = createAccessor( (CompareRandomAccessorArrByte) (a,i, b,j) -> -Byte.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysShortReversed( @ForAll("arraysShort") short[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+            ref = ref.clone();
+    short[] tst = ref.clone();
     Arrays.sort(ref); revert(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrShort) (a,i, b,j) -> -Short.compare(a[i], b[j]) );
+    SortAccessor<short[]> acc = createAccessor( (CompareRandomAccessorArrShort) (a,i, b,j) -> -Short.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysIntReversed( @ForAll("arraysInt") int[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+          ref = ref.clone();
+    int[] tst = ref.clone();
     Arrays.sort(ref); revert(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrInt) (a,i, b,j) -> -Integer.compare(a[i], b[j]) );
+    SortAccessor<int[]> acc = createAccessor( (CompareRandomAccessorArrInt) (a,i, b,j) -> -Integer.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysLongReversed( @ForAll("arraysLong") long[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+           ref = ref.clone();
+    long[] tst = ref.clone();
     Arrays.sort(ref); revert(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrLong) (a,i, b,j) -> -Long.compare(a[i], b[j]) );
+    SortAccessor<long[]> acc = createAccessor( (CompareRandomAccessorArrLong) (a,i, b,j) -> -Long.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysCharReversed( @ForAll("arraysChar") char[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+           ref = ref.clone();
+    char[] tst = ref.clone();
     Arrays.sort(ref); revert(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrChar) (a,i, b,j) -> -Character.compare(a[i], b[j]) );
+    SortAccessor<char[]> acc = createAccessor( (CompareRandomAccessorArrChar) (a,i, b,j) -> -Character.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysFloatReversed( @ForAll("arraysFloat") float[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+            ref = ref.clone();
+    float[] tst = ref.clone();
     Arrays.sort(ref); revert(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrFloat) (a,i, b,j) -> -Float.compare(a[i], b[j]) );
+    SortAccessor<float[]> acc = createAccessor( (CompareRandomAccessorArrFloat) (a,i, b,j) -> -Float.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysDoubleReversed( @ForAll("arraysDouble") double[] ref )
   {
-        ref = ref.clone();
-    var tst = ref.clone();
+             ref = ref.clone();
+    double[] tst = ref.clone();
     Arrays.sort(ref); revert(ref);
-    var acc = createAccessor( (CompareRandomAccessorArrDouble) (a,i, b,j) -> -Double.compare(a[i], b[j]) );
+    SortAccessor<double[]> acc = createAccessor( (CompareRandomAccessorArrDouble) (a,i, b,j) -> -Double.compare(a[i], b[j]) );
     acc.sort(tst, 0,tst.length);
     assertThat(tst).isEqualTo(ref);
   }
@@ -235,57 +235,57 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
 
   @Property default void sortsArraysWithRangeByteReversed( @ForAll("arraysWithRangeByte") WithRange<byte[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrByte) (a,i, b,j) -> -Byte.compare(a[i], b[j]) );
+    byte[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    byte[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<byte[]> acc = createAccessor( (CompareRandomAccessorArrByte) (a,i, b,j) -> -Byte.compare(a[i], b[j]) );
     acc   .sort(tst,from,until); revert(ref,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeShortReversed( @ForAll("arraysWithRangeShort") WithRange<short[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrShort) (a,i, b,j) -> -Short.compare(a[i], b[j]) );
+    short[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    short[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<short[]> acc = createAccessor( (CompareRandomAccessorArrShort) (a,i, b,j) -> -Short.compare(a[i], b[j]) );
     acc   .sort(tst,from,until); revert(ref,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeIntReversed( @ForAll("arraysWithRangeInt") WithRange<int[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrInt) (a,i, b,j) -> -Integer.compare(a[i], b[j]) );
+    int[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    int[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<int[]> acc = createAccessor( (CompareRandomAccessorArrInt) (a,i, b,j) -> -Integer.compare(a[i], b[j]) );
     acc   .sort(tst,from,until); revert(ref,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeLongReversed( @ForAll("arraysWithRangeLong") WithRange<long[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrLong) (a,i, b,j) -> -Long.compare(a[i], b[j]) );
+    long[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    long[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<long[]> acc = createAccessor( (CompareRandomAccessorArrLong) (a,i, b,j) -> -Long.compare(a[i], b[j]) );
     acc   .sort(tst,from,until); revert(ref,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeCharReversed( @ForAll("arraysWithRangeChar") WithRange<char[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrChar) (a,i, b,j) -> -Character.compare(a[i], b[j]) );
+    char[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    char[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<char[]> acc = createAccessor( (CompareRandomAccessorArrChar) (a,i, b,j) -> -Character.compare(a[i], b[j]) );
     acc   .sort(tst,from,until); revert(ref,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeFloatReversed( @ForAll("arraysWithRangeFloat") WithRange<float[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrFloat) (a,i, b,j) -> -Float.compare(a[i], b[j]) );
+    float[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    float[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<float[]> acc = createAccessor( (CompareRandomAccessorArrFloat) (a,i, b,j) -> -Float.compare(a[i], b[j]) );
     acc   .sort(tst,from,until); revert(ref,from,until);
     assertThat(tst).isEqualTo(ref);
   }
   @Property default void sortsArraysWithRangeDoubleReversed( @ForAll("arraysWithRangeDouble") WithRange<double[]> refRange )
   {
-    var ref = refRange.getData().clone(); int from = refRange.getFrom ();
-    var tst =                ref.clone(); int until= refRange.getUntil();
-    Arrays.sort(ref,from,until); var acc = createAccessor( (CompareRandomAccessorArrDouble) (a,i, b,j) -> -Double.compare(a[i], b[j]) );
+    double[] ref = refRange.getData().clone(); int from = refRange.getFrom ();
+    double[] tst =                ref.clone(); int until= refRange.getUntil();
+    Arrays.sort(ref,from,until); SortAccessor<double[]> acc = createAccessor( (CompareRandomAccessorArrDouble) (a,i, b,j) -> -Double.compare(a[i], b[j]) );
     acc   .sort(tst,from,until); revert(ref,from,until);
     assertThat(tst).isEqualTo(ref);
   }
@@ -301,19 +301,20 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
   @Property default void                         sortsStablyArraysTupleFloat  ( @ForAll("arraysFloat"  )   float[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple( boxed(sample), reversed ); }
   @Property default void                         sortsStablyArraysTupleDouble ( @ForAll("arraysDouble" )  double[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple( boxed(sample), reversed ); }
   @Property default void                         sortsStablyArraysTupleString ( @ForAll("arraysString" )  String[] sample, @ForAll boolean reversed ) { sortsStablyArraysTuple(       sample , reversed ); }
-  private <T extends Comparable<? super T>> void sortsStablyArraysTuple( T[] sample, boolean reversed )
+  default <T extends Comparable<? super T>> void sortsStablyArraysTuple( T[] sample, boolean reversed )
   {
     @SuppressWarnings("unchecked")
-    Tuple2<T,Integer>[] ref = range(0,sample.length).mapToObj( i -> Tuple.of(sample[i],i) ).toArray(Tuple2[]::new);
-    var           tst = ref.clone();
+    Tuple2<T,Integer>[]
+      ref = range(0,sample.length).mapToObj( i -> Tuple.of(sample[i],i) ).toArray(Tuple2[]::new),
+      tst = ref.clone();
 
     Comparator<Tuple2<T,Integer>> cmp =   comparing(Tuple2::get1);
     if( reversed )          cmp = cmp.reversed();
     if( ! isStable() )      cmp = cmp.thenComparing(Tuple2::get2);
 
     Arrays.sort(ref,cmp);
-    var CMP = cmp;
-    var acc = createAccessor( new CompareRandomAccessorArrObj<Tuple2<T,Integer>>() {
+    Comparator<Tuple2<T,Integer>> CMP = cmp;
+    SortAccessor<Tuple2<T,Integer>[]> acc = createAccessor( new CompareRandomAccessorArrObj<Tuple2<T,Integer>>() {
       @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public int compare( Tuple2<T,Integer>[] a, int i,
@@ -334,22 +335,23 @@ public interface SortAccessorTestTemplate extends ArrayProviderTemplate
   @Property default void                         sortsStablyArraysWithRangeTupleFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeTuple(sample.map(Boxing::boxed),reversed); }
   @Property default void                         sortsStablyArraysWithRangeTupleDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeTuple(sample.map(Boxing::boxed),reversed); }
   @Property default void                         sortsStablyArraysWithRangeTupleString ( @ForAll("arraysWithRangeString" ) WithRange< String[]> sample, @ForAll boolean reversed ) { sortsStablyArraysWithRangeTuple(sample                   ,reversed); }
-  private <T extends Comparable<? super T>> void sortsStablyArraysWithRangeTuple( WithRange<T[]> sampleRange, boolean reversed )
+  default <T extends Comparable<? super T>> void sortsStablyArraysWithRangeTuple( WithRange<T[]> sampleRange, boolean reversed )
   {
     int   from = sampleRange.getFrom(),
          until = sampleRange.getUntil();
-    var sample = sampleRange.getData();
+    T[] sample = sampleRange.getData();
     @SuppressWarnings("unchecked")
-    Tuple2<T,Integer>[] ref = range(0,sample.length).mapToObj( i -> Tuple.of(sample[i],i) ).toArray(Tuple2[]::new);
-    var           tst = ref.clone();
+    Tuple2<T,Integer>[]
+      ref = range(0,sample.length).mapToObj( i -> Tuple.of(sample[i],i) ).toArray(Tuple2[]::new),
+      tst = ref.clone();
 
     Comparator<Tuple2<T,Integer>> cmp =   comparing(Tuple2::get1);
     if( reversed )          cmp = cmp.reversed();
     if( ! isStable() )      cmp = cmp.thenComparing(Tuple2::get2);
 
     Arrays.sort(ref, from,until, cmp);
-    var CMP = cmp;
-    var acc = createAccessor( new CompareRandomAccessorArrObj<Tuple2<T,Integer>>() {
+    Comparator<Tuple2<T,Integer>> CMP = cmp;
+    SortAccessor<Tuple2<T,Integer>[]> acc = createAccessor( new CompareRandomAccessorArrObj<Tuple2<T,Integer>>() {
       @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public int compare( Tuple2<T,Integer>[] a, int i,

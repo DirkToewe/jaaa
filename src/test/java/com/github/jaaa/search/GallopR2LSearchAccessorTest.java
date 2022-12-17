@@ -9,10 +9,12 @@ import static com.github.jaaa.util.IMath.log2Floor;
 @Group
 public class GallopR2LSearchAccessorTest extends SearchAccessorTestTemplate
 {
-  private record ExpSearchAccessor<T>( CompareAccessor<? super T> compareAccessor ) implements SearchAccessor<T>,
-                                                                                                   GallopR2LSearchAccessor<T>
+  private static final class Acc<T> implements SearchAccessor<T>,
+                                      GallopR2LSearchAccessor<T>
   {
-    @Override public int compare( T a, int i, T b, int j ) { return compareAccessor.compare(a,i, b,j); }
+    private final CompareAccessor<? super T>  acc;
+    private  Acc( CompareAccessor<? super T> _acc ) { acc = _acc; }
+    @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
     @Override public int search    ( T a, int from, int until, T b, int i ) { return gallopR2LSearch    (a,from,until, b,i); }
     @Override public int searchR   ( T a, int from, int until, T b, int i ) { return gallopR2LSearchR   (a,from,until, b,i); }
     @Override public int searchL   ( T a, int from, int until, T b, int i ) { return gallopR2LSearchL   (a,from,until, b,i); }
@@ -20,7 +22,7 @@ public class GallopR2LSearchAccessorTest extends SearchAccessorTestTemplate
     @Override public int searchGapR( T a, int from, int until, T b, int i ) { return gallopR2LSearchGapR(a,from,until, b,i); }
     @Override public int searchGapL( T a, int from, int until, T b, int i ) { return gallopR2LSearchGapL(a,from,until, b,i); }
   }
-  @Override public <T> SearchAccessor<T> createAccessor( CompareAccessor<? super T> cmpAcc ) { return new ExpSearchAccessor<>(cmpAcc); }
+  @Override public <T> SearchAccessor<T> createAccessor( CompareAccessor<? super T> cmpAcc ) { return new Acc<>(cmpAcc); }
   @Override public long comparisonLimit( int from, int until, int i ) {
     if( until == from ) return 0;
     i = until-i;

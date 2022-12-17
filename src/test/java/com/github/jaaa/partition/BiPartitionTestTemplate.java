@@ -103,8 +103,8 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsAccessBoolean( @ForAll @Size(min=0, max=MAX_SIZE) boolean[] sample ) throws Throwable
   {
-    var input = sample.clone();
-    var reference = input.clone(); {
+    boolean[] input = sample.clone();
+    boolean[] reference = input.clone(); {
       Boolean[]   ref = range(0,input.length).mapToObj( i -> input[i] ).toArray(Boolean[]::new);
       Arrays.sort(ref);
       for( int i=ref.length; i-- > 0; )
@@ -151,7 +151,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsArrayByte( @ForAll @Size(min=0, max=MAX_SIZE) byte[] sample, @ForAll @IntRange(min=0, max=Byte.SIZE-1) int bit ) throws Throwable
   {
-    var input = sample.clone();
+    byte[] input = sample.clone();
     PredicateByte pred = x -> (x >>> bit) == 1;
 
     Byte[]       reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Byte[]::new);
@@ -165,7 +165,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsArrayShort( @ForAll @Size(min=0, max=MAX_SIZE) short[] sample, @ForAll @IntRange(min=0, max=Short.SIZE-1) int bit ) throws Throwable
   {
-    var input = sample.clone();
+    short[] input = sample.clone();
     PredicateShort pred = x -> (x >>> bit) == 1;
 
     Short[]      reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Short[]::new);
@@ -179,7 +179,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsArrayInt( @ForAll @Size(min=0, max=MAX_SIZE) int[] sample, @ForAll @IntRange(min=0, max=Integer.SIZE-1) int bit ) throws Throwable
   {
-    var input = sample.clone();
+    int[] input = sample.clone();
     PredicateInt pred = x -> (x >>> bit) == 1;
 
     Integer[]    reference = boxed(input);
@@ -193,7 +193,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsArrayLong( @ForAll @Size(min=0, max=MAX_SIZE) long[] sample, @ForAll @IntRange(min=0, max=Long.SIZE-1) int bit ) throws Throwable
   {
-    var input = sample.clone();
+    long[] input = sample.clone();
     PredicateLong pred = x -> (x >>> bit) == 1;
 
     Long[]       reference = boxed(input);
@@ -207,7 +207,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsArrayChar( @ForAll @Size(min=0, max=MAX_SIZE) char[] sample, @ForAll @IntRange(min=0, max=Character.SIZE-1) int bit ) throws Throwable
   {
-    var input = sample.clone();
+    char[] input = sample.clone();
     PredicateChar pred = x -> (x >>> bit) == 1;
 
     Character[]  reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Character[]::new);
@@ -221,7 +221,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsArrayFloat( @ForAll @Size(min=0, max=MAX_SIZE) float[] sample, @ForAll float split ) throws Throwable
   {
-    var input = sample.clone();
+    float[] input = sample.clone();
     PredicateFloat pred = x -> x <= split;
 
     Float[]      reference = range(0,input.length).mapToObj( i -> input[i] ).toArray(Float[]::new);
@@ -235,7 +235,7 @@ public class BiPartitionTestTemplate
   @Property( tries = N_TRIES, shrinking = ShrinkingMode.OFF )
   void biPartitionsArrayDouble( @ForAll @Size(min=0, max=MAX_SIZE) double[] sample, @ForAll double split ) throws Throwable
   {
-    var input = sample.clone();
+    double[] input = sample.clone();
     PredicateDouble pred = x -> x <= split;
 
     Double[]     reference = boxed(input);

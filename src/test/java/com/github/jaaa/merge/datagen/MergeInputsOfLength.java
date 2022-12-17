@@ -7,7 +7,7 @@ import static java.lang.Math.addExact;
 import static java.lang.Math.multiplyExact;
 
 
-public class MergeInputsOfLength extends AbstractList<MergeInput<byte[]>>
+public final class MergeInputsOfLength extends AbstractList<MergeInput<byte[]>>
 {
 // STATIC FIELDS
   // LOOKUP[LOOKUP.length - 2*len] contains the number of distinct possible merge inputs of length `len`,
@@ -59,7 +59,7 @@ public class MergeInputsOfLength extends AbstractList<MergeInput<byte[]>>
 
     int l=0,
         r=len;
-    var result = new byte[len];
+    byte[] result = new byte[len];
     if(wasB) --r;
     else     ++l;
 
@@ -87,21 +87,30 @@ public class MergeInputsOfLength extends AbstractList<MergeInput<byte[]>>
     }
 
     revert(result, l,len);
-    return new MergeInput<>(result, 0,l,len);
+    return MergeInput.of(result, 0,l,len);
   }
 
 // FIELDS
-  private final int len;
+  private final int len, hashCode;
 
 // CONSTRUCTORS
-  public MergeInputsOfLength(int _len )
+  public MergeInputsOfLength( int _len )
   {
     if(          0 > _len ) throw new IllegalArgumentException();
     if(maxLength() < _len ) throw new ArithmeticException();
     len =_len;
+    hashCode = super.hashCode();
   }
 
 // METHODS
   @Override public int size() { return nSamples(len); }
   @Override public MergeInput<byte[]> get( int index ) { return sample(len,index); }
+  @Override public boolean contains( Object o ) { return o != null && super.contains(o); }
+  @Override public int hashCode() { return hashCode; }
+  @Override public boolean equals( Object that ) {
+    if( that == this ) return true;
+    if( that instanceof MergeInputsOfLength && that.hashCode() != hashCode )
+      return false;
+    return super.equals(that);
+  }
 }

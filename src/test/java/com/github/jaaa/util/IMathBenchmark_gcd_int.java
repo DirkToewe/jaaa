@@ -5,6 +5,7 @@ import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.IOException;
@@ -57,7 +58,7 @@ public class IMathBenchmark_gcd_int
     assert  ea = true;
     if   ( !ea ) throw new IllegalStateException();
 
-    var rng = new SplittableRandom();
+    SplittableRandom rng = new SplittableRandom();
     System.out.print("Running test 1...");
 
     for( int x=-4_000; x < 4_000; x++ )
@@ -89,7 +90,7 @@ public class IMathBenchmark_gcd_int
 
     System.out.println(" passed!");
 
-    var opt = new OptionsBuilder()
+    Options opt = new OptionsBuilder()
       .include( IMathBenchmark_gcd_int.class.getCanonicalName() )
       .build();
 

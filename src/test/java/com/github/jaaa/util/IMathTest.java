@@ -8,6 +8,7 @@ import net.jqwik.api.constraints.Positive;
 
 import java.math.BigInteger;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -47,9 +48,9 @@ public class IMathTest
     @Example void isPowerOf_7_int() { isPowerOf_int(7); }
     @Example void isPowerOf_8_int() { isPowerOf_int(8); }
     @Example void isPowerOf_9_int() { isPowerOf_int(9); }
-    private static void isPowerOf_int( int base ) {
+    private  void isPowerOf_int( int base ) {
       assertThat(base).isGreaterThan(1);
-      var powers = new HashSet<Integer>();
+      Set<Integer> powers = new HashSet<>();
       try {
         for( int p=1;; p = multiplyExact(p,base) )
           powers.add(p);
@@ -63,7 +64,7 @@ public class IMathTest
   }
 
   @Example void isPowerOf3_int() {
-    var powers = new HashSet<Integer>();
+    Set<Integer> powers = new HashSet<>();
     try {
       for( int p=1;; p = multiplyExact(p,3) )
         powers.add(p);
@@ -102,15 +103,17 @@ public class IMathTest
 
   @Property void gcd_int( @ForAll int x, @ForAll int y )
   {
-    var X = BigInteger.valueOf(x);
-    var Y = BigInteger.valueOf(y);
+    BigInteger
+      X = BigInteger.valueOf(x),
+      Y = BigInteger.valueOf(y);
     assertThat( gcd(x,y) ).isEqualTo( X.gcd(Y).intValue() );
   }
 
   @Property void gcd_long( @ForAll long x, @ForAll long y )
   {
-    var X = BigInteger.valueOf(x);
-    var Y = BigInteger.valueOf(y);
+    BigInteger
+      X = BigInteger.valueOf(x),
+      Y = BigInteger.valueOf(y);
     assertThat( gcd(x,y) ).isEqualTo( X.gcd(Y).longValue() );
   }
 
@@ -119,26 +122,27 @@ public class IMathTest
   {
     @Property void int_gcd( @ForAll @IntRange(min=0) int x, @ForAll @IntRange(min=0) int y )
     {
-      var X = BigInteger.valueOf(x);
-      var Y = BigInteger.valueOf(y);
-      assertThat( gcdx(x,y).gcd() ).isEqualTo( X.gcd(Y).intValue() );
+      BigInteger
+        X = BigInteger.valueOf(x),
+        Y = BigInteger.valueOf(y);
+      assertThat( gcdx(x,y).gcd ).isEqualTo( X.gcd(Y).intValue() );
     }
 
     @Property void int_bezout( @ForAll @IntRange(min=0) int x, @ForAll @IntRange(min=0) int y )
     {
-      var gcdx = gcdx(x,y);
-      assertThat( gcdx.gcd() ).isEqualTo( gcdx.bezoutL()*x + gcdx.bezoutR()*y );
+      GcdxInt gcdx = gcdx(x,y);
+      assertThat( gcdx.gcd ).isEqualTo( gcdx.bezoutL*x + gcdx.bezoutR*y );
     }
 
     @Property void int_minimality( @ForAll @IntRange(min=0) int a, @ForAll @IntRange(min=0) int b )
     {
-      var     gcdx = gcdx(a,b);
-      var d = gcdx.gcd();
-      var x = gcdx.bezoutL();
-      var y = gcdx.bezoutR();
+      GcdxInt gcdx = gcdx(a,b);
+      int d = gcdx.gcd,
+          x = gcdx.bezoutL,
+          y = gcdx.bezoutR;
       if( d == 0 ) {
-        assertThat( gcdx.bezoutL() ).isEqualTo(0);
-        assertThat( gcdx.bezoutR() ).isEqualTo(0);
+        assertThat( gcdx.bezoutL ).isEqualTo(0);
+        assertThat( gcdx.bezoutR ).isEqualTo(0);
       }
       else if( a == b )
         assertThat( Tuple.of(x,y) ).isIn( Tuple.of(1,0), Tuple.of(0,1) );
@@ -158,26 +162,27 @@ public class IMathTest
 
     @Property void long_gcd( @ForAll @LongRange(min=0) long x, @ForAll @LongRange(min=0) long y )
     {
-      var X = BigInteger.valueOf(x);
-      var Y = BigInteger.valueOf(y);
-      assertThat( gcdx(x,y).gcd() ).isEqualTo( X.gcd(Y).longValue() );
+      BigInteger
+        X = BigInteger.valueOf(x),
+        Y = BigInteger.valueOf(y);
+      assertThat( gcdx(x,y).gcd ).isEqualTo( X.gcd(Y).longValue() );
     }
 
     @Property void long_bezout( @ForAll @LongRange(min=0) long x, @ForAll @LongRange(min=0) long y )
     {
-      var gcdx = gcdx(x,y);
-      assertThat( gcdx.gcd() ).isEqualTo( gcdx.bezoutL()*x + gcdx.bezoutR()*y );
+      GcdxLong gcdx = gcdx(x,y);
+      assertThat( gcdx.gcd ).isEqualTo( gcdx.bezoutL*x + gcdx.bezoutR*y );
     }
 
     @Property void long_minimality( @ForAll @LongRange(min=0) long a, @ForAll @LongRange(min=0) long b )
     {
-      var     gcdx = gcdx(a,b);
-      var d = gcdx.gcd();
-      var x = gcdx.bezoutL();
-      var y = gcdx.bezoutR();
+      GcdxLong gcdx = gcdx(a,b);
+      long d = gcdx.gcd,
+           x = gcdx.bezoutL,
+           y = gcdx.bezoutR;
       if( d == 0 ) {
-        assertThat( gcdx.bezoutL() ).isEqualTo(0L);
-        assertThat( gcdx.bezoutR() ).isEqualTo(0L);
+        assertThat( gcdx.bezoutL ).isEqualTo(0L);
+        assertThat( gcdx.bezoutR ).isEqualTo(0L);
       }
       else if( a == b )
         assertThat( Tuple.of(x,y) ).isIn( Tuple.of(1L,0L), Tuple.of(0L,1L) );
@@ -251,7 +256,7 @@ public class IMathTest
   }
 
   @Group class Pow {
-    private static int ref( int base, long exp ) {
+    private int ref( int base, long exp ) {
       return BigInteger.valueOf(base).modPow(
         BigInteger.valueOf(exp),
         BigInteger.valueOf(1L<<32)

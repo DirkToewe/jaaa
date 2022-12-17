@@ -1,11 +1,14 @@
 package com.github.jaaa.util;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.newBufferedWriter;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 
@@ -13,50 +16,50 @@ import static java.util.stream.Collectors.joining;
 public final class PlotlyUtils
 {
 // STATIC FIELDS
-  private static final String PLOT_TEMPLATE = """
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8">
-        <script src="https://cdn.plot.ly/plotly-latest.js"></script>
-      </head>
-      <body>
-        <script>
-          'use strict';
-
-          const plot = document.createElement('div');
-          plot.style = 'width: 100%%; height: 95vh;';
-          document.body.appendChild(plot);
-
-          const layout = %1$s;
-          if( 'title' in layout )
-            document.title = layout.title;
-
-          if( 'paper_bgcolor' in layout )
-            document.body.style.background = layout.paper_bgcolor;
-
-          Plotly.plot(plot, {layout, data: %2$s});
-        </script>
-      </body>
-    </html>
-  """;
+  private static final String PLOT_TEMPLATE =
+    "<!DOCTYPE html>\n" +
+    "<html lang=\"en\">\n" +
+    "  <head>\n" +
+    "    <meta charset=\"utf-8\">\n" +
+    "    <script src=\"https://cdn.plot.ly/plotly-latest.js\"></script>\n" +
+    "  </head>\n" +
+    "  <body>\n" +
+    "    <script>\n" +
+    "      'use strict';\n" +
+    "\n" +
+    "      const plot = document.createElement('div');\n" +
+    "      plot.style = 'width: 100%%; height: 95vh;';\n" +
+    "      document.body.appendChild(plot);\n" +
+    "\n" +
+    "      const layout = %1$s;\n" +
+    "      if( 'title' in layout )\n" +
+    "        document.title = layout.title;\n" +
+    "\n" +
+    "      if( 'paper_bgcolor' in layout )\n" +
+    "        document.body.style.background = layout.paper_bgcolor;\n" +
+    "\n" +
+    "      Plotly.plot(plot, {layout, data: %2$s});\n" +
+    "    </script>\n" +
+    "  </body>\n" +
+    "</html>\n";
 
 // STATIC CONSTRUCTOR
 
 // STATIC METHODS
   public static Path plot( String layout, String... data ) throws IOException
   {
-    var  tmp = Files.createTempFile("plot_",".html");
+    Path tmp = Files.createTempFile("plot_",".html");
     plot(tmp, layout, data);
-//    var cmd = format("xdg-open %s", tmp);
     String[] cmd = { "xdg-open", tmp.toString() };
     getRuntime().exec(cmd);
     return tmp;
   }
   public static void plot( Path path, String layout, String... data ) throws IOException
   {
-    var dat = stream(data).collect( joining(",\n", "[", "]") );
-    Files.writeString( path, format(PLOT_TEMPLATE, layout, dat) );
+    String dat = stream(data).collect( joining(",\n", "[", "]") );
+    try( Writer out = newBufferedWriter(path, UTF_8) ) {
+      out.write( format(PLOT_TEMPLATE, layout, dat) );
+    }
   }
 
 // FIELDS

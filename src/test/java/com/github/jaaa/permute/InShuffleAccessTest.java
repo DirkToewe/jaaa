@@ -37,20 +37,20 @@ public class InShuffleAccessTest
       int from = sample.get1(),
          until = sample.get2();
 
-      var tst = IntStream.range(0,until).toArray();
+      int[] tst = IntStream.range(0,until).toArray();
       InShuffleAccess acc = (i, j) -> swap(tst,i,j);
       acc.inShuffle(from,until);
 
-      var ref = IntStream.range(0,until).map( i -> {
+      int[] ref = IntStream.range(0,until).map(i -> {
         if( i < from )
           return i;
         int n = until - from + 1 >>> 1;
         i -= from;
-        i = switch(i&1) {
-          case 0 ->  i>>>1;
-          case 1 -> (i>>>1) + n;
-          default -> throw new AssertionError();
-        };
+        switch(i&1) {
+          case 0 : i = i>>>1;      break;
+          case 1 : i =(i>>>1) + n; break;
+          default: throw new AssertionError();
+        }
         return i + from;
       }).toArray();
 
@@ -60,11 +60,11 @@ public class InShuffleAccessTest
       int from = sample.get1(),
          until = sample.get2();
 
-      var tst = IntStream.range(0,until).toArray();
+      int[] tst = IntStream.range(0,until).toArray();
       InShuffleAccess acc = (i,j) -> swap(tst,i,j);
       acc.unShuffle(from,until);
 
-      var ref = IntStream.range(0,until).map( i -> {
+      int[] ref = IntStream.range(0,until).map( i -> {
         if( i < from )
           return i;
         int n = until - from + 1 >>> 1;

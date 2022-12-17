@@ -20,7 +20,7 @@ public class RotateTest
   @Property( tries = N_TRIES )
   void rotatesArraysBoolean1( @ForAll boolean[] input, @ForAll @IntRange( min = -Integer.MAX_VALUE ) int dist )
   {
-    var reference = input.clone();
+    boolean[] reference = input.clone();
     rotate(input,+dist);
     rotate(input,-dist);
     assertThat(input).isEqualTo(reference);
@@ -33,7 +33,7 @@ public class RotateTest
       dist1 < 0 ? (dist2 > Integer.MIN_VALUE - dist1)
                 : (dist2 < Integer.MAX_VALUE - dist1)
     );
-    var reference = input.clone();
+    boolean[] reference = input.clone();
     rotate(input, dist1);
     rotate(input, dist2);
     rotate(reference, dist1+dist2);
@@ -47,7 +47,7 @@ public class RotateTest
       dist /= input.length;
       dist *= input.length;
     }
-    var reference = input.clone();
+    boolean[] reference = input.clone();
     rotate(input, dist);
     assertThat(input).isEqualTo(reference);
   }
@@ -57,7 +57,7 @@ public class RotateTest
   {
     Assume.that( dist >= input.length - Integer.MAX_VALUE );
 
-    var reference = range(0,input.length).mapToObj( i -> {
+    Boolean[] reference = range(0,input.length).mapToObj(i -> {
       i -= dist;
       i %= input.length;
       if( i < 0 ) i += input.length;
@@ -75,9 +75,9 @@ public class RotateTest
     int  from = sample.getFrom(),
         until = sample.getUntil(),
           len = until-from;
-    var input = sample.getData();
+    boolean[] input = sample.getData();
 
-    var reference = range(0,input.length).mapToObj( i -> {
+    Boolean[] reference = range(0,input.length).mapToObj( i -> {
       if( from <= i && i < until ) {
             i -= from;
             i = (i - dist % len) % len;
@@ -153,9 +153,9 @@ public class RotateTest
     int  from = sample.getFrom(),
         until = sample.getUntil(),
           len = until-from;
-    var input = sample.getData();
+    byte[] input = sample.getData();
 
-    var reference = range(0,input.length).mapToObj( i -> {
+    Byte[] reference = range(0,input.length).mapToObj( i -> {
       if( from <= i && i < until ) {
             i -= from;
             i = (i - dist % len) % len;
@@ -231,9 +231,9 @@ public class RotateTest
     int  from = sample.getFrom(),
         until = sample.getUntil(),
           len = until-from;
-    var input = sample.getData();
+    short[] input = sample.getData();
 
-    var reference = range(0,input.length).mapToObj( i -> {
+    Short[] reference = range(0,input.length).mapToObj(i -> {
       if( from <= i && i < until ) {
             i -= from;
             i = (i - dist % len) % len;
@@ -309,9 +309,9 @@ public class RotateTest
     int  from = sample.getFrom(),
         until = sample.getUntil(),
           len = until-from;
-    var input = sample.getData();
+    int[] input = sample.getData();
 
-    var reference = range(0,input.length).map( i -> {
+    int[] reference = range(0,input.length).map( i -> {
       if( from <= i && i < until ) {
             i -= from;
             i = (i - dist % len) % len;
@@ -387,9 +387,9 @@ public class RotateTest
     int  from = sample.getFrom(),
         until = sample.getUntil(),
           len = until-from;
-    var input = sample.getData();
+    long[] input = sample.getData();
 
-    var reference = range(0,input.length).mapToLong( i -> {
+    long[] reference = range(0,input.length).mapToLong(i -> {
       if( from <= i && i < until ) {
             i -= from;
             i = (i - dist % len) % len;
@@ -465,9 +465,9 @@ public class RotateTest
     int  from = sample.getFrom(),
         until = sample.getUntil(),
           len = until-from;
-    var input = sample.getData();
+    char[] input = sample.getData();
 
-    var reference = range(0,input.length).mapToObj( i -> {
+    Character[] reference = range(0,input.length).mapToObj( i -> {
       if( from <= i && i < until ) {
             i -= from;
             i = (i - dist % len) % len;
@@ -543,7 +543,7 @@ public class RotateTest
     int  from = sample.getFrom(),
         until = sample.getUntil(),
           len = until-from;
-    var input = sample.getData();
+    float[] input = sample.getData();
 
     Float[] reference = range(0,input.length).mapToObj( i -> {
       if( from <= i && i < until ) {
@@ -620,7 +620,7 @@ public class RotateTest
     int  from = sample.getFrom(),
         until = sample.getUntil(),
           len = until-from;
-    var input = sample.getData();
+    double[] input = sample.getData();
 
     double[] reference = range(0,input.length).mapToDouble( i -> {
       if( from <= i && i < until ) {
@@ -643,7 +643,7 @@ public class RotateTest
   @Property( tries = N_TRIES )
   void rotatesArraysObject1( @ForAll Integer[] input, @ForAll @IntRange( min = -Integer.MAX_VALUE ) int dist )
   {
-    var reference = input.clone();
+    Integer[] reference = input.clone();
     rotate(input,+dist);
     rotate(input,-dist);
     assertThat(input).isEqualTo(reference);
@@ -656,7 +656,7 @@ public class RotateTest
       dist1 < 0 ? (dist2 > Integer.MIN_VALUE - dist1)
                 : (dist2 < Integer.MAX_VALUE - dist1)
     );
-    var reference = input.clone();
+    Integer[] reference = input.clone();
     rotate(input, dist1);
     rotate(input, dist2);
     rotate(reference, dist1+dist2);
@@ -670,7 +670,7 @@ public class RotateTest
       dist /= input.length;
       dist *= input.length;
     }
-    var reference = input.clone();
+    Integer[] reference = input.clone();
     rotate(input, dist);
     assertThat(input).isEqualTo(reference);
   }
@@ -679,7 +679,7 @@ public class RotateTest
   void rotatesArraysObject4( @ForAll Integer[] input, @ForAll int dist )
   {
     int len = input.length;
-    var reference = range(0,len).mapToObj( i -> {
+    Integer[] reference = range(0,len).mapToObj( i -> {
           i = (i - dist % len) % len;
       if( i < 0 )
           i += len;
@@ -697,7 +697,7 @@ public class RotateTest
     int  from = sample.getFrom(),
         until = sample.getUntil(),
           len = until-from;
-    var input = sample.getData();
+    Integer[] input = sample.getData();
 
     Integer[] reference = range(0,input.length).mapToObj( i -> {
       if( from <= i && i < until ) {

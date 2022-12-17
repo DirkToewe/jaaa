@@ -5,6 +5,7 @@ import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.IOException;
@@ -36,19 +37,19 @@ public class BinarySearchBenchmark
   // STATIC METHODS
   public static void main( String... args ) throws RunnerException, IOException
   {
-    var rng = new Random();
+    Random rng = new Random();
 
     System.out.print("Running test1...");
-    var arr = rng.ints(1_000_000).sorted().boxed().toArray(Integer[]::new);
+    Integer[] arr = rng.ints(1_000_000).sorted().boxed().toArray(Integer[]::new);
     for( int run=0; run++ < 1_000_000; )
     {
-      var    key = arr[ rng.nextInt(arr.length) ];
-      assert key.equals( arr[          binSearch1(arr,key) ] );
-      assert key.equals( arr[ Arrays.binarySearch(arr,key) ] );
+      Integer key = arr[ rng.nextInt(arr.length) ];
+      assert  key.equals( arr[          binSearch1(arr,key) ] );
+      assert  key.equals( arr[ Arrays.binarySearch(arr,key) ] );
     }
     System.out.println(" passed!");
 
-    var opt = new OptionsBuilder()
+    Options opt = new OptionsBuilder()
       .include( BinarySearchBenchmark.class.getCanonicalName() )
       .build();
 
@@ -124,13 +125,13 @@ public class BinarySearchBenchmark
 
   @Benchmark
   public void binSearch1( Blackhole blackhole ) {
-    var key = arr[ rng.nextInt(arr.length) ];
+    Integer key = arr[ rng.nextInt(arr.length) ];
     blackhole.consume( binSearch1(arr,key) );
   }
 
   @Benchmark
   public void binSearchJDK( Blackhole blackhole ) {
-    var key = arr[ rng.nextInt(arr.length) ];
+    Integer key = arr[ rng.nextInt(arr.length) ];
     blackhole.consume( Arrays.binarySearch(arr,key) );
   }
 }

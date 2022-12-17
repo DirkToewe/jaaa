@@ -19,10 +19,10 @@ repositories {
 }
 
 java {
-  sourceCompatibility = JavaVersion.VERSION_17
+  sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
-val v_jqwik = "1.7.0"
+val v_jqwik = "1.7.1"
 val v_assertj = "3.23.1"//"3.21.0"
 val v_jmh = "1.35"
 
@@ -49,7 +49,7 @@ tasks.compileTestJava {
 }
 
 var memTotal   = Integer.MAX_VALUE
-val memPerFork = 6
+val memPerFork = 5
 
 if( System.getProperty("os.name").decapitalize() == "linux" )
 {
@@ -69,21 +69,18 @@ tasks.test {
   useJUnitPlatform {
     includeEngines(
       "assertj-core",
-//      "junit-jupiter",
       "jqwik"
     )
   }
   enableAssertions = true
   maxHeapSize = "${memPerFork}g"
-  maxParallelForks = max( 1, min(2*memTotal/memPerFork, getRuntime().availableProcessors()) )
+  maxParallelForks = max( 1, min(memTotal/memPerFork, getRuntime().availableProcessors()) )
   jvmArgs = listOf(
     "-ea",
-    "--illegal-access=permit",
-    "-XX:MaxInlineLevel=15",
-    "-XX:AutoBoxCacheMax=1000000",
-//    "--add-modules=jdk.incubator.vector"
+//    "--illegal-access=permit",
+//    "--add-modules=jdk.incubator.vector",
 //    "-Xdisablejavadump",
-//    "-Xdump:none"
+//    "-Xdump:none",
   )
   include(
     "**/*Properties.class",
@@ -92,61 +89,39 @@ tasks.test {
   )
 }
 
-tasks.register<JavaExec>("benchParallelMergeSort") {
+tasks.register<JavaExec>("benchmarkMerge") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
-  mainClass.set("com.github.jaaa.sort.ParallelMergeSortComparison")
-  jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx12g")
+  mainClass.set("com.github.jaaa.merge.BenchmarkMerge")
+  jvmArgs = listOf("-ea")
 }
 
-tasks.register<JavaExec>("compareMerge") {
-  dependsOn(tasks.compileTestJava)
-  classpath = sourceSets.test.get().runtimeClasspath
-  mainClass.set("com.github.jaaa.merge.MergeComparison")
-  jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15")
-}
-
-tasks.register<JavaExec>("compareSort") {
+tasks.register<JavaExec>("benchmarkSort") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
   mainClass.set("com.github.jaaa.sort.BenchmarkSort")
-  jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx12g")
+  jvmArgs = listOf("-ea")
 }
 
-tasks.register<JavaExec>("compareMergeParallel") {
-  dependsOn(tasks.compileTestJava)
-  classpath = sourceSets.test.get().runtimeClasspath
-  mainClass.set("com.github.jaaa.merge.ParallelMergeComparison")
-  jvmArgs = listOf(
-    "-ea",
-    "--illegal-access=warn",
-    "-XX:MaxInlineLevel=15",
-//    "-Xscmx50M",
-//    "-XX:+UseParallelGC",
-//    "-XX:+UseParallelOldGC",
-    "-Xmx48g"
-  )
-}
-
-tasks.register<JavaExec>("compareGcd_int") {
+tasks.register<JavaExec>("benchmarkGcdInt") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
   mainClass.set("com.github.jaaa.util.IMathBenchmark_gcd_int")
-  jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx6g")
+  jvmArgs = listOf("-ea")
 }
 
-tasks.register<JavaExec>("compareGcd_long") {
+tasks.register<JavaExec>("benchmarkGcdLong") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
   mainClass.set("com.github.jaaa.util.IMathBenchmark_gcd_long")
-  jvmArgs = listOf("-ea", "--illegal-access=warn", "-XX:MaxInlineLevel=15", "-Xmx6g")
+  jvmArgs = listOf("-ea")
 }
 
-tasks.register<JavaExec>("compareBiPartition") {
+tasks.register<JavaExec>("benchmarkBiPartition") {
   dependsOn(tasks.compileTestJava)
   classpath = sourceSets.test.get().runtimeClasspath
-  mainClass.set("com.github.jaaa.partition.BiPartitionComparison")
-  jvmArgs = listOf("-ea", "-XX:MaxInlineLevel=15", "-Xmx48g")
+  mainClass.set("com.github.jaaa.partition.BenchmarkBiPartition")
+  jvmArgs = listOf("-ea")
 }
 
 dependencies {

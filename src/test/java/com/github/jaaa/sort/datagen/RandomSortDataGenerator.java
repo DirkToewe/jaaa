@@ -88,11 +88,11 @@ public class RandomSortDataGenerator
       }
     }
     else switch (rng.nextInt(3)) {
-      case 0 -> nextAscending(array, from, until, step);
-      case 1 -> nextDescending(array, from, until, step);
-      case 2 -> nextUniform(array, from, until, step);
-//      case 3 : nextGaussian  (array, from,until,step); break;
-      default -> throw new AssertionError();
+      case 0 : nextAscending (array, from, until, step); return;
+      case 1 : nextDescending(array, from, until, step); return;
+      case 2 : nextUniform   (array, from, until, step); return;
+//      case 3: nextGaussian  (array, from, until, step); return;
+      default: throw new AssertionError();
     }
   }
 

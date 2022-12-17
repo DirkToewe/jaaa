@@ -22,7 +22,7 @@ public class Sampling
     // SHUFFLE
     for( int i=nSamples; i > 0; i-- )
     {
-      var result_i = result[i-1];
+      double[] result_i = result[i-1];
       for( int j=0; j < nFeatures; j++ )
         swap( result_i,j, result[randInt.applyAsInt(i)],j );
     }
@@ -36,9 +36,9 @@ public class Sampling
       throw new IllegalArgumentException();
 
     int nFeatures = lower.length;
-    var result = lhs(nSamples,nFeatures,randInt);
+    double[][] result = lhs(nSamples,nFeatures,randInt);
 
-    for( var row: result )
+    for( double[] row: result )
     for( int j=0; j < nFeatures; j++ )
     {
       double s = row[j];

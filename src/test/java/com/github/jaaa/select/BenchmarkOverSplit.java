@@ -6,7 +6,8 @@ import com.github.jaaa.fn.EntryFn;
 import com.github.jaaa.util.Progress;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.Writer;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,10 +16,14 @@ import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.lang.System.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.createTempFile;
+import static java.nio.file.Files.newBufferedWriter;
 import static java.util.Arrays.stream;
-import static java.util.Map.entry;
+import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
+import static java.util.Arrays.asList;
 
 
 // -ea -Xmx16g -XX:MaxInlineLevel=15
@@ -67,7 +72,7 @@ public class BenchmarkOverSplit
     }
     @Override public int[] malloc( int len ) { return new int[len]; }
     @Override public void swap( int[] a, int i, int[] b, int j ) {
-      var ai = a[i];
+      int ai = a[i];
                a[i] = b[j];
                       b[j] = ai;
       ++nSwaps;
@@ -75,46 +80,46 @@ public class BenchmarkOverSplit
   }
 
   static <T> Map<String, SelectFn<T>> selectors( CompareRandomAccessor<T> acc ) {
-    return Map.ofEntries(
-      entry("Heap", (arr,l,m,r) ->
-        new HeapSelectAccess() {
-          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.heapSelect(l,m,r)
-      ),
-      entry("HeapRandom", (arr,l,m,r) ->
-        new HeapSelectRandomAccess() {
-          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.heapSelectRandom(l,m,r)
-      ),
-      entry("MergeSelect", (arr,l,m,r) ->
-        new MergeSelectAccessor<T>() {
-          @Override public T malloc( int len ) { return acc.malloc(len); }
-          @Override public void   copy( T a, int i, T b, int j ) {        acc.   copy(a,i, b,j); }
-          @Override public void   swap( T a, int i, T b, int j ) {        acc.   swap(a,i, b,j); }
-          @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
-        }.mergeSelect(arr,l,m,r, null,0,0)
-      ),
-      entry("Quick", (arr,l,m,r) ->
-        new QuickSelectAccess() {
-          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.quickSelect(l,m,r)
-      ),
-      entry("MoM5", (arr,l,m,r) ->
-        new Mom5SelectAccess() {
-          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.mom5Select(l,m,r)
-      ),
-      entry("MoM3", (arr,l,m,r) ->
-        new Mom3SelectAccess() {
-          @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
-          @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
-        }.mom3Select(l,m,r)
-      )
+    Map<String, SelectFn<T>> selectors = new LinkedHashMap<>();
+    selectors.put("Heap", (arr,l,m,r) ->
+      new HeapSelectAccess() {
+        @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
+        @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
+      }.heapSelect(l,m,r)
     );
+    selectors.put("HeapRandom", (arr,l,m,r) ->
+      new HeapSelectRandomAccess() {
+        @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
+        @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
+      }.heapSelectRandom(l,m,r)
+    );
+    selectors.put("MergeSelect", (arr,l,m,r) ->
+      new MergeSelectAccessor<T>() {
+        @Override public T malloc( int len ) { return acc.malloc(len); }
+        @Override public void   copy( T a, int i, T b, int j ) {        acc.   copy(a,i, b,j); }
+        @Override public void   swap( T a, int i, T b, int j ) {        acc.   swap(a,i, b,j); }
+        @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
+      }.mergeSelect(arr,l,m,r, null,0,0)
+    );
+    selectors.put("Quick", (arr,l,m,r) ->
+      new QuickSelectAccess() {
+        @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
+        @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
+      }.quickSelect(l,m,r)
+    );
+    selectors.put("MoM5", (arr,l,m,r) ->
+      new Mom5SelectAccess() {
+        @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
+        @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
+      }.mom5Select(l,m,r)
+    );
+    selectors.put("MoM3", (arr,l,m,r) ->
+      new Mom3SelectAccess() {
+        @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
+        @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
+      }.mom3Select(l,m,r)
+    );
+    return unmodifiableMap(selectors);
   }
 
   /** Compares merging algorithms using merge sequences of constant combined length but
@@ -127,13 +132,13 @@ public class BenchmarkOverSplit
   private static void compare_over_split( final int length ) throws IOException
   {
     int N_SAMPLES = N_SAMPLES_DEFAULT;
-    var rng = new SplittableRandom();
+    SplittableRandom rng = new SplittableRandom();
 
     double[] x = rng.ints(N_SAMPLES, 0,length+1).asDoubleStream().toArray();
     Arrays.sort(x);
 
-    var acc = new CountingAccessor();
-    var selectors = selectors(acc);
+    CountingAccessor acc = new CountingAccessor();
+    Map<String, SelectFn<int[]>> selectors = selectors(acc);
 
     Map<String,double[]>
       resultsComps = new TreeMap<>(),
@@ -146,9 +151,9 @@ public class BenchmarkOverSplit
     });
 
     @SuppressWarnings("unchecked")
-    Entry<String,SelectFn<int[]>>[] selectorsArr = selectors.entrySet().toArray(Entry[]::new);
+    Entry<String,SelectFn<int[]>>[] selectorsArr = selectors.entrySet().stream().toArray(Entry[]::new);
 
-    var order = range(0,N_SAMPLES).toArray();
+    int[] order = range(0,N_SAMPLES).toArray();
     randomShuffle(order,rng::nextInt);
     Progress.print( stream(order) ).forEach(i -> {
       int split = (int) x[i];
@@ -171,7 +176,7 @@ public class BenchmarkOverSplit
       stream(selectorsArr).forEach( EntryConsumer.of( (k,v) -> {
         acc.nComps = 0;
         acc.nSwaps = 0;
-        var tst = ref.clone();
+        int[] tst = ref.clone();
 
         long t0 = nanoTime();
         v.select(tst, 0, split, length);
@@ -193,29 +198,27 @@ public class BenchmarkOverSplit
 
   private static void plot2d( String title, String x_label, double[] x, String y_label, Map<String,double[]> ys ) throws IOException
   {
-    var colorList = List.of(
+    List<String> colorList = asList(
       "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#999999"
     );
-    var col = new AtomicInteger();
+    AtomicInteger col = new AtomicInteger();
 
     String[] data = ys.entrySet().stream().map( EntryFn.of(
       (method,y) -> {
-        var color = colorList.get( col.getAndIncrement() );
+        String color = colorList.get( col.getAndIncrement() );
         return format(
-          """
-          {
-            type: 'scattergl',
-            mode: 'markers',
-            name: '%s',
-            marker: {
-              color: '%s',
-              size: 2,
-              opacity: 0.6
-            },
-            x: %s,
-            y: %s
-          }
-          """,
+          "{\n" +
+          "  type: 'scattergl',\n" +
+          "  mode: 'markers',\n" +
+          "  name: '%s',\n" +
+          "  marker: {\n" +
+          "    color: '%s',\n" +
+          "    size: 2,\n" +
+          "    opacity: 0.6\n" +
+          "  },\n" +
+          "  x: %s,\n" +
+          "  y: %s\n" +
+          "}\n",
           method,
           color,
           Arrays.toString(x),
@@ -225,133 +228,132 @@ public class BenchmarkOverSplit
     )).toArray(String[]::new);
 
     String layout = format(
-      """
-      {
-        title: '%s',
-        xaxis: {
-          title: '%s',
-          color: 'lightgray',
-          gridcolor: '#333'
-        },
-        yaxis: {
-          title: '%s',
-          color: 'lightgray',
-          gridcolor: '#333'
-        },
-        paper_bgcolor: 'black',
-         plot_bgcolor: 'black',
-        legend: {
-          font: { color: 'lightgray' }
-        },
-        font: { color: 'lightgray' }
-      }
-      """,
+      "{\n" +
+      "  title: '%s',\n" +
+      "  xaxis: {\n" +
+      "    title: '%s',\n" +
+      "    color: 'lightgray',\n" +
+      "    gridcolor: '#333'\n" +
+      "  },\n" +
+      "  yaxis: {\n" +
+      "    title: '%s',\n" +
+      "    color: 'lightgray',\n" +
+      "    gridcolor: '#333'\n" +
+      "  },\n" +
+      "  paper_bgcolor: 'black',\n" +
+      "   plot_bgcolor: 'black',\n" +
+      "  legend: {\n" +
+      "    font: { color: 'lightgray' }\n" +
+      "  },\n" +
+      "  font: { color: 'lightgray' }\n" +
+      "}\n",
       title,
       x_label,
       y_label
     );
 
-    final String PLOT_TEMPLATE = """
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8">
-        <script src="https://cdn.plot.ly/plotly-latest.js"></script>
-        <script src="./nd.min.js"></script>
-      </head>
-      <body>
-        <script>
-          'use strict';
+    final String PLOT_TEMPLATE =
+      "<!DOCTYPE html>\n" +
+      "<html lang=\"en\">\n" +
+      "  <head>\n" +
+      "    <meta charset=\"utf-8\">\n" +
+      "    <script src=\"https://cdn.plot.ly/plotly-latest.js\"></script>\n" +
+      "    <script src=\"./nd.min.js\"></script>\n" +
+      "  </head>\n" +
+      "  <body>\n" +
+      "    <script>\n" +
+      "      'use strict';\n" +
+      "\n" +
+      "      const plot = document.createElement('div');\n" +
+      "      plot.style = 'width: 100%%; height: 95vh;';\n" +
+      "      document.body.appendChild(plot);\n" +
+      "\n" +
+      "      const layout = %1$s;\n" +
+      "      if( 'title' in layout )\n" +
+      "        document.title = layout.title;\n" +
+      "\n" +
+      "      if( 'paper_bgcolor' in layout )\n" +
+      "        document.body.style.background = 'black';\n" +
+      "\n" +
+      "      let data = %2$s;\n" +
+      "\n" +
+      "      const worstCase   = (m,n) => Math.log2(m+1) * n;\n" +
+      "      const averageCase = (m,n) => Math.log((m+n)/m) * Math.log2(m+1)*m;\n" +
+      "\n" +
+      "      data = data.flatMap( data => {\n" +
+      "        let fitFns = function(){\n" +
+      "          switch(data.name) {\n" +
+      "            default:\n" +
+      "              throw new Error(data.name);\n" +
+      "            case 'MoM5':\n" +
+      "            case 'MoM3':\n" +
+      "            case 'MergeSelect':\n" +
+      "            case 'Quick':\n" +
+      "              return [(m,n) => m+n];\n" +
+      "            case 'Heap':\n" +
+      "            case 'HeapRandom':\n" +
+      "              return [(m,n) => 0];\n" +
+      "            case 'HeapMajor':\n" +
+      "              return [\n" +
+      "                (m,n) => m,\n" +
+      "                (m,n) => n,\n" +
+      "                (m,n) =>   worstCase(n,m),\n" +
+      "                (m,n) => averageCase(n,m),\n" +
+      "              ];\n" +
+      "            case 'HeapMinor':\n" +
+      "            case 'HeapHybridV2':\n" +
+      "              return [\n" +
+      "                (m,n) => m,\n" +
+      "                (m,n) => n,\n" +
+      "                (m,n) =>   worstCase(m,n),\n" +
+      "                (m,n) => averageCase(m,n),\n" +
+      "              ];\n" +
+      "          }\n" +
+      "        }();\n" +
+      "\n" +
+      "        fitFns = fitFns.map(\n" +
+      "          f => ([x,y]) => {\n" +
+      "            const m = Math.min(x,y),\n" +
+      "                  n = Math.max(x,y);\n" +
+      "            return m < 2 ? 0 : f(m,n)\n" +
+      "          }\n" +
+      "        );\n" +
+      "\n" +
+      "        const xMax = data.x.reduce((x,y) => Math.max(x,y)),\n" +
+      "              yMax = data.y.reduce((x,y) => Math.max(x,y)),\n" +
+      "           train_X = data.x.map( x => [x,xMax-x] ),\n" +
+      "           train_y = data.y;\n" +
+      "\n" +
+      "        const fit = nd.opt.fit_lin(train_X, train_y, fitFns);\n" +
+      "\n" +
+      "        console.log({[data.name]: fit.coeffs})\n" +
+      "\n" +
+      "        const x = [...nd.iter.linspace(2,xMax-2,1000)]\n" +
+      "        const y = x.map( x => fit([x,xMax-x]) )\n" +
+      "\n" +
+      "        const fitData = {\n" +
+      "          x,y,\n" +
+      "          name: data.name + ' (fit)',\n" +
+      "          mode: 'lines',\n" +
+      "          type: 'scattergl',\n" +
+      "          line: {\n" +
+      "            color: data.marker.color\n" +
+      "          }\n" +
+      "        };\n" +
+      "        return [data, fitData];\n" +
+      "      });\n" +
+      "\n" +
+      "      Plotly.plot(plot, {layout, data});\n" +
+      "    </script>\n" +
+      "  </body>\n" +
+      "</html>\n";
 
-          const plot = document.createElement('div');
-          plot.style = 'width: 100%%; height: 95vh;';
-          document.body.appendChild(plot);
-
-          const layout = %1$s;
-          if( 'title' in layout )
-            document.title = layout.title;
-
-          if( 'paper_bgcolor' in layout )
-            document.body.style.background = 'black';
-
-          let data = %2$s;
-
-          const worstCase   = (m,n) => Math.log2(m+1) * n;
-          const averageCase = (m,n) => Math.log((m+n)/m) * Math.log2(m+1)*m;
-
-          data = data.flatMap( data => {
-            let fitFns = function(){
-              switch(data.name) {
-                default:
-                  throw new Error(data.name);
-                case 'MoM5':
-                case 'MoM3':
-                case 'MergeSelect':
-                case 'Quick':
-                  return [(m,n) => m+n];
-                case 'Heap':
-                case 'HeapRandom':
-                  return [(m,n) => 0];
-                case 'HeapMajor':
-                  return [
-                    (m,n) => m,
-                    (m,n) => n,
-                    (m,n) =>   worstCase(n,m),
-                    (m,n) => averageCase(n,m),
-                  ];
-                case 'HeapMinor':
-                case 'HeapHybridV2':
-                  return [
-                    (m,n) => m,
-                    (m,n) => n,
-                    (m,n) =>   worstCase(m,n),
-                    (m,n) => averageCase(m,n),
-                  ];
-              }
-            }();
-
-            fitFns = fitFns.map(
-              f => ([x,y]) => {
-                const m = Math.min(x,y),
-                      n = Math.max(x,y);
-                return m < 2 ? 0 : f(m,n)
-              }
-            );
-
-            const xMax = data.x.reduce((x,y) => Math.max(x,y)),
-                  yMax = data.y.reduce((x,y) => Math.max(x,y)),
-               train_X = data.x.map( x => [x,xMax-x] ),
-               train_y = data.y;
-
-            const fit = nd.opt.fit_lin(train_X, train_y, fitFns);
-
-            console.log({[data.name]: fit.coeffs})
-
-            const x = [...nd.iter.linspace(2,xMax-2,1000)]
-            const y = x.map( x => fit([x,xMax-x]) )
-
-            const fitData = {
-              x,y,
-              name: data.name + " (fit)",
-              mode: 'lines',
-              type: 'scattergl',
-              line: {
-                color: data.marker.color
-              }
-            };
-            return [data, fitData];
-          });
-
-          Plotly.plot(plot, {layout, data});
-        </script>
-      </body>
-    </html>
-    """;
-
-    var tmp = Files.createTempFile("plot_",".html");
-    var dat = stream(data).collect( joining(",\n", "[", "]") );
-    Files.writeString( tmp, format(PLOT_TEMPLATE, layout, dat) );
-    var cmd = format("xdg-open %s", tmp);
+    Path tmp = createTempFile("plot_",".html");
+    String dat = stream(data).collect( joining(",\n", "[", "]") );
+    try( Writer out = newBufferedWriter(tmp,UTF_8) ) {
+      out.write( format(PLOT_TEMPLATE, layout, dat) );
+    }
+    String[] cmd = {"xdg-open", tmp.toString()};
     getRuntime().exec(cmd);
   }
 }

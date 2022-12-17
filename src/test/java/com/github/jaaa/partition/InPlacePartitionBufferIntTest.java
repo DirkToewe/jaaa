@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class InPlacePartitionBufferIntTest
 {
-  final class TestState
+  final static class TestState
   {
   // FIELDS
     public final int nBits, nInts;
@@ -27,7 +27,7 @@ public class InPlacePartitionBufferIntTest
 
   // CONSTRUCTORS
     public TestState( int _nBits, int _nInts ) {
-      var acc = new PredicateSwapAccess() {
+      PredicateSwapAccess acc = new PredicateSwapAccess() {
         private final boolean[] bits = new boolean[2*_nBits*_nInts]; {
           Arrays.fill(bits, bits.length/2, bits.length, true);
         }
@@ -46,30 +46,31 @@ public class InPlacePartitionBufferIntTest
   @Provide
   Arbitrary<ActionSequence<TestState>> actions()
   {
-    var set = Arbitraries.integers().greaterOrEqual(0).withDistribution( uniform() ).flatMap( posRaw ->
-              Arbitraries.integers().greaterOrEqual(0).withDistribution( uniform() ).    map( valRaw ->
-      new Action<TestState>() {
-        private int pos = posRaw,
-                    val = valRaw;
-        @Override public boolean precondition( TestState state ) {
-          if( state.nInts <= 0 ) return false;
-          pos =         posRaw %        state.nInts;
-          val = (int) ( valRaw % (1L << state.nBits) );
-          return true;
+    Arbitrary<Action<TestState>> set =
+      Arbitraries.integers().greaterOrEqual(0).withDistribution( uniform() ).flatMap( posRaw ->
+      Arbitraries.integers().greaterOrEqual(0).withDistribution( uniform() ).    map( valRaw ->
+        new Action<TestState>() {
+          private int pos = posRaw,
+                      val = valRaw;
+          @Override public boolean precondition( TestState state ) {
+            if( state.nInts <= 0 ) return false;
+            pos =         posRaw %        state.nInts;
+            val = (int) ( valRaw % (1L << state.nBits) );
+            return true;
+          }
+          @Override public TestState run( TestState state ) {
+            assert state.nInts > 0;
+            pos =         posRaw %        state.nInts;
+            val = (int) ( valRaw % (1L << state.nBits) );
+            state.tst.set(pos, val);
+            state.ref[pos] = val;
+            return state;
+          }
+          @Override public String toString() { return format("set(%d,%d)", pos, val); }
         }
-        @Override public TestState run( TestState state ) {
-          assert state.nInts > 0;
-          pos =         posRaw %        state.nInts;
-          val = (int) ( valRaw % (1L << state.nBits) );
-          state.tst.set(pos, val);
-          state.ref[pos] = val;
-          return state;
-        }
-        @Override public String toString() { return format("set(%d,%d)", pos, val); }
-      }
-    ));
+      ));
 
-    var reset = Arbitraries.of(
+    Arbitrary<Action<TestState>> reset = Arbitraries.of(
       new Action<TestState>() {
         @Override public TestState run( TestState state ) {
           state.tst.reset();

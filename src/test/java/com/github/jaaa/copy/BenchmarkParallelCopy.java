@@ -1,59 +1,28 @@
 package com.github.jaaa.copy;
 
+import com.github.jaaa.util.PlotlyUtils;
 import com.github.jaaa.util.Progress;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.SplittableRandom;
 
-import static java.awt.Desktop.getDesktop;
-import static java.lang.String.format;
-import static java.lang.System.nanoTime;
-import static java.util.stream.IntStream.range;
 import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
-import static java.util.Arrays.stream;
+import static java.lang.String.format;
 import static java.time.Instant.now;
+import static java.util.Arrays.stream;
+import static java.util.stream.IntStream.range;
 
 
-public class ParallelCopyBenchmark
+public class BenchmarkParallelCopy
 {
-  private static final String PLOT_TEMPLATE = """
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="utf-8">
-        <script src="https://cdn.plot.ly/plotly-latest.js"></script>
-      </head>
-      <body>
-        <script>
-          'use strict';
-
-
-          const plot = document.createElement('div');
-          plot.style = 'width: 100%%; height: 95vh;';
-          document.body.appendChild(plot);
-
-
-          const layout = %1$s;
-          document.title = layout.title;
-
-
-          Plotly.plot(plot, {layout, data: %2$s});
-        </script>
-      </body>
-    </html>
-  """;
-
   public static void main( String... args ) throws IOException
   {
-    var rng = new SplittableRandom();
+    SplittableRandom rng = new SplittableRandom();
 
-    int              N_RUNS = 10_000,
+    int              N_RUNS = 1_000,
       x[] = rng.ints(N_RUNS,0,10_000_000).parallel().sorted().toArray();
     double[]
       y_sys = new double[N_RUNS],
@@ -89,16 +58,29 @@ public class ParallelCopyBenchmark
     });
 
     String data = format(
-      "[{\ntype: 'scattergl',\nname: 'sequential',\nx: %1$s,\ny:\n%2$s\n},{\ntype: 'scattergl',\nname: 'parallel',\nx: %1$s,\ny: %3$s\n}]",
+      "{\n" +
+      "  type: 'scattergl',\n" +
+      "  name: 'sequential',\n" +
+      "  x: %1$s,\n" +
+      "  y:\n%2$s\n" +
+      "},{\n" +
+      "  type: 'scattergl',\n" +
+      "  name: 'parallel',\n" +
+      "  x: %1$s,\n" +
+      "  y: %3$s\n" +
+      "}\n",
       Arrays.toString(x),
       Arrays.toString(y_sys),
       Arrays.toString(y_par)
     );
 
-    String layout = "{ title: 'Parallel Copy Benchmark', xaxis: {title: 'Array Length'}, yaxis: {title: 'Time [msec.]'} }";
+    String layout =
+      "{\n" +
+      "  title: 'Parallel Copy Benchmark',\n" +
+      "  xaxis: {title: 'Array Length'},\n" +
+      "  yaxis: {title: 'Time [msec.]'}\n" +
+      "}\n";
 
-    Path tmp = Files.createTempFile("parallel_copy_benchmark_", ".html");
-    Files.writeString(  tmp, format(PLOT_TEMPLATE, layout, data) );
-    getDesktop().browse(tmp.toUri());
+    PlotlyUtils.plot(layout, data);
   }
 }

@@ -17,8 +17,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Group
 public class InsertionAdaptiveSortAccessTest
 {
-  private record Acc<T>( CompareRandomAccessor<T> acc ) implements SortAccessorTestTemplate.SortAccessor<T>
+  private static final class Acc<T> implements SortAccessorTestTemplate.SortAccessor<T>
   {
+    private final CompareRandomAccessor<T>  acc;
+    private  Acc( CompareRandomAccessor<T> _acc ) { acc = _acc; }
     @Override public void sort( T arr, int from, int until) {
       new InsertionAdaptiveSortAccess() {
         @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
@@ -43,13 +45,13 @@ public class InsertionAdaptiveSortAccessTest
     @Property default void sortsAdaptivelyAccessWithRangeFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample, @ForAll Comparator<    Float> cmp ) { sortsAdaptivelyAccessWithRange( sample.map(Boxing::boxed), cmp ); }
     @Property default void sortsAdaptivelyAccessWithRangeDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample, @ForAll Comparator<   Double> cmp ) { sortsAdaptivelyAccessWithRange( sample.map(Boxing::boxed), cmp ); }
     @Property default void sortsAdaptivelyAccessWithRangeString ( @ForAll("arraysWithRangeString" ) WithRange< String[]> sample, @ForAll Comparator<   String> cmp ) { sortsAdaptivelyAccessWithRange( sample                   , cmp ); }
-    private       <T> void sortsAdaptivelyAccessWithRange( WithRange<T[]> sample, Comparator<? super T> cmp )
+    default       <T> void sortsAdaptivelyAccessWithRange( WithRange<T[]> sample, Comparator<? super T> cmp )
     {
       int  from = sample.getFrom(),
           until = sample.getUntil();
-      var input = sample.getData();
+      T[] input = sample.getData();
       Arrays.sort(input, from,until, cmp);
-      var reference = input.clone();
+      T[] reference = input.clone();
 
       class CountAcc implements CompareRandomAccessor<T[]> {
         public long nComps = 0L;
@@ -63,7 +65,7 @@ public class InsertionAdaptiveSortAccessTest
         }
       }
 
-      var acc = new CountAcc();
+      CountAcc acc = new CountAcc();
 
       createAccessor(acc).sort(input, from,until);
 

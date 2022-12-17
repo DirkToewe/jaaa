@@ -21,13 +21,14 @@ public class MergeInputsUpToLength extends AbstractList<MergeInput<byte[]>>
 // STATIC METHODS
 
 // FIELDS
-  private final int maxLen;
+  private final int maxLen, hashCode;
 
 // CONSTRUCTORS
   public MergeInputsUpToLength( int _maxLen ) {
     if( _maxLen < 0 || _maxLen >= LOOKUP.length )
       throw new IllegalArgumentException();
     maxLen = _maxLen;
+    hashCode = super.hashCode();
   }
 
 // METHODS
@@ -39,8 +40,14 @@ public class MergeInputsUpToLength extends AbstractList<MergeInput<byte[]>>
       return MergeInput.EMPTY_BYTE;
     return MergeInputsOfLength.sample(len, index - LOOKUP[len-1]);
   }
-
   @Override public int size() {
     return LOOKUP[maxLen];
+  }
+  @Override public int hashCode() { return hashCode; }
+  @Override public boolean equals( Object that ) {
+    if( that == this ) return true;
+    if( that instanceof MergeInputsUpToLength && that.hashCode() != hashCode )
+      return false;
+    return super.equals(that);
   }
 }

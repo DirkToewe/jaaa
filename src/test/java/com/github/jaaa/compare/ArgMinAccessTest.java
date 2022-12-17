@@ -33,13 +33,13 @@ public class ArgMinAccessTest implements ArrayProviderTemplate
   @Property void argMinLArraysFloat ( @ForAll("arraysFloat" )  float[] ref ) { test_argMinL( 0,ref.length, (i,j) ->     Float.compare(ref[i],ref[j]) ); }
   @Property void argMinLArraysDouble( @ForAll("arraysDouble") double[] ref ) { test_argMinL( 0,ref.length, (i,j) ->    Double.compare(ref[i],ref[j]) ); }
 
-  @Property void argMinLArraysWithRangeByte  ( @ForAll("arraysWithRangeByte"  ) WithRange<  byte[]> x ) { var ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i, j) ->      Byte.compare(ref[i],ref[j]) ); }
-  @Property void argMinLArraysWithRangeShort ( @ForAll("arraysWithRangeShort" ) WithRange< short[]> x ) { var ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) ->     Short.compare(ref[i],ref[j]) ); }
-  @Property void argMinLArraysWithRangeInt   ( @ForAll("arraysWithRangeInt"   ) WithRange<   int[]> x ) { var ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) ->   Integer.compare(ref[i],ref[j]) ); }
-  @Property void argMinLArraysWithRangeLong  ( @ForAll("arraysWithRangeLong"  ) WithRange<  long[]> x ) { var ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) ->      Long.compare(ref[i],ref[j]) ); }
-  @Property void argMinLArraysWithRangeChar  ( @ForAll("arraysWithRangeChar"  ) WithRange<  char[]> x ) { var ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) -> Character.compare(ref[i],ref[j]) ); }
-  @Property void argMinLArraysWithRangeFloat ( @ForAll("arraysWithRangeFloat" ) WithRange< float[]> x ) { var ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) ->     Float.compare(ref[i],ref[j]) ); }
-  @Property void argMinLArraysWithRangeDouble( @ForAll("arraysWithRangeDouble") WithRange<double[]> x ) { var ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) ->    Double.compare(ref[i],ref[j]) ); }
+  @Property void argMinLArraysWithRangeByte  ( @ForAll("arraysWithRangeByte"  ) WithRange<  byte[]> x ) {   byte[] ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i, j) ->      Byte.compare(ref[i],ref[j]) ); }
+  @Property void argMinLArraysWithRangeShort ( @ForAll("arraysWithRangeShort" ) WithRange< short[]> x ) {  short[] ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) ->     Short.compare(ref[i],ref[j]) ); }
+  @Property void argMinLArraysWithRangeInt   ( @ForAll("arraysWithRangeInt"   ) WithRange<   int[]> x ) {    int[] ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) ->   Integer.compare(ref[i],ref[j]) ); }
+  @Property void argMinLArraysWithRangeLong  ( @ForAll("arraysWithRangeLong"  ) WithRange<  long[]> x ) {   long[] ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) ->      Long.compare(ref[i],ref[j]) ); }
+  @Property void argMinLArraysWithRangeChar  ( @ForAll("arraysWithRangeChar"  ) WithRange<  char[]> x ) {   char[] ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) -> Character.compare(ref[i],ref[j]) ); }
+  @Property void argMinLArraysWithRangeFloat ( @ForAll("arraysWithRangeFloat" ) WithRange< float[]> x ) {  float[] ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) ->     Float.compare(ref[i],ref[j]) ); }
+  @Property void argMinLArraysWithRangeDouble( @ForAll("arraysWithRangeDouble") WithRange<double[]> x ) { double[] ref=x.getData(); test_argMinL( x.getFrom(), x.getUntil(), (i,j) ->    Double.compare(ref[i],ref[j]) ); }
 
   private void test_argMinR( int from, int until, ArgMinAccess acc ) {
     if( from >= until ) {
@@ -62,11 +62,11 @@ public class ArgMinAccessTest implements ArrayProviderTemplate
   @Property void argMinRArraysFloat ( @ForAll("arraysFloat" )  float[] ref ) { test_argMinR( 0,ref.length, (i,j) ->     Float.compare(ref[i],ref[j]) ); }
   @Property void argMinRArraysDouble( @ForAll("arraysDouble") double[] ref ) { test_argMinR( 0,ref.length, (i,j) ->    Double.compare(ref[i],ref[j]) ); }
 
-  @Property void argMinRArraysWithRangeByte  ( @ForAll("arraysWithRangeByte"  ) WithRange<  byte[]> x ) { var ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->      Byte.compare(ref[i],ref[j]) ); }
-  @Property void argMinRArraysWithRangeShort ( @ForAll("arraysWithRangeShort" ) WithRange< short[]> x ) { var ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->     Short.compare(ref[i],ref[j]) ); }
-  @Property void argMinRArraysWithRangeInt   ( @ForAll("arraysWithRangeInt"   ) WithRange<   int[]> x ) { var ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->   Integer.compare(ref[i],ref[j]) ); }
-  @Property void argMinRArraysWithRangeLong  ( @ForAll("arraysWithRangeLong"  ) WithRange<  long[]> x ) { var ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->      Long.compare(ref[i],ref[j]) ); }
-  @Property void argMinRArraysWithRangeChar  ( @ForAll("arraysWithRangeChar"  ) WithRange<  char[]> x ) { var ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) -> Character.compare(ref[i],ref[j]) ); }
-  @Property void argMinRArraysWithRangeFloat ( @ForAll("arraysWithRangeFloat" ) WithRange< float[]> x ) { var ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->     Float.compare(ref[i],ref[j]) ); }
-  @Property void argMinRArraysWithRangeDouble( @ForAll("arraysWithRangeDouble") WithRange<double[]> x ) { var ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->    Double.compare(ref[i],ref[j]) ); }
+  @Property void argMinRArraysWithRangeByte  ( @ForAll("arraysWithRangeByte"  ) WithRange<  byte[]> x ) {   byte[] ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->      Byte.compare(ref[i],ref[j]) ); }
+  @Property void argMinRArraysWithRangeShort ( @ForAll("arraysWithRangeShort" ) WithRange< short[]> x ) {  short[] ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->     Short.compare(ref[i],ref[j]) ); }
+  @Property void argMinRArraysWithRangeInt   ( @ForAll("arraysWithRangeInt"   ) WithRange<   int[]> x ) {    int[] ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->   Integer.compare(ref[i],ref[j]) ); }
+  @Property void argMinRArraysWithRangeLong  ( @ForAll("arraysWithRangeLong"  ) WithRange<  long[]> x ) {   long[] ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->      Long.compare(ref[i],ref[j]) ); }
+  @Property void argMinRArraysWithRangeChar  ( @ForAll("arraysWithRangeChar"  ) WithRange<  char[]> x ) {   char[] ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) -> Character.compare(ref[i],ref[j]) ); }
+  @Property void argMinRArraysWithRangeFloat ( @ForAll("arraysWithRangeFloat" ) WithRange< float[]> x ) {  float[] ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->     Float.compare(ref[i],ref[j]) ); }
+  @Property void argMinRArraysWithRangeDouble( @ForAll("arraysWithRangeDouble") WithRange<double[]> x ) { double[] ref=x.getData(); test_argMinR( x.getFrom(), x.getUntil(), (i,j) ->    Double.compare(ref[i],ref[j]) ); }
 }

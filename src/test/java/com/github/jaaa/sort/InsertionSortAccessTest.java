@@ -7,8 +7,10 @@ import net.jqwik.api.Group;
 @Group
 public class InsertionSortAccessTest
 {
-  private record Acc<T>( CompareRandomAccessor<T> acc ) implements SortAccessorTestTemplate.SortAccessor<T>, InsertionSortAccessor<T>
+  private static final class Acc<T> implements SortAccessorTestTemplate.SortAccessor<T>, InsertionSortAccessor<T>
   {
+    private final CompareRandomAccessor<T>  acc;
+    private  Acc( CompareRandomAccessor<T> _acc ) { acc = _acc; }
     @Override public T malloc( int len ) { return acc.malloc(len); }
     @Override public int    compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
     @Override public void      swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j); }

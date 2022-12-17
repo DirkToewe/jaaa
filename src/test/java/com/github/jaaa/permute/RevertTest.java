@@ -84,7 +84,7 @@ public class RevertTest
   void revertsArraysBoolean1( @ForAll boolean[] seq )
   {
            seq = seq.clone();
-    var backup = seq.clone();
+    boolean[] backup = seq.clone();
     revert(seq);
     for( int i=seq.length; i-- > 0; )
       assertThat( backup[i] ).isEqualTo( seq[seq.length-1-i] );
@@ -214,8 +214,8 @@ public class RevertTest
   {
     int  until = sample.getUntil(),
           from = sample.getFrom();
-    var    seq = sample.getData().clone();
-    var backup = seq.clone();
+    boolean[] seq = sample.getData().clone(),
+           backup = seq.clone();
 
     revert(seq, from, until);
 

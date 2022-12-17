@@ -32,8 +32,8 @@ public class RandomMergeInputGenerator
   {
     if( lenA < 0 || lenB < 0 )
       throw new IllegalArgumentException();
-    int                   len = addExact(lenA,lenB);
-    var isB = new boolean[len];
+    int len = addExact(lenA,lenB);
+    boolean[] isB = new boolean[len];
 
 //    Arrays.fill(isB,        true);
 //    Arrays.fill(isB,0,lenA,false);
@@ -49,7 +49,7 @@ public class RandomMergeInputGenerator
     {
       int a=0, b=0;
 
-      var wasB = isB[0];
+      boolean wasB = isB[0];
       if( wasB ) b++;
       else       a++;
 

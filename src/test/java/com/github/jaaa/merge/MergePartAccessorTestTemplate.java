@@ -53,7 +53,7 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
     @Override protected boolean mergesInplaceL2R() { return true; }
     @Override protected boolean mergesInplaceR2L() { return false; }
     @Override protected <T> MergeAccessor<T> createAccessor( CompareRandomAccessor<T> srtAcc ) {
-      var acc = MergePartAccessorTestTemplate.this.createAccessor(srtAcc);
+      MergePartAccessor<T> acc = MergePartAccessorTestTemplate.this.createAccessor(srtAcc);
       return (a,a0,aLen, b,b0,bLen, c,c0) -> acc.mergePartL2R(a,a0,aLen, b,b0,bLen, c,c0,aLen+bLen);
     }
   }
@@ -65,7 +65,7 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
     @Override protected boolean mergesInplaceL2R() { return false; }
     @Override protected boolean mergesInplaceR2L() { return true; }
     @Override protected <T> MergeAccessor<T> createAccessor( CompareRandomAccessor<T> srtAcc ) {
-      var acc = MergePartAccessorTestTemplate.this.createAccessor(srtAcc);
+      MergePartAccessor<T> acc = MergePartAccessorTestTemplate.this.createAccessor(srtAcc);
       return (a,a0,aLen, b,b0,bLen, c,c0) -> acc.mergePartR2L(a,a0,aLen, b,b0,bLen, c,c0,aLen+bLen);
     }
   }
@@ -88,10 +88,10 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   {
     // make sure cRef is the shortest
     if( aRef.length < bRef.length )
-         { if( cRef.length > aRef.length ) { var tmp=cRef; cRef=aRef; aRef=tmp; } }
-    else { if( cRef.length > bRef.length ) { var tmp=cRef; cRef=bRef; bRef=tmp; } }
+         { if( cRef.length > aRef.length ) { byte[] tmp=cRef; cRef=aRef; aRef=tmp; } }
+    else { if( cRef.length > bRef.length ) { byte[] tmp=cRef; cRef=bRef; bRef=tmp; } }
 
-    var acc = createAccessor(new CompareRandomAccessor<byte[]>() {
+    MergePartAccessor<byte[]> acc = createAccessor(new CompareRandomAccessor<byte[]>() {
       @Override public byte[] malloc( int len ) { return new byte[len]; }
       @Override public int    compare( byte[] a, int i, byte[] b, int j ) { int c = Byte.compare(a[i], b[j]); return reversed ? -c : +c; }
       @Override public void      swap( byte[] a, int i, byte[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -106,11 +106,11 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
       Revert.revert(bRef);
     }
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
-    var cTest = cRef.clone();
+    byte[] aTest = aRef.clone(),
+           bTest = bRef.clone(),
+           cTest = cRef.clone();
     {
-      var ab = new byte[aRef.length+bRef.length];
+      byte[] ab = new byte[aRef.length+bRef.length];
       System.arraycopy(aRef,0, ab,0,           aRef.length);
       System.arraycopy(bRef,0, ab,aRef.length, bRef.length);
       Arrays.sort(ab);
@@ -140,10 +140,10 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   {
     // make sure cRef is the shortest
     if( aRef.length < bRef.length )
-         { if( cRef.length > aRef.length ) { var tmp=cRef; cRef=aRef; aRef=tmp; } }
-    else { if( cRef.length > bRef.length ) { var tmp=cRef; cRef=bRef; bRef=tmp; } }
+         { if( cRef.length > aRef.length ) { int[] tmp=cRef; cRef=aRef; aRef=tmp; } }
+    else { if( cRef.length > bRef.length ) { int[] tmp=cRef; cRef=bRef; bRef=tmp; } }
 
-    var acc = createAccessor(new CompareRandomAccessor<int[]>() {
+    MergePartAccessor<int[]> acc = createAccessor(new CompareRandomAccessor<int[]>() {
       @Override public int[] malloc( int len ) { return new int[len]; }
       @Override public int    compare( int[] a, int i, int[] b, int j ) { int c = Integer.compare(a[i], b[j]); return reversed ? -c : +c; }
       @Override public void      swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -158,11 +158,11 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
       Revert.revert(bRef);
     }
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
-    var cTest = cRef.clone();
+    int[] aTest = aRef.clone(),
+          bTest = bRef.clone(),
+          cTest = cRef.clone();
     {
-      var ab = new int[aRef.length+bRef.length];
+      int[] ab = new int[aRef.length+bRef.length];
       System.arraycopy(aRef,0, ab,0,           aRef.length);
       System.arraycopy(bRef,0, ab,aRef.length, bRef.length);
       Arrays.sort(ab);
@@ -195,6 +195,7 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   @Property                                 void mergePartL2RArraysTupleString ( @ForAll("arraysString" )  String[] aRefRaw, @ForAll("arraysString" )  String[] bRefRaw, @ForAll("arraysString" )  String[] cRefRaw, @ForAll boolean reversed ) { mergePartL2RArraysTuple(       aRefRaw ,       bRefRaw ,       cRefRaw , reversed ); }
   private <T extends Comparable<? super T>> void mergePartL2RArraysTuple( T[] aRefRaw, T[] bRefRaw, T[] cRefRaw, boolean reversed )
   {
+    @SuppressWarnings("unchecked")
     Tuple2<T,Integer>[] aRef = range(0,aRefRaw.length).mapToObj( i -> Tuple.of(aRefRaw[i],i) ).toArray(Tuple2[]::new),
                         bRef = range(0,bRefRaw.length).mapToObj( i -> Tuple.of(bRefRaw[i],i) ).toArray(Tuple2[]::new),
                         cRef = range(0,cRefRaw.length).mapToObj( i -> Tuple.of(cRefRaw[i],i) ).toArray(Tuple2[]::new);
@@ -206,10 +207,11 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
 
     // make sure cRef is the shortest
     if( aRef.length < bRef.length )
-         { if( cRef.length > aRef.length ) { var tmp=cRef; cRef=aRef; aRef=tmp; } }
-    else { if( cRef.length > bRef.length ) { var tmp=cRef; cRef=bRef; bRef=tmp; } }
+         { if( cRef.length > aRef.length ) { Tuple2<T,Integer>[] tmp=cRef; cRef=aRef; aRef=tmp; } }
+    else { if( cRef.length > bRef.length ) { Tuple2<T,Integer>[] tmp=cRef; cRef=bRef; bRef=tmp; } }
 
-    var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+    MergePartAccessor <Tuple2<T,Integer>[]> acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+      @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public int    compare( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { return cmp.compare(a[i], b[j]); }
       @Override public void      swap( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -220,10 +222,12 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
     Arrays.sort(aRef,cmp);
     Arrays.sort(bRef,cmp);
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
-    var cTest = cRef.clone();
+    Tuple2<T,Integer>[]
+      aTest = aRef.clone(),
+      bTest = bRef.clone(),
+      cTest = cRef.clone();
     {
+      @SuppressWarnings("unchecked")
       Tuple2<T,Integer>[] ab = new Tuple2[aRef.length+bRef.length];
       System.arraycopy(aRef,0, ab,0,           aRef.length);
       System.arraycopy(bRef,0, ab,aRef.length, bRef.length);
@@ -253,15 +257,20 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   )
   {
     // make sure cRef is the shortest
-    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() )
-         { if( cRefWithRange.rangeLength() > aRefWithRange.rangeLength() ) { var tmp=cRefWithRange;
-                                                                                     cRefWithRange=aRefWithRange;
-                                                                                                   aRefWithRange=tmp; } }
-    else { if( cRefWithRange.rangeLength() > bRefWithRange.rangeLength() ) { var tmp=cRefWithRange;
-                                                                                     cRefWithRange=bRefWithRange;
-                                                                                                   bRefWithRange=tmp; } }
+    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() ) {
+      if( cRefWithRange.rangeLength() > aRefWithRange.rangeLength() ) {
+        WithRange<byte[]> tmp=cRefWithRange;
+                              cRefWithRange=aRefWithRange;
+                                            aRefWithRange=tmp;
+      }
+    }
+    else if( cRefWithRange.rangeLength() > bRefWithRange.rangeLength() ) {
+      WithRange<byte[]> tmp=cRefWithRange;
+                            cRefWithRange=bRefWithRange;
+                                          bRefWithRange=tmp;
+    }
 
-    var acc = createAccessor(new CompareRandomAccessor<byte[]>() {
+    MergePartAccessor<byte[]> acc = createAccessor(new CompareRandomAccessor<byte[]>() {
       @Override public byte[] malloc( int len ) { return new byte[len]; }
       @Override public int    compare( byte[] a, int i, byte[] b, int j ) { int c = Byte.compare(a[i], b[j]); return reversed ? -c : +c; }
       @Override public void      swap( byte[] a, int i, byte[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -290,7 +299,7 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
            bTest = bRef.clone(),
            cTest = cRef.clone();
     {
-      var ab = new byte[aLen + bLen];
+      byte[] ab = new byte[aLen + bLen];
       System.arraycopy(aRef,a0, ab,0,    aLen);
       System.arraycopy(bRef,b0, ab,aLen, bLen);
       Arrays.sort(ab);
@@ -319,15 +328,20 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   )
   {
     // make sure cRef is the shortest
-    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() )
-         { if( cRefWithRange.rangeLength() > aRefWithRange.rangeLength() ) { var tmp=cRefWithRange;
-                                                                                     cRefWithRange=aRefWithRange;
-                                                                                                   aRefWithRange=tmp; } }
-    else { if( cRefWithRange.rangeLength() > bRefWithRange.rangeLength() ) { var tmp=cRefWithRange;
-                                                                                     cRefWithRange=bRefWithRange;
-                                                                                                   bRefWithRange=tmp; } }
+    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() ) {
+      if( cRefWithRange.rangeLength() > aRefWithRange.rangeLength() ) {
+        WithRange<int[]> tmp=cRefWithRange;
+                             cRefWithRange=aRefWithRange;
+                                           aRefWithRange=tmp;
+      }
+    }
+    else if( cRefWithRange.rangeLength() > bRefWithRange.rangeLength() ) {
+      WithRange<int[]> tmp=cRefWithRange;
+                           cRefWithRange=bRefWithRange;
+                                         bRefWithRange=tmp;
+    }
 
-    var acc = createAccessor(new CompareRandomAccessor<int[]>() {
+    MergePartAccessor<int[]> acc = createAccessor(new CompareRandomAccessor<int[]>() {
       @Override public int[] malloc( int len ) { return new int[len]; }
       @Override public int    compare( int[] a, int i, int[] b, int j ) { int c = Integer.compare(a[i], b[j]); return reversed ? -c : +c; }
       @Override public void      swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -356,7 +370,7 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
           bTest = bRef.clone(),
           cTest = cRef.clone();
     {
-      var ab = new int[aLen + bLen];
+      int[] ab = new int[aLen + bLen];
       System.arraycopy(aRef,a0, ab,0,    aLen);
       System.arraycopy(bRef,b0, ab,aLen, bLen);
       Arrays.sort(ab);
@@ -390,19 +404,17 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   private <T extends Comparable<? super T>> void mergePartStablyL2RArraysWithRangeTuple( WithRange<T[]> aRefWithRange, WithRange<T[]> bRefWithRange, WithRange<T[]> cRefWithRange, boolean reversed )
   {
     // make sure cRef is the shortest
-    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() )
-    {
+    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() ) {
       if( cRefWithRange.rangeLength() > aRefWithRange.rangeLength() ) {
-        var       tmp=cRefWithRange;
-        cRefWithRange=aRefWithRange;
-        aRefWithRange=tmp;
+        WithRange<T[]> tmp=cRefWithRange;
+                           cRefWithRange=aRefWithRange;
+                                         aRefWithRange=tmp;
       }
     }
-    else if( cRefWithRange.rangeLength() > bRefWithRange.rangeLength() )
-    {
-      var       tmp=cRefWithRange;
-      cRefWithRange=bRefWithRange;
-      bRefWithRange=tmp;
+    else if( cRefWithRange.rangeLength() > bRefWithRange.rangeLength() ) {
+      WithRange<T[]> tmp=cRefWithRange;
+                         cRefWithRange=bRefWithRange;
+                                       bRefWithRange=tmp;
     }
 
     Comparator<Tuple2<T,Integer>>  cmp; {
@@ -410,7 +422,8 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
      cmp = reversed ? _cmp.reversed() : _cmp;
     }
 
-    var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+    MergePartAccessor <Tuple2<T,Integer>[]> acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+      @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public int    compare( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { return cmp.compare(a[i], b[j]); }
       @Override public void      swap( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -419,13 +432,13 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
     });
 
     Tuple2<T,Integer>[] aRef, bRef, cRef; {
-    var aRaw = aRefWithRange.getData();
-    var bRaw = bRefWithRange.getData();
-    var cRaw = cRefWithRange.getData();
-    aRef = range(0,aRaw.length).mapToObj( i -> Tuple.of(aRaw[i],i) ).toArray(Tuple2[]::new);
-    bRef = range(0,bRaw.length).mapToObj( i -> Tuple.of(bRaw[i],i) ).toArray(Tuple2[]::new);
-    cRef = range(0,cRaw.length).mapToObj( i -> Tuple.of(cRaw[i],i) ).toArray(Tuple2[]::new);
-  }
+      T[] aRaw = aRefWithRange.getData(),
+          bRaw = bRefWithRange.getData(),
+          cRaw = cRefWithRange.getData();
+      aRef = range(0,aRaw.length).mapToObj( i -> Tuple.of(aRaw[i],i) ).toArray(Tuple2[]::new);
+      bRef = range(0,bRaw.length).mapToObj( i -> Tuple.of(bRaw[i],i) ).toArray(Tuple2[]::new);
+      cRef = range(0,cRaw.length).mapToObj( i -> Tuple.of(cRaw[i],i) ).toArray(Tuple2[]::new);
+    }
     final int a0 = aRefWithRange.getFrom(),
               b0 = bRefWithRange.getFrom(),
               c0 = cRefWithRange.getFrom(),
@@ -436,10 +449,12 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
     Arrays.sort(aRef, a0,a0+aLen, cmp);
     Arrays.sort(bRef, b0,b0+bLen, cmp);
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
-    var cTest = cRef.clone();
+    Tuple2<T,Integer>[]
+      aTest = aRef.clone(),
+      bTest = bRef.clone(),
+      cTest = cRef.clone();
     {
+      @SuppressWarnings("unchecked")
       Tuple2<T,Integer>[] ab = new Tuple2[aLen + bLen];
       System.arraycopy(aRef,a0, ab,0,    aLen);
       System.arraycopy(bRef,b0, ab,aLen, bLen);
@@ -473,10 +488,10 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   {
     // make sure cRef is the shortest
     if( aRef.length < bRef.length )
-         { if( cRef.length > aRef.length ) { var tmp=cRef; cRef=aRef; aRef=tmp; } }
-    else { if( cRef.length > bRef.length ) { var tmp=cRef; cRef=bRef; bRef=tmp; } }
+         { if( cRef.length > aRef.length ) { byte[] tmp=cRef; cRef=aRef; aRef=tmp; } }
+    else { if( cRef.length > bRef.length ) { byte[] tmp=cRef; cRef=bRef; bRef=tmp; } }
 
-    var acc = createAccessor(new CompareRandomAccessor<byte[]>() {
+    MergePartAccessor<byte[]> acc = createAccessor(new CompareRandomAccessor<byte[]>() {
       @Override public byte[] malloc( int len ) { return new byte[len]; }
       @Override public int    compare( byte[] a, int i, byte[] b, int j ) { int c = Byte.compare(a[i], b[j]); return reversed ? -c : +c; }
       @Override public void      swap( byte[] a, int i, byte[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -491,11 +506,12 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
       Revert.revert(bRef);
     }
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
-    var cTest = cRef.clone();
+    byte[]
+      aTest = aRef.clone(),
+      bTest = bRef.clone(),
+      cTest = cRef.clone();
     {
-      var         ab = concat(aRef,bRef);
+      byte[]      ab = concat(aRef,bRef);
       Arrays.sort(ab);
       if( ! reversed )
         Revert.revert(ab);
@@ -524,10 +540,10 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   {
     // make sure cRef is the shortest
     if( aRef.length < bRef.length )
-         { if( cRef.length > aRef.length ) { var tmp=cRef; cRef=aRef; aRef=tmp; } }
-    else { if( cRef.length > bRef.length ) { var tmp=cRef; cRef=bRef; bRef=tmp; } }
+         { if( cRef.length > aRef.length ) { int[] tmp=cRef; cRef=aRef; aRef=tmp; } }
+    else { if( cRef.length > bRef.length ) { int[] tmp=cRef; cRef=bRef; bRef=tmp; } }
 
-    var acc = createAccessor(new CompareRandomAccessor<int[]>() {
+    MergePartAccessor<int[]> acc = createAccessor(new CompareRandomAccessor<int[]>() {
       @Override public int[] malloc( int len ) { return new int[len]; }
       @Override public int    compare( int[] a, int i, int[] b, int j ) { int c = Integer.compare(a[i], b[j]); return reversed ? -c : +c; }
       @Override public void      swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -542,11 +558,11 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
       Revert.revert(bRef);
     }
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
-    var cTest = cRef.clone();
+    int[] aTest = aRef.clone(),
+          bTest = bRef.clone(),
+          cTest = cRef.clone();
     {
-      var         ab = concat(aRef,bRef);
+      int[]       ab = concat(aRef,bRef);
       Arrays.sort(ab);
       if( ! reversed )
         Revert.revert(ab);
@@ -578,6 +594,7 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   @Property                                 void mergePartR2LArraysTupleString ( @ForAll("arraysString" )  String[] aRef, @ForAll("arraysString" )  String[] bRef, @ForAll("arraysString" )  String[] cRef, @ForAll boolean reversed ) { mergePartR2LArraysTuple(      aRef ,       bRef ,       cRef,  reversed); }
   private <T extends Comparable<? super T>> void mergePartR2LArraysTuple( T[] aRefRaw, T[] bRefRaw, T[] cRefRaw, boolean reversed )
   {
+    @SuppressWarnings("unchecked")
     Tuple2<T,Integer>[] aRef = range(0,aRefRaw.length).mapToObj( i -> Tuple.of(aRefRaw[i],i) ).toArray(Tuple2[]::new),
                         bRef = range(0,bRefRaw.length).mapToObj( i -> Tuple.of(bRefRaw[i],i) ).toArray(Tuple2[]::new),
                         cRef = range(0,cRefRaw.length).mapToObj( i -> Tuple.of(cRefRaw[i],i) ).toArray(Tuple2[]::new);
@@ -589,10 +606,11 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
 
     // make sure cRef is the shortest
     if( aRef.length < bRef.length )
-         { if( cRef.length > aRef.length ) { var tmp=cRef; cRef=aRef; aRef=tmp; } }
-    else { if( cRef.length > bRef.length ) { var tmp=cRef; cRef=bRef; bRef=tmp; } }
+         { if( cRef.length > aRef.length ) { Tuple2<T,Integer>[] tmp=cRef; cRef=aRef; aRef=tmp; } }
+    else { if( cRef.length > bRef.length ) { Tuple2<T,Integer>[] tmp=cRef; cRef=bRef; bRef=tmp; } }
 
-    var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+    MergePartAccessor<Tuple2<T,Integer>[]> acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+      @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public int    compare( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { return cmp.compare(a[i], b[j]); }
       @Override public void      swap( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -603,10 +621,12 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
     Arrays.sort(aRef,cmp);
     Arrays.sort(bRef,cmp);
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
-    var cTest = cRef.clone();
+    Tuple2<T,Integer>[]
+      aTest = aRef.clone(),
+      bTest = bRef.clone(),
+      cTest = cRef.clone();
     {
+      @SuppressWarnings("unchecked")
       Tuple2<T,Integer>[] ab = new Tuple2[aRef.length+bRef.length];
       System.arraycopy(aRef,0, ab,0,           aRef.length);
       System.arraycopy(bRef,0, ab,aRef.length, bRef.length);
@@ -617,9 +637,9 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
     }
 
     acc.mergePartR2L(
-            aTest,0,aTest.length,
-            bTest,0,bTest.length,
-            cTest,0,cTest.length
+      aTest,0,aTest.length,
+      bTest,0,bTest.length,
+      cTest,0,cTest.length
     );
 
     assertThat(aTest).isEqualTo(aRef);
@@ -637,15 +657,20 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   )
   {
     // make sure cRef is the shortest
-    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() )
-         { if( cRefWithRange.rangeLength() > aRefWithRange.rangeLength() ) { var tmp=cRefWithRange;
-                                                                                     cRefWithRange=aRefWithRange;
-                                                                                                   aRefWithRange=tmp; } }
-    else { if( cRefWithRange.rangeLength() > bRefWithRange.rangeLength() ) { var tmp=cRefWithRange;
-                                                                                     cRefWithRange=bRefWithRange;
-                                                                                                   bRefWithRange=tmp; } }
+    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() ) {
+      if( cRefWithRange.rangeLength() > aRefWithRange.rangeLength() ) {
+        WithRange<byte[]> tmp = cRefWithRange;
+                                cRefWithRange = aRefWithRange;
+                                                aRefWithRange = tmp;
+      }
+    }
+    else if( cRefWithRange.rangeLength() > bRefWithRange.rangeLength() ) {
+      WithRange<byte[]> tmp = cRefWithRange;
+                              cRefWithRange = bRefWithRange;
+                                              bRefWithRange = tmp;
+    }
 
-    var acc = createAccessor(new CompareRandomAccessor<byte[]>() {
+    MergePartAccessor <byte[]> acc = createAccessor(new CompareRandomAccessor<byte[]>() {
       @Override public byte[] malloc( int len ) { return new byte[len]; }
       @Override public int    compare( byte[] a, int i, byte[] b, int j ) { int c = Byte.compare(a[i], b[j]); return reversed ? -c : +c; }
       @Override public void      swap( byte[] a, int i, byte[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -674,7 +699,7 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
            bTest = bRef.clone(),
            cTest = cRef.clone();
     {
-      var ab = new byte[aLen + bLen];
+      byte[] ab = new byte[aLen + bLen];
       System.arraycopy(aRef,a0, ab,0,    aLen);
       System.arraycopy(bRef,b0, ab,aLen, bLen);
       Arrays.sort(ab);
@@ -704,21 +729,20 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   )
   {
     // make sure cRef is the shortest
-    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() )
-    {
+    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() ) {
       if( cRefWithRange.rangeLength() > aRefWithRange.rangeLength() ) {
-        var       tmp=cRefWithRange;
-        cRefWithRange=aRefWithRange;
-        aRefWithRange=tmp;
+        WithRange<int[]> tmp = cRefWithRange;
+                               cRefWithRange = aRefWithRange;
+                                               aRefWithRange=tmp;
       }
     }
     else if( cRefWithRange.rangeLength() > bRefWithRange.rangeLength() ) {
-      var       tmp=cRefWithRange;
-      cRefWithRange=bRefWithRange;
-      bRefWithRange=tmp;
+      WithRange<int[]> tmp = cRefWithRange;
+                             cRefWithRange = bRefWithRange;
+                                             bRefWithRange=tmp;
     }
 
-    var acc = createAccessor(new CompareRandomAccessor<int[]>() {
+    MergePartAccessor <int[]> acc = createAccessor(new CompareRandomAccessor<int[]>() {
       @Override public int[] malloc( int len ) { return new int[len]; }
       @Override public int    compare( int[] a, int i, int[] b, int j ) { int c = Integer.compare(a[i], b[j]); return reversed ? -c : +c; }
       @Override public void      swap( int[] a, int i, int[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -747,7 +771,7 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
           bTest = bRef.clone(),
           cTest = cRef.clone();
     {
-      var ab = new int[aLen + bLen];
+      int[] ab = new int[aLen + bLen];
       System.arraycopy(aRef,a0, ab,0,    aLen);
       System.arraycopy(bRef,b0, ab,aLen, bLen);
       Arrays.sort(ab);
@@ -785,20 +809,26 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
   private <T extends Comparable<? super T>> void mergePartStablyR2LArraysWithRangeTuple( WithRange<T[]> aRefWithRange, WithRange<T[]> bRefWithRange, WithRange<T[]> cRefWithRange, boolean reversed )
   {
     // make sure cRef is the shortest
-    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() )
-    { if( cRefWithRange.rangeLength() > aRefWithRange.rangeLength() ) { var tmp=cRefWithRange;
-      cRefWithRange=aRefWithRange;
-      aRefWithRange=tmp; } }
-    else { if( cRefWithRange.rangeLength() > bRefWithRange.rangeLength() ) { var tmp=cRefWithRange;
-      cRefWithRange=bRefWithRange;
-      bRefWithRange=tmp; } }
+    if( aRefWithRange.rangeLength() < bRefWithRange.rangeLength() ) {
+      if( cRefWithRange.rangeLength() > aRefWithRange.rangeLength() ) {
+        WithRange<T[]> tmp = cRefWithRange;
+                             cRefWithRange = aRefWithRange;
+                                             aRefWithRange = tmp;
+      }
+    }
+    else if( cRefWithRange.rangeLength() > bRefWithRange.rangeLength() ) {
+      WithRange<T[]> tmp = cRefWithRange;
+                           cRefWithRange = bRefWithRange;
+                                           bRefWithRange = tmp;
+    }
 
     Comparator<Tuple2<T,Integer>>  cmp; {
     Comparator<Tuple2<T,Integer>> _cmp = comparing(Tuple2::get1);
       cmp = reversed ? _cmp.reversed() : _cmp;
     }
 
-    var acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+    MergePartAccessor <Tuple2<T,Integer>[]> acc = createAccessor(new CompareRandomAccessor<Tuple2<T,Integer>[]>() {
+      @SuppressWarnings("unchecked")
       @Override public Tuple2<T,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public int    compare( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { return cmp.compare(a[i], b[j]); }
       @Override public void      swap( Tuple2<T,Integer>[] a, int i, Tuple2<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -807,27 +837,29 @@ public abstract class MergePartAccessorTestTemplate implements ArrayProviderTemp
     });
 
     Tuple2<T,Integer>[] aRef, bRef, cRef; {
-    var aRaw = aRefWithRange.getData();
-    var bRaw = bRefWithRange.getData();
-    var cRaw = cRefWithRange.getData();
-    aRef = range(0,aRaw.length).mapToObj( i -> Tuple.of(aRaw[i],i) ).toArray(Tuple2[]::new);
-    bRef = range(0,bRaw.length).mapToObj( i -> Tuple.of(bRaw[i],i) ).toArray(Tuple2[]::new);
-    cRef = range(0,cRaw.length).mapToObj( i -> Tuple.of(cRaw[i],i) ).toArray(Tuple2[]::new);
-  }
-    final int a0 = aRefWithRange.getFrom(),
-            b0 = bRefWithRange.getFrom(),
-            c0 = cRefWithRange.getFrom(),
-            aLen = aRefWithRange.rangeLength(),
-            bLen = bRefWithRange.rangeLength(),
-            cLen = cRefWithRange.rangeLength();
+      T[] aRaw = aRefWithRange.getData(),
+          bRaw = bRefWithRange.getData(),
+          cRaw = cRefWithRange.getData();
+      aRef = range(0,aRaw.length).mapToObj( i -> Tuple.of(aRaw[i],i) ).toArray(Tuple2[]::new);
+      bRef = range(0,bRaw.length).mapToObj( i -> Tuple.of(bRaw[i],i) ).toArray(Tuple2[]::new);
+      cRef = range(0,cRaw.length).mapToObj( i -> Tuple.of(cRaw[i],i) ).toArray(Tuple2[]::new);
+    }
+    int a0 = aRefWithRange.getFrom(),
+        b0 = bRefWithRange.getFrom(),
+        c0 = cRefWithRange.getFrom(),
+       aLen = aRefWithRange.rangeLength(),
+       bLen = bRefWithRange.rangeLength(),
+       cLen = cRefWithRange.rangeLength();
 
     Arrays.sort(aRef, a0,a0+aLen, cmp);
     Arrays.sort(bRef, b0,b0+bLen, cmp);
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
-    var cTest = cRef.clone();
+    Tuple2<T,Integer>[]
+      aTest = aRef.clone(),
+      bTest = bRef.clone(),
+      cTest = cRef.clone();
     {
+      @SuppressWarnings("unchecked")
       Tuple2<T,Integer>[] ab = new Tuple2[aLen + bLen];
       System.arraycopy(aRef,a0, ab,0,    aLen);
       System.arraycopy(bRef,b0, ab,aLen, bLen);

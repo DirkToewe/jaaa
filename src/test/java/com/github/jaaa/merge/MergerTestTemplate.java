@@ -1,11 +1,13 @@
 package com.github.jaaa.merge;
 
-import com.github.jaaa.*;
+import com.github.jaaa.ArrayProviderTemplate;
+import com.github.jaaa.WithInsertIndex;
+import com.github.jaaa.WithRange;
 import com.github.jaaa.compare.*;
+import com.github.jaaa.fn.Int2Fn;
 import com.github.jaaa.permute.Revert;
 import com.github.jaaa.permute.Swap;
 import com.github.jaaa.sort.TimSort;
-import com.github.jaaa.fn.Int2Fn;
 import net.jqwik.api.*;
 import net.jqwik.api.Tuple.Tuple2;
 import net.jqwik.api.Tuple.Tuple3;
@@ -15,15 +17,15 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
+import static com.github.jaaa.ArrayProviderTemplate.withRange;
 import static com.github.jaaa.Concat.concat;
+import static com.github.jaaa.permute.Revert.revert;
 import static java.lang.System.arraycopy;
+import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
 import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
-import static com.github.jaaa.ArrayProviderTemplate.withRange;
-import static java.util.Arrays.copyOfRange;
-import static com.github.jaaa.permute.Revert.revert;
 
 
 @PropertyDefaults( tries = 10_000, shrinking = ShrinkingMode.OFF )
@@ -43,7 +45,7 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
   Merger merger();
 
 
-  @Provide private <T> Arbitrary<Tuple3<
+  @Provide default <T> Arbitrary<Tuple3<
     WithRange<T>,
     WithRange<T>,
     WithInsertIndex<T>
@@ -72,11 +74,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysByte") byte[] bRef
   ) {
     Arrays.sort(aRef);
-    Arrays.sort(bRef); var cRef = concat(aRef,bRef);
+    Arrays.sort(bRef); byte[] cRef = concat(aRef,bRef);
     Arrays.sort(cRef);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst);
+    byte[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -87,11 +90,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysShort") short[] bRef
   ) {
     Arrays.sort(aRef);
-    Arrays.sort(bRef); var cRef = concat(aRef,bRef);
+    Arrays.sort(bRef); short[] cRef = concat(aRef,bRef);
     Arrays.sort(cRef);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst);
+    short[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -102,11 +106,11 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysInt") int[] bRef
   ) {
     Arrays.sort(aRef);
-    Arrays.sort(bRef); var cRef = concat(aRef,bRef);
+    Arrays.sort(bRef); int[] cRef = concat(aRef,bRef);
     Arrays.sort(cRef);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst);
+    int[] aTst = aRef.clone(),
+          bTst = bRef.clone(),
+          cTst = merger().merge(aTst,bTst);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -117,11 +121,11 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysLong") long[] bRef
   ) {
     Arrays.sort(aRef);
-    Arrays.sort(bRef); var cRef = concat(aRef,bRef);
+    Arrays.sort(bRef); long[] cRef = concat(aRef,bRef);
     Arrays.sort(cRef);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst);
+    long[] aTst = aRef.clone(),
+           bTst = bRef.clone(),
+           cTst = merger().merge(aTst,bTst);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -132,11 +136,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysChar") char[] bRef
   ) {
     Arrays.sort(aRef);
-    Arrays.sort(bRef); var cRef = concat(aRef,bRef);
+    Arrays.sort(bRef); char[] cRef = concat(aRef,bRef);
     Arrays.sort(cRef);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst);
+    char[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -147,11 +152,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysFloat") float[] bRef
   ) {
     Arrays.sort(aRef);
-    Arrays.sort(bRef); var cRef = concat(aRef,bRef);
+    Arrays.sort(bRef); float[] cRef = concat(aRef,bRef);
     Arrays.sort(cRef);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst);
+    float[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -162,11 +168,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysDouble") double[] bRef
   ) {
     Arrays.sort(aRef);
-    Arrays.sort(bRef); var cRef = concat(aRef,bRef);
+    Arrays.sort(bRef); double[] cRef = concat(aRef,bRef);
     Arrays.sort(cRef);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst);
+    double[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -182,11 +189,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorByte cmp = Byte::compare;
     if( reversed ) cmp = cmp.reversed();
     TimSort.sort(aRef, cmp);
-    TimSort.sort(bRef, cmp); var cRef = concat(aRef,bRef);
+    TimSort.sort(bRef, cmp); byte[] cRef = concat(aRef,bRef);
     TimSort.sort(cRef, cmp);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst, cmp);
+    byte[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst, cmp);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -200,11 +208,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorShort cmp = Short::compare;
     if( reversed )  cmp = cmp.reversed();
     TimSort.sort(aRef, cmp);
-    TimSort.sort(bRef, cmp); var cRef = concat(aRef,bRef);
+    TimSort.sort(bRef, cmp); short[] cRef = concat(aRef,bRef);
     TimSort.sort(cRef, cmp);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst, cmp);
+    short[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst, cmp);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -218,11 +227,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorInt cmp = Integer::compare;
     if(reversed)  cmp = cmp.reversed();
     TimSort.sort(aRef, cmp);
-    TimSort.sort(bRef, cmp); var cRef = concat(aRef,bRef);
+    TimSort.sort(bRef, cmp); int[] cRef = concat(aRef,bRef);
     TimSort.sort(cRef, cmp);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst, cmp);
+    int[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst, cmp);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -236,11 +246,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorLong cmp = Long::compare;
     if( reversed ) cmp = cmp.reversed();
     TimSort.sort(aRef, cmp);
-    TimSort.sort(bRef, cmp); var cRef = concat(aRef,bRef);
+    TimSort.sort(bRef, cmp); long[] cRef = concat(aRef,bRef);
     TimSort.sort(cRef, cmp);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst, cmp);
+    long[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst, cmp);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -254,11 +265,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorChar cmp = Character::compare;
     if( reversed ) cmp = cmp.reversed();
     TimSort.sort(aRef, cmp);
-    TimSort.sort(bRef, cmp); var cRef = concat(aRef,bRef);
+    TimSort.sort(bRef, cmp); char[] cRef = concat(aRef,bRef);
     TimSort.sort(cRef, cmp);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst, cmp);
+    char[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst, cmp);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -272,11 +284,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorFloat cmp = Float::compare;
     if( reversed )  cmp = cmp.reversed();
     TimSort.sort(aRef, cmp);
-    TimSort.sort(bRef, cmp); var cRef = concat(aRef,bRef);
+    TimSort.sort(bRef, cmp); float[] cRef = concat(aRef,bRef);
     TimSort.sort(cRef, cmp);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst, cmp);
+    float[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst, cmp);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -290,11 +303,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorDouble cmp = Double::compare;
     if(reversed) cmp = cmp.reversed();
     TimSort.sort(aRef, cmp);
-    TimSort.sort(bRef, cmp); var cRef = concat(aRef,bRef);
+    TimSort.sort(bRef, cmp); double[] cRef = concat(aRef,bRef);
     TimSort.sort(cRef, cmp);
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(aTst,bTst, cmp);
+    double[]
+      aTst = aRef.clone(),
+      bTst = bRef.clone(),
+      cTst = merger().merge(aTst,bTst, cmp);
     assertThat(aTst).isEqualTo(aRef);
     assertThat(bTst).isEqualTo(bRef);
     assertThat(cTst).isEqualTo(cRef);
@@ -309,12 +323,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
       WithInsertIndex<byte[]>
     > ref
   ) {
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    Arrays.sort(aRef, a0,a0+aLen); var aTst = aRef.clone();
-    Arrays.sort(bRef, b0,b0+bLen); var bTst = bRef.clone();
-                                   var cTst = cRef.clone();
+    byte[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    byte[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    byte[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    Arrays.sort(aRef, a0,a0+aLen); byte[] aTst = aRef.clone();
+    Arrays.sort(bRef, b0,b0+bLen); byte[] bTst = bRef.clone();
+                                   byte[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     Arrays.sort(cRef, c0,c0+aLen+bLen);
@@ -335,12 +349,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
       WithInsertIndex<short[]>
     > ref
   ) {
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    Arrays.sort(aRef, a0,a0+aLen); var aTst = aRef.clone();
-    Arrays.sort(bRef, b0,b0+bLen); var bTst = bRef.clone();
-                                   var cTst = cRef.clone();
+    short[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    short[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    short[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    Arrays.sort(aRef, a0,a0+aLen); short[] aTst = aRef.clone();
+    Arrays.sort(bRef, b0,b0+bLen); short[] bTst = bRef.clone();
+                                   short[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     Arrays.sort(cRef, c0,c0+aLen+bLen);
@@ -361,12 +375,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
       WithInsertIndex<int[]>
     > ref
   ) {
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    Arrays.sort(aRef, a0,a0+aLen); var aTst = aRef.clone();
-    Arrays.sort(bRef, b0,b0+bLen); var bTst = bRef.clone();
-                                   var cTst = cRef.clone();
+    int[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    int[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    int[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    Arrays.sort(aRef, a0,a0+aLen); int[] aTst = aRef.clone();
+    Arrays.sort(bRef, b0,b0+bLen); int[] bTst = bRef.clone();
+                                   int[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     Arrays.sort(cRef, c0,c0+aLen+bLen);
@@ -387,12 +401,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
       WithInsertIndex<long[]>
     > ref
   ) {
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    Arrays.sort(aRef, a0,a0+aLen); var aTst = aRef.clone();
-    Arrays.sort(bRef, b0,b0+bLen); var bTst = bRef.clone();
-                                   var cTst = cRef.clone();
+    long[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    long[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    long[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    Arrays.sort(aRef, a0,a0+aLen); long[] aTst = aRef.clone();
+    Arrays.sort(bRef, b0,b0+bLen); long[] bTst = bRef.clone();
+                                   long[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     Arrays.sort(cRef, c0,c0+aLen+bLen);
@@ -413,12 +427,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
       WithInsertIndex<char[]>
     > ref
   ) {
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    Arrays.sort(aRef, a0,a0+aLen); var aTst = aRef.clone();
-    Arrays.sort(bRef, b0,b0+bLen); var bTst = bRef.clone();
-                                   var cTst = cRef.clone();
+    char[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    char[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    char[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    Arrays.sort(aRef, a0,a0+aLen); char[] aTst = aRef.clone();
+    Arrays.sort(bRef, b0,b0+bLen); char[] bTst = bRef.clone();
+                                   char[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     Arrays.sort(cRef, c0,c0+aLen+bLen);
@@ -439,12 +453,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
       WithInsertIndex<float[]>
     > ref
   ) {
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    Arrays.sort(aRef, a0,a0+aLen); var aTst = aRef.clone();
-    Arrays.sort(bRef, b0,b0+bLen); var bTst = bRef.clone();
-                                   var cTst = cRef.clone();
+    float[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    float[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    float[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    Arrays.sort(aRef, a0,a0+aLen); float[] aTst = aRef.clone();
+    Arrays.sort(bRef, b0,b0+bLen); float[] bTst = bRef.clone();
+                                   float[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     Arrays.sort(cRef, c0,c0+aLen+bLen);
@@ -465,12 +479,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
       WithInsertIndex<double[]>
     > ref
   ) {
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    Arrays.sort(aRef, a0,a0+aLen); var aTst = aRef.clone();
-    Arrays.sort(bRef, b0,b0+bLen); var bTst = bRef.clone();
-                                   var cTst = cRef.clone();
+    double[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    double[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    double[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    Arrays.sort(aRef, a0,a0+aLen); double[] aTst = aRef.clone();
+    Arrays.sort(bRef, b0,b0+bLen); double[] bTst = bRef.clone();
+                                   double[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     Arrays.sort(cRef, c0,c0+aLen+bLen);
@@ -496,12 +510,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
   ) {
     ComparatorByte cmp = Byte::compare;
     if( reversed ) cmp = cmp.reversed();
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    TimSort.sort(aRef, a0,a0+aLen, cmp); var aTst = aRef.clone();
-    TimSort.sort(bRef, b0,b0+bLen, cmp); var bTst = bRef.clone();
-                                         var cTst = cRef.clone();
+    byte[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    byte[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    byte[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    TimSort.sort(aRef, a0,a0+aLen, cmp); byte[] aTst = aRef.clone();
+    TimSort.sort(bRef, b0,b0+bLen, cmp); byte[] bTst = bRef.clone();
+                                         byte[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     TimSort.sort(cRef, c0,c0+aLen+bLen, cmp);
@@ -525,12 +539,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
   ) {
     ComparatorShort cmp = Short::compare;
     if( reversed )  cmp = cmp.reversed();
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    TimSort.sort(aRef, a0,a0+aLen, cmp); var aTst = aRef.clone();
-    TimSort.sort(bRef, b0,b0+bLen, cmp); var bTst = bRef.clone();
-                                         var cTst = cRef.clone();
+    short[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    short[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    short[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    TimSort.sort(aRef, a0,a0+aLen, cmp); short[] aTst = aRef.clone();
+    TimSort.sort(bRef, b0,b0+bLen, cmp); short[] bTst = bRef.clone();
+                                         short[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     TimSort.sort(cRef, c0,c0+aLen+bLen, cmp);
@@ -554,12 +568,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
   ) {
     ComparatorInt cmp = Integer::compare;
     if(reversed)  cmp = cmp.reversed();
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    TimSort.sort(aRef, a0,a0+aLen, cmp); var aTst = aRef.clone();
-    TimSort.sort(bRef, b0,b0+bLen, cmp); var bTst = bRef.clone();
-                                         var cTst = cRef.clone();
+    int[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    int[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    int[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    TimSort.sort(aRef, a0,a0+aLen, cmp); int[] aTst = aRef.clone();
+    TimSort.sort(bRef, b0,b0+bLen, cmp); int[] bTst = bRef.clone();
+                                         int[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     TimSort.sort(cRef, c0,c0+aLen+bLen, cmp);
@@ -583,12 +597,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
   ) {
     ComparatorLong cmp = Long::compare;
     if( reversed ) cmp = cmp.reversed();
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    TimSort.sort(aRef, a0,a0+aLen, cmp); var aTst = aRef.clone();
-    TimSort.sort(bRef, b0,b0+bLen, cmp); var bTst = bRef.clone();
-                                         var cTst = cRef.clone();
+    long[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    long[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    long[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    TimSort.sort(aRef, a0,a0+aLen, cmp); long[] aTst = aRef.clone();
+    TimSort.sort(bRef, b0,b0+bLen, cmp); long[] bTst = bRef.clone();
+                                         long[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     TimSort.sort(cRef, c0,c0+aLen+bLen, cmp);
@@ -612,12 +626,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
   ) {
     ComparatorChar cmp = Character::compare;
     if( reversed ) cmp = cmp.reversed();
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    TimSort.sort(aRef, a0,a0+aLen, cmp); var aTst = aRef.clone();
-    TimSort.sort(bRef, b0,b0+bLen, cmp); var bTst = bRef.clone();
-                                         var cTst = cRef.clone();
+    char[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    char[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    char[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    TimSort.sort(aRef, a0,a0+aLen, cmp); char[] aTst = aRef.clone();
+    TimSort.sort(bRef, b0,b0+bLen, cmp); char[] bTst = bRef.clone();
+                                         char[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     TimSort.sort(cRef, c0,c0+aLen+bLen, cmp);
@@ -641,12 +655,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
   ) {
     ComparatorFloat cmp = Float::compare;
     if( reversed ) cmp = cmp.reversed();
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    TimSort.sort(aRef, a0,a0+aLen, cmp); var aTst = aRef.clone();
-    TimSort.sort(bRef, b0,b0+bLen, cmp); var bTst = bRef.clone();
-                                         var cTst = cRef.clone();
+    float[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    float[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    float[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    TimSort.sort(aRef, a0,a0+aLen, cmp); float[] aTst = aRef.clone();
+    TimSort.sort(bRef, b0,b0+bLen, cmp); float[] bTst = bRef.clone();
+                                         float[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     TimSort.sort(cRef, c0,c0+aLen+bLen, cmp);
@@ -670,12 +684,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
   ) {
     ComparatorDouble cmp = Double::compare;
     if(reversed) cmp=cmp.reversed();
-    var aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
-    var bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
-    var cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
-    TimSort.sort(aRef, a0,a0+aLen, cmp); var aTst = aRef.clone();
-    TimSort.sort(bRef, b0,b0+bLen, cmp); var bTst = bRef.clone();
-                                         var cTst = cRef.clone();
+    double[] aRef = ref.get1().getData().clone(); int a0 = ref.get1().getFrom(), aLen = ref.get1().rangeLength();
+    double[] bRef = ref.get2().getData().clone(); int b0 = ref.get2().getFrom(), bLen = ref.get2().rangeLength();
+    double[] cRef = ref.get3().getData().clone(); int c0 = ref.get3().getIndex();
+    TimSort.sort(aRef, a0,a0+aLen, cmp); double[] aTst = aRef.clone();
+    TimSort.sort(bRef, b0,b0+bLen, cmp); double[] bTst = bRef.clone();
+                                         double[] cTst = cRef.clone();
     arraycopy(aRef,a0, cRef,c0,aLen);
     arraycopy(bRef,b0, cRef,c0+aLen, bLen);
     TimSort.sort(cRef, c0,c0+aLen+bLen, cmp);
@@ -708,7 +722,7 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
            bTest = bRef.clone(),
            cTest = new byte[aTest.length+bTest.length];
 
-    var acc = new CompareRandomAccessor<byte[]>(){
+    CompareRandomAccessor<byte[]> acc = new CompareRandomAccessor<byte[]>(){
       @Override public byte[] malloc( int len ) { return new byte[len]; }
       @Override public void copyRange( byte[] a, int i, byte[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
       @Override public void copy     ( byte[] a, int i, byte[] b, int j ) { b[j] = a[i]; }
@@ -732,7 +746,7 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysInt") int[] bRef,
     @ForAll boolean reversed
   ) {
-    var               cRef = new int[aRef.length + bRef.length];
+    int[]             cRef = new int[aRef.length + bRef.length];
     arraycopy(aRef,0, cRef,0,           aRef.length);
     arraycopy(bRef,0, cRef,aRef.length, bRef.length);
     Arrays.sort(aRef); if(reversed) Revert.revert(aRef);
@@ -743,7 +757,7 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
           bTest = bRef.clone(),
           cTest = new int[aTest.length+bTest.length];
 
-    var acc = new CompareRandomAccessor<int[]>(){
+    CompareRandomAccessor<int[]> acc = new CompareRandomAccessor<int[]>(){
       @Override public int[] malloc( int len ) { return new int[len]; }
       @Override public void copyRange( int[] a, int i, int[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
       @Override public void copy     ( int[] a, int i, int[] b, int j ) { b[j] = a[i]; }
@@ -778,12 +792,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
       bRef = range(0,bRaw.length).mapToObj( i -> Tuple.of(bRaw[i],aRaw.length + i) ).toArray(Tuple2[]::new),
       cRef =                             Stream.concat( stream(aRef), stream(bRef) ).toArray(Tuple2[]::new);
 
-    Arrays.sort(aRef,cmp); var aTest = aRef.clone();
-    Arrays.sort(bRef,cmp); var bTest = bRef.clone();
-                           var cTest = cRef.clone();
+    Arrays.sort(aRef,cmp); Tuple2<Byte,Integer>[] aTest = aRef.clone();
+    Arrays.sort(bRef,cmp); Tuple2<Byte,Integer>[] bTest = bRef.clone();
+                           Tuple2<Byte,Integer>[] cTest = cRef.clone();
     Arrays.sort(cRef,cmp);
 
-    var acc = new CompareRandomAccessor<Tuple2<Byte,Integer>[]>(){
+    CompareRandomAccessor<Tuple2<Byte,Integer>[]> acc = new CompareRandomAccessor<Tuple2<Byte,Integer>[]>(){
       @SuppressWarnings("unchecked")
       @Override public Tuple2<Byte,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public void copyRange( Tuple2<Byte,Integer>[] a, int i, Tuple2<Byte,Integer>[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
@@ -816,12 +830,12 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
       bRef = range(0,bRaw.length).mapToObj( i -> Tuple.of(bRaw[i],aRaw.length + i) ).toArray(Tuple2[]::new),
       cRef =                             Stream.concat( stream(aRef), stream(bRef) ).toArray(Tuple2[]::new);
 
-    Arrays.sort(aRef,cmp); var aTest = aRef.clone();
-    Arrays.sort(bRef,cmp); var bTest = bRef.clone();
-                           var cTest = cRef.clone();
+    Arrays.sort(aRef,cmp); Tuple2<Integer,Integer>[] aTest = aRef.clone();
+    Arrays.sort(bRef,cmp); Tuple2<Integer,Integer>[] bTest = bRef.clone();
+                           Tuple2<Integer,Integer>[] cTest = cRef.clone();
     Arrays.sort(cRef,cmp);
 
-    var acc = new CompareRandomAccessor<Tuple2<Integer,Integer>[]>(){
+    CompareRandomAccessor<Tuple2<Integer,Integer>[]> acc = new CompareRandomAccessor<Tuple2<Integer,Integer>[]>(){
       @SuppressWarnings("unchecked")
       @Override public Tuple2<Integer,Integer>[] malloc( int len ) { return new Tuple2[len]; }
       @Override public void copyRange( Tuple2<Integer,Integer>[] a, int i, Tuple2<Integer,Integer>[] b, int j, int len ) { System.arraycopy(a,i, b,j, len); }
@@ -844,17 +858,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysWithRangeByte") WithRange<byte[]> aSample,
     @ForAll("arraysWithRangeByte") WithRange<byte[]> bSample
   ) {
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
-    var cRef = concat(
+    byte[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
+    byte[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
+    byte[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    byte[] aTst = aRef.clone();
+    byte[] bTst = bRef.clone();
+    byte[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0
     );
@@ -869,17 +883,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysWithRangeShort") WithRange<short[]> aSample,
     @ForAll("arraysWithRangeShort") WithRange<short[]> bSample
   ) {
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
-    var cRef = concat(
+    short[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
+    short[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
+    short[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    short[] aTst = aRef.clone();
+    short[] bTst = bRef.clone();
+    short[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0
     );
@@ -894,17 +908,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysWithRangeInt") WithRange<int[]> aSample,
     @ForAll("arraysWithRangeInt") WithRange<int[]> bSample
   ) {
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
-    var cRef = concat(
+    int[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
+    int[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
+    int[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    int[] aTst = aRef.clone();
+    int[] bTst = bRef.clone();
+    int[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0
     );
@@ -919,17 +933,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysWithRangeLong") WithRange<long[]> aSample,
     @ForAll("arraysWithRangeLong") WithRange<long[]> bSample
   ) {
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
-    var cRef = concat(
+    long[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
+    long[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
+    long[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    long[] aTst = aRef.clone();
+    long[] bTst = bRef.clone();
+    long[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0
     );
@@ -944,17 +958,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysWithRangeChar") WithRange<char[]> aSample,
     @ForAll("arraysWithRangeChar") WithRange<char[]> bSample
   ) {
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
-    var cRef = concat(
+    char[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
+    char[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
+    char[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    char[] aTst = aRef.clone();
+    char[] bTst = bRef.clone();
+    char[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0
     );
@@ -969,17 +983,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysWithRangeFloat") WithRange<float[]> aSample,
     @ForAll("arraysWithRangeFloat") WithRange<float[]> bSample
   ) {
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
-    var cRef = concat(
+    float[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
+    float[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
+    float[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    float[] aTst = aRef.clone();
+    float[] bTst = bRef.clone();
+    float[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0
     );
@@ -994,17 +1008,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     @ForAll("arraysWithRangeDouble") WithRange<double[]> aSample,
     @ForAll("arraysWithRangeDouble") WithRange<double[]> bSample
   ) {
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
-    var cRef = concat(
+    double[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1);
+    double[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1);
+    double[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    double[] aTst = aRef.clone();
+    double[] bTst = bRef.clone();
+    double[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0
     );
@@ -1025,17 +1039,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorByte cmp = Byte::compare;
     if( reversed ) cmp=cmp.reversed();
 
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
-    var cRef = concat(
+    byte[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
+    byte[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
+    byte[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef); if(reversed) revert(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    byte[] aTst = aRef.clone();
+    byte[] bTst = bRef.clone();
+    byte[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0, cmp
     );
@@ -1054,17 +1068,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorShort cmp = Short::compare;
     if( reversed )  cmp=cmp.reversed();
 
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
-    var cRef = concat(
+    short[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
+    short[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
+    short[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef); if(reversed) revert(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    short[] aTst = aRef.clone();
+    short[] bTst = bRef.clone();
+    short[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0, cmp
     );
@@ -1083,17 +1097,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorInt cmp = Integer::compare;
     if(reversed)  cmp=cmp.reversed();
 
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
-    var cRef = concat(
-            copyOfRange(aRef,a0,a1),
-            copyOfRange(bRef,b0,b1)
+    int[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
+    int[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
+    int[] cRef = concat(
+      copyOfRange(aRef,a0,a1),
+      copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef); if(reversed) revert(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    int[] aTst = aRef.clone();
+    int[] bTst = bRef.clone();
+    int[] cTst = merger().merge(
             aTst, a0, a1-a0,
             bTst, b0, b1-b0, cmp
     );
@@ -1112,17 +1126,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorLong   cmp = Long::compare;
     if(reversed) cmp=cmp.reversed();
 
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
-    var cRef = concat(
+    long[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
+    long[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
+    long[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef); if(reversed) revert(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    long[] aTst = aRef.clone();
+    long[] bTst = bRef.clone();
+    long[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0, cmp
     );
@@ -1141,17 +1155,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorChar cmp = Character::compare;
     if(reversed) cmp=cmp.reversed();
 
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
-    var cRef = concat(
-            copyOfRange(aRef,a0,a1),
-            copyOfRange(bRef,b0,b1)
+    char[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
+    char[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
+    char[] cRef = concat(
+      copyOfRange(aRef,a0,a1),
+      copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef); if(reversed) revert(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    char[] aTst = aRef.clone();
+    char[] bTst = bRef.clone();
+    char[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0, cmp
     );
@@ -1170,17 +1184,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorFloat cmp = Float::compare;
     if(reversed) cmp=cmp.reversed();
 
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
-    var cRef = concat(
+    float[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
+    float[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
+    float[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef); if(reversed) revert(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    float[] aTst = aRef.clone();
+    float[] bTst = bRef.clone();
+    float[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0, cmp
     );
@@ -1199,17 +1213,17 @@ public interface MergerTestTemplate extends ArrayProviderTemplate
     ComparatorDouble cmp = Double::compare;
     if(reversed) cmp=cmp.reversed();
 
-    var aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
-    var bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
-    var cRef = concat(
+    double[] aRef = aSample.getData().clone(); int a0 = aSample.getFrom(), a1 = aSample.getUntil(); Arrays.sort(aRef,a0,a1); if(reversed) revert(aRef,a0,a1);
+    double[] bRef = bSample.getData().clone(); int b0 = bSample.getFrom(), b1 = bSample.getUntil(); Arrays.sort(bRef,b0,b1); if(reversed) revert(bRef,b0,b1);
+    double[] cRef = concat(
       copyOfRange(aRef,a0,a1),
       copyOfRange(bRef,b0,b1)
     );
     Arrays.sort(cRef); if(reversed) revert(cRef);
 
-    var aTst = aRef.clone();
-    var bTst = bRef.clone();
-    var cTst = merger().merge(
+    double[] aTst = aRef.clone();
+    double[] bTst = bRef.clone();
+    double[] cTst = merger().merge(
       aTst, a0, a1-a0,
       bTst, b0, b1-b0, cmp
     );

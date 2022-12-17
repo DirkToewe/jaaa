@@ -7,7 +7,8 @@ import com.github.jaaa.select.BenchmarkOverSplit.SelectFn;
 import com.github.jaaa.util.Progress;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.Writer;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,6 +23,9 @@ import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 import static java.lang.System.out;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.Files.createTempFile;
+import static java.nio.file.Files.newBufferedWriter;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
@@ -43,7 +47,7 @@ public class BenchmarkOverBoth
     out.println( System.getProperty("java.vm.name") + " " + System.getProperty("java.vm.version") );
     out.println( "Java " + System.getProperty("java.version") );
 
-    for( int len: new int[]{ 1_000_000 } )
+    for( int len: new int[]{ 100_000 } )
     {
       out.printf("len: %d\n", len);
       compare_over_both(len);
@@ -53,14 +57,15 @@ public class BenchmarkOverBoth
   private static void compare_over_both( final int max_length ) throws IOException
   {
     int N_SAMPLES = N_SAMPLES_DEFAULT;
-    var rng = new SplittableRandom();
+    SplittableRandom rng = new SplittableRandom();
 
-    var samples = lhs(N_SAMPLES, 2);
-    var x = stream(samples).mapToDouble( xy -> round(2 + xy[0]*(max_length-1)) ).toArray();
-    var y = stream(samples).mapToDouble( xy -> round(2 + xy[1]*(max_length-1)) ).toArray();
+    double[][] samples = lhs(N_SAMPLES, 2);
+    double[]
+      x = stream(samples).mapToDouble( xy -> round(2 + xy[0]*(max_length-1)) ).toArray(),
+      y = stream(samples).mapToDouble( xy -> round(2 + xy[1]*(max_length-1)) ).toArray();
 
-    var acc = new CountingAccessor();
-    var selectors = selectors(acc);
+    CountingAccessor acc = new CountingAccessor();
+    Map<String, SelectFn<int[]>> selectors = selectors(acc);
 
     Map<String,double[]>
       resultsComps = new TreeMap<>(),
@@ -73,9 +78,9 @@ public class BenchmarkOverBoth
     });
 
     @SuppressWarnings("unchecked")
-    Entry<String,SelectFn<int[]>>[] selectorsArr = selectors.entrySet().toArray(Entry[]::new);
+    Entry<String,SelectFn<int[]>>[] selectorsArr = selectors.entrySet().stream().toArray(Entry[]::new);
 
-    var order = range(0,N_SAMPLES).toArray();
+    int[] order = range(0,N_SAMPLES).toArray();
     randomShuffle(order,rng::nextInt);
     Progress.print( stream(order) ).forEach( i -> {
       final int split = (int) x[i],
@@ -98,7 +103,7 @@ public class BenchmarkOverBoth
       stream(selectorsArr).forEach( EntryConsumer.of( (k,v) -> {
         acc.nComps = 0;
         acc.nSwaps = 0;
-        var tst = ref.clone();
+        int[] tst = ref.clone();
 
         long t0 = nanoTime();
         v.select(tst, 0, split, length);
@@ -122,24 +127,22 @@ public class BenchmarkOverBoth
   {
     String data = zs.entrySet().stream().map( EntryFn.of(
       (method,z) -> format(
-        """
-        {
-          type: 'scatter3d',
-          mode: 'markers',
-          name: '%s',
-          marker: {
-            size: 1.5,
-            opacity: 0.8,
-            line: {
-              width: 0.5,
-              color: 'black'
-            }
-          },
-          x: %s,
-          y: %s,
-          z: %s
-        }
-        """,
+        "{\n" +
+        "  type: 'scatter3d',\n" +
+        "  mode: 'markers',\n" +
+        "  name: '%s',\n" +
+        "  marker: {\n" +
+        "    size: 1.5,\n" +
+        "    opacity: 0.8,\n" +
+        "    line: {\n" +
+        "      width: 0.5,\n" +
+        "      color: 'black'\n" +
+        "    }\n" +
+        "  },\n" +
+        "  x: %s,\n" +
+        "  y: %s,\n" +
+        "  z: %s\n" +
+        "}\n",
         method,
         Arrays.toString(x),
         Arrays.toString(y),
@@ -167,180 +170,178 @@ public class BenchmarkOverBoth
         */
 
     String layout = format(
-      """
-      {
-        title: '%s',
-        paper_bgcolor: 'black',
-         plot_bgcolor: 'black',
-        legend: {
-          font: { color: 'lightgray' }
-        },
-        font: { color: 'lightgray' },
-        scene: {
-          xaxis: {title: '%s', color: 'lightgray', gridcolor: '#333' },
-          yaxis: {title: '%s', color: 'lightgray', gridcolor: '#333' },
-          zaxis: {title: '%s', color: 'lightgray', gridcolor: '#333' }
-        }
-      }
-      """,
+      "{\n" +
+      "  title: '%s',\n" +
+      "  paper_bgcolor: 'black',\n" +
+      "   plot_bgcolor: 'black',\n" +
+      "  legend: {\n" +
+      "    font: { color: 'lightgray' }\n" +
+      "  },\n" +
+      "  font: { color: 'lightgray' },\n" +
+      "  scene: {\n" +
+      "    xaxis: {title: '%s', color: 'lightgray', gridcolor: '#333' },\n" +
+      "    yaxis: {title: '%s', color: 'lightgray', gridcolor: '#333' },\n" +
+      "    zaxis: {title: '%s', color: 'lightgray', gridcolor: '#333' }\n" +
+      "  }\n" +
+      "}\n",
       title,
       x_label,
       y_label,
       z_label
     );
 
-    String PLOT_TEMPLATE = """
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="utf-8">
-          <script src="https://cdn.plot.ly/plotly-latest.js"></script>
-          <script type="text/javascript" src="./nd.min.js"></script>
-        </head>
-        <body>
-          <script>
-          'use strict';
+    String PLOT_TEMPLATE =
+      "<!DOCTYPE html>\n" +
+      "<html lang=\"en\">\n" +
+      "  <head>\n" +
+      "    <meta charset=\"utf-8\">\n" +
+      "    <script src=\"https://cdn.plot.ly/plotly-latest.js\"></script>\n" +
+      "    <script type=\"text/javascript\" src=\"./nd.min.js\"></script>\n" +
+      "  </head>\n" +
+      "  <body>\n" +
+      "    <script>\n" +
+      "    'use strict';\n" +
+      "\n" +
+      "    (async () => {\n" +
+      "      const plot = document.createElement('div');\n" +
+      "      plot.style = 'width: 100%%; height: 95vh;';\n" +
+      "      document.body.appendChild(plot);\n" +
+      "\n" +
+      "      const dataRaw = %2$s,\n" +
+      "             layout = %1$s;\n" +
+      "      if( 'title' in layout )\n" +
+      "        document.title = layout.title;\n" +
+      "      if( 'paper_bgcolor' in layout )\n" +
+      "        document.body.style.background = layout.paper_bgcolor;\n" +
+      "\n" +
+      "      const colors = [\n" +
+      "        '#e41a1c',\n" +
+      "        '#377eb8',\n" +
+      "        '#4daf4a',\n" +
+      "        '#984ea3',\n" +
+      "        '#ff7f00',\n" +
+      "        '#ffff33',\n" +
+      "        '#a65628',\n" +
+      "        '#f781bf',\n" +
+      "        '#999999'\n" +
+      "      ];\n" +
+      "\n" +
+      "      const sleep = dt => new Promise(resolve => setTimeout(resolve,dt));\n" +
+      "\n" +
+      "      const data = [];\n" +
+      "      let col = 0;\n" +
+      "      for( const pts of dataRaw )\n" +
+      "      {\n" +
+      "        const color = colors[col++ %% colors.length];\n" +
+      "        pts.marker.color = color;\n" +
+      "\n" +
+      "        const     log2 = x => Math.ceil( Math.log2(x+1) ),\n" +
+      "          sortedInputs = fn => ([x,y]) => fn( Math.min(x,y), Math.max(x,y) );\n" +
+      "\n" +
+      "        const   worstCase = (m,n) => Math.log2(m+1) * n;\n" +
+      "        const averageCase = (m,n) => Math.log((m+n)/m) * Math.log2(m+1)*m;\n" +
+      "\n" +
+      "        let fit_fns = function(){\n" +
+      "          switch(pts.name) {\n" +
+      "            default:\n" +
+      "              throw new Error(data.name);\n" +
+      "            case 'MoM3':\n" +
+      "            case 'MoM5':\n" +
+      "            case 'MergeSelect':\n" +
+      "            case 'Quick':\n" +
+      "              return [(m,n) => m+n];\n" +
+      "            case 'Heap':\n" +
+      "            case 'HeapRandom':\n" +
+      "              return [(m,n) => 0];\n" +
+      "            case 'HeapMajor':\n" +
+      "              return [\n" +
+      "                (m,n) => m,\n" +
+      "                (m,n) => n,\n" +
+      "                (m,n) =>   worstCase(n,m),\n" +
+      "                (m,n) => averageCase(n,m),\n" +
+      "              ];\n" +
+      "            case 'HeapMinor':\n" +
+      "            case 'HeapHybridV2':\n" +
+      "              return [\n" +
+      "                (m,n) => m,\n" +
+      "                (m,n) => n,\n" +
+      "                (m,n) =>   worstCase(m,n),\n" +
+      "                (m,n) => averageCase(m,n),\n" +
+      "              ];\n" +
+      "          }\n" +
+      "        }();\n" +
+      "\n" +
+      "        fit_fns = fit_fns.map(\n" +
+      "          f => ([x,y]) => {\n" +
+      "            const m = Math.min(x,y),\n" +
+      "                  n = Math.max(x,y);\n" +
+      "            return m < 2 ? 0 : f(m,n)\n" +
+      "          }\n" +
+      "        );\n" +
+      "\n" +
+      "        const fit_fn = nd.opt.fit_lin(\n" +
+      "          [...nd.iter.zip(pts.x, pts.y)],\n" +
+      "          pts.z,\n" +
+      "          fit_fns\n" +
+      "        );\n" +
+      "\n" +
+      "        console.log({name: pts.name, fit_fn})\n" +
+      "\n" +
+      "        const xMin = pts.x.reduce( (x,y) => Math.min(x,y) ), xMax = pts.x.reduce( (x,y) => Math.max(x,y) ),\n" +
+      "              yMin = pts.y.reduce( (x,y) => Math.min(x,y) ), yMax = pts.y.reduce( (x,y) => Math.max(x,y) );\n" +
+      "\n" +
+      "        const x = [],\n" +
+      "              y = [],\n" +
+      "              z = [];\n" +
+      "\n" +
+      "        const N = 17,\n" +
+      "            LOD = 10;\n" +
+      "\n" +
+      "        for( const xi of nd.iter.linspace(xMin,xMax,N) )\n" +
+      "        {\n" +
+      "          for( const yi of nd.iter.linspace(yMin,yMax,N*LOD) )\n" +
+      "          {\n" +
+      "            x.push(xi);\n" +
+      "            y.push(yi);\n" +
+      "            z.push( fit_fn([xi,yi]) );\n" +
+      "          }\n" +
+      "          [x,y,z].forEach( arr => arr.push(NaN) );\n" +
+      "        }\n" +
+      "        for( const yi of nd.iter.linspace(yMin,yMax,N) )\n" +
+      "        {\n" +
+      "          for( const xi of nd.iter.linspace(xMin,xMax,N*LOD) )\n" +
+      "          {\n" +
+      "            x.push(xi);\n" +
+      "            y.push(yi);\n" +
+      "            z.push( fit_fn([xi,yi]) );\n" +
+      "          }\n" +
+      "          [x,y,z].forEach( arr => arr.push(NaN) );\n" +
+      "        }\n" +
+      "\n" +
+      "        const fit = {\n" +
+      "          type: 'scatter3d',\n" +
+      "          mode: 'lines',\n" +
+      "          name: pts.name + ' (fit)',\n" +
+      "          line: { color, width: 4 },\n" +
+      "          x,y,z\n" +
+      "        };\n" +
+      "\n" +
+      "        await sleep();\n" +
+      "\n" +
+      "        data.push(pts,fit);\n" +
+      "      }\n" +
+      "\n" +
+      "      await Plotly.plot(plot, {layout, data});\n" +
+      "    })()\n" +
+      "    </script>\n" +
+      "  </body>\n" +
+      "</html>\n";
 
-          (async () => {
-            const plot = document.createElement('div');
-            plot.style = 'width: 100%%; height: 95vh;';
-            document.body.appendChild(plot);
-
-            const dataRaw = %2$s,
-                   layout = %1$s;
-            if( 'title' in layout )
-              document.title = layout.title;
-            if( 'paper_bgcolor' in layout )
-              document.body.style.background = layout.paper_bgcolor;
-
-            const colors = [
-              "#e41a1c",
-              "#377eb8",
-              "#4daf4a",
-              "#984ea3",
-              "#ff7f00",
-              "#ffff33",
-              "#a65628",
-              "#f781bf",
-              "#999999"
-            ];
-
-            const sleep = dt => new Promise(resolve => setTimeout(resolve,dt));
-
-            const data = [];
-            let col = 0;
-            for( const pts of dataRaw )
-            {
-              const color = colors[col++ %% colors.length];
-              pts.marker.color = color;
-
-              const     log2 = x => Math.ceil( Math.log2(x+1) ),
-                sortedInputs = fn => ([x,y]) => fn( Math.min(x,y), Math.max(x,y) );
-
-              const   worstCase = (m,n) => Math.log2(m+1) * n;
-              const averageCase = (m,n) => Math.log((m+n)/m) * Math.log2(m+1)*m;
-
-              let fit_fns = function(){
-                switch(pts.name) {
-                  default:
-                    throw new Error(data.name);
-                  case 'MoM3 V1':
-                  case 'MoM3 V2':
-                  case 'MoM5 V1':
-                  case 'MoM5 V2':
-                  case 'QuickV1':
-                  case 'QuickV2':
-                    return [(m,n) => m+n];
-                  case 'Heap':
-                  case 'HeapRandom':
-                    return [(m,n) => 0];
-                  case 'HeapMajor':
-                    return [
-                      (m,n) => m,
-                      (m,n) => n,
-                      (m,n) =>   worstCase(n,m),
-                      (m,n) => averageCase(n,m),
-                    ];
-                  case 'HeapMinor':
-                  case 'HeapHybridV2':
-                    return [
-                      (m,n) => m,
-                      (m,n) => n,
-                      (m,n) =>   worstCase(m,n),
-                      (m,n) => averageCase(m,n),
-                    ];
-                }
-              }();
-
-              fit_fns = fit_fns.map(
-                f => ([x,y]) => {
-                  const m = Math.min(x,y),
-                        n = Math.max(x,y);
-                  return m < 2 ? 0 : f(m,n)
-                }
-              );
-
-              const fit_fn = nd.opt.fit_lin(
-                [...nd.iter.zip(pts.x, pts.y)],
-                pts.z,
-                fit_fns
-              );
-
-              console.log({name: pts.name, fit_fn})
-
-              const xMin = pts.x.reduce( (x,y) => Math.min(x,y) ), xMax = pts.x.reduce( (x,y) => Math.max(x,y) ),
-                    yMin = pts.y.reduce( (x,y) => Math.min(x,y) ), yMax = pts.y.reduce( (x,y) => Math.max(x,y) );
-
-              const x = [],
-                    y = [],
-                    z = [];
-
-              const N = 17,
-                  LOD = 10;
-
-              for( const xi of nd.iter.linspace(xMin,xMax,N) )
-              {
-                for( const yi of nd.iter.linspace(yMin,yMax,N*LOD) )
-                {
-                  x.push(xi);
-                  y.push(yi);
-                  z.push( fit_fn([xi,yi]) );
-                }
-                [x,y,z].forEach( arr => arr.push(NaN) );
-              }
-              for( const yi of nd.iter.linspace(yMin,yMax,N) )
-              {
-                for( const xi of nd.iter.linspace(xMin,xMax,N*LOD) )
-                {
-                  x.push(xi);
-                  y.push(yi);
-                  z.push( fit_fn([xi,yi]) );
-                }
-                [x,y,z].forEach( arr => arr.push(NaN) );
-              }
-
-              const fit = {
-                type: 'scatter3d',
-                mode: 'lines',
-                name: pts.name + ' (fit)',
-                line: { color, width: 4 },
-                x,y,z
-              };
-
-              await sleep();
-
-              data.push(pts,fit);
-            }
-    
-            await Plotly.plot(plot, {layout, data});
-          })()
-          </script>
-        </body>
-      </html>
-    """;
-
-    var tmp = Files.createTempFile("plot_",".html");
-    Files.writeString( tmp, format(PLOT_TEMPLATE, layout, data) );
-    getRuntime().exec( format("xdg-open %s", tmp) );
+    Path tmp = createTempFile("plot_",".html");
+    try( Writer out = newBufferedWriter(tmp,UTF_8) ) {
+      out.write( format(PLOT_TEMPLATE, layout, data) );
+    }
+    String[] cmd = {"xdg-open", tmp.toString()};
+    getRuntime().exec(cmd);
   }
 }

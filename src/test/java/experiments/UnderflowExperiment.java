@@ -33,7 +33,7 @@ public class UnderflowExperiment
 //    System.out.println(large);
 //    System.out.println(large*large);
 
-    var tinyF32 = (float) binarySearchGapL(0, 1, x -> Float.isInfinite(1f / (float) x) ? +1 : -1);
+    float tinyF32 = (float) binarySearchGapL(0, 1, x -> Float.isInfinite(1f / (float) x) ? +1 : -1);
     System.out.println(tinyF32);
     System.out.println( 1f / tinyF32 ); tinyF32 = Math.nextDown(tinyF32);
     System.out.println(tinyF32);

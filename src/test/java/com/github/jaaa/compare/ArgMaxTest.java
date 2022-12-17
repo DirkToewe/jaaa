@@ -40,10 +40,10 @@ public class ArgMaxTest implements ArrayProviderTemplate
       assertThat(iMin).isBetween(from,until-1);
       assertThat(tst).isEqualTo(array);
 
-      var min = Array.get(array,iMin);
+      Object min = Array.get(array,iMin);
 
       for( int i=from; i < until; i++ ) {
-        var c = cmp.compare(min, Array.get(array,i));
+        int c = cmp.compare(min, Array.get(array,i));
         assertThat(c).isGreaterThan( i < iMin ? 0 : -1 );
       }
     }
@@ -124,10 +124,10 @@ public class ArgMaxTest implements ArrayProviderTemplate
       assertThat(iMin).isBetween(from,until-1);
       assertThat(tst).isEqualTo(array);
 
-      var min = Array.get(array,iMin);
+      Object min = Array.get(array,iMin);
 
       for( int i=from; i < until; i++ ) {
-        var c = cmp.compare(min, Array.get(array,i));
+        int c = cmp.compare(min, Array.get(array,i));
         assertThat(c).isGreaterThan( i > iMin ? 0 : -1 );
       }
     }

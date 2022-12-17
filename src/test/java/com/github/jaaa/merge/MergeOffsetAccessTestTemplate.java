@@ -37,8 +37,8 @@ public abstract class MergeOffsetAccessTestTemplate implements ArrayProviderTemp
   static Arbitrary< Tuple5<Integer,Integer, Integer,Integer, int[]> > exhaustiveSamples()
   {
     return MergeOffsetAccessorTestTemplate.exhaustiveSamples().map( ab -> {
-      var a = ab.get1(); int nA = a.length;
-      var b = ab.get2(); int nB = b.length;
+      int[] a = ab.get1(); int nA = a.length;
+      int[] b = ab.get2(); int nB = b.length;
       return Tuple.of(0,nA, nA,nB, concat(a,b));
     });
   }
@@ -53,9 +53,9 @@ public abstract class MergeOffsetAccessTestTemplate implements ArrayProviderTemp
 
   @Property void mergeOffsetArraysIntExhaustive( @ForAll("exhaustiveSamples") Tuple5<Integer,Integer, Integer,Integer, int[]> sample )
   {
-    var input = sample.get5();
-    int    a0 = sample.get1(), aLen = sample.get2(),
-           b0 = sample.get3(), bLen = sample.get4();
+    int[] input = sample.get5();
+    int      a0 = sample.get1(), aLen = sample.get2(),
+             b0 = sample.get3(), bLen = sample.get4();
     mergeOffsetArrays(a0,aLen, b0,bLen, boxed(input), false);
     mergeOffsetArrays(a0,aLen, b0,bLen, boxed(input), true );
   }
@@ -63,25 +63,25 @@ public abstract class MergeOffsetAccessTestTemplate implements ArrayProviderTemp
 
   @Property void mergeOffsetArraysByte( @ForAll WithRange<WithRange<byte[]>> sample, @ForAll boolean reversed )
   {
-    var input = sample.getData().getData();
-    int    a0 = sample          .getFrom(), aLen = sample         .rangeLength(),
-           b0 = sample.getData().getFrom(), bLen = sample.getData().rangeLength();
+    byte[] input = sample.getData().getData();
+    int       a0 = sample          .getFrom(), aLen = sample         .rangeLength(),
+              b0 = sample.getData().getFrom(), bLen = sample.getData().rangeLength();
     mergeOffsetArrays(a0,aLen, b0,bLen, boxed(input), reversed);
   }
 
 
   @Property void mergeOffsetArraysInt( @ForAll WithRange<WithRange<int[]>> sample, @ForAll boolean reversed )
   {
-    var input = sample.getData().getData();
-    int    a0 = sample          .getFrom(), aLen = sample         .rangeLength(),
-           b0 = sample.getData().getFrom(), bLen = sample.getData().rangeLength();
+    int[] input = sample.getData().getData();
+    int      a0 = sample          .getFrom(), aLen = sample         .rangeLength(),
+             b0 = sample.getData().getFrom(), bLen = sample.getData().rangeLength();
     mergeOffsetArrays(a0,aLen, b0,bLen, boxed(input), reversed);
   }
 
 
   private <T extends Comparable<? super T>> void mergeOffsetArrays( int a0, int aLen, int b0, int bLen, T[] input, boolean reversed )
   {
-    var cmp = reversed
+    Comparator<T> cmp = reversed
       ? Comparator.<T>naturalOrder().reversed()
       : Comparator.<T>naturalOrder();
 
@@ -95,13 +95,14 @@ public abstract class MergeOffsetAccessTestTemplate implements ArrayProviderTemp
       Arrays.sort(input, b0,b0+bLen, cmp);
     }
 
-    var tst = input.clone();
-    var ref = (T[]) Stream.concat(
-      stream(input, a0, a0+aLen),
-      stream(input, b0, b0+bLen)
-    ).sorted(cmp).toArray(Comparable[]::new);
+    @SuppressWarnings("unchecked")
+    T[] tst = input.clone(),
+        ref = (T[]) Stream.concat(
+          stream(input, a0, a0+aLen),
+          stream(input, b0, b0+bLen)
+        ).sorted(cmp).toArray(Comparable[]::new);
 
-    var acc = createAccess( (i,j) -> cmp.compare(tst[i],tst[j]) );
+    MergeOffsetAccess acc = createAccess( (i, j) -> cmp.compare(tst[i],tst[j]) );
 
     int len = aLen+bLen;
 

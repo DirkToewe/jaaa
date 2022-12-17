@@ -18,10 +18,10 @@ public class BitReversalPermuteAccessorTest
   @Property void test_bitReversal( @ForAll @IntRange(min=0,max=25) int shift ) {
     int len = 1 << shift;
 
-    var tst = range(0,len).toArray();
+    int[] tst = range(0,len).toArray();
     ACC.bitReversalPermute(tst,0,len);
 
-    var ref = range(0,len).map( x -> Integer.reverse(x) >>> 32-shift ).toArray();
+    int[] ref = range(0,len).map(x -> Integer.reverse(x) >>> 32-shift ).toArray();
 
     assertThat(tst).isEqualTo(ref);
   }
@@ -35,10 +35,10 @@ public class BitReversalPermuteAccessorTest
       swap(a,i, b,j);
     };
 
-    var tst = range(0, from+len).toArray();
+    int[] tst = range(0, from+len).toArray();
     acc.bitReversalPermute(tst, from, from+len);
 
-    var ref = range(0, from+len).map( x ->
+    int[] ref = range(0, from+len).map(x ->
       x < from ? x : from + (Integer.reverse(x-from) >>> 32-shift)
     ).toArray();
 

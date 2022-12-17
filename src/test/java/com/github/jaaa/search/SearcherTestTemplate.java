@@ -21,7 +21,7 @@ import static java.lang.Math.min;
 import static org.assertj.core.api.Assertions.assertThat;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
-
+import static java.util.Objects.requireNonNull;
 
 public abstract class SearcherTestTemplate
 {
@@ -35,8 +35,14 @@ public abstract class SearcherTestTemplate
     @Override public int compare( T x, T y ) { nComp++; assert 0 < nComp; return cmp.compare(x,y); }
   }
 
-  private record CountingComparable<T extends Comparable<? super T>>( T cmp, LongAdder counter ) implements Comparable<CountingComparable<? extends T>>
+  private static final class CountingComparable<T extends Comparable<? super T>> implements Comparable<CountingComparable<? extends T>>
   {
+    private final T cmp;
+    private final LongAdder counter;
+    private CountingComparable( T _cmp, LongAdder _counter ) {
+      cmp     = requireNonNull(_cmp);
+      counter = requireNonNull(_counter);
+    }
     @Override public int compareTo( CountingComparable<? extends T> o ) {
       counter.increment();
       return cmp.compareTo(o.cmp);
@@ -240,7 +246,7 @@ public abstract class SearcherTestTemplate
     @Override public int maxArraySize() { return SearcherTestTemplate.this.maxArraySize(); }
     @Override long comparisonLimit( int from, int until, int i ) { return SearcherTestTemplate.this.comparisonLimit(from,until, i); }
     @Override <T> SearchAccessor<T> createAccessor( CompareAccessor<? super T> acc ) {
-      return new SearchAccessor<>() {
+      return  new SearchAccessor<T>() {
         @Override public int search    ( T b, int from, int until, T a, int i ) { return searcher.search    (from,until, j -> acc.compare(a,i, b,j)); }
         @Override public int searchL   ( T b, int from, int until, T a, int i ) { return searcher.searchL   (from,until, j -> acc.compare(a,i, b,j)); }
         @Override public int searchR   ( T b, int from, int until, T a, int i ) { return searcher.searchR   (from,until, j -> acc.compare(a,i, b,j)); }
@@ -252,6 +258,9 @@ public abstract class SearcherTestTemplate
   }
 
 
+  interface ComparableSearcher          { <T extends Comparable<? super T>> int search(T[] arr,                      T key ); }
+  interface ComparableSearcherWithRange { <T extends Comparable<? super T>> int search(T[] arr, int from, int until, T key ); }
+
 
   @PropertyDefaults( tries = N_TRIES )
   @Group class BoxedComparable
@@ -260,14 +269,14 @@ public abstract class SearcherTestTemplate
     {
       @Override public int maxArraySize() { return SearcherTestTemplate.this.maxArraySize(); }
 
-      @Property                         void noRange_idx_Boolean( @ForAll("arraysWithIndexBoolean") WithIndex<boolean[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
-      @Property                         void noRange_idx_Byte   ( @ForAll("arraysWithIndexByte"   ) WithIndex<   byte[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
-      @Property                         void noRange_idx_Short  ( @ForAll("arraysWithIndexShort"  ) WithIndex<  short[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
-      @Property                         void noRange_idx_Int    ( @ForAll("arraysWithIndexInt"    ) WithIndex<    int[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
-      @Property                         void noRange_idx_Long   ( @ForAll("arraysWithIndexLong"   ) WithIndex<   long[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
-      @Property                         void noRange_idx_Char   ( @ForAll("arraysWithIndexChar"   ) WithIndex<   char[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
-      @Property                         void noRange_idx_Float  ( @ForAll("arraysWithIndexFloat"  ) WithIndex<  float[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
-      @Property                         void noRange_idx_Double ( @ForAll("arraysWithIndexDouble" ) WithIndex< double[]> sample ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Boolean( @ForAll("arraysWithIndexBoolean") WithIndex<boolean[]> sample ) {   Boolean[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Byte   ( @ForAll("arraysWithIndexByte"   ) WithIndex<   byte[]> sample ) {      Byte[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Short  ( @ForAll("arraysWithIndexShort"  ) WithIndex<  short[]> sample ) {     Short[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Int    ( @ForAll("arraysWithIndexInt"    ) WithIndex<    int[]> sample ) {   Integer[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Long   ( @ForAll("arraysWithIndexLong"   ) WithIndex<   long[]> sample ) {      Long[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Char   ( @ForAll("arraysWithIndexChar"   ) WithIndex<   char[]> sample ) { Character[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Float  ( @ForAll("arraysWithIndexFloat"  ) WithIndex<  float[]> sample ) {     Float[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
+      @Property                         void noRange_idx_Double ( @ForAll("arraysWithIndexDouble" ) WithIndex< double[]> sample ) {    Double[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()]); }
       @Property                         void noRange_key_Boolean( @ForAll("arraysBoolean") boolean[] vals, @ForAll boolean key ) { noRange(boxed(vals), key); }
       @Property                         void noRange_key_Byte   ( @ForAll("arraysByte"   )    byte[] vals, @ForAll    byte key ) { noRange(boxed(vals), key); }
       @Property                         void noRange_key_Short  ( @ForAll("arraysShort"  )   short[] vals, @ForAll   short key ) { noRange(boxed(vals), key); }
@@ -279,20 +288,20 @@ public abstract class SearcherTestTemplate
       <T extends Comparable<? super T>> void noRange( T[] vals, T key )
       {
         Arrays.sort(vals);
-        var valCpy = vals.clone();
+        T[] valCpy = vals.clone();
         noRange_testImpl(vals,key);
         assertThat(vals).isEqualTo(valCpy);
       }
       abstract <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key );
 
-      @Property                         void withRange_idx_Boolean( @ForAll("arraysWithIndexWithRangeBoolean") WithRange<WithIndex<boolean[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
-      @Property                         void withRange_idx_Byte   ( @ForAll("arraysWithIndexWithRangeByte"   ) WithRange<WithIndex<   byte[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
-      @Property                         void withRange_idx_Short  ( @ForAll("arraysWithIndexWithRangeShort"  ) WithRange<WithIndex<  short[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
-      @Property                         void withRange_idx_Int    ( @ForAll("arraysWithIndexWithRangeInt"    ) WithRange<WithIndex<    int[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
-      @Property                         void withRange_idx_Long   ( @ForAll("arraysWithIndexWithRangeLong"   ) WithRange<WithIndex<   long[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
-      @Property                         void withRange_idx_Char   ( @ForAll("arraysWithIndexWithRangeChar"   ) WithRange<WithIndex<   char[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
-      @Property                         void withRange_idx_Float  ( @ForAll("arraysWithIndexWithRangeFloat"  ) WithRange<WithIndex<  float[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
-      @Property                         void withRange_idx_Double ( @ForAll("arraysWithIndexWithRangeDouble" ) WithRange<WithIndex< double[]>> sample ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Boolean( @ForAll("arraysWithIndexWithRangeBoolean") WithRange<WithIndex<boolean[]>> sample ) {   Boolean[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Byte   ( @ForAll("arraysWithIndexWithRangeByte"   ) WithRange<WithIndex<   byte[]>> sample ) {      Byte[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Short  ( @ForAll("arraysWithIndexWithRangeShort"  ) WithRange<WithIndex<  short[]>> sample ) {     Short[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Int    ( @ForAll("arraysWithIndexWithRangeInt"    ) WithRange<WithIndex<    int[]>> sample ) {   Integer[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Long   ( @ForAll("arraysWithIndexWithRangeLong"   ) WithRange<WithIndex<   long[]>> sample ) {      Long[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Char   ( @ForAll("arraysWithIndexWithRangeChar"   ) WithRange<WithIndex<   char[]>> sample ) { Character[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Float  ( @ForAll("arraysWithIndexWithRangeFloat"  ) WithRange<WithIndex<  float[]>> sample ) {     Float[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
+      @Property                         void withRange_idx_Double ( @ForAll("arraysWithIndexWithRangeDouble" ) WithRange<WithIndex< double[]>> sample ) {    Double[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()]); }
       @Property                         void withRange_key_Boolean( @ForAll("arraysWithRangeBoolean") WithRange<boolean[]> vals, @ForAll boolean key ) { withRange(vals.map(Boxing::boxed), key); }
       @Property                         void withRange_key_Byte   ( @ForAll("arraysWithRangeByte"   ) WithRange<   byte[]> vals, @ForAll    byte key ) { withRange(vals.map(Boxing::boxed), key); }
       @Property                         void withRange_key_Short  ( @ForAll("arraysWithRangeShort"  ) WithRange<  short[]> vals, @ForAll   short key ) { withRange(vals.map(Boxing::boxed), key); }
@@ -304,7 +313,7 @@ public abstract class SearcherTestTemplate
       <T extends Comparable<? super T>> void withRange( WithRange<T[]> sample, T key )
       {
         Arrays.sort( sample.getData() );
-        var vals = sample.getData().clone();
+        T[] vals = sample.getData().clone();
         withRange_testImpl(vals, sample.getFrom(),sample.getUntil(), key);
         assertThat(vals).isEqualTo( sample.getData() );
       }
@@ -313,17 +322,15 @@ public abstract class SearcherTestTemplate
 
     class LimitTemplate extends Template
     {
-      interface Searcher          { <T extends Comparable<? super T>> int search(T[] arr, T key ); }
-      interface SearcherWithRange { <T extends Comparable<? super T>> int search( T[] arr, int from, int until, T key ); }
-      private final Searcher          searcher;
-      private final SearcherWithRange searcherWithRange;
-      LimitTemplate( Searcher _searcher, SearcherWithRange _searcherWithRange ) {
+      private final ComparableSearcher searcher;
+      private final ComparableSearcherWithRange searcherWithRange;
+      LimitTemplate(ComparableSearcher _searcher, ComparableSearcherWithRange _searcherWithRange ) {
         searcher          =_searcher;
         searcherWithRange =_searcherWithRange;
       }
       @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key )
       {
-        var counter = new LongAdder();
+        LongAdder counter = new LongAdder();
         @SuppressWarnings({"rawtypes", "unchecked"})
         CountingComparable<T>[] ccs = stream(vals).map( x -> new CountingComparable(x,counter) ).toArray(CountingComparable[]::new);
 
@@ -336,7 +343,7 @@ public abstract class SearcherTestTemplate
       }
       @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key )
       {
-        var counter = new LongAdder();
+        LongAdder counter = new LongAdder();
         @SuppressWarnings({"rawtypes", "unchecked"})
         CountingComparable<T>[] ccs = stream(vals).map( x -> new CountingComparable(x,counter) ).toArray(CountingComparable[]::new);
 
@@ -529,14 +536,14 @@ public abstract class SearcherTestTemplate
     {
       @Override public int maxArraySize() { return SearcherTestTemplate.this.maxArraySize(); }
 
-      @Property                         void noRange_idx_Boolean( @ForAll("arraysWithIndexBoolean") WithIndex<boolean[]> sample, @ForAll Comparator<  Boolean> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
-      @Property                         void noRange_idx_Byte   ( @ForAll("arraysWithIndexByte"   ) WithIndex<   byte[]> sample, @ForAll Comparator<     Byte> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
-      @Property                         void noRange_idx_Short  ( @ForAll("arraysWithIndexShort"  ) WithIndex<  short[]> sample, @ForAll Comparator<    Short> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
-      @Property                         void noRange_idx_Int    ( @ForAll("arraysWithIndexInt"    ) WithIndex<    int[]> sample, @ForAll Comparator<  Integer> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
-      @Property                         void noRange_idx_Long   ( @ForAll("arraysWithIndexLong"   ) WithIndex<   long[]> sample, @ForAll Comparator<     Long> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
-      @Property                         void noRange_idx_Char   ( @ForAll("arraysWithIndexChar"   ) WithIndex<   char[]> sample, @ForAll Comparator<Character> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
-      @Property                         void noRange_idx_Float  ( @ForAll("arraysWithIndexFloat"  ) WithIndex<  float[]> sample, @ForAll Comparator<    Float> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
-      @Property                         void noRange_idx_Double ( @ForAll("arraysWithIndexDouble" ) WithIndex< double[]> sample, @ForAll Comparator<   Double> cmp ) { var vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Boolean( @ForAll("arraysWithIndexBoolean") WithIndex<boolean[]> sample, @ForAll Comparator<  Boolean> cmp ) {   Boolean[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Byte   ( @ForAll("arraysWithIndexByte"   ) WithIndex<   byte[]> sample, @ForAll Comparator<     Byte> cmp ) {      Byte[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Short  ( @ForAll("arraysWithIndexShort"  ) WithIndex<  short[]> sample, @ForAll Comparator<    Short> cmp ) {     Short[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Int    ( @ForAll("arraysWithIndexInt"    ) WithIndex<    int[]> sample, @ForAll Comparator<  Integer> cmp ) {   Integer[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Long   ( @ForAll("arraysWithIndexLong"   ) WithIndex<   long[]> sample, @ForAll Comparator<     Long> cmp ) {      Long[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Char   ( @ForAll("arraysWithIndexChar"   ) WithIndex<   char[]> sample, @ForAll Comparator<Character> cmp ) { Character[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Float  ( @ForAll("arraysWithIndexFloat"  ) WithIndex<  float[]> sample, @ForAll Comparator<    Float> cmp ) {     Float[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
+      @Property                         void noRange_idx_Double ( @ForAll("arraysWithIndexDouble" ) WithIndex< double[]> sample, @ForAll Comparator<   Double> cmp ) {    Double[] vals = boxed(sample.getData()); noRange(vals, vals[sample.getIndex()], cmp); }
       @Property                         void noRange_key_Boolean( @ForAll("arraysBoolean") boolean[] vals, @ForAll boolean key, @ForAll Comparator<  Boolean> cmp ) { noRange(boxed(vals), key, cmp); }
       @Property                         void noRange_key_Byte   ( @ForAll("arraysByte"   )    byte[] vals, @ForAll    byte key, @ForAll Comparator<     Byte> cmp ) { noRange(boxed(vals), key, cmp); }
       @Property                         void noRange_key_Short  ( @ForAll("arraysShort"  )   short[] vals, @ForAll   short key, @ForAll Comparator<    Short> cmp ) { noRange(boxed(vals), key, cmp); }
@@ -548,20 +555,20 @@ public abstract class SearcherTestTemplate
       <T extends Comparable<? super T>> void noRange( T[] vals, T key, Comparator<? super T> cmp )
       {
         Arrays.sort(vals,cmp);
-        var copy = vals.clone();
+        T[] copy = vals.clone();
         noRange_testImpl(vals,key,cmp);
         assertThat(vals).isEqualTo(copy);
       }
       abstract <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp );
 
-      @Property                         void withRange_idx_Boolean( @ForAll("arraysWithIndexWithRangeBoolean") WithRange<WithIndex<boolean[]>> sample, @ForAll Comparator<  Boolean> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
-      @Property                         void withRange_idx_Byte   ( @ForAll("arraysWithIndexWithRangeByte"   ) WithRange<WithIndex<   byte[]>> sample, @ForAll Comparator<     Byte> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
-      @Property                         void withRange_idx_Short  ( @ForAll("arraysWithIndexWithRangeShort"  ) WithRange<WithIndex<  short[]>> sample, @ForAll Comparator<    Short> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
-      @Property                         void withRange_idx_Int    ( @ForAll("arraysWithIndexWithRangeInt"    ) WithRange<WithIndex<    int[]>> sample, @ForAll Comparator<  Integer> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
-      @Property                         void withRange_idx_Long   ( @ForAll("arraysWithIndexWithRangeLong"   ) WithRange<WithIndex<   long[]>> sample, @ForAll Comparator<     Long> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
-      @Property                         void withRange_idx_Char   ( @ForAll("arraysWithIndexWithRangeChar"   ) WithRange<WithIndex<   char[]>> sample, @ForAll Comparator<Character> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
-      @Property                         void withRange_idx_Float  ( @ForAll("arraysWithIndexWithRangeFloat"  ) WithRange<WithIndex<  float[]>> sample, @ForAll Comparator<    Float> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
-      @Property                         void withRange_idx_Double ( @ForAll("arraysWithIndexWithRangeDouble" ) WithRange<WithIndex< double[]>> sample, @ForAll Comparator<   Double> cmp ) { var vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Boolean( @ForAll("arraysWithIndexWithRangeBoolean") WithRange<WithIndex<boolean[]>> sample, @ForAll Comparator<  Boolean> cmp ) {   Boolean[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Byte   ( @ForAll("arraysWithIndexWithRangeByte"   ) WithRange<WithIndex<   byte[]>> sample, @ForAll Comparator<     Byte> cmp ) {      Byte[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Short  ( @ForAll("arraysWithIndexWithRangeShort"  ) WithRange<WithIndex<  short[]>> sample, @ForAll Comparator<    Short> cmp ) {     Short[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Int    ( @ForAll("arraysWithIndexWithRangeInt"    ) WithRange<WithIndex<    int[]>> sample, @ForAll Comparator<  Integer> cmp ) {   Integer[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Long   ( @ForAll("arraysWithIndexWithRangeLong"   ) WithRange<WithIndex<   long[]>> sample, @ForAll Comparator<     Long> cmp ) {      Long[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Char   ( @ForAll("arraysWithIndexWithRangeChar"   ) WithRange<WithIndex<   char[]>> sample, @ForAll Comparator<Character> cmp ) { Character[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Float  ( @ForAll("arraysWithIndexWithRangeFloat"  ) WithRange<WithIndex<  float[]>> sample, @ForAll Comparator<    Float> cmp ) {     Float[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
+      @Property                         void withRange_idx_Double ( @ForAll("arraysWithIndexWithRangeDouble" ) WithRange<WithIndex< double[]>> sample, @ForAll Comparator<   Double> cmp ) {    Double[] vals = boxed(sample.getData().getData()); withRange(sample.map(x -> vals), vals[sample.getData().getIndex()], cmp); }
       @Property                         void withRange_key_Boolean( @ForAll("arraysWithRangeBoolean") WithRange<boolean[]> vals, @ForAll boolean key, @ForAll Comparator<  Boolean> cmp ) { withRange(vals.map(Boxing::boxed), key, cmp); }
       @Property                         void withRange_key_Byte   ( @ForAll("arraysWithRangeByte"   ) WithRange<   byte[]> vals, @ForAll    byte key, @ForAll Comparator<     Byte> cmp ) { withRange(vals.map(Boxing::boxed), key, cmp); }
       @Property                         void withRange_key_Short  ( @ForAll("arraysWithRangeShort"  ) WithRange<  short[]> vals, @ForAll   short key, @ForAll Comparator<    Short> cmp ) { withRange(vals.map(Boxing::boxed), key, cmp); }
@@ -575,7 +582,7 @@ public abstract class SearcherTestTemplate
         int from = sample.getFrom(),
            until = sample.getUntil();
         Arrays.sort( sample.getData(), from,until, cmp );
-        var vals = sample.getData().clone();
+        T[] vals = sample.getData().clone();
         withRange_testImpl(vals,from,until, key, cmp);
         assertThat(vals).isEqualTo( sample.getData() );
       }
@@ -586,7 +593,7 @@ public abstract class SearcherTestTemplate
     {
       @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.search(vals, key, ctr),
          from = 0,
@@ -606,7 +613,7 @@ public abstract class SearcherTestTemplate
       }
       @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.search(vals, from,until, key, ctr);
 
@@ -628,7 +635,7 @@ public abstract class SearcherTestTemplate
     {
       @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.searchL(vals, key, ctr),
          from = 0,
@@ -649,7 +656,7 @@ public abstract class SearcherTestTemplate
       }
       @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.searchL(vals, from,until, key, ctr);
 
@@ -672,7 +679,7 @@ public abstract class SearcherTestTemplate
     {
       @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.searchR(vals, key, ctr),
          from = 0,
@@ -693,7 +700,7 @@ public abstract class SearcherTestTemplate
       }
       @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.searchR(vals, from,until, key, ctr);
 
@@ -716,7 +723,7 @@ public abstract class SearcherTestTemplate
     {
       @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.searchGap(vals, key, ctr),
          from = 0,
@@ -730,7 +737,7 @@ public abstract class SearcherTestTemplate
       }
       @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.searchGap(vals, from,until, key, ctr);
 
@@ -746,7 +753,7 @@ public abstract class SearcherTestTemplate
     {
       @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.searchGapL(vals, key, ctr),
          from = 0,
@@ -760,7 +767,7 @@ public abstract class SearcherTestTemplate
       }
       @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.searchGapL(vals, from,until, key, ctr);
 
@@ -776,7 +783,7 @@ public abstract class SearcherTestTemplate
     {
       @Override <T extends Comparable<? super T>> void noRange_testImpl( T[] vals, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.searchGapR(vals, key, ctr),
                 from = 0,
@@ -790,7 +797,7 @@ public abstract class SearcherTestTemplate
       }
       @Override <T extends Comparable<? super T>> void withRange_testImpl( T[] vals, int from, int until, T key, Comparator<? super T> cmp )
       {
-        var ctr = new CountingComparator<>(cmp);
+        CountingComparator<T> ctr = new CountingComparator<>(cmp);
 
         int i = searcher.searchGapR(vals, from,until, key, ctr);
 
@@ -804,15 +811,16 @@ public abstract class SearcherTestTemplate
   }
 
 
+  interface UnboxedSearcher                       <U,C> { int search( U unboxed,                      C key ); }
+  interface UnboxedSearcherWithRange              <U,C> { int search( U unboxed, int from, int until, C key ); }
+  interface UnboxedSearcherWithComparator         <U,C> { int search( U unboxed,                      C key, Comparator<? super C> cmp ); }
+  interface UnboxedSearcherWithComparatorWithRange<U,C> { int search( U unboxed, int from, int until, C key, Comparator<? super C> cmp ); }
+
 
   @PropertyDefaults( tries = N_TRIES )
   @Group class Unboxed implements ArrayProviderTemplate
   {
   // STATIC FIELDS
-    interface Searcher                       <U,C> { int search( U unboxed,                      C key ); }
-    interface SearcherWithRange              <U,C> { int search( U unboxed, int from, int until, C key ); }
-    interface SearcherWithComparator         <U,C> { int search( U unboxed,                      C key, Comparator<? super C> cmp ); }
-    interface SearcherWithComparatorWithRange<U,C> { int search( U unboxed, int from, int until, C key, Comparator<? super C> cmp ); }
   // STATIC CONSTRUCTOR
   // STATIC METHODS
   // FIELDS
@@ -820,19 +828,19 @@ public abstract class SearcherTestTemplate
   // METHODS
     @Override public int maxArraySize() { return SearcherTestTemplate.this.maxArraySize(); }
 
-    <U,C extends Comparable<? super C>> void test( U unboxed, C key, Searcher<U,C> searchUnboxed, Searcher<C[],C> searchBoxed )
+    <U,C extends Comparable<? super C>> void test(U unboxed, C key, UnboxedSearcher<U,C> searchUnboxed, UnboxedSearcher<C[],C> searchBoxed )
     {
-      var sample = new WithRange<>(0, Array.getLength(unboxed), unboxed);
+      WithRange<U> sample = new WithRange<>(0, Array.getLength(unboxed), unboxed);
       withRange_test(sample, key, (w,x,y,z) -> searchUnboxed.search(w,z), (w,x,y,z) -> searchBoxed.search(w,z));
     }
     @SuppressWarnings("unchecked")
-    <U,C extends Comparable<? super C>> void withRange_test( WithRange<U> sample, C key, SearcherWithRange<U,C> searchUnboxed, SearcherWithRange<C[],C> searchBoxed )
+    <U,C extends Comparable<? super C>> void withRange_test(WithRange<U> sample, C key, UnboxedSearcherWithRange<U,C> searchUnboxed, UnboxedSearcherWithRange<C[],C> searchBoxed )
     {
       U unboxed = sample.getData();
       int len = Array.getLength(unboxed),
          from = sample.getFrom(),
         until = sample.getUntil();
-      var unboxed_class = unboxed.getClass();
+      Class<?> unboxed_class = unboxed.getClass();
       C[] boxed;
       try {
         Arrays.class.getMethod("sort", unboxed_class, int.class, int.class).invoke(null,unboxed, from,until);
@@ -849,19 +857,19 @@ public abstract class SearcherTestTemplate
       assertThat(unboxed).isEqualTo(backup);
     }
 
-    <U,C extends Comparable<? super C>> void withComparator_test( U unboxed, C key, Comparator<? super C> cmp, SearcherWithComparator<U,C> searchUnboxed, SearcherWithComparator<C[],C> searchBoxed )
+    <U,C extends Comparable<? super C>> void withComparator_test(U unboxed, C key, Comparator<? super C> cmp, UnboxedSearcherWithComparator<U,C> searchUnboxed, UnboxedSearcherWithComparator<C[],C> searchBoxed )
     {
-      var sample = new WithRange<>(0, Array.getLength(unboxed), unboxed);
+      WithRange<U> sample = new WithRange<>(0, Array.getLength(unboxed), unboxed);
       withComparator_withRange_test(sample, key, cmp, (w,x,y,z,c) -> searchUnboxed.search(w,z,c), (w,x,y,z,c) -> searchBoxed.search(w,z,c));
     }
     @SuppressWarnings("unchecked")
-    <U,C extends Comparable<? super C>> void withComparator_withRange_test( WithRange<U> sample, C key, Comparator<? super C> cmp, SearcherWithComparatorWithRange<U,C> searchUnboxed, SearcherWithComparatorWithRange<C[],C> searchBoxed )
+    <U,C extends Comparable<? super C>> void withComparator_withRange_test(WithRange<U> sample, C key, Comparator<? super C> cmp, UnboxedSearcherWithComparatorWithRange<U,C> searchUnboxed, UnboxedSearcherWithComparatorWithRange<C[],C> searchBoxed )
     {
       U unboxed = sample.getData();
       int len = Array.getLength(unboxed),
          from = sample.getFrom(),
         until = sample.getUntil();
-      var unboxed_class = unboxed.getClass();
+      Class<?> unboxed_class = unboxed.getClass();
       C[] boxed;
       try {
         Arrays.class.getMethod("sort", unboxed_class, int.class, int.class).invoke(null,unboxed, from,until);
@@ -872,7 +880,7 @@ public abstract class SearcherTestTemplate
       U backup = (U) Array.newInstance(unboxed_class.getComponentType(), len);
       System.arraycopy(unboxed,0, backup,0, len);
 
-      var ctr = new CountingComparator<>(cmp);
+      CountingComparator<? super C> ctr = new CountingComparator<>(cmp);
 
       int        i =           searchUnboxed.search(unboxed, from,until, key, ctr);
       assertThat(i).isEqualTo( searchBoxed  .search(  boxed, from,until, key, cmp) );
@@ -886,106 +894,106 @@ public abstract class SearcherTestTemplate
 
     @Group class ArraysByte
     {
-      @Property void                search                        ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::search    ,searcher::search    ); }
-      @Property void                searchL                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::searchL   ,searcher::searchL   ); }
-      @Property void                searchR                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::searchR   ,searcher::searchR   ); }
-      @Property void                searchGap                     ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::searchGap ,searcher::searchGap ); }
-      @Property void                searchGapL                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::searchGapL,searcher::searchGapL); }
-      @Property void                searchGapR                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                  test(array, key,                                                   searcher::searchGapR,searcher::searchGapR); }
-      @Property void                withIndex_search              ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::search    ,searcher::search    ); }
-      @Property void                withIndex_searchL             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchL   ,searcher::searchL   ); }
-      @Property void                withIndex_searchR             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchR   ,searcher::searchR   ); }
-      @Property void                withIndex_searchGap           ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGap ,searcher::searchGap ); }
-      @Property void                withIndex_searchGapL          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapL,searcher::searchGapL); }
-      @Property void                withIndex_searchGapR          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapR,searcher::searchGapR); }
-      @Property void                withRange_search              ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::search    ,searcher::search    ); }
-      @Property void                withRange_searchL             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::searchL   ,searcher::searchL   ); }
-      @Property void                withRange_searchR             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::searchR   ,searcher::searchR   ); }
-      @Property void                withRange_searchGap           ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::searchGap ,searcher::searchGap ); }
-      @Property void                withRange_searchGapL          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::searchGapL,searcher::searchGapL); }
-      @Property void                withRange_searchGapR          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                        withRange_test(sample, key,                                                  searcher::searchGapR,searcher::searchGapR); }
-      @Property void                withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::search    ,searcher::search    ); }
-      @Property void                withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchL   ,searcher::searchL   ); }
-      @Property void                withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchR   ,searcher::searchR   ); }
-      @Property void                withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGap ,searcher::searchGap ); }
-      @Property void                withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapL,searcher::searchGapL); }
-      @Property void                withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapR,searcher::searchGapR); }
-      @Property void withComparator_search                        ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
-      @Property void withComparator_searchL                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
-      @Property void withComparator_searchR                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
-      @Property void withComparator_searchGap                     ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
-      @Property void withComparator_searchGapL                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
-      @Property void withComparator_searchGapR                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
-      @Property void withComparator_withIndex_search              ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
-      @Property void withComparator_withIndex_searchL             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
-      @Property void withComparator_withIndex_searchR             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
-      @Property void withComparator_withIndex_searchGap           ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
-      @Property void withComparator_withIndex_searchGapL          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
-      @Property void withComparator_withIndex_searchGapR          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
-      @Property void withComparator_withRange_search              ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
-      @Property void withComparator_withRange_searchL             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
-      @Property void withComparator_withRange_searchR             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
-      @Property void withComparator_withRange_searchGap           ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
-      @Property void withComparator_withRange_searchGapL          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
-      @Property void withComparator_withRange_searchGapR          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
-      @Property void withComparator_withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
-      @Property void withComparator_withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
-      @Property void withComparator_withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
-      @Property void withComparator_withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
-      @Property void withComparator_withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
-      @Property void withComparator_withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
+      @Property void                search                        ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                     test(array, key,                                                   searcher::search    ,searcher::search    ); }
+      @Property void                searchL                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                     test(array, key,                                                   searcher::searchL   ,searcher::searchL   ); }
+      @Property void                searchR                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                     test(array, key,                                                   searcher::searchR   ,searcher::searchR   ); }
+      @Property void                searchGap                     ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                     test(array, key,                                                   searcher::searchGap ,searcher::searchGap ); }
+      @Property void                searchGapL                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                     test(array, key,                                                   searcher::searchGapL,searcher::searchGapL); }
+      @Property void                searchGapR                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key ) {                                                     test(array, key,                                                   searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withIndex_search              ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { byte[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::search    ,searcher::search    ); }
+      @Property void                withIndex_searchL             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { byte[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withIndex_searchR             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { byte[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withIndex_searchGap           ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { byte[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withIndex_searchGapL          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { byte[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withIndex_searchGapR          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                   ) { byte[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withRange_search              ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                           withRange_test(sample, key,                                                  searcher::search    ,searcher::search    ); }
+      @Property void                withRange_searchL             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                           withRange_test(sample, key,                                                  searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withRange_searchR             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                           withRange_test(sample, key,                                                  searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withRange_searchGap           ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                           withRange_test(sample, key,                                                  searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withRange_searchGapL          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                           withRange_test(sample, key,                                                  searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withRange_searchGapR          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key ) {                                           withRange_test(sample, key,                                                  searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { byte[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::search    ,searcher::search    ); }
+      @Property void                withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { byte[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { byte[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { byte[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { byte[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                   ) { byte[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapR,searcher::searchGapR); }
+      @Property void withComparator_search                        ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                 withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
+      @Property void withComparator_searchL                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                 withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_searchR                       ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                 withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_searchGap                     ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                 withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_searchGapL                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                 withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_searchGapR                    ( @ForAll(                  "arraysByte")                     byte[]   array,  @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                 withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withIndex_search              ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v, k, c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
+      @Property void withComparator_withIndex_searchL             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v, k, c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withIndex_searchR             ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v, k, c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withIndex_searchGap           ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v, k, c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withIndex_searchGapL          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v, k, c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withIndex_searchGapR          ( @ForAll(         "arraysWithIndexByte")           WithIndex<byte[]>  sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v, k, c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withRange_search              ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                           withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
+      @Property void withComparator_withRange_searchL             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                           withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withRange_searchR             ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                           withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withRange_searchGap           ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                           withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withRange_searchGapL          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                           withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withRange_searchGapR          ( @ForAll(         "arraysWithRangeByte") WithRange<          byte[]>  sample, @ForAll byte key, @ForAll Comparator<? super Byte> cmp ) {                                           withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v, l, r, k, c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
+      @Property void withComparator_withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v, l, r, k, c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v, l, r, k, c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v, l, r, k, c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v, l, r, k, c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeByte") WithRange<WithIndex<byte[]>> sample                  , @ForAll Comparator<? super Byte> cmp ) { byte[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v, l, r, k, c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
     }
 
     @Group class ArraysInt
     {
-      @Property void                search                        ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::search    ,searcher::search    ); }
-      @Property void                searchL                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::searchL   ,searcher::searchL   ); }
-      @Property void                searchR                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::searchR   ,searcher::searchR   ); }
-      @Property void                searchGap                     ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::searchGap ,searcher::searchGap ); }
-      @Property void                searchGapL                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::searchGapL,searcher::searchGapL); }
-      @Property void                searchGapR                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                  test(array, key,                                                   searcher::searchGapR,searcher::searchGapR); }
-      @Property void                withIndex_search              ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::search    ,searcher::search    ); }
-      @Property void                withIndex_searchL             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchL   ,searcher::searchL   ); }
-      @Property void                withIndex_searchR             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchR   ,searcher::searchR   ); }
-      @Property void                withIndex_searchGap           ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGap ,searcher::searchGap ); }
-      @Property void                withIndex_searchGapL          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapL,searcher::searchGapL); }
-      @Property void                withIndex_searchGapR          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { var vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapR,searcher::searchGapR); }
-      @Property void                withRange_search              ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::search    ,searcher::search    ); }
-      @Property void                withRange_searchL             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::searchL   ,searcher::searchL   ); }
-      @Property void                withRange_searchR             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::searchR   ,searcher::searchR   ); }
-      @Property void                withRange_searchGap           ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::searchGap ,searcher::searchGap ); }
-      @Property void                withRange_searchGapL          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::searchGapL,searcher::searchGapL); }
-      @Property void                withRange_searchGapR          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                        withRange_test(sample, key,                                                  searcher::searchGapR,searcher::searchGapR); }
-      @Property void                withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::search    ,searcher::search    ); }
-      @Property void                withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchL   ,searcher::searchL   ); }
-      @Property void                withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchR   ,searcher::searchR   ); }
-      @Property void                withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGap ,searcher::searchGap ); }
-      @Property void                withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapL,searcher::searchGapL); }
-      @Property void                withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { var vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapR,searcher::searchGapR); }
-      @Property void withComparator_search                        ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
-      @Property void withComparator_searchL                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
-      @Property void withComparator_searchR                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
-      @Property void withComparator_searchGap                     ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
-      @Property void withComparator_searchGapL                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
-      @Property void withComparator_searchGapR                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                              withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
-      @Property void withComparator_withIndex_search              ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
-      @Property void withComparator_withIndex_searchL             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
-      @Property void withComparator_withIndex_searchR             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
-      @Property void withComparator_withIndex_searchGap           ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
-      @Property void withComparator_withIndex_searchGapL          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
-      @Property void withComparator_withIndex_searchGapR          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
-      @Property void withComparator_withRange_search              ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
-      @Property void withComparator_withRange_searchL             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
-      @Property void withComparator_withRange_searchR             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
-      @Property void withComparator_withRange_searchGap           ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
-      @Property void withComparator_withRange_searchGapL          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
-      @Property void withComparator_withRange_searchGapR          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                        withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
-      @Property void withComparator_withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
-      @Property void withComparator_withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
-      @Property void withComparator_withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
-      @Property void withComparator_withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
-      @Property void withComparator_withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
-      @Property void withComparator_withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { var vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
+      @Property void                search                        ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                    test(array, key,                                                   searcher::search    ,searcher::search    ); }
+      @Property void                searchL                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                    test(array, key,                                                   searcher::searchL   ,searcher::searchL   ); }
+      @Property void                searchR                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                    test(array, key,                                                   searcher::searchR   ,searcher::searchR   ); }
+      @Property void                searchGap                     ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                    test(array, key,                                                   searcher::searchGap ,searcher::searchGap ); }
+      @Property void                searchGapL                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                    test(array, key,                                                   searcher::searchGapL,searcher::searchGapL); }
+      @Property void                searchGapR                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key ) {                                                    test(array, key,                                                   searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withIndex_search              ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { int[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::search    ,searcher::search    ); }
+      @Property void                withIndex_searchL             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { int[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withIndex_searchR             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { int[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withIndex_searchGap           ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { int[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withIndex_searchGapL          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { int[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withIndex_searchGapR          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                  ) { int[] vals = sample.getData();                     test(vals, vals[sample.getIndex()],                                searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withRange_search              ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                          withRange_test(sample, key,                                                  searcher::search    ,searcher::search    ); }
+      @Property void                withRange_searchL             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                          withRange_test(sample, key,                                                  searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withRange_searchR             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                          withRange_test(sample, key,                                                  searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withRange_searchGap           ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                          withRange_test(sample, key,                                                  searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withRange_searchGapL          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                          withRange_test(sample, key,                                                  searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withRange_searchGapR          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key ) {                                          withRange_test(sample, key,                                                  searcher::searchGapR,searcher::searchGapR); }
+      @Property void                withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { int[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::search    ,searcher::search    ); }
+      @Property void                withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { int[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchL   ,searcher::searchL   ); }
+      @Property void                withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { int[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchR   ,searcher::searchR   ); }
+      @Property void                withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { int[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGap ,searcher::searchGap ); }
+      @Property void                withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { int[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapL,searcher::searchGapL); }
+      @Property void                withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                  ) { int[] vals = sample.getData().getData(); withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], searcher::searchGapR,searcher::searchGapR); }
+      @Property void withComparator_search                        ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
+      @Property void withComparator_searchL                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_searchR                       ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_searchGap                     ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_searchGapL                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_searchGapR                    ( @ForAll(                  "arraysInt")                     int[]   array,  @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                withComparator_test(array, key                                                                      , cmp, (v,    k,c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withIndex_search              ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.search    (v,    k,c::compare), searcher::search    ); }
+      @Property void withComparator_withIndex_searchL             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchL   (v,    k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withIndex_searchR             ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchR   (v,    k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withIndex_searchGap           ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGap (v,    k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withIndex_searchGapL          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGapL(v,    k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withIndex_searchGapR          ( @ForAll(         "arraysWithIndexInt")           WithIndex<int[]>  sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData(); withComparator_test(vals, vals[sample.getIndex()]                                                   , cmp, (v,    k,c) -> searcher.searchGapR(v,    k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withRange_search              ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                          withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
+      @Property void withComparator_withRange_searchL             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                          withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withRange_searchR             ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                          withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withRange_searchGap           ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                          withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withRange_searchGapL          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                          withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withRange_searchGapR          ( @ForAll(         "arraysWithRangeInt") WithRange<          int[]>  sample, @ForAll int key, @ForAll Comparator<? super Integer> cmp ) {                                          withComparator_withRange_test(sample, key                                                 , cmp, (v,l,r,k,c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
+      @Property void withComparator_withIndex_withRange_search    ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.search    (v,l,r,k,c::compare), searcher::search    ); }
+      @Property void withComparator_withIndex_withRange_searchL   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchL   (v,l,r,k,c::compare), searcher::searchL   ); }
+      @Property void withComparator_withIndex_withRange_searchR   ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchR   (v,l,r,k,c::compare), searcher::searchR   ); }
+      @Property void withComparator_withIndex_withRange_searchGap ( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGap (v,l,r,k,c::compare), searcher::searchGap ); }
+      @Property void withComparator_withIndex_withRange_searchGapL( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGapL(v,l,r,k,c::compare), searcher::searchGapL); }
+      @Property void withComparator_withIndex_withRange_searchGapR( @ForAll("arraysWithIndexWithRangeInt") WithRange<WithIndex<int[]>> sample                 , @ForAll Comparator<? super Integer> cmp ) { int[] vals = sample.getData().getData(); withComparator_withRange_test(sample.map(With::getData), vals[sample.getData().getIndex()], cmp, (v,l,r,k,c) -> searcher.searchGapR(v,l,r,k,c::compare), searcher::searchGapR); }
     }
   }
 }

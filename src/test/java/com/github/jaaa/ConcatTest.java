@@ -18,11 +18,11 @@ public class ConcatTest
   @Property( tries = N_TRIES )
   void concatArraysByte( @ForAll byte[][] seq )
   {
-    var test = concat(seq);
-    var ref = new ByteArrayOutputStream();
+    byte[] test = concat(seq);
+    ByteArrayOutputStream ref = new ByteArrayOutputStream();
 
-    for( var arr: seq )
-    for( var  y : arr )
+    for( byte[] arr: seq )
+    for( byte     y: arr )
       ref.write(y);
 
     assertThat(test).isEqualTo( ref.toByteArray() );
@@ -31,9 +31,9 @@ public class ConcatTest
   @Property( tries = N_TRIES )
   void concatArraysShort( @ForAll short[][] seq )
   {
-    var    test = concat(seq);
+    short[] test = concat(seq);
     short[] ref; {
-      var refInt = stream(seq).flatMapToInt( arr -> range(0,arr.length).map(i -> arr[i]) ).toArray();
+      int[] refInt = stream(seq).flatMapToInt(arr -> range(0,arr.length).map(i -> arr[i]) ).toArray();
       ref = new short[refInt.length];
       for( int i=ref.length; i-- > 0; )
         ref[i] = (short) refInt[i];
@@ -44,25 +44,25 @@ public class ConcatTest
   @Property( tries = N_TRIES )
   void concatArraysInt( @ForAll int[][] seq )
   {
-    var test = concat(seq);
-    var ref = stream(seq).flatMapToInt(Arrays::stream).toArray();
+    int[] test = concat(seq);
+    int[] ref = stream(seq).flatMapToInt(Arrays::stream).toArray();
     assertThat(test).isEqualTo(ref);
   }
 
   @Property( tries = N_TRIES )
   void concatArraysLong( @ForAll long[][] seq )
   {
-    var test = concat(seq);
-    var ref = stream(seq).flatMapToLong(Arrays::stream).toArray();
+    long[] test = concat(seq);
+    long[] ref = stream(seq).flatMapToLong(Arrays::stream).toArray();
     assertThat(test).isEqualTo(ref);
   }
 
   @Property( tries = N_TRIES )
   void concatArraysChar( @ForAll char[][] seq )
   {
-    var    test = concat(seq);
+    char[] test = concat(seq);
     char[] ref; {
-      var refInt = stream(seq).flatMapToInt( arr -> range(0,arr.length).map(i -> arr[i]) ).toArray();
+      int[] refInt = stream(seq).flatMapToInt(arr -> range(0,arr.length).map(i -> arr[i]) ).toArray();
       ref = new char[refInt.length];
       for( int i=ref.length; i-- > 0; )
         ref[i] = (char) refInt[i];
@@ -73,9 +73,9 @@ public class ConcatTest
   @Property( tries = N_TRIES )
   void concatArraysFloat( @ForAll float[][] seq )
   {
-    var test = concat(seq);
+    float[] test = concat(seq);
     float[] ref; {
-      var refDouble = stream(seq).flatMapToDouble( arr -> range(0,arr.length).mapToDouble(i -> arr[i]) ).toArray();
+      double[] refDouble = stream(seq).flatMapToDouble(arr -> range(0,arr.length).mapToDouble(i -> arr[i]) ).toArray();
       ref = new float[refDouble.length];
       for( int i=ref.length; i-- > 0; )
         ref[i] = (float) refDouble[i];
@@ -86,8 +86,8 @@ public class ConcatTest
   @Property( tries = N_TRIES )
   void concatArraysDouble( @ForAll double[][] seq )
   {
-    var test = concat(seq);
-    var ref = stream(seq).flatMapToDouble(Arrays::stream).toArray();
+    double[] test = concat(seq);
+    double[] ref = stream(seq).flatMapToDouble(Arrays::stream).toArray();
     assertThat(test).isEqualTo(ref);
   }
 }

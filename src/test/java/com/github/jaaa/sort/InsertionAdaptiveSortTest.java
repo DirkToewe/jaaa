@@ -58,13 +58,13 @@ public class InsertionAdaptiveSortTest
     @Property default                         void sortsAdaptivelyAccessWithRangeFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample ) { sortsAdaptivelyAccessWithRange( sample.map(Boxing::boxed) ); }
     @Property default                         void sortsAdaptivelyAccessWithRangeDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample ) { sortsAdaptivelyAccessWithRange( sample.map(Boxing::boxed) ); }
     @Property default                         void sortsAdaptivelyAccessWithRangeString ( @ForAll("arraysWithRangeString" ) WithRange< String[]> sample ) { sortsAdaptivelyAccessWithRange( sample                    ); }
-    private <T extends Comparable<? super T>> void sortsAdaptivelyAccessWithRange( WithRange<T[]> sample )
+    default <T extends Comparable<? super T>> void sortsAdaptivelyAccessWithRange( WithRange<T[]> sample )
     {
       int  from = sample.getFrom(),
           until = sample.getUntil();
-      var input = sample.getData();
+      T[] input = sample.getData();
       Arrays.sort(input, from,until);
-      var reference = input.clone();
+      T[] reference = input.clone();
 
       class CountAcc implements CompareSwapAccess {
         public long nSwaps = 0L,
@@ -73,7 +73,7 @@ public class InsertionAdaptiveSortTest
         @Override public void   swap( int i, int j ) { nSwaps++; Swap.swap(input,i,j); }
       }
 
-      var acc = new CountAcc() {};
+      CountAcc acc = new CountAcc() {};
 
       sorter().sort(from,until, acc);
 

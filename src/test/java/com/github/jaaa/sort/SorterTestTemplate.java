@@ -39,7 +39,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
 
     @Override public boolean equals( Object o ) {
       assert getClass().isInstance(o);
-      var cmp = (CmpIdx<?>) o;
+      CmpIdx<?> cmp = (CmpIdx<?>) o;
       return cmp.val==val
           && cmp.idx==idx;
     }
@@ -74,14 +74,14 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   default <T> CmpIdx<T> CmpIdx( T val, int idx, Comparator<? super T> comparator )
   {
     if( sorter().isStable() )
-      return new CmpIdx<>(val,idx) {
+      return new CmpIdx<T>(val,idx) {
         @Override public int compareTo( CmpIdx<T> cmp ) {
           assert getClass().isInstance(cmp);
           return comparator.compare(val, cmp.val);
         }
       };
     else
-      return new CmpIdx<>(val,idx) {
+      return new CmpIdx<T>(val,idx) {
         @Override public int compareTo( CmpIdx<T> cmp ) {
           assert getClass().isInstance(cmp);
           int result = comparator.compare(val, cmp.val);
@@ -100,17 +100,17 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property default void sortsStablyAccessorWithRangeChar   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> sample, @ForAll Comparator<Character> cmp ) { sortsStablyAccessorWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
   @Property default void sortsStablyAccessorWithRangeFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample, @ForAll Comparator<Float    > cmp ) { sortsStablyAccessorWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
   @Property default void sortsStablyAccessorWithRangeDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample, @ForAll Comparator<Double   > cmp ) { sortsStablyAccessorWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
-  private <T>       void sortsStablyAccessorWithRange( WithRange<Entry<T,Integer>[]> sample, Comparator<? super T> comparator )
+  default <T>       void sortsStablyAccessorWithRange( WithRange<Entry<T,Integer>[]> sample, Comparator<? super T> comparator )
   {
-    int  from = sample.getFrom(),
-        until = sample.getUntil();
-    var input = sample.getData();
+    int from = sample.getFrom(),
+       until = sample.getUntil();
+    Entry<T,Integer>[] input = sample.getData();
 
     Comparator<Entry<T,Integer>> cmp = comparingByKey(comparator);
     if( ! sorter().isStable() )  cmp = cmp.thenComparing(comparingByValue());
 
-    var CMP = cmp;
-    var acc = new CountingAccessor<Entry<T,Integer>[]>() {
+    Comparator<Entry<T,Integer>> CMP = cmp;
+    CountingAccessor<Entry<T,Integer>[]> acc = new CountingAccessor<Entry<T,Integer>[]>() {
       @SuppressWarnings("unchecked")
       @Override public Entry<T,Integer>[] malloc( int len ) { return new Entry[len]; }
       @Override public void      swap( Entry<T,Integer>[] a, int i, Entry<T,Integer>[] b, int j ) { Swap.swap(a,i, b,j); }
@@ -119,7 +119,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
       @Override public int    compare( Entry<T,Integer>[] a, int i, Entry<T,Integer>[] b, int j ) { nComps++; return CMP.compare(a[i], b[j]); }
     };
 
-    var reference = input.clone();
+    Entry<T,Integer>[] reference = input.clone();
 
     Arrays  .sort(reference, from,until, cmp);
     sorter().sort(input,     from,until, acc);
@@ -214,7 +214,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property default                         void sortsArraysComparableFloat  ( @ForAll("arraysFloat"  )   float[] sampleRaw ) { sortsArraysComparable( boxed(sampleRaw) ); }
   @Property default                         void sortsArraysComparableDouble ( @ForAll("arraysDouble" )  double[] sampleRaw ) { sortsArraysComparable( boxed(sampleRaw) ); }
   @Property default                         void sortsArraysComparableString ( @ForAll("arraysString" )  String[] sample    ) { sortsArraysComparable( sample.clone() ); }
-  private <T extends Comparable<? super T>> void sortsArraysComparable( T[] sample )
+  default <T extends Comparable<? super T>> void sortsArraysComparable( T[] sample )
   {
     T[] backup = sample.clone();
     Arrays.sort(backup);
@@ -233,7 +233,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property default                         void sortsStablyArraysComparableFloat  ( @ForAll("arraysFloat"  )   float[] sample, @ForAll Comparator<Float    > cmp ) { sortsStablyArraysComparable(boxed(sample), cmp); }
   @Property default                         void sortsStablyArraysComparableDouble ( @ForAll("arraysDouble" )  double[] sample, @ForAll Comparator<Double   > cmp ) { sortsStablyArraysComparable(boxed(sample), cmp); }
   @Property default                         void sortsStablyArraysComparableString ( @ForAll("arraysString" )  String[] sample, @ForAll Comparator<String   > cmp ) { sortsStablyArraysComparable(      sample,  cmp); }
-  private <T extends Comparable<? super T>> void sortsStablyArraysComparable( T[] sample, Comparator<? super T> cmp )
+  default <T extends Comparable<? super T>> void sortsStablyArraysComparable( T[] sample, Comparator<? super T> cmp )
   {
     @SuppressWarnings("unchecked")
     CmpIdx<T>[] input = range(0,sample.length).mapToObj( i -> CmpIdx(sample[i],i,cmp) ).toArray(CmpIdx[]::new),
@@ -251,7 +251,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
     ComparatorByte cmp = Byte::compare;
     if(reversed)   cmp = cmp.reversed();
                    seq = seq.clone();
-    var         backup = seq.clone();
+    byte[]      backup = seq.clone();
     Arrays.sort(backup); if(reversed) revert(backup);
     sorter().sort(seq, cmp);
     assertThat(seq).isEqualTo(backup);
@@ -261,8 +261,8 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   {
     ComparatorShort cmp = Short::compare;
     if(reversed)    cmp = cmp.reversed();
-                   seq = seq.clone();
-    var         backup = seq.clone();
+                    seq = seq.clone();
+    short[]      backup = seq.clone();
     Arrays.sort(backup); if(reversed) revert(backup);
     sorter().sort(seq, cmp);
     assertThat(seq).isEqualTo(backup);
@@ -273,8 +273,8 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   {
     ComparatorInt cmp = Integer::compare;
     if(reversed)  cmp = cmp.reversed();
-                   seq = seq.clone();
-    var         backup = seq.clone();
+                  seq = seq.clone();
+    int[]      backup = seq.clone();
     Arrays.sort(backup); if(reversed) revert(backup);
     sorter().sort(seq, cmp);
     assertThat(seq).isEqualTo(backup);
@@ -286,7 +286,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
     ComparatorLong cmp = Long::compare;
     if( reversed ) cmp = cmp.reversed();
                    seq = seq.clone();
-    var         backup = seq.clone();
+    long[]      backup = seq.clone();
     Arrays.sort(backup); if(reversed) revert(backup);
     sorter().sort(seq, cmp);
     assertThat(seq).isEqualTo(backup);
@@ -298,7 +298,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
     ComparatorChar cmp = Character::compare;
     if( reversed ) cmp = cmp.reversed();
                    seq = seq.clone();
-    var         backup = seq.clone();
+    char[]      backup = seq.clone();
     Arrays.sort(backup); if(reversed) revert(backup);
     sorter().sort(seq, cmp);
     assertThat(seq).isEqualTo(backup);
@@ -310,7 +310,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
     ComparatorFloat cmp = Float::compare;
     if( reversed )  cmp = cmp.reversed();
                     seq = seq.clone();
-    var          backup = seq.clone();
+    float[]      backup = seq.clone();
     Arrays.sort(backup); if(reversed) revert(backup);
     sorter().sort(seq, cmp);
     assertThat(seq).isEqualTo(backup);
@@ -321,8 +321,8 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   {
     ComparatorDouble cmp = Double::compare;
     if( reversed )   cmp = cmp.reversed();
-                   seq = seq.clone();
-    var         backup = seq.clone();
+                     seq = seq.clone();
+    double[]      backup = seq.clone();
     Arrays.sort(backup); if(reversed) revert(backup);
     sorter().sort(seq, cmp);
     assertThat(seq).isEqualTo(backup);
@@ -333,8 +333,8 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   {
     Comparator<String> cmp = naturalOrder();
     if(reversed) cmp = cmp.reversed();
-                   seq = seq.clone();
-    var         backup = seq.clone();
+                 seq = seq.clone();
+    String[]  backup = seq.clone();
     Arrays.sort(backup); if(reversed) revert(backup);
     sorter().sort(seq, cmp);
     assertThat(seq).isEqualTo(backup);
@@ -350,9 +350,9 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property default void sortsStablyArraysTupleChar   ( @ForAll("arraysChar"   )    char[] sample, @ForAll Comparator<Character> cmp ) { sortsStablyArraysTuple(zipWithIndex(sample), cmp); }
   @Property default void sortsStablyArraysTupleFloat  ( @ForAll("arraysFloat"  )   float[] sample, @ForAll Comparator<Float    > cmp ) { sortsStablyArraysTuple(zipWithIndex(sample), cmp); }
   @Property default void sortsStablyArraysTupleDouble ( @ForAll("arraysDouble" )  double[] sample, @ForAll Comparator<Double   > cmp ) { sortsStablyArraysTuple(zipWithIndex(sample), cmp); }
-  private <T>       void sortsStablyArraysTuple( Entry<T,Integer>[] input, Comparator<? super T> comparator )
+  default <T>       void sortsStablyArraysTuple( Entry<T,Integer>[] input, Comparator<? super T> comparator )
   {
-    var reference = input.clone();
+    Entry<T,Integer>[] reference = input.clone();
 
     Comparator<Entry<T,Integer>> cmp = comparingByKey(comparator);
 
@@ -463,12 +463,12 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property default                         void sortsArraysWithRangeComparableFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample ) { sortsArraysWithRangeComparable( sample.map(Boxing::boxed) ); }
   @Property default                         void sortsArraysWithRangeComparableDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample ) { sortsArraysWithRangeComparable( sample.map(Boxing::boxed) ); }
   @Property default                         void sortsArraysWithRangeComparableString ( @ForAll("arraysWithRangeString" ) WithRange< String[]> sample ) { sortsArraysWithRangeComparable( sample.map(String[]::clone) ); }
-  private <T extends Comparable<? super T>> void sortsArraysWithRangeComparable( WithRange<T[]> sample )
+  default <T extends Comparable<? super T>> void sortsArraysWithRangeComparable( WithRange<T[]> sample )
   {
-    int      from = sample.getFrom(),
-            until = sample.getUntil();
-    var     input = sample.getData();
-    var reference = input.clone();
+    int  from = sample.getFrom(),
+        until = sample.getUntil();
+    T[] input = sample.getData(),
+    reference = input.clone();
     Arrays  .sort(reference, from,until);
     sorter().sort(input,     from,until);
     assertThat(input).isEqualTo(reference);
@@ -489,7 +489,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   {
     int   from = sampleWithRange.getFrom(),
          until = sampleWithRange.getUntil();
-    var sample = sampleWithRange.getData();
+    T[] sample = sampleWithRange.getData();
     @SuppressWarnings("unchecked")
     CmpIdx<String>[] input = range(0,sample.length).mapToObj( i -> CmpIdx(sample[i],i,cmp) ).toArray(CmpIdx[]::new),
             backup = input.clone();
@@ -504,10 +504,10 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property
   default void sortsArraysWithRangeComparatorByte( @ForAll("arraysWithRangeByte") WithRange<byte[]> sampleWithRange, @ForAll boolean reversed )
   {
-    int   from = sampleWithRange.getFrom(),
-         until = sampleWithRange.getUntil();
-    var sample = sampleWithRange.getData().clone();
-    var backup = sample.clone();
+    int from = sampleWithRange.getFrom(),
+       until = sampleWithRange.getUntil();
+    byte[] sample = sampleWithRange.getData().clone(),
+           backup = sample.clone();
 
     ComparatorByte cmp = Byte::compare;
     if( reversed ) cmp = cmp.reversed();
@@ -519,10 +519,10 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property
   default void sortsArraysWithRangeComparatorShort( @ForAll("arraysWithRangeShort") WithRange<short[]> sampleWithRange, @ForAll boolean reversed )
   {
-    int   from = sampleWithRange.getFrom(),
-         until = sampleWithRange.getUntil();
-    var sample = sampleWithRange.getData().clone();
-    var backup = sample.clone();
+    int from = sampleWithRange.getFrom(),
+       until = sampleWithRange.getUntil();
+    short[] sample = sampleWithRange.getData().clone(),
+            backup = sample.clone();
 
     ComparatorShort cmp = Short::compare;
     if( reversed )  cmp = cmp.reversed();
@@ -534,10 +534,10 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property
   default void sortsArraysWithRangeComparatorInt( @ForAll("arraysWithRangeInt") WithRange<int[]> sampleWithRange, @ForAll boolean reversed )
   {
-    int   from = sampleWithRange.getFrom(),
-         until = sampleWithRange.getUntil();
-    var sample = sampleWithRange.getData().clone();
-    var backup = sample.clone();
+    int from = sampleWithRange.getFrom(),
+       until = sampleWithRange.getUntil();
+    int[] sample = sampleWithRange.getData().clone(),
+          backup = sample.clone();
 
     ComparatorInt cmp = Integer::compare;
     if(reversed)  cmp = cmp.reversed();
@@ -549,10 +549,10 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property
   default void sortsArraysWithRangeComparatorLong( @ForAll("arraysWithRangeLong") WithRange<long[]> sampleWithRange, @ForAll boolean reversed )
   {
-    int   from = sampleWithRange.getFrom(),
-         until = sampleWithRange.getUntil();
-    var sample = sampleWithRange.getData().clone();
-    var backup = sample.clone();
+    int from = sampleWithRange.getFrom(),
+       until = sampleWithRange.getUntil();
+    long[] sample = sampleWithRange.getData().clone(),
+           backup = sample.clone();
 
     ComparatorLong cmp = Long::compare;
     if( reversed ) cmp = cmp.reversed();
@@ -564,10 +564,10 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property
   default void sortsArraysWithRangeComparatorChar( @ForAll("arraysWithRangeChar") WithRange<char[]> sampleWithRange, @ForAll boolean reversed )
   {
-    int   from = sampleWithRange.getFrom(),
-         until = sampleWithRange.getUntil();
-    var sample = sampleWithRange.getData().clone();
-    var backup = sample.clone();
+    int from = sampleWithRange.getFrom(),
+       until = sampleWithRange.getUntil();
+    char[] sample = sampleWithRange.getData().clone(),
+           backup = sample.clone();
 
     ComparatorChar cmp = Character::compare;
     if(reversed)   cmp = cmp.reversed();
@@ -579,10 +579,10 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property
   default void sortsArraysWithRangeComparatorFloat( @ForAll("arraysWithRangeFloat") WithRange<float[]> sampleWithRange, @ForAll boolean reversed )
   {
-    int   from = sampleWithRange.getFrom(),
-         until = sampleWithRange.getUntil();
-    var sample = sampleWithRange.getData().clone();
-    var backup = sample.clone();
+    int from = sampleWithRange.getFrom(),
+       until = sampleWithRange.getUntil();
+    float[] sample = sampleWithRange.getData().clone(),
+            backup = sample.clone();
 
     ComparatorFloat cmp = Float::compare;
     if(reversed)   cmp = cmp.reversed();
@@ -594,10 +594,10 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property
   default void sortsArraysWithRangeComparatorDouble( @ForAll("arraysWithRangeDouble") WithRange<double[]> sampleWithRange, @ForAll boolean reversed )
   {
-    int   from = sampleWithRange.getFrom(),
-         until = sampleWithRange.getUntil();
-    var sample = sampleWithRange.getData().clone();
-    var backup = sample.clone();
+    int from = sampleWithRange.getFrom(),
+       until = sampleWithRange.getUntil();
+    double[] sample = sampleWithRange.getData().clone(),
+             backup = sample.clone();
 
     ComparatorDouble cmp = Double::compare;
     if(reversed)   cmp = cmp.reversed();
@@ -617,12 +617,12 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property default void sortsStablyTupleArraysWithRangeChar   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> sample, @ForAll Comparator<Character> cmp ) { sortsStablyTupleArraysWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
   @Property default void sortsStablyTupleArraysWithRangeFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample, @ForAll Comparator<Float    > cmp ) { sortsStablyTupleArraysWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
   @Property default void sortsStablyTupleArraysWithRangeDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample, @ForAll Comparator<Double   > cmp ) { sortsStablyTupleArraysWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
-  private <T>       void sortsStablyTupleArraysWithRange( WithRange<Entry<T,Integer>[]> sample, Comparator<? super T> comparator )
+  default <T>       void sortsStablyTupleArraysWithRange( WithRange<Entry<T,Integer>[]> sample, Comparator<? super T> comparator )
   {
-    int      from = sample.getFrom(),
-            until = sample.getUntil();
-    var     input = sample.getData();
-    var reference = input.clone();
+    int from = sample.getFrom(),
+       until = sample.getUntil();
+    Entry<T,Integer>[] input = sample.getData(),
+                   reference = input.clone();
 
     Comparator<Entry<T,Integer>> cmp = comparingByKey(comparator);
     if( ! sorter().isStable() )  cmp = cmp.thenComparing(comparingByValue());
@@ -638,7 +638,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   default void sortsBufInt( @ForAll("arraysInt") int[] seq )
   {
     seq = seq.clone();
-    var backup = seq;
+    int[] backup = seq;
     Arrays.sort(backup);
     sorter().sort( IntBuffer.wrap(seq) );
     assertThat(seq).isEqualTo(backup);
@@ -647,8 +647,8 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property()
   default void sortsBufWithRangeInt( @ForAll("arraysWithRangeInt") WithRange<int[]> sample )
   {
-    int    from = sample.getFrom(),
-          until = sample.getUntil();
+    int from = sample.getFrom(),
+       until = sample.getUntil();
     int[] input = sample.getData().clone(),
       reference = input.clone();
     Arrays  .sort(reference, from, until);
@@ -659,8 +659,8 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
   @Property()
   default void sortsBufWithPosLimInt( @ForAll("arraysWithRangeInt") WithRange<int[]> sample )
   {
-    int    from = sample.getFrom(),
-          until = sample.getUntil();
+    int from = sample.getFrom(),
+       until = sample.getUntil();
     int[] input = sample.getData().clone(),
       reference = input.clone();
     Arrays.sort(reference, from, until);
@@ -677,7 +677,7 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
     if(reversed)  cmp = cmp.reversed();
 
     seq = seq.clone();
-    var backup = boxed(seq);
+    Integer[] backup = boxed(seq);
     Arrays.sort(backup, cmp::compare);
     sorter().sort( IntBuffer.wrap(seq), cmp );
     assertThat(seq).isEqualTo( unboxed(backup) );
@@ -689,10 +689,10 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
     ComparatorInt cmp = Integer::compare;
     if(reversed)  cmp = cmp.reversed();
 
-    int      from = sample.getFrom(),
-            until = sample.getUntil();
-    var     input = sample.getData().clone();
-    var reference = boxed(input);
+    int    from = sample.getFrom(),
+          until = sample.getUntil();
+    int[] input = sample.getData().clone();
+    Integer[] reference = boxed(input);
     Arrays.sort(reference, from,until, cmp::compare);
     sorter().sort( IntBuffer.wrap(input), from, until, cmp );
     assertThat(input).isEqualTo( unboxed(reference) );
@@ -706,8 +706,8 @@ public interface SorterTestTemplate extends ArrayProviderTemplate
 
     int      from = sample.getFrom(),
             until = sample.getUntil();
-    var     input = sample.getData().clone();
-    var reference = boxed(input);
+    int[]   input = sample.getData().clone();
+    Integer[] reference = boxed(input);
     Arrays.sort(reference, from,until, cmp::compare);
     sorter().sort( IntBuffer.wrap(input,from,until-from), cmp );
     assertThat(input).isEqualTo( unboxed(reference) );

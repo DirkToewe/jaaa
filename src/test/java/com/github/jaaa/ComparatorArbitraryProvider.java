@@ -5,12 +5,11 @@ import net.jqwik.api.Arbitrary;
 import net.jqwik.api.providers.ArbitraryProvider;
 import net.jqwik.api.providers.TypeUsage;
 
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 
-import static java.util.stream.Collectors.toSet;
-import static net.jqwik.api.Arbitraries.integers;
-import static net.jqwik.api.RandomDistribution.uniform;
 
 public class ComparatorArbitraryProvider implements ArbitraryProvider
 {
@@ -23,7 +22,7 @@ public class ComparatorArbitraryProvider implements ArbitraryProvider
   {
     TypeUsage contentType = targetType.getTypeArgument(0);
 
-    var byHashAscending = new Comparator<>() {
+    Comparator<?> byHashAscending = new Comparator<Object>() {
       @Override public int compare( Object x, Object y ) {
         return Integer.compare(
           Objects.hashCode(x),
@@ -33,7 +32,7 @@ public class ComparatorArbitraryProvider implements ArbitraryProvider
       @Override public String toString() { return "Comparator.comparing(Objects::hashCode)"; }
     };
 
-    var byHashDescending = new Comparator<>() {
+    Comparator<?> byHashDescending = new Comparator<Object>() {
       @Override public int compare( Object x, Object y ) {
         return Integer.compare(
           Objects.hashCode(y),
@@ -43,33 +42,37 @@ public class ComparatorArbitraryProvider implements ArbitraryProvider
       @Override public String toString() { return "Comparator.comparing(Objects::hashCode).reversed()"; }
     };
 
+    Set<Arbitrary<?>> result = new LinkedHashSet<>();
+
     if( Comparable.class.isAssignableFrom( contentType.getRawType() ) )
     {
       @SuppressWarnings("rawtypes")
-      var natOrdAscending = new Comparator<Comparable>() {
+      Comparator<Comparable> natOrdAscending = new Comparator<Comparable>() {
         @SuppressWarnings("unchecked")
         @Override public int compare( Comparable x, Comparable y ) { return x.compareTo(y); }
         @Override public String toString() { return "Comparator.naturalOrder()"; }
       };
 
       @SuppressWarnings("rawtypes")
-      var natOrdDescending = new Comparator<Comparable>() {
+      Comparator<Comparable> natOrdDescending = new Comparator<Comparable>() {
         @SuppressWarnings("unchecked")
         @Override public int compare( Comparable x, Comparable y ) { return y.compareTo(x); }
         @Override public String toString() { return "Comparator.naturalOrder().reversed()"; }
       };
 
-      return Set.of( Arbitraries.of(
+      result.add( Arbitraries.of(
         byHashAscending,
         byHashDescending,
         natOrdAscending,
         natOrdDescending
       ));
+      return result;
     }
 
-    return Set.of( Arbitraries.of(
+    result.add( Arbitraries.of(
       byHashAscending,
       byHashDescending
     ));
+    return result;
   }
 }

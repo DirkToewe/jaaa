@@ -16,7 +16,7 @@ public class Mom5SelectAccessTest
 {
   private void momSelectV2_select5_test( int a, int c, int d ) {
     permutations(5).forEach( ref -> {
-      var tst = ref.clone();
+      byte[] tst = ref.clone();
       new Mom5SelectAccess() {
         @Override public void   swap( int i, int j ) { Swap.swap(tst,i,j); }
         @Override public int compare( int i, int j ) { return Integer.compare(tst[i], tst[j]); }

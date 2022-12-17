@@ -5,13 +5,17 @@ import java.util.function.Function;
 import static java.lang.String.format;
 
 
-public record WithIndex<T>( int index, T data ) implements With<T>
+public final class WithIndex<T> implements With<T>
 {
-  public WithIndex
+  public final int index;
+  public final T data;
+  public WithIndex( int _index, T _data )
   {
-    if( index < 0                        ) throw new IllegalArgumentException();
-    if( index >= With.contentLength(data)) throw new IllegalArgumentException();
-    With.checkData(data);
+    if( _index < 0                         ) throw new IllegalArgumentException();
+    if( _index >= With.contentLength(_data)) throw new IllegalArgumentException();
+    With.checkData(_data);
+    index = _index;
+    data  = _data;
   }
 
   @Override

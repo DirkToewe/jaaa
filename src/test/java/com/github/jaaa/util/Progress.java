@@ -1,9 +1,11 @@
 package com.github.jaaa.util;
 
 import java.io.PrintStream;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
@@ -15,16 +17,13 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
-import static java.util.stream.StreamSupport.intStream;
-import static java.util.stream.StreamSupport.longStream;
-import static java.util.stream.StreamSupport.doubleStream;
-import static java.util.stream.StreamSupport.stream;
+import static java.util.stream.StreamSupport.*;
 
 
 public class Progress
 {
 // STATIC FIELDS
-  private static char[]
+  private static final char[]
     BAR_SUBSTEPS_UTF8  = { ' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█' },
     BAR_SUBSTEPS_ASCII = { ' ', '-', '=', '#' },
     BAR_ENDS_UTF8      = { '▕', '▏' },
@@ -36,20 +35,12 @@ public class Progress
   {
   // STATIC FIELDS
     private static final long REFRESH_DELAY = 20_000_000L;
-    private static final VarHandle PROGRESS;
-
   // STATIC CONSTRUCTOR
-    static {
-    try {
-      PROGRESS = MethodHandles.lookup().findVarHandle(ProgressPrinter.class, "progress", long.class);
-    } catch( NoSuchFieldException | IllegalAccessException ex ) {
-      throw new ExceptionInInitializerError(ex);
-    }
-  }
   // STATIC METHODS
   // FIELDS
-    private final long pTotal,     tStart = nanoTime();
-    private       long progress=-1, tLast  = Long.MIN_VALUE;
+    private       long tLast = Long.MIN_VALUE;
+    private final long pTotal, tStart = nanoTime();
+    private final LongAdder progress = new LongAdder();
     private final boolean usePercent;
     private final PrintStream out;
     private final int barLength;
@@ -69,18 +60,17 @@ public class Progress
       barLength   = _barLength;
       barSubsteps = _barSubsteps;
       barEnds     = _barEnds;
+      progress.add(-1);
       increment();
     }
 
   // METHODS
     public void increment()
     {
-      long progress;
-      do {
-        progress = (long) PROGRESS.getVolatile(this);
-      } while( ! PROGRESS.weakCompareAndSet(this, progress, ++progress) );
+      this.progress.increment();
+      long progress = this.progress.sum();
 
-      var refresh = (tLast + REFRESH_DELAY) < nanoTime();
+      boolean refresh = (tLast + REFRESH_DELAY) < nanoTime();
       int n = barSubsteps.length - 1,
           p = 0;
       if( 0 < pTotal ) {
@@ -94,9 +84,9 @@ public class Progress
 
       synchronized(out)
       {
-        progress = (long) PROGRESS.getVolatile(this);
+        progress = this.progress.sum();
 
-        var                                 now = nanoTime();
+        long                                now = nanoTime();
         refresh = (tLast + REFRESH_DELAY) < now;
         if( 0 < pTotal) {
           if( pTotal < progress )
@@ -110,7 +100,7 @@ public class Progress
         tLast = now;
         pLast = p;
 
-        var line = new StringBuilder();
+        StringBuilder line = new StringBuilder();
         for( int i=clrLen; i-- > 0; )
           line.append('\b');
 
@@ -144,8 +134,8 @@ public class Progress
           if( usePercent && 0 < pTotal )
             line.append( format("%5.1f%%", 100d*progress/pTotal) );
           else {
-            var r = String.valueOf(pTotal);
-            var l = String.valueOf(progress);
+            String r = String.valueOf(pTotal),
+                   l = String.valueOf(progress);
 
             for( int i = r.length() - l.length(); i-- > 0; )
               line.append(' ');
@@ -199,9 +189,8 @@ public class Progress
 
   // METHODS
     @Override public boolean tryAdvance( Consumer<? super T> action ) {
-      var result = spliterator.tryAdvance(action);
-      if( result )
-        progressMonitor.increment();
+      boolean result = spliterator.tryAdvance(action);
+      if(result) progressMonitor.increment();
       return result;
     }
 
@@ -213,7 +202,7 @@ public class Progress
     }
 
     @Override public Spliterator<T> trySplit() {
-      var left = spliterator.trySplit();
+      Spliterator<T> left = spliterator.trySplit();
       if( left != null )
           left = new ProgressSpliterator<>(progressMonitor, left);
       return left;
@@ -256,9 +245,8 @@ public class Progress
 
   // METHODS
     @Override public boolean tryAdvance( IntConsumer action ) {
-      var result = spliterator.tryAdvance(action);
-      if( result )
-        progressMonitor.increment();
+      boolean result = spliterator.tryAdvance(action);
+      if(result) progressMonitor.increment();
       return result;
     }
 
@@ -271,7 +259,7 @@ public class Progress
     }
 
     @Override public Spliterator.OfInt trySplit() {
-      var left = spliterator.trySplit();
+      Spliterator.OfInt left = spliterator.trySplit();
       if( left != null )
           left = new ProgressSpliteratorInt(progressMonitor, left);
       return left;
@@ -314,9 +302,8 @@ public class Progress
 
   // METHODS
     @Override public boolean tryAdvance( LongConsumer action ) {
-      var result = spliterator.tryAdvance(action);
-      if( result )
-        progressMonitor.increment();
+      boolean result = spliterator.tryAdvance(action);
+      if(result) progressMonitor.increment();
       return result;
     }
 
@@ -328,7 +315,7 @@ public class Progress
     }
 
     @Override public Spliterator.OfLong trySplit() {
-      var left = spliterator.trySplit();
+      Spliterator.OfLong left = spliterator.trySplit();
       if( left != null )
           left = new ProgressSpliteratorLong(progressMonitor, left);
       return left;
@@ -371,9 +358,8 @@ public class Progress
 
   // METHODS
     @Override public boolean tryAdvance( DoubleConsumer action ) {
-      var result = spliterator.tryAdvance(action);
-      if( result )
-        progressMonitor.increment();
+      boolean result = spliterator.tryAdvance(action);
+      if(result) progressMonitor.increment();
       return result;
     }
 
@@ -385,7 +371,7 @@ public class Progress
     }
 
     @Override public Spliterator.OfDouble trySplit() {
-      var left = spliterator.trySplit();
+      Spliterator.OfDouble left = spliterator.trySplit();
       if( left != null )
           left = new ProgressSpliteratorDouble(progressMonitor, left);
       return left;
@@ -430,7 +416,7 @@ public class Progress
     @Override public boolean hasNext() { return iterator.hasNext(); }
 
     @Override public T next() {
-      var result = iterator.next();
+      T result = iterator.next();
       progressMonitor.increment();
       return result;
     }
@@ -465,8 +451,8 @@ public class Progress
     {
       if( null == iterable )
         throw new IllegalStateException("Progress.print(iterator) can only be traversed once.");
-      var progressMonitor = this.progressMonitor; this.progressMonitor = null;
-      var iterable        = this.iterable;        this.iterable        = null;
+      ProgressMonitor progressMonitor = this.progressMonitor; this.progressMonitor = null;
+      Iterable<T>     iterable        = this.iterable;        this.iterable        = null;
       iterable.forEach( x -> {
         action.accept(x);
         progressMonitor.increment();
@@ -477,7 +463,7 @@ public class Progress
     {
       if( null == iterable )
         throw new IllegalStateException("Progress.print(iterator) can only be traversed once.");
-      var result = new ProgressIterator<>(progressMonitor, iterable.iterator());
+      ProgressIterator result = new ProgressIterator<>(progressMonitor, iterable.iterator());
       progressMonitor = null;
       iterable        = null;
       return result;
@@ -487,7 +473,7 @@ public class Progress
     {
       if( null == iterable )
         throw new IllegalStateException("Progress.print(iterator) can only be traversed once.");
-      var result = new ProgressSpliterator<>(progressMonitor, iterable.spliterator());
+      ProgressSpliterator result = new ProgressSpliterator<>(progressMonitor, iterable.spliterator());
       progressMonitor = null;
       iterable        = null;
       return result;
@@ -499,29 +485,29 @@ public class Progress
 // STATIC METHODS
   public static IntStream print( IntStream stream )
   {
-    var parallel = stream.isParallel();
-    var spliterator = print(stream.spliterator());
+    boolean parallel = stream.isParallel();
+    Spliterator.OfInt spliterator = print(stream.spliterator());
     return intStream(spliterator, parallel);
   }
 
   public static LongStream print( LongStream stream )
   {
-    var parallel = stream.isParallel();
-    var spliterator = print(stream.spliterator());
+    boolean parallel = stream.isParallel();
+    Spliterator.OfLong spliterator = print(stream.spliterator());
     return longStream(spliterator, parallel);
   }
 
   public static DoubleStream print( DoubleStream stream )
   {
-    var parallel = stream.isParallel();
-    var spliterator = print(stream.spliterator());
+    boolean parallel = stream.isParallel();
+    Spliterator.OfDouble spliterator = print(stream.spliterator());
     return doubleStream(spliterator, parallel);
   }
 
   public static <T> Stream<T> print( Stream<T> stream )
   {
-    var parallel = stream.isParallel();
-    var spliterator = print(stream.spliterator());
+    boolean parallel = stream.isParallel();
+    Spliterator<T> spliterator = print(stream.spliterator());
     return stream(spliterator, parallel);
   }
 
@@ -530,7 +516,7 @@ public class Progress
   public static Spliterator.OfInt print( Spliterator.OfInt spliterator )
   {
     long nTotal = spliterator.getExactSizeIfKnown();
-    var printer = new ProgressPrinter(nTotal, System.out, 10000 <= nTotal, 32, BAR_SUBSTEPS_UTF8, BAR_ENDS_UTF8);
+    ProgressPrinter printer = new ProgressPrinter(nTotal, System.out, 10000 <= nTotal, 32, BAR_SUBSTEPS_UTF8, BAR_ENDS_UTF8);
     spliterator = new ProgressSpliteratorInt(printer, spliterator);
     return spliterator;
   }
@@ -538,7 +524,7 @@ public class Progress
   public static Spliterator.OfLong print( Spliterator.OfLong spliterator )
   {
     long nTotal = spliterator.getExactSizeIfKnown();
-    var printer = new ProgressPrinter(nTotal, System.out, 10000 <= nTotal, 32, BAR_SUBSTEPS_UTF8, BAR_ENDS_UTF8);
+    ProgressPrinter printer = new ProgressPrinter(nTotal, System.out, 10000 <= nTotal, 32, BAR_SUBSTEPS_UTF8, BAR_ENDS_UTF8);
     spliterator = new ProgressSpliteratorLong(printer, spliterator);
     return spliterator;
   }
@@ -546,7 +532,7 @@ public class Progress
   public static Spliterator.OfDouble print( Spliterator.OfDouble spliterator )
   {
     long nTotal = spliterator.getExactSizeIfKnown();
-    var printer = new ProgressPrinter(nTotal, System.out, 10000 <= nTotal, 32, BAR_SUBSTEPS_UTF8, BAR_ENDS_UTF8);
+    ProgressPrinter printer = new ProgressPrinter(nTotal, System.out, 10000 <= nTotal, 32, BAR_SUBSTEPS_UTF8, BAR_ENDS_UTF8);
     spliterator = new ProgressSpliteratorDouble(printer, spliterator);
     return spliterator;
   }
@@ -554,12 +540,12 @@ public class Progress
   @SuppressWarnings("unchecked")
   public static <T> Spliterator<T> print( Spliterator<T> spliterator )
   {
-    if( spliterator instanceof Spliterator.OfInt    spliter ) return (Spliterator<T>) print(spliter);
-    if( spliterator instanceof Spliterator.OfLong   spliter ) return (Spliterator<T>) print(spliter);
-    if( spliterator instanceof Spliterator.OfDouble spliter ) return (Spliterator<T>) print(spliter);
+    if( spliterator instanceof Spliterator.OfInt    ) return (Spliterator<T>) print( (Spliterator.OfInt   ) spliterator );
+    if( spliterator instanceof Spliterator.OfLong   ) return (Spliterator<T>) print( (Spliterator.OfLong  ) spliterator );
+    if( spliterator instanceof Spliterator.OfDouble ) return (Spliterator<T>) print( (Spliterator.OfDouble) spliterator );
 
     long nTotal = spliterator.getExactSizeIfKnown();
-    var printer = new ProgressPrinter(nTotal, System.out, 10000 <= nTotal, 32, BAR_SUBSTEPS_UTF8, BAR_ENDS_UTF8);
+    ProgressPrinter printer = new ProgressPrinter(nTotal, System.out, 10000 <= nTotal, 32, BAR_SUBSTEPS_UTF8, BAR_ENDS_UTF8);
     spliterator = new ProgressSpliterator<>(printer, spliterator);
     return spliterator;
   }
@@ -569,12 +555,12 @@ public class Progress
   public static <T> Iterable<T> print( Iterable<T> iterable )
   {
     long nTotal = -1;
-    if( iterable instanceof Collection<T> coll ) {
-      int size = coll.size();
+    if( iterable instanceof Collection ) {
+      int size = ((Collection<?>) iterable).size();
       if( size < Integer.MAX_VALUE )
         nTotal = size;
     }
-    var printer = new ProgressPrinter(nTotal, System.out, 10000 <= nTotal, 32, BAR_SUBSTEPS_UTF8, BAR_ENDS_UTF8);
+    ProgressPrinter printer = new ProgressPrinter(nTotal, System.out, 10000 <= nTotal, 32, BAR_SUBSTEPS_UTF8, BAR_ENDS_UTF8);
     return new ProgressIterable<>(printer, iterable);
   }
 }

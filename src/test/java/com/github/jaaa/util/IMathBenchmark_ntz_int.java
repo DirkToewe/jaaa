@@ -5,11 +5,11 @@ import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.results.RunResult;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 
@@ -44,7 +44,7 @@ public class IMathBenchmark_ntz_int
     }
     System.out.println(" passed!");
 
-    var opt = new OptionsBuilder()
+    Options opt = new OptionsBuilder()
       .include( IMathBenchmark_ntz_int.class.getCanonicalName() )
       .build();
 

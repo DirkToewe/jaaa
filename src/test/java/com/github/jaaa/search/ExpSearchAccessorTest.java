@@ -17,17 +17,19 @@ public class ExpSearchAccessorTest
 {
   private static long compLim( IntBinaryOperator startIndex, int from, int until, int i ) {
     if( from == until ) return 0;
-                           i = abs( startIndex.applyAsInt(from,until) - i );
+    i = abs( startIndex.applyAsInt(from,until) - i );
     return 2 + 2L*log2Floor(i+1);
   }
 
-  private record ExpSearchAcc<T>(
-    CompareAccessor<? super T> compareAccessor,
-    IntBinaryOperator startIndex
-  ) implements SearchAccessor<T>,
-            ExpSearchAccessor<T>
+  private static final class Acc<T> implements SearchAccessor<T>, ExpSearchAccessor<T>
   {
-    @Override public int compare( T a, int i, T b, int j ) { return compareAccessor.compare(a,i, b,j); }
+    private final CompareAccessor<? super T>  acc;
+    private final IntBinaryOperator startIndex;
+    private  Acc( CompareAccessor<? super T> _acc, IntBinaryOperator _startIndex ) {
+      acc = _acc;
+      startIndex = _startIndex;
+    }
+    @Override public int compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
     @Override public int search    ( T a, int from, int until, T b, int i ) { return expSearch    (a,from,until, startIndex.applyAsInt(from,until), b,i); }
     @Override public int searchR   ( T a, int from, int until, T b, int i ) { return expSearchR   (a,from,until, startIndex.applyAsInt(from,until), b,i); }
     @Override public int searchL   ( T a, int from, int until, T b, int i ) { return expSearchL   (a,from,until, startIndex.applyAsInt(from,until), b,i); }
@@ -40,7 +42,7 @@ public class ExpSearchAccessorTest
   {
     private IntBinaryOperator startIndex;
     public ExpSearchAccTestTemplate( IntBinaryOperator _startIndex ) { startIndex = requireNonNull(_startIndex); }
-    @Override public <T> SearchAccessor<T> createAccessor( CompareAccessor<? super T> cmpAcc ) { return new ExpSearchAcc<>(cmpAcc,startIndex); }
+    @Override public <T> SearchAccessor<T> createAccessor( CompareAccessor<? super T> cmpAcc ) { return new Acc<>(cmpAcc,startIndex); }
     @Override public long comparisonLimit( int from, int until, int i ) { return compLim(startIndex, from,until, i); }
   }
 

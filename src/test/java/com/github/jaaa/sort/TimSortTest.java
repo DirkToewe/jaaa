@@ -90,12 +90,12 @@ public class TimSortTest
       long a = 0,
            b = sum;
 
-      var builder = IntStream.builder();
+      IntStream.Builder builder = IntStream.builder();
       builder.add(0);
       builder.add(sum);
 
       for(;;) {
-        var c = addExact(1+a,b);
+        long c = addExact(1+a,b);
         sum = (int) min( addExact(sum,c), Integer.MAX_VALUE );
         builder.add(sum);
 
@@ -132,8 +132,6 @@ public class TimSortTest
   @Property( tries = 10_000_000 )
   void timSort_ensureCapacity( @ForAll @Positive int minCapacity, @ForAll @Positive int length ) {
     new Object() {
-      private static final int MIN_MERGE = 32;
-
       private int ensureCapacityJDK( int minCapacity, int length )
       {
         // Compute smallest power of 2 > minCapacity

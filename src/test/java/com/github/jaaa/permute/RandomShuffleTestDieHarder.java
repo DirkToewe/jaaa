@@ -28,10 +28,10 @@ public class RandomShuffleTestDieHarder
   public static void main( String... args ) throws IOException
   {
     System.out.println("\no---------------------o\n| shuffle(boolean[]) |\no---------------------o\n");
-    testWith( new Consumer<>() {
+    testWith( new Consumer<byte[]>() {
       final SplittableRandom rng = new SplittableRandom();
       @Override public void accept( byte[] buf ) {
-        var bits = new boolean[buf.length*8];
+        boolean[] bits = new boolean[buf.length*8];
         Arrays.fill(bits,0,buf.length*4, true);
         randomShuffle(bits, rng::nextInt);
 
@@ -45,7 +45,7 @@ public class RandomShuffleTestDieHarder
     });
 
     System.out.println("\no----------------o\n| shuffle(byte[]) |\no----------------o\n");
-    testWith( new Consumer<>() {
+    testWith( new Consumer<byte[]>() {
       final SplittableRandom rng = new SplittableRandom();
       @Override public void accept( byte[] buf ) {
         for( int i=0; i < buf.length; i++ )
@@ -57,7 +57,7 @@ public class RandomShuffleTestDieHarder
 
   private static void testWith( Consumer<byte[]> genBytes ) throws IOException
   {
-    Process            proc = getRuntime().exec("dieharder -k 2 -a -g 200");
+    Process            proc = getRuntime().exec( new String[]{"dieharder", "-k 2", "-a", "-g 200"} );
     OutputStream pin = proc.getOutputStream();
     InputStream pOut = proc.getInputStream(),
                 pErr = proc.getErrorStream();

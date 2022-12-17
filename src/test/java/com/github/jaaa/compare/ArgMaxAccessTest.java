@@ -33,13 +33,13 @@ public class ArgMaxAccessTest implements ArrayProviderTemplate
   @Property void argMaxLArraysFloat ( @ForAll("arraysFloat" )  float[] ref ) { test_argMaxL( 0,ref.length, (i,j) ->     Float.compare(ref[i],ref[j]) ); }
   @Property void argMaxLArraysDouble( @ForAll("arraysDouble") double[] ref ) { test_argMaxL( 0,ref.length, (i,j) ->    Double.compare(ref[i],ref[j]) ); }
 
-  @Property void argMaxLArraysWithRangeByte  ( @ForAll("arraysWithRangeByte"  ) WithRange<  byte[]> x ) { var ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i, j) ->      Byte.compare(ref[i],ref[j]) ); }
-  @Property void argMaxLArraysWithRangeShort ( @ForAll("arraysWithRangeShort" ) WithRange< short[]> x ) { var ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) ->     Short.compare(ref[i],ref[j]) ); }
-  @Property void argMaxLArraysWithRangeInt   ( @ForAll("arraysWithRangeInt"   ) WithRange<   int[]> x ) { var ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) ->   Integer.compare(ref[i],ref[j]) ); }
-  @Property void argMaxLArraysWithRangeLong  ( @ForAll("arraysWithRangeLong"  ) WithRange<  long[]> x ) { var ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) ->      Long.compare(ref[i],ref[j]) ); }
-  @Property void argMaxLArraysWithRangeChar  ( @ForAll("arraysWithRangeChar"  ) WithRange<  char[]> x ) { var ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) -> Character.compare(ref[i],ref[j]) ); }
-  @Property void argMaxLArraysWithRangeFloat ( @ForAll("arraysWithRangeFloat" ) WithRange< float[]> x ) { var ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) ->     Float.compare(ref[i],ref[j]) ); }
-  @Property void argMaxLArraysWithRangeDouble( @ForAll("arraysWithRangeDouble") WithRange<double[]> x ) { var ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) ->    Double.compare(ref[i],ref[j]) ); }
+  @Property void argMaxLArraysWithRangeByte  ( @ForAll("arraysWithRangeByte"  ) WithRange<  byte[]> x ) {   byte[] ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i, j) ->      Byte.compare(ref[i],ref[j]) ); }
+  @Property void argMaxLArraysWithRangeShort ( @ForAll("arraysWithRangeShort" ) WithRange< short[]> x ) {  short[] ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) ->     Short.compare(ref[i],ref[j]) ); }
+  @Property void argMaxLArraysWithRangeInt   ( @ForAll("arraysWithRangeInt"   ) WithRange<   int[]> x ) {    int[] ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) ->   Integer.compare(ref[i],ref[j]) ); }
+  @Property void argMaxLArraysWithRangeLong  ( @ForAll("arraysWithRangeLong"  ) WithRange<  long[]> x ) {   long[] ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) ->      Long.compare(ref[i],ref[j]) ); }
+  @Property void argMaxLArraysWithRangeChar  ( @ForAll("arraysWithRangeChar"  ) WithRange<  char[]> x ) {   char[] ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) -> Character.compare(ref[i],ref[j]) ); }
+  @Property void argMaxLArraysWithRangeFloat ( @ForAll("arraysWithRangeFloat" ) WithRange< float[]> x ) {  float[] ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) ->     Float.compare(ref[i],ref[j]) ); }
+  @Property void argMaxLArraysWithRangeDouble( @ForAll("arraysWithRangeDouble") WithRange<double[]> x ) { double[] ref=x.getData(); test_argMaxL( x.getFrom(), x.getUntil(), (i,j) ->    Double.compare(ref[i],ref[j]) ); }
 
   private void test_argMaxR( int from, int until, ArgMaxAccess acc ) {
     if( from >= until ) {
@@ -62,11 +62,11 @@ public class ArgMaxAccessTest implements ArrayProviderTemplate
   @Property void argMaxRArraysFloat ( @ForAll("arraysFloat" )  float[] ref ) { test_argMaxR( 0,ref.length, (i,j) ->     Float.compare(ref[i],ref[j]) ); }
   @Property void argMaxRArraysDouble( @ForAll("arraysDouble") double[] ref ) { test_argMaxR( 0,ref.length, (i,j) ->    Double.compare(ref[i],ref[j]) ); }
 
-  @Property void argMaxRArraysWithRangeByte  ( @ForAll("arraysWithRangeByte"  ) WithRange<  byte[]> x ) { var ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->      Byte.compare(ref[i],ref[j]) ); }
-  @Property void argMaxRArraysWithRangeShort ( @ForAll("arraysWithRangeShort" ) WithRange< short[]> x ) { var ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->     Short.compare(ref[i],ref[j]) ); }
-  @Property void argMaxRArraysWithRangeInt   ( @ForAll("arraysWithRangeInt"   ) WithRange<   int[]> x ) { var ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->   Integer.compare(ref[i],ref[j]) ); }
-  @Property void argMaxRArraysWithRangeLong  ( @ForAll("arraysWithRangeLong"  ) WithRange<  long[]> x ) { var ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->      Long.compare(ref[i],ref[j]) ); }
-  @Property void argMaxRArraysWithRangeChar  ( @ForAll("arraysWithRangeChar"  ) WithRange<  char[]> x ) { var ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) -> Character.compare(ref[i],ref[j]) ); }
-  @Property void argMaxRArraysWithRangeFloat ( @ForAll("arraysWithRangeFloat" ) WithRange< float[]> x ) { var ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->     Float.compare(ref[i],ref[j]) ); }
-  @Property void argMaxRArraysWithRangeDouble( @ForAll("arraysWithRangeDouble") WithRange<double[]> x ) { var ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->    Double.compare(ref[i],ref[j]) ); }
+  @Property void argMaxRArraysWithRangeByte  ( @ForAll("arraysWithRangeByte"  ) WithRange<  byte[]> x ) {   byte[] ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->      Byte.compare(ref[i],ref[j]) ); }
+  @Property void argMaxRArraysWithRangeShort ( @ForAll("arraysWithRangeShort" ) WithRange< short[]> x ) {  short[] ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->     Short.compare(ref[i],ref[j]) ); }
+  @Property void argMaxRArraysWithRangeInt   ( @ForAll("arraysWithRangeInt"   ) WithRange<   int[]> x ) {    int[] ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->   Integer.compare(ref[i],ref[j]) ); }
+  @Property void argMaxRArraysWithRangeLong  ( @ForAll("arraysWithRangeLong"  ) WithRange<  long[]> x ) {   long[] ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->      Long.compare(ref[i],ref[j]) ); }
+  @Property void argMaxRArraysWithRangeChar  ( @ForAll("arraysWithRangeChar"  ) WithRange<  char[]> x ) {   char[] ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) -> Character.compare(ref[i],ref[j]) ); }
+  @Property void argMaxRArraysWithRangeFloat ( @ForAll("arraysWithRangeFloat" ) WithRange< float[]> x ) {  float[] ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->     Float.compare(ref[i],ref[j]) ); }
+  @Property void argMaxRArraysWithRangeDouble( @ForAll("arraysWithRangeDouble") WithRange<double[]> x ) { double[] ref=x.getData(); test_argMaxR( x.getFrom(), x.getUntil(), (i,j) ->    Double.compare(ref[i],ref[j]) ); }
 }

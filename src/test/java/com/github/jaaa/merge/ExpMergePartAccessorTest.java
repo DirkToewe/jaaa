@@ -44,7 +44,7 @@ public class ExpMergePartAccessorTest extends MergePartAccessorTestTemplate
     @Override protected boolean mergesInplaceL2R() { return true; }
     @Override protected boolean mergesInplaceR2L() { return false; }
     @Override protected <T> MergeAccessor<T> createAccessor( CompareRandomAccessor<T> srtAcc ) {
-      var acc = ExpMergePartAccessorTest.this.createAccessor(srtAcc);
+      MergePartAccessor<T> acc = ExpMergePartAccessorTest.this.createAccessor(srtAcc);
       return (a,a0,aLen, b,b0,bLen, c,c0) -> acc.mergePartL2R(a,a0,aLen, b,b0,bLen, c,c0,aLen+bLen);
     }
   }
@@ -56,7 +56,7 @@ public class ExpMergePartAccessorTest extends MergePartAccessorTestTemplate
     @Override protected boolean mergesInplaceL2R() { return false; }
     @Override protected boolean mergesInplaceR2L() { return true; }
     @Override protected <T> MergeAccessor<T> createAccessor( CompareRandomAccessor<T> srtAcc ) {
-      var acc = ExpMergePartAccessorTest.this.createAccessor(srtAcc);
+      MergePartAccessor<T> acc = ExpMergePartAccessorTest.this.createAccessor(srtAcc);
       return (a,a0,aLen, b,b0,bLen, c,c0) -> acc.mergePartR2L(a,a0,aLen, b,b0,bLen, c,c0,aLen+bLen);
     }
   }

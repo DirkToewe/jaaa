@@ -24,7 +24,7 @@ public class MaxHeapLAccessTest
     private abstract class TestTemplate implements SortAccessorTestTemplate {
       @Override public <T> SortAccessor<T> createAccessor( CompareRandomAccessor<T> acc ) {
         return (arr, from, until) -> {
-          var acs = new MaxHeapLAccess(){
+          MaxHeapLAccess acs = new MaxHeapLAccess(){
             @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
             @Override public void   swap( int i, int j ) {        acc.   swap(arr,i, arr,j); }
           };
@@ -120,15 +120,15 @@ public class MaxHeapLAccessTest
       int from = sample.getFrom(),
          until = sample.getUntil();
 
-      var tst = sample.getData().clone();
-      var acc = new CountingAcc<>(tst, from, until);
+      T[] tst = sample.getData().clone();
+      CountingAcc<T> acc = new CountingAcc<>(tst, from, until);
       buildImpl(acc, from, until);
       assertThat(acc.nComps).isLessThanOrEqualTo( maxComps(until-from) );
 
       if( from < until )
       {
-        var visited = new boolean[until-from];
-        var visitor = new IntConsumer(){
+        boolean[]   visited = new boolean[until-from];
+        IntConsumer visitor = new IntConsumer(){
           @Override public void accept( int parent )
           {
             // make sure every entry is visited only once
@@ -189,7 +189,7 @@ public class MaxHeapLAccessTest
       until = t;
     }
 
-    var acc = new CountingAcc<>(null, from, until);
+    CountingAcc<?> acc = new CountingAcc<>(null, from, until);
 
     for( int p=from; p < until; p++ ) {
       int  c = acc.maxHeapL_child(from,until, p);

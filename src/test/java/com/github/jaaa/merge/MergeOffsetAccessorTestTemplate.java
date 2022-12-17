@@ -86,7 +86,7 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
   {
     int aLen = aRef.length,
         bLen = bRef.length;
-    var cRef = new byte[aLen + bLen];
+    byte[] cRef = new byte[aLen + bLen];
 
     Arrays.sort(aRef); System.arraycopy(aRef,0, cRef,0,    aLen);
     Arrays.sort(bRef); System.arraycopy(bRef,0, cRef,aLen, bLen);
@@ -102,8 +102,8 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
       Revert.revert(cRef);
     }
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
+    byte[] aTest = aRef.clone(),
+           bTest = bRef.clone();
 
     MergeOffsetAccessor<byte[]> acc = createAccessor( (a, i, b, j) -> cmp.compare(a[i], b[j]) );
 
@@ -150,7 +150,7 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
   {
     int aLen = aRef.length,
         bLen = bRef.length;
-    var cRef = new int[aLen + bLen];
+    int[] cRef = new int[aLen + bLen];
 
     Arrays.sort(aRef); System.arraycopy(aRef,0, cRef,0,    aLen);
     Arrays.sort(bRef); System.arraycopy(bRef,0, cRef,aLen, bLen);
@@ -166,8 +166,8 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
       Revert.revert(cRef);
     }
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
+    int[] aTest = aRef.clone(),
+          bTest = bRef.clone();
 
     MergeOffsetAccessor<int[]> acc = createAccessor( (a, i, b, j) -> cmp.compare(a[i], b[j]) );
 
@@ -228,20 +228,22 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
       cmp =_cmp;
     }
 
+    @SuppressWarnings("unchecked")
     Tuple2<T,Integer>[]
       aRef = range(0,aRefRaw.length).mapToObj( i -> Tuple.of(aRefRaw[i],     i) ).sorted(cmp).toArray(Tuple2[]::new),
       bRef = range(0,bRefRaw.length).mapToObj( i -> Tuple.of(bRefRaw[i],aLen+i) ).sorted(cmp).toArray(Tuple2[]::new),
       cRef =                          Stream.concat( stream(aRef), stream(bRef) ).sorted(cmp).toArray(Tuple2[]::new);
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
+    Tuple2<T,Integer>[]
+      aTest = aRef.clone(),
+      bTest = bRef.clone();
 
     MergeOffsetAccessor<Tuple2<T,Integer>[]> acc = createAccessor( (a, i, b, j) -> cmp.compare(a[i], b[j]) );
 
     rangeClosed(0,cRef.length).forEach( nSkip -> {
       int nA = acc.mergeOffset(
-              aTest,0,aLen,
-              bTest,0,bLen, nSkip
+        aTest,0,aLen,
+        bTest,0,bLen, nSkip
       );
       int nB = nSkip - nA;
 
@@ -287,7 +289,7 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
       aLen = -a0 + aRefWithRange.getFrom(),
       bLen = -b0 + bRefWithRange.getFrom();
 
-    var cRef = new byte[aLen + bLen];
+    byte[] cRef = new byte[aLen + bLen];
 
     Arrays.sort(aRef,a0,a0+aLen); System.arraycopy(aRef,a0, cRef,0,    aLen);
     Arrays.sort(bRef,b0,b0+bLen); System.arraycopy(bRef,b0, cRef,aLen, bLen);
@@ -303,8 +305,8 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
       Revert.revert(cRef);
     }
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
+    byte[] aTest = aRef.clone(),
+           bTest = bRef.clone();
 
     MergeOffsetAccessor<byte[]> acc = createAccessor( (a, i, b, j) -> cmp.compare(a[i], b[j]) );
 
@@ -356,7 +358,7 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
       aLen = -a0 + aRefWithRange.getFrom(),
       bLen = -b0 + bRefWithRange.getFrom();
 
-    var cRef = new int[aLen + bLen];
+    int[] cRef = new int[aLen + bLen];
 
     Arrays.sort(aRef,a0,a0+aLen); System.arraycopy(aRef,a0, cRef,0,    aLen);
     Arrays.sort(bRef,b0,b0+bLen); System.arraycopy(bRef,b0, cRef,aLen, bLen);
@@ -372,16 +374,16 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
       Revert.revert(cRef);
     }
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
+    int[] aTest = aRef.clone(),
+          bTest = bRef.clone();
 
     MergeOffsetAccessor<int[]> acc = createAccessor( (a, i, b, j) -> cmp.compare(a[i], b[j]) );
 
     for( int nSkip=0; nSkip <= aLen+bLen; nSkip++ )
     {
       int nA = acc.mergeOffset(
-              aTest,a0,aLen,
-              bTest,b0,bLen, nSkip
+        aTest,a0,aLen,
+        bTest,b0,bLen, nSkip
       );
       int nB = nSkip - nA;
 
@@ -432,12 +434,12 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
     }
 
     Tuple2<Integer,Integer>[] aRef, bRef, cRef; {
-    var aRaw = aRefWithRange.getData();
-    var bRaw = bRefWithRange.getData();
-    aRef = range(0,aRaw.length).mapToObj( i -> Tuple.of(aRaw[i],            i) ).toArray(Tuple2[]::new);
-    bRef = range(0,bRaw.length).mapToObj( i -> Tuple.of(bRaw[i],aRaw.length+i) ).toArray(Tuple2[]::new);
-    cRef =                           Stream.concat( stream(aRef), stream(bRef) ).toArray(Tuple2[]::new);
-  }
+      T[] aRaw = aRefWithRange.getData(),
+          bRaw = bRefWithRange.getData();
+      aRef = range(0,aRaw.length).mapToObj( i -> Tuple.of(aRaw[i],            i) ).toArray(Tuple2[]::new);
+      bRef = range(0,bRaw.length).mapToObj( i -> Tuple.of(bRaw[i],aRaw.length+i) ).toArray(Tuple2[]::new);
+      cRef =                           Stream.concat( stream(aRef), stream(bRef) ).toArray(Tuple2[]::new);
+    }
     int a0 = aRefWithRange.getFrom(),
             b0 = bRefWithRange.getFrom(),
             aLen = -a0 + aRefWithRange.getFrom(),
@@ -453,8 +455,9 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
       Revert.revert(cRef);
     }
 
-    var aTest = aRef.clone();
-    var bTest = bRef.clone();
+    Tuple2<Integer,Integer>[]
+      aTest = aRef.clone(),
+      bTest = bRef.clone();
 
     MergeOffsetAccessor<Tuple2<Integer,Integer>[]> acc = createAccessor( (a, i, b, j) -> cmp.compare(a[i], b[j]) );
 
@@ -477,17 +480,17 @@ public abstract class MergeOffsetAccessorTestTemplate implements ArrayProviderTe
       if(           nB < bLen ) assertThat( BinarySearch.searchR(cRef, bTest[b0+nB], cmp) ).isGreaterThanOrEqualTo(nSkip);
 
       if( nSkip < aLen+bLen ) {
-        if( nA >= aLen ) assertThat(cRef[nSkip]).isEqualTo(bTest[b0+nB]);
+             if( nA >= aLen ) assertThat(cRef[nSkip]).isEqualTo(bTest[b0+nB]);
         else if( nB >= bLen ) assertThat(cRef[nSkip]).isEqualTo(aTest[a0+nA]);
         else                  assertThat(cRef[nSkip]).isIn(aTest[a0+nA], bTest[b0+nB]);
       }
 
       if( 0 < nSkip ) {
-        if( nA <= 0 ) assertThat(cRef[nSkip-1]).isEqualTo(bTest[b0+nB-1]);
+             if( nA <= 0 ) assertThat(cRef[nSkip-1]).isEqualTo(bTest[b0+nB-1]);
         else if( nB <= 0 ) assertThat(cRef[nSkip-1]).isEqualTo(aTest[a0+nA-1]);
         else               assertThat(cRef[nSkip-1]).isIn(aTest[a0+nA-1], bTest[b0+nB-1]);
       }
-    };
+    }
 
     assertThat(aTest).isEqualTo(aRef);
     assertThat(bTest).isEqualTo(bRef);

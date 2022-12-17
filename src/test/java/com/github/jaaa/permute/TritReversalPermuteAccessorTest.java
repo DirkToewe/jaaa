@@ -18,10 +18,10 @@ public class TritReversalPermuteAccessorTest
   @Property void test_tritReversal( @ForAll @IntRange(min=0,max=16) int exp ) {
     int len = (int) Math.pow(3,exp);
 
-    var tst = range(0,len).toArray();
+    int[] tst = range(0,len).toArray();
     ACC.tritReversalPermute(tst,0,len);
 
-    var ref = range(0,len).map( x -> {
+    int[] ref = range(0,len).map(x -> {
       int y = 0;
       for( int i=0; i++ < exp; ) {
         y *= 3;
@@ -43,10 +43,10 @@ public class TritReversalPermuteAccessorTest
       swap(a,i, b,j);
     };
 
-    var tst = range(0, from+len).toArray();
+    int[] tst = range(0, from+len).toArray();
     acc.tritReversalPermute(tst, from,from+len);
 
-    var ref = range(0, from+len).map( x -> {
+    int[] ref = range(0, from+len).map(x -> {
       if( x < from )
         return x;
       x -= from;

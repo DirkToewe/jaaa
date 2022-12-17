@@ -17,7 +17,7 @@ public class Mom3SelectAccessTest
 {
   private void momSelect_select3_test_impl( int a, int b, int c ) {
     permutations(3).forEach( ref -> {
-      var tst = ref.clone();
+      byte[] tst = ref.clone();
       new Mom3SelectAccess() {
         @Override public void   swap( int i, int j ) { Swap.swap(tst,i,j); }
         @Override public int compare( int i, int j ) { return Integer.compare(tst[i], tst[j]); }

@@ -60,20 +60,20 @@ public interface SorterInPlaceTestTemplate extends SorterTestTemplate
   @Property default void sortsStablyAccessWithRangeChar   ( @ForAll("arraysWithRangeChar"   ) WithRange<   char[]> sample, @ForAll Comparator<Character> cmp ) { sortsStablyAccessWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
   @Property default void sortsStablyAccessWithRangeFloat  ( @ForAll("arraysWithRangeFloat"  ) WithRange<  float[]> sample, @ForAll Comparator<Float    > cmp ) { sortsStablyAccessWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
   @Property default void sortsStablyAccessWithRangeDouble ( @ForAll("arraysWithRangeDouble" ) WithRange< double[]> sample, @ForAll Comparator<Double   > cmp ) { sortsStablyAccessWithRange(sample.map(ZipWithIndex::zipWithIndex), cmp); }
-  private <T>       void sortsStablyAccessWithRange( WithRange<Entry<T,Integer>[]> sample, Comparator<? super T> comparator )
+  default <T>       void sortsStablyAccessWithRange( WithRange<Entry<T,Integer>[]> sample, Comparator<? super T> comparator )
   {
-    int      from = sample.getFrom(),
-            until = sample.getUntil();
-    var     input = sample.getData();
-    var reference = input.clone();
+    int from = sample.getFrom(),
+       until = sample.getUntil();
+    Entry<T,Integer>[] input = sample.getData(),
+                   reference = input.clone();
 
     Comparator<Entry<T,Integer>> cmp = comparingByKey(comparator);
     if( ! sorter().isStable() )  cmp = cmp.thenComparing(comparingByValue());
 
     Arrays.sort(reference, from, until, cmp);
 
-    var CMP = cmp;
-    var acc = new CountingAccess() {
+    Comparator<Entry<T,Integer>> CMP = cmp;
+    CountingAccess acc = new CountingAccess() {
       @Override public int compare( int i, int j ) { ++nComps; return CMP.compare(input[i], input[j]); }
       @Override public void   swap( int i, int j ) { ++nSwaps; Swap.swap(input,i,j); }
     };
@@ -97,17 +97,17 @@ public interface SorterInPlaceTestTemplate extends SorterTestTemplate
   @Property default                         void sortsStablyAccessChar   ( @ForAll("arraysChar"   )    char[] array, @ForAll Comparator<Character> cmp ) { sortsStablyAccess( zipWithIndex(array), cmp ); }
   @Property default                         void sortsStablyAccessFloat  ( @ForAll("arraysFloat"  )   float[] array, @ForAll Comparator<Float    > cmp ) { sortsStablyAccess( zipWithIndex(array), cmp ); }
   @Property default                         void sortsStablyAccessDouble ( @ForAll("arraysDouble" )  double[] array, @ForAll Comparator<Double   > cmp ) { sortsStablyAccess( zipWithIndex(array), cmp ); }
-  private <T extends Comparable<? super T>> void sortsStablyAccess( Entry<T,Integer>[] input, Comparator<? super T> comparator )
+  default <T extends Comparable<? super T>> void sortsStablyAccess( Entry<T,Integer>[] input, Comparator<? super T> comparator )
   {
-    var reference = input.clone();
+    Entry<T,Integer>[] reference = input.clone();
 
     Comparator<Entry<T,Integer>> cmp = comparingByKey(comparator);
     if( ! sorter().isStable() )  cmp = cmp.thenComparing(comparingByValue());
 
     Arrays.sort(reference, cmp);
 
-    var CMP = cmp;
-    var acc = new CountingAccess() {
+    Comparator<Entry<T,Integer>> CMP = cmp;
+    CountingAccess acc = new CountingAccess() {
       @Override public int compare( int i, int j ) { ++nComps; return CMP.compare(input[i], input[j]); }
       @Override public void   swap( int i, int j ) { ++nSwaps; Swap.swap(input, i,j); }
     };

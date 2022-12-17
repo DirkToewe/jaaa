@@ -1,7 +1,9 @@
 package com.github.jaaa.util;
 
+import java.util.List;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.IntStream;
+import static java.util.stream.Collectors.toList;
 
 
 public class ProgressExperiments
@@ -12,11 +14,11 @@ public class ProgressExperiments
 
     for( int run=0; run++ < 10; )
     {
-      var list = IntStream.range(0,N).boxed().toList();
+      List<Integer> list = IntStream.range(0,N).boxed().collect(toList());
 
-      var counter = new LongAdder();
+      LongAdder counter = new LongAdder();
       long base_t0 = System.nanoTime();
-      for( var i: list )
+      for( int i: list )
         counter.increment();
       long base_dt = System.nanoTime() - base_t0;
 
@@ -26,7 +28,7 @@ public class ProgressExperiments
 
       counter.reset();
       long t0 = System.nanoTime();
-      for( var i: Progress.print(list) )
+      for( int i: Progress.print(list) )
         counter.increment();
       long dt = System.nanoTime() - t0;
 
@@ -37,7 +39,7 @@ public class ProgressExperiments
 
     for( int run=0; run++ < 10; )
     {
-      var counter = new LongAdder();
+      LongAdder counter = new LongAdder();
 
       long base_t0 = System.nanoTime();
       IntStream.range(0,N).boxed().parallel().forEach(

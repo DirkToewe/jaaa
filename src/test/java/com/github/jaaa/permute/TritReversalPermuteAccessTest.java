@@ -16,11 +16,11 @@ public class TritReversalPermuteAccessTest
   @Property void test_tritReversal( @ForAll @IntRange(min=0,max=16) int exp ) {
     int len = (int) Math.pow(3,exp);
 
-    var tst = range(0,len).toArray();
+    int[] tst = range(0,len).toArray();
     TritReversalPermuteAccess acc = (i, j) -> swap(tst,i,j);
     acc.tritReversalPermute(0,len);
 
-    var ref = range(0,len).map( x -> {
+    int[] ref = range(0,len).map(x -> {
       int y = 0;
       for( int i=0; i++ < exp; ) {
         y *= 3;
@@ -36,7 +36,7 @@ public class TritReversalPermuteAccessTest
   @Property void test_tritReversal_shifted( @ForAll @IntRange(min=0,max=8) int exp, @ForAll @IntRange(min=0, max =8192) int from ) {
     int len = (int) Math.pow(3,exp);
 
-    var tst = range(0, from+len).toArray();
+    int[] tst = range(0, from+len).toArray();
     TritReversalPermuteAccess acc = (i,j) -> {
       assertThat(i).isGreaterThanOrEqualTo(from);
       assertThat(j).isGreaterThanOrEqualTo(from);
@@ -44,7 +44,7 @@ public class TritReversalPermuteAccessTest
     };
     acc.tritReversalPermute(from,from+len);
 
-    var ref = range(0, from+len).map( x -> {
+    int[] ref = range(0, from+len).map(x -> {
       if( x < from )
         return x;
       x -= from;

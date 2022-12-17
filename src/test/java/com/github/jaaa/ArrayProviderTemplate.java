@@ -20,8 +20,8 @@ public interface ArrayProviderTemplate
   static <T> Arbitrary<WithRange<T>> withRange( Arbitrary<T> arbitrary ) {
     return arbitrary.flatMap( arr -> {
       int len;
-      if( arr instanceof WithIndex withIndex )
-        len = withIndex.contentLength();
+      if( arr instanceof WithIndex )
+        len = ((WithIndex<?>) arr).contentLength();
       else
         len = Array.getLength(arr);
 
@@ -37,12 +37,13 @@ public interface ArrayProviderTemplate
 
   static <T> Arbitrary<WithInsertIndex<T>> withInsertIndex( Arbitrary<T> arbitrary ) {
     return arbitrary.flatMap( arr -> {
-      if( arr instanceof WithRange wr )
-        return Arbitraries.integers().between(wr.getFrom(), wr.getUntil()).withDistribution( uniform() ).map(
+      if( !(arr instanceof WithRange) )
+        return Arbitraries.integers().between(0, Array.getLength(arr)).withDistribution( uniform() ).map(
           i -> new WithInsertIndex<>(i,arr)
         );
 
-      return Arbitraries.integers().between(0, Array.getLength(arr)).withDistribution( uniform() ).map(
+      WithRange<?> wr = (WithRange<?>) arr;
+      return Arbitraries.integers().between(wr.getFrom(), wr.getUntil()).withDistribution( uniform() ).map(
         i -> new WithInsertIndex<>(i,arr)
       );
     });
@@ -70,7 +71,7 @@ public interface ArrayProviderTemplate
   @Provide default Arbitrary<byte[]> arraysByte_smallPermutations() {
     return integers().between(0,8).flatMap(
       n ->    longs().between(0,factorial(n)-1).map( off -> {
-        var next = new byte[n];
+        byte[] next = new byte[n];
         for( int i=0; i < n; ) {
           next[i] = (byte) i;
           swap(next,i++, (int) (off % i));

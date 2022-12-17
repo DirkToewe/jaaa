@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-import static java.util.Collections.unmodifiableCollection;
-
 
 public interface With<T>
 {
@@ -16,15 +14,15 @@ public interface With<T>
 
 // STATIC METHODS
   static String toString( Object data ) {
-    if( data instanceof boolean[] dat ) return Arrays.toString(dat);
-    if( data instanceof    byte[] dat ) return Arrays.toString(dat);
-    if( data instanceof   short[] dat ) return Arrays.toString(dat);
-    if( data instanceof     int[] dat ) return Arrays.toString(dat);
-    if( data instanceof    long[] dat ) return Arrays.toString(dat);
-    if( data instanceof    char[] dat ) return Arrays.toString(dat);
-    if( data instanceof   float[] dat ) return Arrays.toString(dat);
-    if( data instanceof  double[] dat ) return Arrays.toString(dat);
-    if( data instanceof  Object[] dat ) return Arrays.deepToString(dat);
+    if( data instanceof boolean[] ) return Arrays.toString( (boolean[]) data );
+    if( data instanceof    byte[] ) return Arrays.toString( (   byte[]) data );
+    if( data instanceof   short[] ) return Arrays.toString( (  short[]) data );
+    if( data instanceof     int[] ) return Arrays.toString( (    int[]) data );
+    if( data instanceof    long[] ) return Arrays.toString( (   long[]) data );
+    if( data instanceof    char[] ) return Arrays.toString( (   char[]) data );
+    if( data instanceof   float[] ) return Arrays.toString( (  float[]) data );
+    if( data instanceof  double[] ) return Arrays.toString( ( double[]) data );
+    if( data instanceof  Object[] ) return Arrays.deepToString( (Object[]) data );
     return data.toString();
   }
   static void checkData( Object data ) {
@@ -43,20 +41,20 @@ public interface With<T>
   }
   @SuppressWarnings("unchecked")
   static <T> T clone( T data ) {
-    if( data instanceof boolean[] dat ) return (T)  dat.clone();
-    if( data instanceof    byte[] dat ) return (T)  dat.clone();
-    if( data instanceof   short[] dat ) return (T)  dat.clone();
-    if( data instanceof     int[] dat ) return (T)  dat.clone();
-    if( data instanceof    long[] dat ) return (T)  dat.clone();
-    if( data instanceof    char[] dat ) return (T)  dat.clone();
-    if( data instanceof   float[] dat ) return (T)  dat.clone();
-    if( data instanceof  double[] dat ) return (T)  dat.clone();
-    if( data instanceof  Object[] dat ) return (T)  dat.clone();
-    if( data instanceof     With with ) return (T) with.clone();
+    if( data instanceof boolean[] ) return (T)  ( (boolean[]) data ).clone();
+    if( data instanceof    byte[] ) return (T)  ( (   byte[]) data ).clone();
+    if( data instanceof   short[] ) return (T)  ( (  short[]) data ).clone();
+    if( data instanceof     int[] ) return (T)  ( (    int[]) data ).clone();
+    if( data instanceof    long[] ) return (T)  ( (   long[]) data ).clone();
+    if( data instanceof    char[] ) return (T)  ( (   char[]) data ).clone();
+    if( data instanceof   float[] ) return (T)  ( (  float[]) data ).clone();
+    if( data instanceof  double[] ) return (T)  ( ( double[]) data ).clone();
+    if( data instanceof  Object[] ) return (T)  ( ( Object[]) data ).clone();
+    if( data instanceof      With ) return (T)  ( (  With<?>) data ).clone();
     throw new IllegalArgumentException();
   }
   static int contentLength( Object data ) {
-    if( data instanceof With with ) return with.contentLength();
+    if( data instanceof With ) return ((With<?>) data).contentLength();
     if( data.getClass().isArray() ) return Array.getLength(data);
     throw new AssertionError();
   }
@@ -70,9 +68,9 @@ public interface With<T>
 
   default int contentLength() {
     T data = getData();
-    if( data instanceof      With with ) return with.contentLength();
-    if( data.getClass().isArray()      ) return Array.getLength(data);
-    if( data instanceof Collection col ) return col.size();
+    if( data instanceof       With ) return ((With<?>) data).contentLength();
+    if( data.getClass().isArray()  ) return Array.getLength(data);
+    if( data instanceof Collection ) return ((Collection<?>) data).size();
     throw new AssertionError();
   }
 

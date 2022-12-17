@@ -19,8 +19,8 @@ public class LinSpace extends AbstractList<Double> implements RandomAccess
 
   // FIELDS
     private final double start, end;
-    private final int size;
-    private int from,until;
+    private final int size, until;
+    private int from;
 
   // CONSTRUCTORS
     public  LinSpaceSpliterator( double  start, double  end, int  size ) { this(start,end,size, 0,size); }
@@ -91,8 +91,8 @@ public class LinSpace extends AbstractList<Double> implements RandomAccess
   public           double getAsDouble( int index ) { return linSpace_get(start,end, size, index); }
 
   @Override public void forEach( Consumer<? super Double> action ) {
-    if( action instanceof DoubleConsumer c )
-      forEach(c);
+    if( action instanceof DoubleConsumer )
+      forEach( (DoubleConsumer) action );
     else
       forEach( (DoubleConsumer) action::accept );
   }
