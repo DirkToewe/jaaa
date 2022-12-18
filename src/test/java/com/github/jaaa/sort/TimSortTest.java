@@ -1,6 +1,5 @@
 package com.github.jaaa.sort;
 
-import com.github.jaaa.util.IMath;
 import net.jqwik.api.*;
 import net.jqwik.api.constraints.IntRange;
 import net.jqwik.api.constraints.Positive;
@@ -8,77 +7,27 @@ import net.jqwik.api.constraints.Positive;
 import java.util.Spliterators;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
+import static java.util.stream.IntStream.rangeClosed;
 
 import static com.github.jaaa.sort.TimSort.TIM_SORTER;
-import static java.lang.Integer.numberOfLeadingZeros;
 import static java.lang.Math.addExact;
 import static java.lang.Math.min;
 import static java.util.Spliterator.*;
 import static java.util.stream.StreamSupport.intStream;
 import static org.assertj.core.api.Assertions.assertThat;
-
+import static com.github.jaaa.sort.BenchmarkTimSort_optimalRunLength.*;
 
 public class TimSortTest
 {
   @Example void timSort_minRunLength()
   {
-    new Object() {
-      private static final int MIN_MERGE = 32;
-
-      private int minRunLenJDK( int n ) {
-        assert n >= 0;
-        int r = 0; // Becomes 1 if any 1 bits are shifted off
-        while (n >= MIN_MERGE) {
-          r |= (n & 1);
-          n >>= 1;
-        }
-        return n + r;
-      }
-
-      private int minRunLenJaaaV1( int n )
-      {
-        if( n < MIN_MERGE )
-          return n;
-        int s = 27 - numberOfLeadingZeros(n),
-            l = n>>>s;
-        if( l<<s != n )
-          ++l;
-        return l;
-      }
-
-      private int minRunLenJaaaV2( int len )
-      {
-        int minRunLen = 16;
-        if( minRunLen <= 0 || len <  0 ) throw new IllegalArgumentException();
-        int                              s = 0;
-        if(   len>>>  16  >= minRunLen ) s =16;
-        if(   len>>>(s|8) >= minRunLen ) s|= 8;
-        if(   len>>>(s|4) >= minRunLen ) s|= 4;
-        if(   len>>>(s|2) >= minRunLen ) s|= 2;
-        if(   len>>>(s|1) >= minRunLen ) s|= 1;
-        int l=len>>> s;
-        return l<<s != len ? l+1 : l;
-      }
-
-      private int minRunLenJaaaV3( int len )
-      {
-        int minRunLen = 16;
-        if( len < 0 ) throw new IllegalArgumentException();
-        if( len <= minRunLen ) return len;
-        int s = IMath.log2Floor(len/minRunLen);
-        int l=len>>>s;
-        return l<<s != len ? l+1 : l;
-      }
-
-      {
-        for( int n=-1; ++n >= 0; ) {                         int runLen = minRunLenJDK(n);
-          assertThat(             minRunLenJaaaV1(n) ).isEqualTo(runLen);
-          assertThat(             minRunLenJaaaV2(n) ).isEqualTo(runLen);
-          assertThat(             minRunLenJaaaV3(n) ).isEqualTo(runLen);
-          assertThat( TimSort.optimalRunLength(16,n) ).isEqualTo(runLen);
-        }
-      }
-    };
+    rangeClosed(0,Integer.MAX_VALUE).parallel().forEach( n -> {
+      int                                                  runLen = minRunLenJDK(n);
+      assertThat(            minRunLenJaaaV1(n)).isEqualTo(runLen);
+      assertThat(            minRunLenJaaaV2(n)).isEqualTo(runLen);
+      assertThat(            minRunLenJaaaV3(n)).isEqualTo(runLen);
+      assertThat(TimSort.optimalRunLength(16,n)).isEqualTo(runLen);
+    });
   }
 
   @Property( tries=Integer.MAX_VALUE )

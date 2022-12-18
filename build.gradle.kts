@@ -49,7 +49,7 @@ tasks.compileTestJava {
 }
 
 var memTotal   = Integer.MAX_VALUE
-val memPerFork = 5
+val memPerFork = 6
 
 if( System.getProperty("os.name").decapitalize() == "linux" )
 {

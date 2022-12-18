@@ -8,6 +8,7 @@ import java.lang.reflect.Array;
 import java.nio.IntBuffer;
 import java.util.Comparator;
 
+import static java.lang.Integer.numberOfLeadingZeros;
 import static java.lang.Math.min;
 import static java.lang.System.arraycopy;
 
@@ -91,13 +92,9 @@ public final class TimSort
   {
     if( minRunLen <= 0 || len <  0 )
       throw new IllegalArgumentException();
-    int                              s = 0;
-    if(   len>>>  16  >= minRunLen ) s =16;
-    if(   len>>>(s|8) >= minRunLen ) s|= 8;
-    if(   len>>>(s|4) >= minRunLen ) s|= 4;
-    if(   len>>>(s|2) >= minRunLen ) s|= 2;
-    if(   len>>>(s|1) >= minRunLen ) s|= 1;
-    int l=len>>>s;
+    if( len <= minRunLen ) return len;
+    int s = 31 - numberOfLeadingZeros(len/minRunLen),
+        l = len>>>s;
     return l<<s != len ? l+1 : l;
   }
 

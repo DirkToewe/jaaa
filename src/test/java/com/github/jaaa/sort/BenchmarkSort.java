@@ -62,16 +62,20 @@ public class BenchmarkSort
 //    sorters.put("ParSkip", ParallelSkipMergeSort::sort);
     sorters.put("ParZen",  ParallelZenMergeSort ::sort);
     sorters.put("JDK (parallel)", Arrays::parallelSort);
+
 //    sorters.put("HeapSort",             HeapSort::sort);
 //    sorters.put("QuickSort",           QuickSort::sort);
 //    sorters.put("MergeSort",           MergeSort::sort);
-//    sorters.put("KiwiSort",             KiwiSort::sort);
-//    sorters.put("KiwiSortBiased", KiwiSortBiased::sort);
+
+//    sorters.put("KiwiSort",                     KiwiSort::sort);
+//    sorters.put("WikiSort", new ComparatorWikiSort(null)::sort);
+//    sorters.put("KiwiSortBiased",         KiwiSortBiased::sort);
+
 //    sorters.put("TimSort",               TimSort::sort);
 //    sorters.put("JDK",                    Arrays::sort);
 
-    int     LEN = 1_000_000,
-      N_SAMPLES =     1_000;
+    int     LEN = 100_000_000,
+      N_SAMPLES =       1_000;
 
     SplittableRandom        rng = new SplittableRandom();
     RandomSortDataGenerator gen = new RandomSortDataGenerator(rng);
@@ -96,15 +100,16 @@ public class BenchmarkSort
       int[] data = gen.nextShuffled(len);
       assert len == data.length;
 
-      int sign = rng.nextBoolean() ? -1 : +1;
+      int mask = rng.nextInt();
       CountingComparator cmp = new CountingComparator() {
         @Override public int compare( Integer x, Integer y ) {
           nComps.increment();
-          return sign*Integer.compare(x,y);
+          return Integer.compare(x^mask,y^mask);
         }
       };
 
-      Integer[] ref = stream(data).boxed().sorted(cmp).toArray(Integer[]::new);
+      Integer[] ref = stream(data).boxed().toArray(Integer[]::new);
+      Arrays.parallelSort(ref,cmp);
 
       Collections.shuffle(mergersEntries);
 
@@ -118,11 +123,13 @@ public class BenchmarkSort
         v.sort(test, cmp);
         long dt = nanoTime() - t0;
 
+        out.printf("\n%14s: %.3fsec.", k, dt/1e9);
         resultsComps.get(k)[i] = cmp.nComps.doubleValue();
         resultsTimes.get(k)[i] = dt / 1e3;
 
         assert Arrays.equals(test,ref) : Arrays.toString(test) + "\n != \n" + Arrays.toString(ref);
       }));
+      out.println();
     });
 
     plot_results("comparisons", x, resultsComps);

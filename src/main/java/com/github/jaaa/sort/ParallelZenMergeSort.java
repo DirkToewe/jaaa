@@ -97,7 +97,7 @@ public class ParallelZenMergeSort
          nPar = pool.getParallelism();
 
       int  h0,          h = log2Ceil( max(1,len) ); {
-      int  H0 = max(13, h-4-log2Ceil(nPar)); // <- spawn at least 4 tasks per cpu core for load balancing
+      int  H0 = max(13, h-8-log2Ceil(nPar)); // <- 128 tasks/thread for work-stealing
       h0 = H0 - (h-H0)%2; // <- make sure there's an even number of tree levels, such that seq always contains final result
     }
 

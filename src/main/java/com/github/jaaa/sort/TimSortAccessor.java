@@ -12,6 +12,7 @@ import java.util.function.IntUnaryOperator;
 import static java.lang.Math.*;
 import static java.util.Spliterator.*;
 import static java.util.stream.StreamSupport.intStream;
+import static java.lang.Integer.highestOneBit;
 
 
 public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
@@ -88,7 +89,7 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
     new Object()
     {
     // STATIC FIELDS
-      private static final int INIT_BUF_LEN = 256;
+      private static final int INIT_BUF_LEN = 512;
 
     // FIELDS
       private  T  buf    = _buf;
@@ -115,21 +116,14 @@ public interface TimSortAccessor<T> extends CompareRandomAccessor<T>,
     // METHODS
       private void ensureCapacity( int capacity )
       {
-        int half = length>>>1;
-//        assert half>=capacity;
-        if( bufLen < capacity ) {
-            bufLen = 1<<31; capacity = max(capacity, INIT_BUF_LEN-1);
-          // find next power of two larger larger than capacity
-          if( bufLen>>>16 > capacity ) bufLen >>>= 16;
-          if( bufLen>>> 8 > capacity ) bufLen >>>=  8;
-          if( bufLen>>> 4 > capacity ) bufLen >>>=  4;
-          if( bufLen>>> 2 > capacity ) bufLen >>>=  2;
-          if( bufLen>>> 1 > capacity ) bufLen >>>=  1;
-          if( bufLen > half || bufLen < 0 )
-              bufLen = half;
-          buf  = malloc(bufLen);
-          buf0 = 0;
-        }
+        if( capacity <= bufLen )
+          return;
+        capacity = max(capacity, INIT_BUF_LEN);
+        // find next power of two larger larger than capacity
+        bufLen = highestOneBit(capacity*2 - 1);
+        bufLen = min(bufLen, length>>>1); // <- max buffer length we'll ever need
+        buf = malloc(bufLen);
+        buf0 = 0;
       }
 
       private void merge( int from, int mid, int until )

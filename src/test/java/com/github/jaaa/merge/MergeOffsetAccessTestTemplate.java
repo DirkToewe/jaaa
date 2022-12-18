@@ -19,6 +19,7 @@ import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
+@PropertyDefaults( tries = 10_000 )
 public abstract class MergeOffsetAccessTestTemplate implements ArrayProviderTemplate
 {
 // STATIC FIELDS
