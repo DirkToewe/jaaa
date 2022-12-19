@@ -64,12 +64,12 @@ public class BenchmarkMerge
     out.println( "Java " + System.getProperty("java.version") );
 
     Map<String,MergeFn> mergers = new LinkedHashMap<>();
-    mergers.put("ParSkip", ParallelSkipMerge::merge);
-    mergers.put("ParZen",  ParallelZenMerge ::merge);
-//    mergers.put("ExpV2",           ExpMerge::merge);
-//    mergers.put("TapeMerge",      TapeMerge::merge);
-//    mergers.put("TimMerge",        TimMerge::merge);
-//    mergers.put("HwangLin",   HwangLinMerge::merge);
+//    mergers.put("ParSkip", ParallelSkipMerge::merge);
+//    mergers.put("ParZen",  ParallelZenMerge ::merge);
+    mergers.put("ExpV2",           ExpMerge::merge);
+    mergers.put("TapeMerge",      TapeMerge::merge);
+    mergers.put("TimMerge",        TimMerge::merge);
+    mergers.put("HwangLin",   HwangLinMerge::merge);
 //    mergers.put("HwangLinPart", new MergeFn() {
 //      @Override public <T> void merge(
 //        T a, int i, int m,
@@ -168,7 +168,7 @@ public class BenchmarkMerge
       new DoubleSupplier() { @Override public double getAsDouble() { return 0.75;             } @Override public String toString() { return format("%.2f", getAsDouble()); } }
     };
 
-    for( int len = 100_000_000; len > 100; len /= 10 )
+    for( int len = 100_000; len > 100; len /= 10 )
       compare_over_split(mergers, len);
 //    for( var len: new int[]{ 1_000, 10_000, 100_000, 1_000_000 } ) compare_over_split (mergers, len);
 //    for( var len: new int[]{ 1_000, 10_000, 100_000, 1_000_000 } ) compare_over_length(mergers, len, splits[0]);
@@ -201,7 +201,7 @@ public class BenchmarkMerge
     });
 
     @SuppressWarnings("unchecked")
-    Entry<String,MergeFn>[] mergersArr = mergers.entrySet().stream().toArray(Entry[]::new);
+    Entry<String,MergeFn>[] mergersArr = mergers.entrySet().toArray(new Entry[0]);
 
     CountingAccessor acc = new CountingAccessor();
 
@@ -279,7 +279,7 @@ public class BenchmarkMerge
     });
 
     @SuppressWarnings("unchecked")
-    Entry<String,MergeFn>[] mergersArr = mergers.entrySet().stream().toArray(Entry[]::new);
+    Entry<String,MergeFn>[] mergersArr = mergers.entrySet().toArray(new Entry[0]);
 
     CountingAccessor acc = new CountingAccessor();
 

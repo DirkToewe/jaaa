@@ -60,22 +60,22 @@ public class BenchmarkSort
 
     Map<String,SortFn> sorters = new LinkedHashMap<>();
 //    sorters.put("ParSkip", ParallelSkipMergeSort::sort);
-    sorters.put("ParZen",  ParallelZenMergeSort ::sort);
-    sorters.put("JDK (parallel)", Arrays::parallelSort);
+//    sorters.put("ParZen",  ParallelZenMergeSort ::sort);
+//    sorters.put("JDK (parallel)", Arrays::parallelSort);
 
 //    sorters.put("HeapSort",             HeapSort::sort);
 //    sorters.put("QuickSort",           QuickSort::sort);
 //    sorters.put("MergeSort",           MergeSort::sort);
 
-//    sorters.put("KiwiSort",                     KiwiSort::sort);
-//    sorters.put("WikiSort", new ComparatorWikiSort(null)::sort);
+    sorters.put("KiwiSort",                     KiwiSort::sort);
+    sorters.put("WikiSort", new ComparatorWikiSort(null)::sort);
 //    sorters.put("KiwiSortBiased",         KiwiSortBiased::sort);
 
 //    sorters.put("TimSort",               TimSort::sort);
-//    sorters.put("JDK",                    Arrays::sort);
+    sorters.put("JDK",                    Arrays::sort);
 
-    int     LEN = 100_000_000,
-      N_SAMPLES =       1_000;
+    int     LEN = 1_000_000,
+      N_SAMPLES =     1_000;
 
     SplittableRandom        rng = new SplittableRandom();
     RandomSortDataGenerator gen = new RandomSortDataGenerator(rng);
@@ -208,7 +208,7 @@ public class BenchmarkSort
       "          x => 1,\n" +
       "          x => x,\n" +
       "          x => Math.log(x)*x,\n" +
-      "          x => x*x\n" +
+      "//          x => x*x\n" +
       "        ];\n" +
       "\n" +
       "        const xMax = data.x.reduce((x,y) => Math.max(x,y)),\n" +

@@ -3,6 +3,7 @@ package com.github.jaaa.select;
 import com.github.jaaa.compare.CompareRandomAccessor;
 import com.github.jaaa.fn.EntryConsumer;
 import com.github.jaaa.fn.EntryFn;
+import com.github.jaaa.sort.TimSortAccessor;
 import com.github.jaaa.util.Progress;
 
 import java.io.IOException;
@@ -119,6 +120,16 @@ public class BenchmarkOverSplit
         @Override public int compare( int i, int j ) { return acc.compare(arr,i, arr,j); }
       }.mom3Select(l,m,r)
     );
+    selectors.put("TimSort", (arr,l,m,r) -> {
+      TimSortAccessor<T> accessor = new TimSortAccessor<T>() {
+        @Override public T malloc( int len ) { return acc.malloc(len); }
+        @Override public int    compare( T a, int i, T b, int j ) { return acc.compare(a,i, b,j); }
+        @Override public void      swap( T a, int i, T b, int j ) { acc.swap(a,i, b,j);}
+        @Override public void copy     ( T a, int i, T b, int j ) { acc.copy(a,i, b,j); }
+        @Override public void copyRange( T a, int i, T b, int j, int len ) { acc.copyRange(a,i, b,j, len); }
+      };
+      accessor.timSort(arr,l,r, null,0,0);
+    });
     return unmodifiableMap(selectors);
   }
 
@@ -151,7 +162,7 @@ public class BenchmarkOverSplit
     });
 
     @SuppressWarnings("unchecked")
-    Entry<String,SelectFn<int[]>>[] selectorsArr = selectors.entrySet().stream().toArray(Entry[]::new);
+    Entry<String,SelectFn<int[]>>[] selectorsArr = selectors.entrySet().toArray(new Entry[0]);
 
     int[] order = range(0,N_SAMPLES).toArray();
     randomShuffle(order,rng::nextInt);
@@ -287,6 +298,7 @@ public class BenchmarkOverSplit
       "              throw new Error(data.name);\n" +
       "            case 'MoM5':\n" +
       "            case 'MoM3':\n" +
+      "            case 'TimSort':\n" +
       "            case 'MergeSelect':\n" +
       "            case 'Quick':\n" +
       "              return [(m,n) => m+n];\n" +
