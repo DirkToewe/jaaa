@@ -27,7 +27,7 @@ public interface KiwiSortAccess extends ArgMaxAccess, ArgMinAccess, BlockRotatio
 
   static int bufLen( int len )
   {
-    // bufLen == (len-bufLen) / bufLen;
+    // solve( bufLen == (len-bufLen) / bufLen )
     if( len <  0 ) throw new IllegalArgumentException();
     if( len == 0 ) return 0;
     double bufLenMin = nextDown( ceil( (sqrt(len*8d + 1) - 5) / 4 ) );

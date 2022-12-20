@@ -13,7 +13,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.LongAdder;
 
 import static com.github.jaaa.Boxing.boxed;
-import static com.github.jaaa.permute.RandomShuffle.shuffled;
+import static com.github.jaaa.permute.RandomShuffle.randomShuffle;
 import static java.lang.Runtime.getRuntime;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
@@ -43,8 +43,7 @@ public class BenchmarkSort
     <T> void sort( T[] arr, Comparator<? super T> cmp );
   }
 
-  private static abstract class CountingComparator implements Comparator<Integer>
-  {
+  private static abstract class CountingComparator implements Comparator<Integer> {
     public final LongAdder nComps = new LongAdder();
   }
 
@@ -53,10 +52,6 @@ public class BenchmarkSort
   {
     out.println( System.getProperty("java.vm.name") + " " + System.getProperty("java.vm.version") );
     out.println( "Java " + System.getProperty("java.version") );
-
-//    System.out.println("WAIT");
-//    new java.util.Scanner(System.in).next();
-//    System.out.println("GO");
 
     Map<String,SortFn> sorters = new LinkedHashMap<>();
 //    sorters.put("ParSkip", ParallelSkipMergeSort::sort);
@@ -67,15 +62,15 @@ public class BenchmarkSort
 //    sorters.put("QuickSort",           QuickSort::sort);
 //    sorters.put("MergeSort",           MergeSort::sort);
 
-    sorters.put("KiwiSort",                     KiwiSort::sort);
-    sorters.put("WikiSort", new ComparatorWikiSort(null)::sort);
+//    sorters.put("KiwiSort",                     KiwiSort::sort);
+//    sorters.put("WikiSort", new ComparatorWikiSort(null)::sort);
 //    sorters.put("KiwiSortBiased",         KiwiSortBiased::sort);
 
-//    sorters.put("TimSort",               TimSort::sort);
+    sorters.put("TimSort",               TimSort::sort);
     sorters.put("JDK",                    Arrays::sort);
 
-    int     LEN = 1_000_000,
-      N_SAMPLES =     1_000;
+    int     LEN = 10_000_000,
+      N_SAMPLES =      1_000;
 
     SplittableRandom        rng = new SplittableRandom();
     RandomSortDataGenerator gen = new RandomSortDataGenerator(rng);
@@ -85,16 +80,18 @@ public class BenchmarkSort
     assert x.length == N_SAMPLES;
 
     Map<String,double[]>
-      resultsComps = new TreeMap<>(),
-      resultsTimes = new TreeMap<>();
+      resultsComps = new LinkedHashMap<>(),
+      resultsTimes = new LinkedHashMap<>();
     sorters.forEach( (k,v) -> {
       resultsComps.put(k, new double[N_SAMPLES]);
       resultsTimes.put(k, new double[N_SAMPLES]);
     });
 
-    List<Entry<String,SortFn>> mergersEntries  = new ArrayList<>( sorters.entrySet() );
+    List<Entry<String,SortFn>> mergersEntries = new ArrayList<>( sorters.entrySet() );
 
-    Progress.print( stream( shuffled(range(0,N_SAMPLES).toArray(), rng::nextInt) ) ).forEach( i -> {
+    int[] order = range(0,N_SAMPLES).toArray();
+    randomShuffle(order, rng::nextInt);
+    Progress.print( stream(order) ).forEach( i -> {
       int len = x[i];
 //      int[] data = gen.nextMixed(len);
       int[] data = gen.nextShuffled(len);
@@ -109,7 +106,7 @@ public class BenchmarkSort
       };
 
       Integer[] ref = stream(data).boxed().toArray(Integer[]::new);
-      Arrays.parallelSort(ref,cmp);
+      Arrays.sort(ref,cmp);
 
       Collections.shuffle(mergersEntries);
 
@@ -123,17 +120,17 @@ public class BenchmarkSort
         v.sort(test, cmp);
         long dt = nanoTime() - t0;
 
-        out.printf("\n%14s: %.3fsec.", k, dt/1e9);
+//        out.printf("\n%14s: %.3fsec.", k, dt / 1e9);
         resultsComps.get(k)[i] = cmp.nComps.doubleValue();
-        resultsTimes.get(k)[i] = dt / 1e3;
+        resultsTimes.get(k)[i] = dt / 1e9;
 
         assert Arrays.equals(test,ref) : Arrays.toString(test) + "\n != \n" + Arrays.toString(ref);
       }));
-      out.println();
+//      out.println();
     });
 
-    plot_results("comparisons", x, resultsComps);
-    plot_results("timings",     x, resultsTimes);
+    plot_results("Comparisons", x, resultsComps);
+    plot_results("Time [sec.]", x, resultsTimes);
   }
 
   private static void plot_results( String type, int[] x, Map<String,double[]> results ) throws IOException
@@ -168,11 +165,11 @@ public class BenchmarkSort
 
     String layout = format(
       "{\n" +
-      "  title: 'Sort %s Benchmark (L_max = %d)<br>%s<br>%s',\n" +
-      "  xaxis: {title: 'Split Position'},\n" +
-      "  yaxis: {title: 'Time [msec.]'  }\n" +
+      "  title: '<b>Sort Benchmark %s</b><br>Randomly Shuffled Input (max. size: %d)<br>%s<br>%s',\n" +
+      "  xaxis: { title: 'Length' },\n" +
+      "  yaxis: { title: '%s' }\n" +
       "}\n",
-      type, stream(x).max().getAsInt(), vm, jv
+      type, stream(x).max().getAsInt(), vm, jv, type
     );
 
     final String PLOT_TEMPLATE =
@@ -192,8 +189,12 @@ public class BenchmarkSort
       "      document.body.appendChild(plot);\n" +
       "\n" +
       "      const layout = %1$s;\n" +
-      "      if( 'title' in layout )\n" +
-      "        document.title = layout.title;\n" +
+      "\n" +
+      "      if( 'title' in layout ) {\n" +
+      "        const div = document.createElement('div');\n" +
+      "        div.innerHTML = layout.title;\n" +
+      "        document.title = div.innerText.split(/\\r?\\n/)[0];\n" +
+      "      }\n" +
       "\n" +
       "      if( 'paper_bgcolor' in layout )\n" +
       "        document.body.style.background = 'black';\n" +
@@ -208,7 +209,7 @@ public class BenchmarkSort
       "          x => 1,\n" +
       "          x => x,\n" +
       "          x => Math.log(x)*x,\n" +
-      "//          x => x*x\n" +
+      "//          x => x*x,\n" +
       "        ];\n" +
       "\n" +
       "        const xMax = data.x.reduce((x,y) => Math.max(x,y)),\n" +

@@ -10,8 +10,8 @@ public interface ExtractSortBufOrdinalAccess extends AkimboSearchAccess, RotateA
     * and moves them to a specified destination as a sorted block. If there are
     * less than the desired number of elements available, it extracts as many as
     * possible. The method returns the actual number of extracted unique elements.
-    * Amongst duplicate elements, the left most element (i.e. with the lowest index)
-    * is always extracted.
+    * The extraction is stable in the sense that amongst duplicate elements, the
+    * leftmost element (i.e. with the lowest index) is always extracted.
     *
     * @param from Start index (inclusive) of the range to be extracted from.
     * @param until End index (exclusive) of the range to be extracted from.

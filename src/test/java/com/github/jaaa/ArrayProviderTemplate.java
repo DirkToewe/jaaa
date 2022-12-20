@@ -58,7 +58,7 @@ public interface ArrayProviderTemplate
   }
 
           int maxArraySize      ();
-  default int maxArraySizeString() { return min(32*1024, maxArraySize()); }
+  default int maxArraySizeString() { return min(8192, maxArraySize()); }
 
   @Provide default Arbitrary<byte[]> arraysByte_limitedRange() {
     return bytes().tuple2().flatMap( xy -> {

@@ -3,6 +3,15 @@ package com.github.jaaa.search;
 import com.github.jaaa.compare.CompareAccess;
 
 
+/**
+ * An exponential search variant that is optimized for searching entries
+ * that are close to either the left or the right end of the search range.
+ * To achieve that, AkimboSearch first compare the search key to the
+ * middle element. If the search key is left of the middle, Akimbo search
+ * starts exponential search at the left end of the range (similar to
+ * ExpSearchL2R), otherwise it starts at the right end (similar to
+ * ExpSearchR2L).
+ */
 public interface AkimboSearchAccess extends CompareAccess
 {
   default int akimboSearch( int from, int until, int key )
